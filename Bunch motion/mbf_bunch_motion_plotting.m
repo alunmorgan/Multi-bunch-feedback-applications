@@ -1,7 +1,7 @@
 function mbf_bunch_motion_plotting(data)
 
 %% Getting the desired system setup parameters.
-[~, num_buckets] = mbf_system_setup;
+[~, num_buckets] = mbf_system_config;
 
 xlimits = [min(data.x) max(data.x)];
 ylimits = [min(data.y) max(data.y)];
