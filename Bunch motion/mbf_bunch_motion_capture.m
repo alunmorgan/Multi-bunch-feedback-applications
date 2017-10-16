@@ -6,7 +6,7 @@ function bunch_motion = mbf_bunch_motion_capture
 
 %% Getting the desired system setup parameters.
 [root_string, ~] = mbf_system_config;
-
+[turn_count, turn_offset] = mbf_bunch_motion_config;
 % getting general environment data.
 bunch_motion = machine_environment;
 
@@ -49,8 +49,6 @@ pause(1)
 [~,t] = lcaGet({[ax2dev(1) ':DDR:LONGWF']; [ax2dev(2) ':DDR:LONGWF']; [ax2dev(3) ':DDR:LONGWF']});
 bunch_motion.time_check = diff(EPICStime2MLtime(t)) .*24 .* 60 .* 60;
 
-turn_count = 8962;
-turn_offset = -1000;
 bunch_motion.x = tmbf_read(ax2dev(1), turn_count, turn_offset);
 bunch_motion.y = tmbf_read(ax2dev(2), turn_count, turn_offset);
 bunch_motion.z = tmbf_read(ax2dev(3), turn_count, turn_offset);
