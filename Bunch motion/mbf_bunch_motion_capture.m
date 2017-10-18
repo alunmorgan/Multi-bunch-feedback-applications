@@ -5,7 +5,7 @@ function bunch_motion = mbf_bunch_motion_capture
 % Example: bunch_motion = mbf_bunch_motion_capture
 
 %% Getting the desired system setup parameters.
-[root_string, ~] = mbf_system_config;
+[root_string, ~, pv_names] = mbf_system_config;
 [turn_count, turn_offset] = mbf_bunch_motion_config;
 % getting general environment data.
 bunch_motion = machine_environment;
@@ -18,22 +18,22 @@ tree_gen(root_string,bunch_motion.time);
 
 %% Trigger the measurement on all three axes
 % Capturing original trigger state for later resoration.
-trig_orig_state = lcaGet('LI-TI-MTGEN-01:BS-DI-MODE');
+trig_orig_state = lcaGet(pv_names.Hardware_trigger);
 % Temporarily turning of the trigger to make sure the system do not
 % premeturely trigger. Deliberately using lcaPut.
-lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 'Off')
+lcaPut(pv_names.Hardware_trigger, 'Off')
 % Arming the systems
-mbf_get_then_put({[ax2dev(1) ':TRG:DDR:ARM_S.PROC'];...
-    [ax2dev(2) ':TRG:DDR:ARM_S.PROC'];...
-    [ax2dev(3) ':TRG:DDR:ARM_S.PROC']},1);
-lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', trig_orig_state)
+mbf_get_then_put({[ax2dev(1) pv_names.tails.DDR_arm];...
+    [ax2dev(2) pv_names.tails.DDR_arm];...
+    [ax2dev(3) pv_names.tails.DDR_arm]},1);
+lcaPut(pv_names.Hardware_trigger, trig_orig_state)
 
 %% Wait for trigger
 disp('Waiting for trigger.\n')
 js = 1;
-while ~strcmp(lcaGet([ax2dev(1) ':DDR:STATUS']),'Ready') ||...
-        ~strcmp(lcaGet([ax2dev(2) ':DDR:STATUS']),'Ready') ||...
-        ~strcmp(lcaGet([ax2dev(3) ':DDR:STATUS']),'Ready')
+while ~strcmp(lcaGet([ax2dev(1) pv_names.tails.DDR_status]),'Ready') ||...
+        ~strcmp(lcaGet([ax2dev(2) pv_names.tails.DDR_status]),'Ready') ||...
+        ~strcmp(lcaGet([ax2dev(3) pv_names.tails.DDR_status]),'Ready')
     pause(.2)
     js = js +1;
     if js >20
@@ -46,7 +46,9 @@ end %while
 pause(1)
 
 %% Checking that all the Buffers were triggered at the same time
-[~,t] = lcaGet({[ax2dev(1) ':DDR:LONGWF']; [ax2dev(2) ':DDR:LONGWF']; [ax2dev(3) ':DDR:LONGWF']});
+[~,t] = lcaGet({[ax2dev(1) pv_names.tails.DDR_buffer]; ...
+                [ax2dev(2) pv_names.tails.DDR_buffer]; ...
+                [ax2dev(3) pv_names.tails.DDR_buffer]});
 bunch_motion.time_check = diff(EPICStime2MLtime(t)) .*24 .* 60 .* 60;
 
 bunch_motion.x = tmbf_read(ax2dev(1), turn_count, turn_offset);

@@ -14,7 +14,7 @@ function data = mbf_spectrum(mbf_axis, n_turns, fold, repeat)
 % Example: mbf_spectrum('x',10000)
 
 %% Getting the desired system setup parameters.
-[root_string, harmonic_number] = mbf_system_config;
+[root_string, harmonic_number, pv_names] = mbf_system_config;
 
 
 if ~exist('fold','var')
@@ -35,20 +35,20 @@ elseif strcmpi(mbf_axis, 's')
     data.axis_label = 'S axis';
 end %if
 
-mbf_get_then_put([ax2dev(ax) ':DDR:INPUT_S'],'ADC');
-mbf_get_then_put([ax2dev(ax) ':TRG:DDR:SEL_S'],'Hardware');
-mbf_get_then_put([ax2dev(ax) ':TRG:DDR:EXT:EN_S'],'Ignore');
-mbf_get_then_put([ax2dev(ax) ':TRG:DDR:PM:EN_S'],'Ignore');
-mbf_get_then_put([ax2dev(ax) ':TRG:DDR:ADC:EN_S'],'Ignore');
-mbf_get_then_put([ax2dev(ax) ':TRG:DDR:SEQ:EN_S'],'Enable');
-mbf_get_then_put([ax2dev(ax) ':TRG:DDR:SCLK:EN_S'],'Ignore');
-mbf_get_then_put([ax2dev(ax) ':SEQ:TRIGGER_S'],0);
-mbf_get_then_put([ax2dev(ax) ':TRG:DDR:MODE_S'],'One Shot');
+mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_input],'ADC');
+mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_trigger_select],'Hardware');
+mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_external_trigger_enable_status],'Ignore');
+mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_post_mortem_trigger_enable_status],'Ignore');
+mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_ADC_trigger_enable_status],'Ignore');
+mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_sequencer_trigger_enable_status],'Enable');
+mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_system_clock_trigger_enable_status],'Ignore');
+mbf_get_then_put([ax2dev(ax) pv_names.tails.Sequencer_trigger_state],0);
+mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_trigger_mode],'One Shot');
 mode_data = zeros(n_turns/fold, harmonic_number);
 bunch_data = zeros(n_turns/2, harmonic_number);
 
 for k=1:repeat
-    lcaPut([ax2dev(ax) ':TRG:DDR:ARM_S.PROC'],1);
+    lcaPut([ax2dev(ax) pv_names.tails.DDR_arm],1);
     pause(2)
     raw_data = tmbf_read(ax2dev(ax), n_turns);
     data_length=length(raw_data);

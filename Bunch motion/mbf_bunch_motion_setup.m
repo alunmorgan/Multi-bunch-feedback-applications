@@ -4,21 +4,23 @@ function mbf_bunch_motion_setup
 %
 % Example: mbf_bunch_motion_setup
 
+[~, ~, pv_names] = mbf_system_config;
+PVt = pv_names.tails;
 for hse = 1:3
-    mbf_get_then_put([ax2dev(hse) ':TRG:DDR:SEL_S'], 'Hardware')
-    mbf_get_then_put([ax2dev(hse) ':TRG:DDR:MODE_S'], 'One Shot')
-    mbf_get_then_put([ax2dev(hse) ':TRG:SEQ:SEL_S'], 'BUF trigger')
+    mbf_get_then_put([ax2dev(hse) PVt.DDR_trigger_select], 'Hardware')
+    mbf_get_then_put([ax2dev(hse) PVt.DDR_trigger_mode], 'One Shot')
+    mbf_get_then_put([ax2dev(hse) PVt.Sequencer_trigger_select], 'BUF trigger')
     %     Setting hardware triggers
-    mbf_get_then_put([ax2dev(hse) ':TRG:DDR:EXT:EN_S'], 'Enable')
-    mbf_get_then_put([ax2dev(hse) ':TRG:DDR:PM:EN_S'], 'Ignore')
-    mbf_get_then_put([ax2dev(hse) ':TRG:DDR:ADC:EN_S'], 'Ignore')
-    mbf_get_then_put([ax2dev(hse) ':TRG:DDR:SEQ:EN_S'], 'Ignore')
-    mbf_get_then_put([ax2dev(hse) ':TRG:DDR:SCLK:EN_S'], 'Ignore')
-    mbf_get_then_put([ax2dev(hse) ':TRG:DDR:EXT:BL_S'], 'All')
-    mbf_get_then_put([ax2dev(hse) ':TRG:DDR:PM:BL_S'], 'All')
-    mbf_get_then_put([ax2dev(hse) ':TRG:DDR:ADC:BL_S'], 'Blanking')
-    mbf_get_then_put([ax2dev(hse) ':TRG:DDR:SEQ:BL_S'], 'All')
-    mbf_get_then_put([ax2dev(hse) ':TRG:DDR:SCLK:BL_S'], 'All')
+    mbf_get_then_put([ax2dev(hse) PVt.DDR_external_trigger_enable_status], 'Enable')
+    mbf_get_then_put([ax2dev(hse) PVt.DDR_post_mortem_trigger_enable_status], 'Ignore')
+    mbf_get_then_put([ax2dev(hse) PVt.DDR_ADC_trigger_enable_status], 'Ignore')
+    mbf_get_then_put([ax2dev(hse) PVt.DDR_sequencer_trigger_enable_status], 'Ignore')
+    mbf_get_then_put([ax2dev(hse) PVt.DDR_system_clock_trigger_enable_status], 'Ignore')
+    mbf_get_then_put([ax2dev(hse) PVt.DDR_external_trigger_blanking_status], 'All')
+    mbf_get_then_put([ax2dev(hse) PVt.DDR_post_mortem_trigger_blanking_status], 'All')
+    mbf_get_then_put([ax2dev(hse) PVt.DDR_ADC_trigger_blanking_status], 'Blanking')
+    mbf_get_then_put([ax2dev(hse) PVt.DDR_sequencer_trigger_blanking_status], 'All')
+    mbf_get_then_put([ax2dev(hse) PVt.DDR_system_clock_trigger_blanking_status], 'All')
     %  set up the DDR buffer to capture ADC data.
-    mbf_get_then_put([ax2dev(hse) ':DDR:INPUT_S'], 'ADC')
+    mbf_get_then_put([ax2dev(hse) PVt.DDR_input], 'ADC')
 end %for
