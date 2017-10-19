@@ -39,9 +39,9 @@ mbf_set_bank(settings.axis_number, 2, 1) %FIR
 % bunch bank 0 (the resting condition)
 mbf_set_bank(settings.axis_number, 0, 1) %FIR
 
-bank0=lcaGet([pv_head ':BUN:0:OUTWF_S']);
-bank0(1)=2; 
-mbf_get_then_put([pv_head ':BUN:0:OUTWF_S'], bank0);
+% bank0=lcaGet([pv_head ':BUN:0:OUTWF_S']);
+% bank0(1)=2; 
+% mbf_get_then_put([pv_head ':BUN:0:OUTWF_S'], bank0);
 
 %% Set up states
 % state 4
