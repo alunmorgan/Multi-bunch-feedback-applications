@@ -13,7 +13,7 @@ function requested_data = mbf_growdamp_archival_retrieval(ax, date_range)
 % Example: mbf_growdamp_archival_archival_retreval('x', [now-5, now])
 
 % Getting the desired system setup parameters.
-[root_string, ~] = mbf_system_config;
+[root_string, ~, ~] = mbf_system_config;
 
 if strcmpi(ax, 'x')
     filter_name = 'Growdamp_x_axis';

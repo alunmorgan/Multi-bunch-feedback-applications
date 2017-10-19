@@ -18,7 +18,7 @@ function mbf_growdamp_archival_analysis(data_requested, anal_type, sweep_paramet
 % Example: mbf_growdamp_archival_analysis(data_requested, 'average')
 
 % Getting the desired system setup parameters.
-[~, harmonic_number] = mbf_system_config;
+[~, harmonic_number, ~] = mbf_system_config;
 
 for nd = length(data_requested):-1:1
     [s_poly_data, ~] = mbf_growdamp_analysis(data_requested{nd});

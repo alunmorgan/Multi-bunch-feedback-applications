@@ -13,14 +13,18 @@ function mbf_set_state(ax, state, tune, bank, gain, duration, dwell, capture)
 %                       keep the data or not
 %
 % Example: mbf_set_state(ax, state, tune, bank, gain, duration, dwell, capture)
+[~, ~, pv_names] = mbf_system_config;
 
-mbf_get_then_put([ax2dev(ax) ':SEQ:',num2str(state),':START_FREQ_S'], tune);
-mbf_get_then_put([ax2dev(ax) ':SEQ:',num2str(state),':STEP_FREQ_S'],0);
-mbf_get_then_put([ax2dev(ax) ':SEQ:',num2str(state),':COUNT_S'], duration);
-mbf_get_then_put([ax2dev(ax) ':SEQ:',num2str(state),':HOLDOFF_S'], 0);
-mbf_get_then_put([ax2dev(ax) ':SEQ:',num2str(state),':DWELL_S'], dwell);
-mbf_get_then_put([ax2dev(ax) ':SEQ:',num2str(state),':BANK_S'], ['Bank ',num2str(bank)]);
-mbf_get_then_put([ax2dev(ax) ':SEQ:',num2str(state),':CAPTURE_S'], capture);
-mbf_get_then_put([ax2dev(ax) ':SEQ:',num2str(state),':ENWIN_S'], 'Disabled');
-mbf_get_then_put([ax2dev(ax) ':SEQ:',num2str(state),':GAIN_S'], gain);
-mbf_get_then_put([ax2dev(ax) ':SEQ:',num2str(state),':BLANK_S'], 'Off');
+Sequencer = pv_names.tails.Sequencer;
+pv_head = [ax2dev(ax), Sequencer.Base, num2str(state)];
+
+mbf_get_then_put([pv_head, Sequencer.start_frequency], tune);
+mbf_get_then_put([pv_head, Sequencer.step_frequency],0);
+mbf_get_then_put([pv_head, Sequencer.count], duration);
+mbf_get_then_put([pv_head, Sequencer.holdoff], 0);
+mbf_get_then_put([pv_head, Sequencer.dwell], dwell);
+mbf_get_then_put([pv_head, Sequencer.bank_select], ['Bank ',num2str(bank)]);
+mbf_get_then_put([pv_head, Sequencer.capture_state], capture);
+mbf_get_then_put([pv_head, Sequencer.windowing_state], 'Disabled');
+mbf_get_then_put([pv_head, Sequencer.gain], gain);
+mbf_get_then_put([pv_head, Sequencer.blanking_state], 'Off');

@@ -12,7 +12,7 @@ if ~strcmpi(mbf_axis,'x') && ~strcmpi(mbf_axis,'y') && ~strcmpi(mbf_axis,'s')
  error('mbf_growdamp_capture: Incorrect value axis given (should be x, y or s)');
 end
 
-[root_string, ~] = mbf_system_config;
+[root_string, ~, pv_names] = mbf_system_config;
 settings = mbf_growdamp_config(mbf_axis);
 % Generate the base PV name.
 pv_head = ax2dev(settings.axis_number);
@@ -25,27 +25,17 @@ growdamp.base_name = ['Growdamp_' growdamp.ax_label '_axis'];
 
 % set tune, should only be required on excitation (state 4), but do it on
 % all just in case someone makes a big jump!
+%  Also getting settings for growth, natural damping, and active damping.
+exp_state_names = {'spacer', 'act', 'nat', 'growth'};
 for n=2:4
-    mbf_get_then_put([pv_head ':SEQ:',num2str(n),':START_FREQ_S'], tune);
+    mbf_get_then_put([pv_head, pv_names.tails.Sequencer.Base, num2str(n),pv_names.tails.Sequencer.start_frequency], tune);
+    % Getting the number of turns 
+growdamp.([exp_state_names{n}, '_turns']) = lcaGet([pv_head, pv_names.tails.Sequencer.Base, num2str(n), pv_names.tails.Sequencer.count]);
+% Getting the number of turns each point dwells at
+growdamp.([exp_state_names{n}, '_dwell']) = lcaGet([pv_head, pv_names.tails.Sequencer.Base, num2str(n), pv_names.tails.Sequencer.dwell]);
+% Getting the gain
+growdamp.([exp_state_names{n}, '_gain']) = lcaGet([pv_head, pv_names.tails.Sequencer.Base, num2str(n), pv_names.tails.Sequencer.gain]);
 end
-
-% Getting the number of turns of growth, natural damping, and active
-% damping.
-growdamp.growth_turns = lcaGet([pv_head ':SEQ:4:COUNT_S']);
-growdamp.nat_turns = lcaGet([pv_head ':SEQ:3:COUNT_S']);
-growdamp.act_turns = lcaGet([pv_head ':SEQ:2:COUNT_S']);
-
-% Getting the number of turns each point dwells at, for growth,
-%natural damping, and active damping.
-growdamp.growth_dwell = lcaGet([pv_head ':SEQ:4:DWELL_S']);
-growdamp.nat_dwell = lcaGet([pv_head ':SEQ:3:DWELL_S']);
-growdamp.act_dwell = lcaGet([pv_head ':SEQ:2:DWELL_S']);
-
-% Getting the number of turns each point dwells at, for growth,
-%natural damping, and active damping.
-growdamp.growth_gain = lcaGet([pv_head ':SEQ:4:GAIN_S']);
-growdamp.nat_gain = lcaGet([pv_head ':SEQ:3:GAIN_S']);
-growdamp.act_gain = lcaGet([pv_head ':SEQ:2:GAIN_S']);
 
 % Trigger the measurement
 
@@ -54,9 +44,9 @@ while 1==1
     % check we don't have an overflow or too little IQ data, adjust fixed IQ
     % gain accordingly.
     datamax=max(abs(output));
-    gain_pv = [pv_head ':DET:GAIN_S'];
+    gain_pv = [pv_head pv_names.tails.Detector_gain];
     gain = lcaGet(gain_pv, 1, 'double');
-    overflow_pv = [pv_head ':DDR:OVF:IQ'];
+    overflow_pv = [pv_head pv_names.tails.DDR_IQ_overflow];
     overflow_state = lcaGet(overflow_pv, 1 , 'double');
     if overflow_state == 1
         if gain < 7

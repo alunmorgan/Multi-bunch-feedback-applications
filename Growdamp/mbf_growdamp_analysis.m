@@ -8,7 +8,7 @@ function [poly_data, frequency_shifts] = mbf_growdamp_analysis(exp_data)
 %
 % Example: [poly_data, frequency_shifts] = tmbf_growdamp_analysis(exp_data)
 
-[~, harmonic_number] = mbf_system_config;
+[~, harmonic_number, ~] = mbf_system_config;
 exp_data.data = reshape(exp_data.data,[],harmonic_number)';
 n_modes = size(exp_data.data,1);
 % Preallocation
