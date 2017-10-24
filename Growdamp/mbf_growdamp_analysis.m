@@ -33,7 +33,8 @@ for nq = n_modes:-1:1
     % passive damping
     x2 = end_of_growth + 1:end_of_passive;
     pd_data = exp_data.data(nq,x2);
-    f2 = find(movmean(abs(pd_data), 5) <1000, 1, 'first');
+        % truncating the data if it falls into the noise
+    f2 = find(movmean(abs(pd_data), 5) <50, 1, 'first');
     if isempty(f2)
         f2 = length(x2);
     end
@@ -48,6 +49,13 @@ for nq = n_modes:-1:1
     %active damping
     x3 = end_of_passive + 1:end_of_active;
     ad_data = exp_data.data(nq,x3);
+    % truncating the data if it falls into the noise
+    f3 = find(movmean(abs(ad_data), 5) <50, 1, 'first');
+    if isempty(f3)
+        f3 = length(x3);
+    end
+    ad_data = ad_data(1:f3);
+    x3 = x3(1:f3);
     s3 = polyfit(x3,log(abs(ad_data)),1);
     c3 = polyval(s3,x3);
     delta3 = mean(abs(c3 - log(abs(ad_data)))./c3);
