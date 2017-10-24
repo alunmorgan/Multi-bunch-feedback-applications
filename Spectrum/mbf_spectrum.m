@@ -6,7 +6,7 @@ function data = mbf_spectrum(mbf_axis, n_turns, fold, repeat)
 %                       requesting
 %       n_turns (int): The number of turns to capture.
 %       fold (int): The number of times to fold the data along the
-%                   frequency axis. This enhances power resolution 
+%                   frequency axis. This enhances power resolution
 %                   at the cost of frequency resolution.
 %       repeat (int): Repeat the capture this many times in order to
 %                     improve the power resolution.
@@ -115,9 +115,9 @@ linkaxes([ax1, ax2], 'y')
 graph_handles(2) = figure;
 ax4 = subplot('position',[.02 .35 .7 .6]);
 imagesc(data.mode_axis,...
-        data.tune_axis,...
-        log10(data.tune_data(1:end/2,:)),...
-        [-3 0]+log10(max(max(data.tune_data(1:end/2,:)))));
+    data.tune_axis,...
+    log10(data.tune_data(1:end/2,:)),...
+    [-3 0]+log10(max(max(data.tune_data(1:end/2,:)))));
 set(ax4,'YAxisLocation','right');
 set(ax4,'YDir','normal')
 set(ax4, 'XTick', [])
@@ -141,7 +141,7 @@ linkaxes([ax4, ax6], 'x')
 linkaxes([ax4, ax5], 'y')
 
 data.time = clock;
-data.base_name = ['mbf_spectrum_', mbf_axis, '_axis'];
+data.base_name = ['Spectrum_', mbf_axis, '_axis'];
 %% saving the data to a file
 save_to_archive(root_string, data, graph_handles)
 mbf_restore_all

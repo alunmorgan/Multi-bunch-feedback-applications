@@ -27,7 +27,7 @@ end
 save_name = fullfile(root_string, num2str(data.time(1)), mth, dy, ...
     [data.filename '.mat']);
 save(save_name, 'data')
-if nargin > 2
+if nargin > 3
     for heaq = 1:length(graph_handles)
         if ishandle(graph_handles(heaq))
             graph_save_name = fullfile(root_string, num2str(data.time(1)), mth, dy, data.filename);
@@ -38,3 +38,10 @@ if nargin > 2
 end %if
 
 disp(['Data saved to:  ',save_name])
+
+index_name = [data.base_name, '_index'];
+load(fullfile(root_string, index_name))
+file_index{1, end+1} = save_name;
+file_index{2, end+1} = data.time;
+save(fullfile(root_string, index_name), 'file_index')
+disp('Index updated')

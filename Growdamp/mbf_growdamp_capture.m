@@ -4,14 +4,13 @@ function varargout = mbf_growdamp_capture(mbf_axis, tune)
 %
 %   Args:
 %       mbf_axis (str): Selects which MBF axis to work on (x, y, s).
-%       tune (float): Usually the fractional tune of the machine. 
+%       tune (float): Usually the fractional tune of the machine.
 %
 % example growdamp = mbf_growdamp_capture('x', 0.17)
 
-if ~strcmpi(mbf_axis,'x') && ~strcmpi(mbf_axis,'y') && ~strcmpi(mbf_axis,'s')
- error('mbf_growdamp_capture: Incorrect value axis given (should be x, y or s)');
-end
-
+if ~strcmpi(mbf_axis, 'x')&& ~strcmpi(mbf_axis, 'y') && ~strcmpi(mbf_axis, 's')
+    error('mbf_growdamp_capture: Incorrect value axis given (should be x, y or s)');
+end %if
 [root_string, ~, pv_names] = mbf_system_config;
 settings = mbf_growdamp_config(mbf_axis);
 % Generate the base PV name.
@@ -29,12 +28,12 @@ growdamp.base_name = ['Growdamp_' growdamp.ax_label '_axis'];
 exp_state_names = {'spacer', 'act', 'nat', 'growth'};
 for n=2:4
     mbf_get_then_put([pv_head, pv_names.tails.Sequencer.Base, num2str(n),pv_names.tails.Sequencer.start_frequency], tune);
-    % Getting the number of turns 
-growdamp.([exp_state_names{n}, '_turns']) = lcaGet([pv_head, pv_names.tails.Sequencer.Base, num2str(n), pv_names.tails.Sequencer.count]);
-% Getting the number of turns each point dwells at
-growdamp.([exp_state_names{n}, '_dwell']) = lcaGet([pv_head, pv_names.tails.Sequencer.Base, num2str(n), pv_names.tails.Sequencer.dwell]);
-% Getting the gain
-growdamp.([exp_state_names{n}, '_gain']) = lcaGet([pv_head, pv_names.tails.Sequencer.Base, num2str(n), pv_names.tails.Sequencer.gain]);
+    % Getting the number of turns
+    growdamp.([exp_state_names{n}, '_turns']) = lcaGet([pv_head, pv_names.tails.Sequencer.Base, num2str(n), pv_names.tails.Sequencer.count]);
+    % Getting the number of turns each point dwells at
+    growdamp.([exp_state_names{n}, '_dwell']) = lcaGet([pv_head, pv_names.tails.Sequencer.Base, num2str(n), pv_names.tails.Sequencer.dwell]);
+    % Getting the gain
+    growdamp.([exp_state_names{n}, '_gain']) = lcaGet([pv_head, pv_names.tails.Sequencer.Base, num2str(n), pv_names.tails.Sequencer.gain]);
 end
 
 % Trigger the measurement
