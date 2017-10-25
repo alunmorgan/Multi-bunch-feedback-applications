@@ -52,6 +52,9 @@ pv_names.tails.Detector_gain = ':DET:GAIN_S';
 pv_names.tails.Detector_mode = ':DET:MODE_S';
 pv_names.tails.Detector_autogain_state = ':DET:AUTOGAIN_S';
 pv_names.tails.Detector_input = ':DET:INPUT_S';
+pv_names.tails.Detector_scale = ':DET:SCALE';
+pv_names.tails.Detector_I = ':DET:I:M';
+pv_names.tails.Detector_Q = ':DET:Q:M';
 
 % DDR settings
 pv_names.tails.DDR_arm = ':TRG:DDR:ARM_S.PROC';
@@ -65,5 +68,15 @@ pv_names.tails.DDR_autostop_setting = ':DDR:AUTOSTOP_S';
 % Buffer settings
 pv_names.tails.Buffer_trigger_mode = ':TRG:BUF:MODE_S';
 pv_names.tails.Buffer_trigger_stop = ':TRG:BUF:RESET_S.PROC';
+
+% NCO settings
+pv_names.tails.NCO.Base = ':NCO';
+pv_names.tails.NCO.frequency = ':FREQ_S';
+pv_names.tails.NCO.gain = ':GAIN_S';
+
+% FIR settings
+pv_names.tails.FIR.Base = ':FIR:';
+pv_names.tails.FIR.gain = 'GAIN_S';
+pv_names.tails.FIR.method_of_construction = ':USEWF_S';
 
 
