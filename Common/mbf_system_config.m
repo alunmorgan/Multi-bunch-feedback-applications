@@ -8,6 +8,9 @@ harmonic_number = 936;
 % External trigger
 pv_names.Hardware_trigger = 'LI-TI-MTGEN-01:BS-DI-MODE';
 
+% Emittance measurement
+pv_names.emittance = 'SR-DI-EMIT-01:ESPREAD_MEAN';
+
 % Trigger settings
 pv_names.tails.DDR_trigger_select = ':TRG:DDR:SEL_S';
 pv_names.tails.DDR_trigger_mode = ':TRG:DDR:MODE_S';
@@ -79,4 +82,9 @@ pv_names.tails.FIR.Base = ':FIR:';
 pv_names.tails.FIR.gain = 'GAIN_S';
 pv_names.tails.FIR.method_of_construction = ':USEWF_S';
 
+% Tune settings
+pv_names.tails.tune.peak.left_area = ':PEAK:LEFT:AREA';
+pv_names.tails.tune.peak.right_area = ':PEAK:RIGHT:AREA';
+pv_names.tails.tune.peak.centre_area = ':PEAK:CENTRE:AREA';
+pv_names.tails.tune.peak.sync_tune = ':PEAK:SYNCTUNE';
 
