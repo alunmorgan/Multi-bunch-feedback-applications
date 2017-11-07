@@ -39,6 +39,7 @@ else
 end %if
 
 [root_string, ~] = mbf_system_config;
+root_string = root_string{1};
 
 data.frontend_pv = 'SR23C-DI-BBFE-01';
 p=lcaGet([data.frontend_pv ':PHA:OFF:' mbf_ax]);

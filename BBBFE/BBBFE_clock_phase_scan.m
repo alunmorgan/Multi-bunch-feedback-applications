@@ -22,6 +22,7 @@ function BBBFE_clock_phase_scan(ax)
 % Example: BBBFE_clock_phase_scan(1)
 
 [root_string, ~] = mbf_system_config;
+root_string = root_string{1};
 
 data.frontend_pv = 'SR23C-DI-BBFE-01';
 p = lcaGet([data.frontend_pv ':PHA:CLO:' num2str(ax)]);

@@ -1,5 +1,5 @@
 function [poly_data, frequency_shifts] = mbf_growdamp_analysis(exp_data)
-% takes the data from mbf growdamp capture and fits it with a series of 
+% takes the data from mbf growdamp capture and fits it with a series of
 % linear fits to get the damping times for each mode.
 %
 % Args:

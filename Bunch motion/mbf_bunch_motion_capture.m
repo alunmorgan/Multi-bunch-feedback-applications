@@ -6,6 +6,8 @@ function bunch_motion = mbf_bunch_motion_capture
 
 %% Getting the desired system setup parameters.
 [root_string, ~, pv_names] = mbf_system_config;
+root_string = root_string{1};
+
 [turn_count, turn_offset] = mbf_bunch_motion_config;
 % getting general environment data.
 bunch_motion = machine_environment;

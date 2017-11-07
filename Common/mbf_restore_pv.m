@@ -8,6 +8,8 @@ function mbf_restore_pv(pv_name)
 % Example: mbf_restore_pv('SR-DI-MBF-TRIG-01')
 
 [root_string, ~] = mbf_system_config;
+root_string = root_string{1};
+
 load(fullfile(root_string, 'captured_config', pv_name))
 lcaPut(pv_name(1:end-4), original_value)
 

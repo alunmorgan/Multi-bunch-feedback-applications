@@ -13,6 +13,7 @@ if ~strcmpi(mbf_axis, 'x')&& ~strcmpi(mbf_axis, 'y') && ~strcmpi(mbf_axis, 's')
 end %if
 
 [root_string, ~, pv_names] = mbf_system_config;
+root_string = root_string{1};
 settings = mbf_modescan_config(mbf_axis);
 % Generate the base PV name.
 pv_head = ax2dev(settings.axis_number);

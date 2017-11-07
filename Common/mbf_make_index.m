@@ -35,7 +35,12 @@ else
     end %if
 end %if
 tic
-datasets = dir_list_gen_tree(root_string, '.mat', 1);
+datasets = {};
+for nes = 1:length(root_string)
+    sets_temp = dir_list_gen_tree(root_string{nes}, '.mat', 1);
+    datasets = cat(1, datasets, sets_temp);
+end %for
+datasets = datasets(2:end);
 wanted_datasets_type = datasets(find_position_in_cell_lst(strfind(datasets, filter_name)));
 disp(['Creating lookup index for ',app, ' ' ax])
 if isempty(wanted_datasets_type)
