@@ -1,5 +1,6 @@
-function mbf_growdamp_archival_analysis(data_requested, anal_type, sweep_parameter, parameter_step_size)
-% Takes the data extracted by mbf_growdamp_archival_retreval and averages
+function [dr_passive, dr_active, error_passive, error_active, times, setup, extents] = ...
+    mbf_growdamp_archival_analysis(data_requested, anal_type, sweep_parameter, parameter_step_size)
+% Takes the data extracted by mbf_growdamp_archival_retreval and operates
 % across all datasets. Then plots the results.
 %
 % Args:
@@ -18,24 +19,42 @@ function mbf_growdamp_archival_analysis(data_requested, anal_type, sweep_paramet
 % Example: mbf_growdamp_archival_analysis(data_requested, 'average')
 
 % Getting the desired system setup parameters.
-[~, harmonic_number, ~] = mbf_system_config;
+% [~, harmonic_number, ~] = mbf_system_config;
 
+extents = struct;
 for nd = length(data_requested):-1:1
     [s_poly_data, ~] = mbf_growdamp_analysis(data_requested{nd});
-    dr(nd,:) = fftshift(squeeze(-s_poly_data(:,2,1))');
+    f_nms = fieldnames(data_requested{nd});
+    for kef = 1:length(f_nms)
+        if ~isfield(extents, f_nms{kef})
+            extents.(f_nms{kef}){1} = data_requested{nd}.(f_nms{kef});
+            extents.(f_nms{kef}){2} = data_requested{nd}.(f_nms{kef});
+        else
+            if ~iscell(data_requested{nd}.(f_nms{kef}))
+                extents.(f_nms{kef}){1} = max(data_requested{nd}.(f_nms{kef}), extents.(f_nms{kef}){1});
+                %START HERE... need to rename setup
+                extents.(f_nms{kef}){2} = min(data_requested{nd}.(f_nms{kef}), extents.(f_nms{kef}){2});
+            end %if
+        end %if
+    end %for
+    times(nd) = datenum(data_requested{nd}.time);
+    dr_passive(nd,:) = fftshift(squeeze(-s_poly_data(:,2,1))');
+    dr_active(nd,:) = fftshift(squeeze(-s_poly_data(:,3,1))');
+    error_passive(nd,:) = squeeze(-s_poly_data(:,2,3))';
+    error_active(nd,:) = squeeze(-s_poly_data(:,3,3))';
     if strcmp(anal_type, 'parameter_sweep') && nargin >2
-        param(nd) = data_requested{jes}.(sweep_parameter);
+        param(nd) = data_requested{nd}.(sweep_parameter);
     end %if
     fprintf('.')
 end %for
 fprintf('\n')
-
-graph_title = 'Damping rates for different modes';
+setup.anal_type = anal_type;
 if nargin == 1
     disp('No analysis type set -- assuming collate')
 elseif nargin == 2
     if strcmp(anal_type, 'average')
-        dr = mean(dr,1);
+        dr_passive = mean(dr_passive,1);
+        dr_active = mean(dr_active,1);
     end %if
     if strcmp(anal_type, 'parameter_sweep')
         error('Not enough parameters set for a parameter sweep')
@@ -44,35 +63,15 @@ elseif nargin == 3
     error('Wrong number of parameters. Should be two or four')
 elseif nargin == 4
     if strcmp(anal_type, 'parameter_sweep')
-        [dr, param] = mbf_analysis_reorganise_for_parameter_sweep(dr, param, parameter_step_size);
-        graph_title = {'Damping rates for different modes';...
-            ['as a function of', sweep_parameter];...
-            ['Using a step size of ', num2str(current_step_size)]};
+        setup.sweep_parameter = sweep_parameter;
+        setup.parameter_step_size = parameter_step_size;
+        [dr_passive, setup.param] = mbf_analysis_reorganise_for_parameter_sweep(dr_passive, param, parameter_step_size);
+        [dr_active, ~] = mbf_analysis_reorganise_for_parameter_sweep(dr_active, param, parameter_step_size);
     elseif strcmp(anal_type, 'average')
         warning('Ignoring the last two parameters as "average" is set')
-        dr = mean(dr,1);
+        dr_passive = mean(dr_passive,1);
+        dr_active = mean(dr_active,1);
     elseif strcmp(anal_type, 'collate')
         warning('Ignoring the last two parameters as "collate" is set')
     end %if
 end %if
-
-figure
-hold on
-x_plt_axis = (1:harmonic_number) - harmonic_number/2;
-y_max = max(max(dr));
-y_min = min(min(dr));
-plot(x_plt_axis, dr)
-xlim([x_plt_axis(1) x_plt_axis(end)])
-ylim([y_min y_max])
-title(graph_title)
-xlabel('Mode')
-ylabel('Damping rates (1/turns)')
-
-% add labels if it is a parameter sweep.
-if nargin == 4 && strcmp(anal_type, 'parameter_sweep')
-    for tb = length(param):-1:1
-        labels{tb} = num2str(param(tb));
-    end %for
-    legend(labels)
-end %if
-

@@ -1,4 +1,5 @@
-function requested_data = mbf_growdamp_archival_retrieval(ax, date_range, bypass_index)
+function requested_data = mbf_growdamp_archival_retrieval(ax, date_range,...
+    bypass_index, metadata_only)
 % Extracts requested data from the data archive between
 % the requested times(date_range), and of the correct type (ax).
 %
@@ -79,7 +80,17 @@ end %if
 
 requested_data = cell(length(wanted_datasets),1);
 for jes = 1:length(wanted_datasets)
-    load(wanted_datasets{jes})
-    requested_data{jes} = data;
+    temp = load(wanted_datasets{jes});
+    data_name = fieldnames(temp);
+    % Although the code saves eveything in 'data', older datasets have
+    % a variety of names.
+    if strcmp(data_name{1}, 'data') || ...
+            strcmp(data_name{1}, 'growdamp') || ...
+            strcmp(data_name{1}, 'what_to_save')
+        requested_data{jes} = temp.(data_name{1});
+    end %if
+    if metadata_only ~= 0
+        requested_data{jes} = rmfield(requested_data{jes}, 'data');
+    end %if
     clear data
 end %for
