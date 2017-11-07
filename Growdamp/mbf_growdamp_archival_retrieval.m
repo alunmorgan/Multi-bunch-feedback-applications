@@ -17,10 +17,14 @@ function requested_data = mbf_growdamp_archival_retrieval(ax, date_range, bypass
 
 if nargin < 3
     bypass_index = 0;
+    metadata_only = 0;
+elseif nargin == 3
+    metadata_only = 0;
 end %if
 
 % Getting the desired system setup parameters.
 [root_string, ~, ~] = mbf_system_config;
+root_string = root_string{1};
 
 if strcmpi(ax, 'x')
     filter_name = 'Growdamp_x_axis';

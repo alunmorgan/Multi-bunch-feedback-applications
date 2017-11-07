@@ -2,7 +2,11 @@ function [root_path, harmonic_number, pv_names] = mbf_system_config
 
 %       harmonic_number (int): Harmonic number of the machine.
 
-root_path = '/dls/ops-data/Diagnostics/MBF/';
+% The first entry in root_path is the currently used location for capture. 
+% Additional locations are for alternative archival locations only.
+root_path = {'/dls/ops-data/Diagnostics/MBF/', ...
+             '/dls/ops-data/Diagnostics/TMBF/', ...
+             '/dls/ops-data/Diagnostics/LMBF/'};
 harmonic_number = 936;
 
 % External trigger

@@ -48,12 +48,21 @@ if isempty(wanted_datasets_type)
 else
     parfor kse = 1:length(wanted_datasets_type)
         temp = load(wanted_datasets_type{kse});
-        file_time{kse} = temp.data.time;
-        %     clear temp
-        file_name{kse} = wanted_datasets_type{kse};
-        %     fprintf('.')
-    end %for
-    file_index = cat(1, file_name, file_time);
+        data_name = fieldnames(temp);
+        % Although the code saves eveything in 'data', older datasets have
+        % a variety of names.
+        if strcmp(data_name{1}, 'data') || ...
+           strcmp(data_name{1}, 'growdamp') || ...
+           strcmp(data_name{1}, 'what_to_save')
+            file_time{kse} = temp.(data_name{1}).time;
+            file_name{kse} = wanted_datasets_type{kse};
+            ok(kse) = 1;
+         else
+%             disp(fieldnames(temp))
+            ok(kse) = 0;
+        end %if
+    end %parfor
+    file_index = cat(1, file_name(ok==1), file_time(ok==1));
     toc
-    save(fullfile(root_string, [app, '_', index_name]), 'file_index')
+    save(fullfile(root_string{1}, [app, '_', index_name]), 'file_index')
 end %if
