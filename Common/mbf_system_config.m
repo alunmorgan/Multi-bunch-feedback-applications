@@ -16,25 +16,25 @@ pv_names.Hardware_trigger = 'LI-TI-MTGEN-01:BS-DI-MODE';
 pv_names.emittance = 'SR-DI-EMIT-01:ESPREAD_MEAN';
 
 % Trigger settings
-pv_names.tails.DDR_trigger_select = ':TRG:DDR:SEL_S';
-pv_names.tails.DDR_trigger_mode = ':TRG:DDR:MODE_S';
+pv_names.tails.MEM_trigger_select = ':TRG:MEM:SEL_S';
+pv_names.tails.MEM_trigger_mode = ':TRG:MEM:MODE_S';
 pv_names.tails.Sequencer_trigger_select = ':TRG:SEQ:SEL_S';
-pv_names.tails.DDR_external_trigger_enable_status = ':TRG:DDR:EXT:EN_S';
-pv_names.tails.DDR_post_mortem_trigger_enable_status = ':TRG:DDR:PM:EN_S';
-pv_names.tails.DDR_ADC_trigger_enable_status = ':TRG:DDR:ADC:EN_S';
-pv_names.tails.DDR_sequencer_trigger_enable_status = ':TRG:DDR:SEQ:EN_S';
-pv_names.tails.DDR_system_clock_trigger_enable_status = ':TRG:DDR:SCLK:EN_S';
-pv_names.tails.DDR_external_trigger_blanking_status = ':TRG:DDR:EXT:BL_S';
-pv_names.tails.DDR_post_mortem_trigger_blanking_status   = ':TRG:DDR:PM:BL_S';
-pv_names.tails.DDR_ADC_trigger_blanking_status = ':TRG:DDR:ADC:BL_S';
-pv_names.tails.DDR_sequencer_trigger_blanking_status = ':TRG:DDR:SEQ:BL_S';
-pv_names.tails.DDR_system_clock_trigger_blanking_status = ':TRG:DDR:SCLK:BL_S';
+pv_names.tails.MEM_external_trigger_enable_status = ':TRG:MEM:EXT:EN_S';
+pv_names.tails.MEM_post_mortem_trigger_enable_status = ':TRG:MEM:PM:EN_S';
+pv_names.tails.MEM_ADC_trigger_enable_status = ':TRG:MEM:ADC:EN_S';
+pv_names.tails.MEM_sequencer_trigger_enable_status = ':TRG:MEM:SEQ:EN_S';
+pv_names.tails.MEM_system_clock_trigger_enable_status = ':TRG:MEM:SCLK:EN_S';
+pv_names.tails.MEM_external_trigger_blanking_status = ':TRG:MEM:EXT:BL_S';
+pv_names.tails.MEM_post_mortem_trigger_blanking_status   = ':TRG:MEM:PM:BL_S';
+pv_names.tails.MEM_ADC_trigger_blanking_status = ':TRG:MEM:ADC:BL_S';
+pv_names.tails.MEM_sequencer_trigger_blanking_status = ':TRG:MEM:SEQ:BL_S';
+pv_names.tails.MEM_system_clock_trigger_blanking_status = ':TRG:MEM:SCLK:BL_S';
 
 % Super Sequencer settings
 pv_names.tails.Super_sequencer_count = ':SEQ:SUPER:COUNT_S';
 
 % Sequencer settings
-pv_names.tails.Sequencer_trigger_state = ':SEQ:TRIGGER_S';
+pv_names.tails.Sequencer_trigger_state = ''; %????? was ':SEQ:TRIGGER_S';
 pv_names.tails.Sequencer_start_state = ':SEQ:PC_S';
 pv_names.tails.Sequencer_steady_state_bank = ':SEQ:0:BANK_S';
 pv_names.tails.Sequencer.Base = ':SEQ:';
@@ -55,31 +55,34 @@ pv_names.tails.Bunch_bank.Output_types = ':OUTWF_S';
 pv_names.tails.Bunch_bank.FIR_select = ':FIRWF_S';
 
 % Detector settings
-pv_names.tails.Detector_gain = ':DET:GAIN_S';
-pv_names.tails.Detector_mode = ':DET:MODE_S';
-pv_names.tails.Detector_autogain_state = ':DET:AUTOGAIN_S';
-pv_names.tails.Detector_input = ':DET:INPUT_S';
-pv_names.tails.Detector_scale = ':DET:SCALE';
-pv_names.tails.Detector_I = ':DET:I:M';
-pv_names.tails.Detector_Q = ':DET:Q:M';
+% NOW HAVE FOUR SEPARATE DETECTORS
+% pv_names.tails.Detector1.gain = ':DET:GAIN_S';
+% pv_names.tails.Detector1.mode = ':DET:MODE_S';
+% pv_names.tails.Detector1.autogain_state = ':DET:AUTOGAIN_S';
+% pv_names.tails.Detector1.input = ':DET:INPUT_S';
+% pv_names.tails.Detector.1scale = ':DET:SCALE';
+% pv_names.tails.Detector1.I = ':DET:I:M';
+% pv_names.tails.Detector1.Q = ':DET:Q:M';
 
-% DDR settings
-pv_names.tails.DDR_arm = ':TRG:DDR:ARM_S.PROC';
-pv_names.tails.DDR_status = ':DDR:STATUS';
-pv_names.tails.DDR_buffer = ':DDR:LONGWF';
-pv_names.tails.DDR_input = ':DDR:INPUT_S';
-pv_names.tails.DDR_IQ_overflow = ':DDR:OVF:IQ';
-pv_names.tails.DDR_IQ_mode = ':DDR:IQMODE_S';
-pv_names.tails.DDR_autostop_setting = ':DDR:AUTOSTOP_S';
+% Memory settings
+pv_names.tails.MEM_arm = ':TRG:MEM:ARM_S.PROC';
+pv_names.tails.MEM_status = ':MEM:STATUS';
+pv_names.tails.MEM_buffer = ':MEM:LONGWF';
+pv_names.tails.MEM_input = ':MEM:INPUT_S';
+pv_names.tails.MEM_IQ_overflow = ':MEM:OVF:IQ';
+pv_names.tails.MEM_IQ_mode = ':MEM:IQMODE_S';
+pv_names.tails.MEM_autostop_setting = ':MEM:AUTOSTOP_S';
 
 % Buffer settings
-pv_names.tails.Buffer_trigger_mode = ':TRG:BUF:MODE_S';
-pv_names.tails.Buffer_trigger_stop = ':TRG:BUF:RESET_S.PROC';
+% THERE IS NO BUFFER ANY MORE.
+% pv_names.tails.Buffer_trigger_mode = ':TRG:BUF:MODE_S';
+% pv_names.tails.Buffer_trigger_stop = ':TRG:BUF:RESET_S.PROC';
 
-% NCO settings
-pv_names.tails.NCO.Base = ':NCO';
-pv_names.tails.NCO.frequency = ':FREQ_S';
-pv_names.tails.NCO.gain = ':GAIN_S';
+% % NCO settings
+% NOT IMPLEMENTED ON THE NEW HARDWARE YET.
+% pv_names.tails.NCO.Base = ':NCO';
+% pv_names.tails.NCO.frequency = ':FREQ_S';
+% pv_names.tails.NCO.gain = ':GAIN_S';
 
 % FIR settings
 pv_names.tails.FIR.Base = ':FIR:';

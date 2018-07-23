@@ -44,9 +44,9 @@ while 1==1
     % check we don't have an overflow or too little IQ data, adjust fixed IQ
     % gain accordingly.
     datamax=max(abs(output));
-    gain_pv = [pv_head pv_names.tails.Detector_gain];
+    gain_pv = [pv_head pv_names.tails.Detector1.gain]; %FIXME
     gain = lcaGet(gain_pv, 1, 'double');
-    overflow_pv = [pv_head pv_names.tails.DDR_IQ_overflow];
+    overflow_pv = [pv_head pv_names.tails.MEM_IQ_overflow]; % FIXME does this exist?
     overflow_state = lcaGet(overflow_pv, 1 , 'double');
     if overflow_state == 1
         if gain < 7

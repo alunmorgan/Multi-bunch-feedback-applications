@@ -35,20 +35,20 @@ elseif strcmpi(mbf_axis, 's')
     data.axis_label = 'S axis';
 end %if
 
-mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_input],'ADC');
-mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_trigger_select],'Hardware');
-mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_external_trigger_enable_status],'Ignore');
-mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_post_mortem_trigger_enable_status],'Ignore');
-mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_ADC_trigger_enable_status],'Ignore');
-mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_sequencer_trigger_enable_status],'Enable');
-mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_system_clock_trigger_enable_status],'Ignore');
+mbf_get_then_put([ax2dev(ax) pv_names.tails.MEM_input],'ADC');
+mbf_get_then_put([ax2dev(ax) pv_names.tails.MEM_trigger_select],'Hardware');
+mbf_get_then_put([ax2dev(ax) pv_names.tails.MEM_external_trigger_enable_status],'Ignore');
+mbf_get_then_put([ax2dev(ax) pv_names.tails.MEM_post_mortem_trigger_enable_status],'Ignore');
+mbf_get_then_put([ax2dev(ax) pv_names.tails.MEM_ADC_trigger_enable_status],'Ignore');
+mbf_get_then_put([ax2dev(ax) pv_names.tails.MEM_sequencer_trigger_enable_status],'Enable');
+mbf_get_then_put([ax2dev(ax) pv_names.tails.MEM_system_clock_trigger_enable_status],'Ignore');
 mbf_get_then_put([ax2dev(ax) pv_names.tails.Sequencer_trigger_state],0);
-mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_trigger_mode],'One Shot');
+mbf_get_then_put([ax2dev(ax) pv_names.tails.MEM_trigger_mode],'One Shot');
 mode_data = zeros(n_turns/fold, harmonic_number);
 bunch_data = zeros(n_turns/2, harmonic_number);
 
 for k=1:repeat
-    lcaPut([ax2dev(ax) pv_names.tails.DDR_arm],1);
+    lcaPut([ax2dev(ax) pv_names.tails.MEM_arm],1);
     pause(2)
     raw_data = tmbf_read(ax2dev(ax), n_turns);
     data_length=length(raw_data);
