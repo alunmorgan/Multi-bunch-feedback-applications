@@ -66,7 +66,7 @@ exp_data.pinhole = a;
 
 % Feedback status
 exp_data.orbit_feedback_status = lcaGet('SR01A-CS-FOFB-01:RUN');
-exp_data.tune_feedback_status = lcaGet('SR-TS-TFB-01:ONOFF');
+exp_data.tune_feedback_status = lcaGet('SR-CS-TFB-01:STATUS');
 
 % Emittance
 exp_data.emittance(1) = lcaGet('SR-DI-EMIT-01:HEMIT_MEAN');
