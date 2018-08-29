@@ -63,12 +63,13 @@ pv_names.tails.Detector.source = ':DET:SELECT_S';
 pv_names.tails.Detector.fill_waveforms = ':DET:FILL_WAVEFORMS_S';
 pv_names.tails.Detector.fir_delay = ':DET:FIR_DELAY_S_S';
 for n_det = 0:3
-    l_det = num2str(n_det);
-    pv_names.tails.Detector.(l_det).enable = [':DET:',l_det,':ENABLE_S'];
-    pv_names.tails.Detector.(l_det).bunch_selection = [':DET:',l_det,':BUNCHES_S']; % How do you set all?
-    pv_names.tails.Detector.(l_det).scale = [':DET:',l_det,':SCALING_S']; % gain?
-    pv_names.tails.Detector.(l_det).I = [':DET:',l_det,':I'];
-    pv_names.tails.Detector.(l_det).Q = [':DET:',l_det,':Q'];
+    l_det = ['det',num2str(n_det)];
+    n_det_label = num2str(n_det);
+    pv_names.tails.Detector.(l_det).enable = [':DET:',n_det_label,':ENABLE_S'];
+    pv_names.tails.Detector.(l_det).bunch_selection = [':DET:',n_det_label,':BUNCHES_S']; % How do you set all?
+    pv_names.tails.Detector.(l_det).scale = [':DET:',n_det_label,':SCALING_S']; % gain?
+    pv_names.tails.Detector.(l_det).I = [':DET:',n_det_label,':I'];
+    pv_names.tails.Detector.(l_det).Q = [':DET:',n_det_label,':Q'];
 end %for
 
 % Memory settings

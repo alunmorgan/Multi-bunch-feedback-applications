@@ -64,12 +64,12 @@ mbf_get_then_put([pv_head pv_names.tails.Super_sequencer_count], harmonic_number
 mbf_get_then_put([pv_head pv_names.tails.Detector.source]);
 % Enable only detector 0
 for n_det = 0:3
-    l_det = num2str(n_det);
+    l_det = ['det',num2str(n_det)];
     mbf_get_then_put([pv_head  pv_names.tails.Detector.(l_det).enable], 'Disabled');
 end
-lcaPut([pv_head  pv_names.tails.Detector.(0).enable], 'Enabled');
+lcaPut([pv_head  pv_names.tails.Detector.('det0').enable], 'Enabled');
 % Set the bunch mode to all bunches on detector 0
-mbf_get_then_put([pv_head  pv_names.tails.Detector.(0).bunch_selection], ones(936,1));
+mbf_get_then_put([pv_head  pv_names.tails.Detector.('det0').bunch_selection], ones(936,1));
 
 
 
