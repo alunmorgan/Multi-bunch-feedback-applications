@@ -42,7 +42,7 @@ end
 % LENGTH 467?
 lcaPut([pv_head(1:end-2), pv_names.tails.triggers.arm], 1)
 % readout under a lock
-growdamp.data = mbf_read_det(pv_head, 467 ,'Channel', 0, 'Lock', 60); %mbf_IQ_measurement(settings.axis_number);
+growdamp.data = mbf_read_det(pv_head, 467 ,'channel', 0, 'lock', 60);
 % Trigger
 lcaPut([pv_head(1:end-2), pv_names.tails.triggers.soft], 1)
 

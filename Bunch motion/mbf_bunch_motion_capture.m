@@ -28,34 +28,41 @@ lcaPut(pv_names.Hardware_trigger, 'Off')
 mbf_get_then_put({[ax2dev(1) pv_names.tails.MEM_arm];...
     [ax2dev(2) pv_names.tails.MEM_arm];...
     [ax2dev(3) pv_names.tails.MEM_arm]},1);
+
+% Triggering memory under a lock.
+[bunch_motion.x, bunch_motion.y] = mbf_read_mem(ax2dev(1), turn_count, turn_offset,'channel', -1, 'lock', 60);
+bunch_motion.z = mbf_read_mem(ax2dev(3), turn_count, turn_offset,'channel', 0, 'lock', 60);
+
+% Triggering the measurement.
+lcaPut(pv_names.Hardware_trigger, 'On')
+
+% Restoring the original system state.
 lcaPut(pv_names.Hardware_trigger, trig_orig_state)
 
-%% Wait for trigger
-disp('Waiting for trigger.\n')
-js = 1;
-while ~strcmp(lcaGet([ax2dev(1) pv_names.tails.MEM_status]),'Ready') ||...
-        ~strcmp(lcaGet([ax2dev(2) pv_names.tails.MEM_status]),'Ready') ||...
-        ~strcmp(lcaGet([ax2dev(3) pv_names.tails.MEM_status]),'Ready')
-    pause(.2)
-    js = js +1;
-    if js >20
-        fprintf('\n')
-        js =1;
-    end %if
-    fprintf('.')
-end %while
-%% Wait for memory to be ready, then read out.
-pause(1)
+% %% Wait for trigger
+% disp('Waiting for trigger.\n')
+% js = 1;
+% while ~strcmp(lcaGet([ax2dev(1) pv_names.tails.MEM_status]),'Ready') ||...
+%         ~strcmp(lcaGet([ax2dev(2) pv_names.tails.MEM_status]),'Ready') ||...
+%         ~strcmp(lcaGet([ax2dev(3) pv_names.tails.MEM_status]),'Ready')
+%     pause(.2)
+%     js = js +1;
+%     if js >20
+%         fprintf('\n')
+%         js =1;
+%     end %if
+%     fprintf('.')
+% end %while
+% %% Wait for memory to be ready, then read out.
+% pause(1)
+% 
+% %% Checking that all the Buffers were triggered at the same time
+% [~,t] = lcaGet({[ax2dev(1) pv_names.tails.MEM_buffer]; ...
+%                 [ax2dev(2) pv_names.tails.MEM_buffer]; ...
+%                 [ax2dev(3) pv_names.tails.MEM_buffer]});
+% bunch_motion.time_check = diff(EPICStime2MLtime(t)) .*24 .* 60 .* 60;
 
-%% Checking that all the Buffers were triggered at the same time
-[~,t] = lcaGet({[ax2dev(1) pv_names.tails.MEM_buffer]; ...
-                [ax2dev(2) pv_names.tails.MEM_buffer]; ...
-                [ax2dev(3) pv_names.tails.MEM_buffer]});
-bunch_motion.time_check = diff(EPICStime2MLtime(t)) .*24 .* 60 .* 60;
 
-bunch_motion.x = tmbf_read(ax2dev(1), turn_count, turn_offset);
-bunch_motion.y = tmbf_read(ax2dev(2), turn_count, turn_offset);
-bunch_motion.z = tmbf_read(ax2dev(3), turn_count, turn_offset);
 
 %% saving the data to a file
 save_to_archive(root_string, bunch_motion)

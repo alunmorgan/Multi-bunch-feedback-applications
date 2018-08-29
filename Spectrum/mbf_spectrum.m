@@ -49,8 +49,7 @@ bunch_data = zeros(n_turns/2, harmonic_number);
 
 for k=1:repeat
     lcaPut([ax2dev(ax) pv_names.tails.MEM_arm],1);
-    pause(2)
-    raw_data = tmbf_read(ax2dev(ax), n_turns);
+    raw_data = mbf_read_mem(ax2dev(ax), n_turns,'channel', 0, 'lock', 60);
     data_length=length(raw_data);
     
     % remove everything that is constant each revolotion
