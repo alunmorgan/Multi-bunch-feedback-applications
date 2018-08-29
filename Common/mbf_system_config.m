@@ -1,4 +1,4 @@
-function [root_path, harmonic_number, pv_names] = mbf_system_config
+function [root_path, harmonic_number, pv_names, trigger_inputs] = mbf_system_config
 
 %       harmonic_number (int): Harmonic number of the machine.
 
@@ -16,27 +16,30 @@ pv_names.Hardware_trigger = 'LI-TI-MTGEN-01:BS-DI-MODE';
 pv_names.emittance = 'SR-DI-EMIT-01:ESPREAD_MEAN';
 
 % Trigger settings
-pv_names.tails.MEM_trigger_select = ':TRG:MEM:SEL_S';
-pv_names.tails.MEM_trigger_mode = ':TRG:MEM:MODE_S';
-pv_names.tails.Sequencer_trigger_select = ':TRG:SEQ:SEL_S';
-pv_names.tails.MEM_external_trigger_enable_status = ':TRG:MEM:EXT:EN_S';
-pv_names.tails.MEM_post_mortem_trigger_enable_status = ':TRG:MEM:PM:EN_S';
-pv_names.tails.MEM_ADC_trigger_enable_status = ':TRG:MEM:ADC:EN_S';
-pv_names.tails.MEM_sequencer_trigger_enable_status = ':TRG:MEM:SEQ:EN_S';
-pv_names.tails.MEM_system_clock_trigger_enable_status = ':TRG:MEM:SCLK:EN_S';
-pv_names.tails.MEM_external_trigger_blanking_status = ':TRG:MEM:EXT:BL_S';
-pv_names.tails.MEM_post_mortem_trigger_blanking_status   = ':TRG:MEM:PM:BL_S';
-pv_names.tails.MEM_ADC_trigger_blanking_status = ':TRG:MEM:ADC:BL_S';
-pv_names.tails.MEM_sequencer_trigger_blanking_status = ':TRG:MEM:SEQ:BL_S';
-pv_names.tails.MEM_system_clock_trigger_blanking_status = ':TRG:MEM:SCLK:BL_S';
+trigger_inputs = {'SOFT', 'EXT', 'PM', 'ADC0', 'ADC1', 'SEQ0', 'SEQ1'};
+for trigger_ind = 1:length(trigger_inputs)
+    trigger = trigger_inputs{trigger_ind};
+    pv_names.tails.triggers.(trigger).enable_status = [':TRG:SEQ:',trigger,':EN_S'];
+    pv_names.tails.triggers.(trigger).blanking_status = [':TRG:SEQ:',trigger,':BL_S'];
+end
+pv_names.tails.triggers.arm = ':TRG:SEQ:ARM_S.PROC';
+pv_names.tails.triggers.disarm = ':TRG:SEQ:DISARM_S.PROC';
+pv_names.tails.triggers.mode = ':TRG:SEQ:MODE_S';
+pv_names.tails.triggers.delay = ':TRG:SEQ:DELAY_S';
+% shared with other axis
+pv_names.tails.trigger.mem_arm = ':TRG:MEM:ARM_S.PROC'; % NEED TO TAKE OFF THE X|Y BEFORE USE.
+pv_names.tails.trigger.mem_disarm = ':TRG:MEM:DISARM_S.PROC'; % NEED TO TAKE OFF THE X|Y BEFORE USE.
+pv_names.tails.triggers.soft = ':TRG:SOFT_S.PROC';  % NEED TO TAKE OFF THE X|Y BEFORE USE.
+pv_names.tails.triggers.soft_settings = ':TRG:SOFT_S.SCAN';  % NEED TO TAKE OFF THE X|Y BEFORE USE.
+pv_names.tails.triggers.shared = ':TRG:MODE_S'; % NEED TO TAKE OFF THE X|Y BEFORE USE.
+pv_names.tails.triggers.blanking_length = ':TRG:BLANKING_S'; % NEED TO TAKE OFF THE X|Y BEFORE USE.
 
 % Super Sequencer settings
 pv_names.tails.Super_sequencer_count = ':SEQ:SUPER:COUNT_S';
 
 % Sequencer settings
-pv_names.tails.Sequencer_trigger_state = ''; %????? was ':SEQ:TRIGGER_S';
-pv_names.tails.Sequencer_start_state = ':SEQ:PC_S';
-pv_names.tails.Sequencer_steady_state_bank = ':SEQ:0:BANK_S';
+pv_names.tails.Sequencer.start_state = ':SEQ:PC_S';
+pv_names.tails.Sequencer.steady_state_bank = ':SEQ:0:BANK_S';
 pv_names.tails.Sequencer.Base = ':SEQ:';
 pv_names.tails.Sequencer.start_frequency = ':START_FREQ_S';
 pv_names.tails.Sequencer.count = ':COUNT_S';
@@ -55,34 +58,31 @@ pv_names.tails.Bunch_bank.Output_types = ':OUTWF_S';
 pv_names.tails.Bunch_bank.FIR_select = ':FIRWF_S';
 
 % Detector settings
-% NOW HAVE FOUR SEPARATE DETECTORS
-% pv_names.tails.Detector1.gain = ':DET:GAIN_S';
-% pv_names.tails.Detector1.mode = ':DET:MODE_S';
-% pv_names.tails.Detector1.autogain_state = ':DET:AUTOGAIN_S';
-% pv_names.tails.Detector1.input = ':DET:INPUT_S';
-% pv_names.tails.Detector.1scale = ':DET:SCALE';
-% pv_names.tails.Detector1.I = ':DET:I:M';
-% pv_names.tails.Detector1.Q = ':DET:Q:M';
+% applies to all
+pv_names.tails.Detector.source = ':DET:SELECT_S';
+pv_names.tails.Detector.fill_waveforms = ':DET:FILL_WAVEFORMS_S';
+pv_names.tails.Detector.fir_delay = ':DET:FIR_DELAY_S_S';
+for n_det = 0:3
+    l_det = num2str(n_det);
+    pv_names.tails.Detector.(l_det).enable = [':DET:',l_det,':ENABLE_S'];
+    pv_names.tails.Detector.(l_det).bunch_selection = [':DET:',l_det,':BUNCHES_S']; % How do you set all?
+    pv_names.tails.Detector.(l_det).scale = [':DET:',l_det,':SCALING_S']; % gain?
+    pv_names.tails.Detector.(l_det).I = [':DET:',l_det,':I'];
+    pv_names.tails.Detector.(l_det).Q = [':DET:',l_det,':Q'];
+end %for
 
 % Memory settings
-pv_names.tails.MEM_arm = ':TRG:MEM:ARM_S.PROC';
-pv_names.tails.MEM_status = ':MEM:STATUS';
-pv_names.tails.MEM_buffer = ':MEM:LONGWF';
-pv_names.tails.MEM_input = ':MEM:INPUT_S';
-pv_names.tails.MEM_IQ_overflow = ':MEM:OVF:IQ';
-pv_names.tails.MEM_IQ_mode = ':MEM:IQMODE_S';
-pv_names.tails.MEM_autostop_setting = ':MEM:AUTOSTOP_S';
+pv_names.tails.MEM_status = ':MEM:BUSY';% NEED TO TAKE OFF THE X|Y BEFORE USE.
+pv_names.tails.MEM.channel_select = ':MEM:SELECT_S';% NEED TO TAKE OFF THE X|Y BEFORE USE.
+pv_names.tails.MEM.offset = ':MEM:OFFSET_S';% NEED TO TAKE OFF THE X|Y BEFORE USE.
+pv_names.tails.MEM.runout = ':MEM:RUNOUT_S'; % NEED TO TAKE OFF THE X|Y BEFORE USE.
 
-% Buffer settings
-% THERE IS NO BUFFER ANY MORE.
-% pv_names.tails.Buffer_trigger_mode = ':TRG:BUF:MODE_S';
-% pv_names.tails.Buffer_trigger_stop = ':TRG:BUF:RESET_S.PROC';
 
 % % NCO settings
-% NOT IMPLEMENTED ON THE NEW HARDWARE YET.
-% pv_names.tails.NCO.Base = ':NCO';
-% pv_names.tails.NCO.frequency = ':FREQ_S';
-% pv_names.tails.NCO.gain = ':GAIN_S';
+pv_names.tails.NCO.Base = ':NCO';
+pv_names.tails.NCO.frequency = ':FREQ_S';
+pv_names.tails.NCO.gain = ':GAIN_S';
+pv_names.tails.NCO.enable = ':ENABLE_S';
 
 % FIR settings
 pv_names.tails.FIR.Base = ':FIR:';

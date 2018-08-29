@@ -11,7 +11,7 @@ function varargout = mbf_growdamp_capture(mbf_axis, tune)
 if ~strcmpi(mbf_axis, 'x')&& ~strcmpi(mbf_axis, 'y') && ~strcmpi(mbf_axis, 's')
     error('mbf_growdamp_capture: Incorrect value axis given (should be x, y or s)');
 end %if
-[root_string, ~, pv_names] = mbf_system_config;
+[root_string, ~, pv_names, ~] = mbf_system_config;
 root_string = root_string{1};
 settings = mbf_growdamp_config(mbf_axis);
 % Generate the base PV name.
@@ -38,37 +38,13 @@ for n=2:4
 end
 
 % Trigger the measurement
-
-while 1==1
-    output = mbf_IQ_measurement(settings.axis_number);
-    % check we don't have an overflow or too little IQ data, adjust fixed IQ
-    % gain accordingly.
-    datamax=max(abs(output));
-    gain_pv = [pv_head pv_names.tails.Detector1.gain]; %FIXME
-    gain = lcaGet(gain_pv, 1, 'double');
-    overflow_pv = [pv_head pv_names.tails.MEM_IQ_overflow]; % FIXME does this exist?
-    overflow_state = lcaGet(overflow_pv, 1 , 'double');
-    if overflow_state == 1
-        if gain < 7
-            mbf_get_then_put(gain_pv, gain+1);
-            warning('IQ overflow, detector gain has been adjusted, capturing again!')
-        else
-            error('too much signal at maximum attenuation!')
-        end
-    elseif datamax<4000
-        if gain > 0
-            mbf_get_then_put(gain_pv, gain-1);
-            warning('IQ weak, detector gain has been adjusted, capturing again!')
-        else
-            warning('very small signal at minimum attenuation!')
-            growdamp.data = output;
-            break
-        end
-    else
-        growdamp.data = output;
-        break
-    end
-end
+% NEED TO SELECT THE CORRECT CHANNEL.
+% LENGTH 467?
+lcaPut([pv_head(1:end-2), pv_names.tails.triggers.arm], 1)
+% readout under a lock
+growdamp.data = mbf_read_det(pv_head, 467 ,'Channel', 0, 'Lock', 60); %mbf_IQ_measurement(settings.axis_number);
+% Trigger
+lcaPut([pv_head(1:end-2), pv_names.tails.triggers.soft], 1)
 
 %% saving the data to a file
 save_to_archive(root_string, growdamp)

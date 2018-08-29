@@ -7,7 +7,7 @@ function mbf_growdamp_setup(mbf_axis, tune)
 %
 % example: mbf_growdamp_setup('x', 0.17)
 
-[~, harmonic_number, pv_names] = mbf_system_config;
+[~, harmonic_number, pv_names, trigger_inputs] = mbf_system_config;
 settings = mbf_growdamp_config(mbf_axis);
 % Generate the base PV name.
 pv_head = ax2dev(settings.axis_number);
@@ -15,15 +15,15 @@ pv_head = ax2dev(settings.axis_number);
 % set up the apropriate triggering
 % Stop triggering first, otherwise there's a good chance the first thing
 % we'll do is loose the beam as we change things.
-mbf_get_then_put([pv_head pv_names.tails.Buffer_trigger_stop], 1); % FIXME
-pause(1)
+for trigger_ind = 1:legnth(trigger_inputs)
+    trigger = trigger_inputs{trigger_ind};
+    mbf_get_then_put([pv_head pv_names.tails.triggers.(trigger).enable_status], 'Ignore');
+end
 
-% Set the Memory Trigger to one shot
-mbf_get_then_put([pv_head pv_names.tails.MEM_trigger_mode], 'One Shot');
-% Set the memory Trigger to Soft
-mbf_get_then_put([pv_head pv_names.tails.MEM_trigger_select], 'Soft');
-% setting up the sequencer to trigger off the memory trigger
-mbf_get_then_put([pv_head pv_names.tails.Sequencer_trigger_select], 'DDR trigger') ; % FIXME
+% Set the trigger to one shot
+mbf_get_then_put([pv_head pv_names.tails.triggers.mode], 'One Shot');
+% Set the triggering to Soft only
+lcaPut([pv_head pv_names.tails.triggers.SOFT.enable_status], 'Enable')
 
 %% Set up banks
 % bunch output (0=off 1=FIR 2=NCO 3 =NCO+FIR 4=sweep 5=sweep+FIR 6=sweep+NCO 7=sweep+NCO+FIR)
@@ -60,16 +60,16 @@ mbf_get_then_put([pv_head pv_names.tails.Super_sequencer_count], harmonic_number
 
 
 %% Set up data capture
-% Set the input source of the memory to IQ
-mbf_get_then_put([pv_head pv_names.tails.MEM_input], 'IQ');
-% set the IQ mode to mean
-mbf_get_then_put([pv_head pv_names.tails.MEM_IQ_mode], 'Mean');
-% Set the stop mode of the IQ capture to auto stop
-mbf_get_then_put([pv_head pv_names.tails.MEM_autostop_setting], 'Auto-stop');
 % Set the detector input to FIR
-mbf_get_then_put([pv_head pv_names.tails.Detector1.input], settings.det_input); %FIXME
-% Set the bunch mode to all bunches
-mbf_get_then_put([pv_head pv_names.tails.Detector1.mode],'All Bunches'); %FIXME
-% Set detector to fixed gain, autogain does not work with memory IQ
-mbf_get_then_put([pv_head pv_names.tails.Detector1.autogain_state],'Fixed Gain');
+mbf_get_then_put([pv_head pv_names.tails.Detector.source]);
+% Enable only detector 0
+for n_det = 0:3
+    l_det = num2str(n_det);
+    mbf_get_then_put([pv_head  pv_names.tails.Detector.(l_det).enable], 'Disabled');
+end
+lcaPut([pv_head  pv_names.tails.Detector.(0).enable], 'Enabled');
+% Set the bunch mode to all bunches on detector 0
+mbf_get_then_put([pv_head  pv_names.tails.Detector.(0).bunch_selection], ones(936,1));
+
+
 
