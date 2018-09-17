@@ -8,7 +8,7 @@ function [poly_data, frequency_shifts] = mbf_growdamp_analysis(exp_data)
 %
 % Example: [poly_data, frequency_shifts] = tmbf_growdamp_analysis(exp_data)
 
-[~, harmonic_number, ~] = mbf_system_config;
+[~, harmonic_number, ~, ~] = mbf_system_config;
 % Sometimes there is a problem with data transfer. By truncating the data
 % length to a multiple of the harmonic number the analysis can proceed.
 exp_data.data = exp_data.data(1:end - rem(length(exp_data.data), harmonic_number));

@@ -8,7 +8,7 @@ function mbf_growdamp_plot_summary(poly_data, frequency_shifts)
 % Example: mbf_growdamp_plot_summary(growdamp, poly_data, frequency_shifts)
 
 % Getting the desired system setup parameters.
-[~, harmonic_number, ~] = mbf_system_config;
+[~, harmonic_number, ~, ~] = mbf_system_config;
 
 x_plt_axis = (0:harmonic_number-1);
 % x_plt_axis = (0:harmonic_number-1) - harmonic_number/2;

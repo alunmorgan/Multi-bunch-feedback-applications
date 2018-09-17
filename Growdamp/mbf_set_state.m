@@ -13,7 +13,7 @@ function mbf_set_state(ax, state, tune, bank, gain, duration, dwell, capture)
 %                       keep the data or not
 %
 % Example: mbf_set_state(ax, state, tune, bank, gain, duration, dwell, capture)
-[~, ~, pv_names] = mbf_system_config;
+[~, ~, pv_names, ~] = mbf_system_config;
 
 Sequencer = pv_names.tails.Sequencer;
 pv_head = [ax2dev(ax), Sequencer.Base, num2str(state)];

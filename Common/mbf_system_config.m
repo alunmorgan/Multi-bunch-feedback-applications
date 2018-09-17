@@ -45,6 +45,7 @@ pv_names.tails.Sequencer.start_frequency = ':START_FREQ_S';
 pv_names.tails.Sequencer.count = ':COUNT_S';
 pv_names.tails.Sequencer.dwell = ':DWELL_S';
 pv_names.tails.Sequencer.gain = ':GAIN_S';
+pv_names.tails.Sequencer.enable = ':ENABLE_S';
 pv_names.tails.Sequencer.step_frequency = ':STEP_FREQ_S';
 pv_names.tails.Sequencer.holdoff = ':HOLDOFF_S';
 pv_names.tails.Sequencer.bank_select = ':BANK_S';
@@ -61,7 +62,7 @@ pv_names.tails.Bunch_bank.FIR_select = ':FIRWF_S';
 % applies to all
 pv_names.tails.Detector.source = ':DET:SELECT_S';
 pv_names.tails.Detector.fill_waveforms = ':DET:FILL_WAVEFORMS_S';
-pv_names.tails.Detector.fir_delay = ':DET:FIR_DELAY_S_S';
+pv_names.tails.Detector.fir_delay = ':DET:FIR_DELAY_S';
 for n_det = 0:3
     l_det = ['det',num2str(n_det)];
     n_det_label = num2str(n_det);

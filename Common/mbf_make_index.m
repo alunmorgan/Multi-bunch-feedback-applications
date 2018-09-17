@@ -1,6 +1,6 @@
 function mbf_make_index(app, ax)
 
-[root_string, ~, ~] = mbf_system_config;
+[root_string, ~, ~, ~] = mbf_system_config;
 
 if ~strcmp(app, 'Growdamp') && ~strcmp(app, 'Bunch_motion') ...
         && ~strcmp(app, 'Modescan') && ~strcmp(app, 'Spectrum') ...

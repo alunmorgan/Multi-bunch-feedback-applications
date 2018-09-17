@@ -7,7 +7,7 @@ function mbf_restore_all
 %
 % Example: mbf_restore_all_except_triggers
 
-[root_string, ~] = mbf_system_config;
+[root_string, ~, ~, ~] = mbf_system_config;
 root_string = root_string{1};
 
 [pv_files, file_dir] = dir_list_gen(fullfile(root_string, 'captured_config'), 'mat');
