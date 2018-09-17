@@ -12,7 +12,7 @@ settings = mbf_growdamp_config(mbf_axis);
 % Generate the base PV name.
 pv_head = ax2dev(settings.axis_number);
 %% Set up triggering
-% set up the apropriate triggering
+% set up the appropriate triggering
 % Stop triggering first, otherwise there's a good chance the first thing
 % we'll do is loose the beam as we change things.
 for trigger_ind = 1:legnth(trigger_inputs)
@@ -23,7 +23,7 @@ end
 % Set the trigger to one shot
 mbf_get_then_put([pv_head pv_names.tails.triggers.mode], 'One Shot');
 % Set the triggering to Soft only
-lcaPut([pv_head pv_names.tails.triggers.SOFT.enable_status], 'Enable')
+lcaPut([pv_head pv_names.tails.triggers.('SOFT').enable_status], 'Enable')
 
 %% Set up banks
 % bunch output (0=off 1=FIR 2=NCO 3 =NCO+FIR 4=sweep 5=sweep+FIR 6=sweep+NCO 7=sweep+NCO+FIR)
@@ -35,10 +35,6 @@ mbf_set_bank(settings.axis_number, 2, 1) %FIR
 
 % bunch bank 0 (the resting condition)
 mbf_set_bank(settings.axis_number, 0, 1) %FIR
-
-% bank0=lcaGet([pv_head ':BUN:0:OUTWF_S']);
-% bank0(1)=2; 
-% mbf_get_then_put([pv_head ':BUN:0:OUTWF_S'], bank0);
 
 %% Set up states
 % state 4
