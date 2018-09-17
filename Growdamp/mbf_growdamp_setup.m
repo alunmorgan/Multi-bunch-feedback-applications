@@ -10,7 +10,7 @@ function mbf_growdamp_setup(mbf_axis, tune)
 [~, harmonic_number, pv_names, trigger_inputs] = mbf_system_config;
 settings = mbf_growdamp_config(mbf_axis);
 % Generate the base PV name.
-pv_head = ax2dev(settings.axis_number);
+pv_head = pv_names.hardware_names.(mbf_axis);
 %% Set up triggering
 % set up the appropriate triggering
 % Stop triggering first, otherwise there's a good chance the first thing
@@ -28,23 +28,23 @@ lcaPut([pv_head pv_names.tails.triggers.('SOFT').enable_status], 'Enable')
 %% Set up banks
 % bunch output (0=off 1=FIR 2=NCO 3 =NCO+FIR 4=sweep 5=sweep+FIR 6=sweep+NCO 7=sweep+NCO+FIR)
 % bunch bank 1 (the excitation)
-mbf_set_bank(settings.axis_number, 1, 4) %Sweep
+mbf_set_bank(mbf_axis, 1, 4) %Sweep
 
 % bunch bank 2 (the feedback)
-mbf_set_bank(settings.axis_number, 2, 1) %FIR
+mbf_set_bank(mbf_axis, 2, 1) %FIR
 
 % bunch bank 0 (the resting condition)
-mbf_set_bank(settings.axis_number, 0, 1) %FIR
+mbf_set_bank(mbf_axis, 0, 1) %FIR
 
 %% Set up states
 % state 4
- mbf_set_state(settings.axis_number, 4,  tune, 1, [num2str(settings.ex_level),'dB'], settings.durations(1), settings.dwell, 'Capture') %excitation
+ mbf_set_state(mbf_axis, 4,  tune, 1, [num2str(settings.ex_level),'dB'], settings.durations(1), settings.dwell, 'Capture') %excitation
  % state 3
- mbf_set_state(settings.axis_number, 3, tune, 1, 'Off', settings.durations(2), settings.dwell, 'Capture') %passive damping
+ mbf_set_state(mbf_axis, 3, tune, 1, 'Off', settings.durations(2), settings.dwell, 'Capture') %passive damping
  % state 2
- mbf_set_state(settings.axis_number, 2, tune, 2, 'Off', settings.durations(3), settings.dwell, 'Capture') %active damping
+ mbf_set_state(mbf_axis, 2, tune, 2, 'Off', settings.durations(3), settings.dwell, 'Capture') %active damping
  % state 1
- mbf_set_state(settings.axis_number, 1, tune, 2, 'Off', settings.durations(4), settings.dwell, 'Discard') %Quiecent
+ mbf_set_state(mbf_axis, 1, tune, 2, 'Off', settings.durations(4), settings.dwell, 'Discard') %Quiecent
 
 % start state
 mbf_get_then_put([pv_head pv_names.tails.Sequencer_start_state], 4);

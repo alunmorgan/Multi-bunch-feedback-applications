@@ -13,13 +13,13 @@ if ~strcmpi(mbf_axis, 'x')&& ~strcmpi(mbf_axis, 'y') && ~strcmpi(mbf_axis, 's')
 end %if
 [root_string, ~, pv_names, ~] = mbf_system_config;
 root_string = root_string{1};
-settings = mbf_growdamp_config(mbf_axis);
+% settings = mbf_growdamp_config(mbf_axis);
 % Generate the base PV name.
-pv_head = ax2dev(settings.axis_number);
+pv_head = pv_names.hardware_names.(mbf_axis);
 % getting general environment data.
 growdamp = machine_environment;
 % Add the axis label to the data structure.
-growdamp.ax_label = settings.axis_label;
+growdamp.ax_label = mbf_axis;
 % construct name and add it to the structure
 growdamp.base_name = ['Growdamp_' growdamp.ax_label '_axis'];
 
