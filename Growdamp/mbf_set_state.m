@@ -28,3 +28,4 @@ mbf_get_then_put([pv_head, Sequencer.capture_state], capture);
 mbf_get_then_put([pv_head, Sequencer.windowing_state], 'Disabled');
 mbf_get_then_put([pv_head, Sequencer.gain], gain);
 mbf_get_then_put([pv_head, Sequencer.blanking_state], 'Off');
+mbf_get_then_put([pv_head, Sequencer.enable], 'On');
