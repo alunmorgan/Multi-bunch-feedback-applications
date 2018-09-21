@@ -65,7 +65,7 @@ for n_det = 0:3
 end
 lcaPut([pv_head  pv_names.tails.Detector.('det0').enable], 'Enabled');
 % Set the bunch mode to all bunches on detector 0
-mbf_get_then_put([pv_head  pv_names.tails.Detector.('det0').bunch_selection], ones(936,1));
+mbf_get_then_put([pv_head  pv_names.tails.Detector.('det0').bunch_selection], ones(936,1)');
 
 
 
