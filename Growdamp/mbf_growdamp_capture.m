@@ -1,12 +1,16 @@
-function varargout = mbf_growdamp_capture(mbf_axis, tune)
-% wrapper function to call growdamp, gather data on the environment
-% and to save the resultant data.
+function varargout = mbf_growdamp_capture(mbf_axis)
+% Gathers data on the machine environment.
+% Runs a growdamp experiment on an already setup system.
+% Saves the resultant data.
 %
 %   Args:
 %       mbf_axis (str): Selects which MBF axis to work on (x, y, s).
-%       tune (float): Usually the fractional tune of the machine.
+%   Returns:
+%       growdamp (struct): data structure containing the experimental
+%                          results and the machine conditions. 
+%                          [optional output]
 %
-% example growdamp = mbf_growdamp_capture('x', 0.17)
+% example growdamp = mbf_growdamp_capture('x')
 
 if ~strcmpi(mbf_axis, 'x')&& ~strcmpi(mbf_axis, 'y') && ~strcmpi(mbf_axis, 's')
     error('mbf_growdamp_capture: Incorrect value axis given (should be x, y or s)');

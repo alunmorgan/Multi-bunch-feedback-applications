@@ -2,9 +2,16 @@ function [poly_data, frequency_shifts] = mbf_growdamp_analysis(exp_data)
 % takes the data from mbf growdamp capture and fits it with a series of
 % linear fits to get the damping times for each mode.
 %
-% Args:
+%   Args:
 %       exp_data (structure): Contains the systems setup and the data
-%                             captured
+%                             captured.
+%   Returns:
+%       poly_data (3 by 3 matrix): axis 1 is coupling mode.
+%                                  axis 2 is expermental state,
+%                                  excitation, natural damping, active damping). 
+%                                  axis 3 is damping time, offset and 
+%                                  fractional error.
+%       frequency_shifts (list of floats): The frequency shift of each mode.
 %
 % Example: [poly_data, frequency_shifts] = tmbf_growdamp_analysis(exp_data)
 
@@ -67,7 +74,7 @@ parfor nq = 1:n_modes
     f2 = find(movmean(abs(pd_data), 5) <50, 1, 'first');
     if isempty(f2)
         f2 = length(x2);
-    end
+    end %if
     pd_data = pd_data(1:f2);
     x2 = x2(1:f2);
     if length(x2) < 2
@@ -89,7 +96,7 @@ parfor nq = 1:n_modes
     f3 = find(movmean(abs(ad_data), 5) <50, 1, 'first');
     if isempty(f3)
         f3 = length(x3);
-    end
+    end %if
     ad_data = ad_data(1:f3);
     x3 = x3(1:f3);
     if length(x3) < 2
@@ -99,9 +106,7 @@ parfor nq = 1:n_modes
         s3 = polyfit(x3,log(abs(ad_data)),1);
         c3 = polyval(s3,x3);
         delta3 = mean(abs(c3 - log(abs(ad_data)))./c3);
-    end %if
-    %     clear tmp_data
-    
+    end %if  
     % Each point is dwell time turns long so the
     % damping time needs to be adjusted accordingly.
     s1(1) = s1(1) ./ growth_dwell;
@@ -115,17 +120,10 @@ parfor nq = 1:n_modes
     delta2_acum(nq) = delta2;
     delta3_acum(nq) = delta3;
     p2_acum(nq) = p2(1);
-    %     % Output data structure.
-    %     % axis 1 is mode, axis 2 is expermental state (excitation, natural
-    %     % damping, active damping). axis 3 is damping time, offset and fractional error.
-    %     poly_data(nq,1,1:2) = s1;
-    %     poly_data(nq,2,1:2) = s2;
-    %     poly_data(nq,3,1:2) = s3;
-    %     poly_data(nq,1,3) = delta1;
-    %     poly_data(nq,2,3) = delta2;
-    %     poly_data(nq,3,3) = delta3;
-    %     frequency_shifts(nq) = p2(1);
-end
+end %parfor
+% Output data structure.
+% axis 1 is mode, axis 2 is expermental state (excitation, natural
+% damping, active damping). axis 3 is damping time, offset and fractional error.
 poly_data(:,1,1:2) = s1_acum;
 poly_data(:,2,1:2) = s2_acum;
 poly_data(:,3,1:2) = s3_acum;
