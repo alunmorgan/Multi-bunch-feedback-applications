@@ -1,4 +1,4 @@
-function mbf_set_state(ax, state, tune, bank, gain, duration, dwell, capture)
+function mbf_set_state(ax, state, tune, bank, gain, enable, duration, dwell, capture)
 % Setup an individual state in the super sequencer.
 %
 % Args:
@@ -28,4 +28,4 @@ mbf_get_then_put([pv_head, Sequencer.capture_state], capture);
 mbf_get_then_put([pv_head, Sequencer.windowing_state], 'Disabled');
 mbf_get_then_put([pv_head, Sequencer.gain], gain);
 mbf_get_then_put([pv_head, Sequencer.blanking_state], 'Off');
-mbf_get_then_put([pv_head, Sequencer.enable], 'On');
+mbf_get_then_put([pv_head, Sequencer.enable], enable);
