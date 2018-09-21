@@ -69,7 +69,7 @@ mbf_get_then_put([pv_head pv_names.tails.Super_sequencer_count], harmonic_number
 
 %% Set up data capture
 % Set the detector input to FIR
-mbf_get_then_put([pv_head pv_names.tails.Detector.source]);
+mbf_get_then_put([pv_head pv_names.tails.Detector.source], 'FIR');
 % Enable only detector 0
 for n_det = 0:3
     l_det = ['det',num2str(n_det)];
