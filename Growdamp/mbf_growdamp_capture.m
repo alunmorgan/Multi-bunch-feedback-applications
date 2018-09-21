@@ -27,14 +27,9 @@ growdamp.ax_label = mbf_axis;
 % construct name and add it to the structure
 growdamp.base_name = ['Growdamp_' growdamp.ax_label '_axis'];
 
-% set tune, should only be required on excitation (state 4), but do it on
-% all just in case someone makes a big jump!
-%  Also getting settings for growth, natural damping, and active damping.
+% Getting settings for growth, natural damping, and active damping.
 exp_state_names = {'spacer', 'act', 'nat', 'growth'};
-for n=2:4
-    mbf_get_then_put([pv_head, ...
-        pv_names.tails.Sequencer.Base, num2str(n),...
-        pv_names.tails.Sequencer.start_frequency], tune);
+for n=1:4
     % Getting the number of turns
     growdamp.([exp_state_names{n}, '_turns']) = lcaGet([pv_head,...
         pv_names.tails.Sequencer.Base, num2str(n), ...
@@ -47,16 +42,21 @@ for n=2:4
     growdamp.([exp_state_names{n}, '_gain']) = lcaGet([pv_head,... 
         pv_names.tails.Sequencer.Base, num2str(n), ...
         pv_names.tails.Sequencer.gain]);
-end
+end %for
 
 % Trigger the measurement
-% NEED TO SELECT THE CORRECT CHANNEL.
-% LENGTH 467?
-lcaPut([pv_head(1:end-2), pv_names.tails.triggers.arm], 1)
-% readout under a lock
-growdamp.data = mbf_read_det(pv_head, 467 ,'channel', 0, 'lock', 60);
+if strcmp(mbf_axis, 'x') || strcmp(mbf_axis, 's')
+    chan = 0;
+elseif strcmp(mbf_axis, 'y')
+    chan = 1;
+end %if
+%Arm
+lcaPut([pv_head, pv_names.tails.triggers.arm], 1)
 % Trigger
 lcaPut([pv_head(1:end-2), pv_names.tails.triggers.soft], 1)
+% readout under a lock
+[growdamp.data, growdamp.data_freq, ~] = mbf_read_det(pv_head(1:end-2),...
+                                                   'axis', chan, 'lock', 60);
 
 %% saving the data to a file
 save_to_archive(root_string, growdamp)
@@ -64,4 +64,3 @@ save_to_archive(root_string, growdamp)
 if nargout == 1
     varargout{1} = growdamp;
 end %if
-
