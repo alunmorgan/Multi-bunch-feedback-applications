@@ -23,7 +23,7 @@ figure
 ax1 = subplot(3,1,1:2);
 plot(x_plt_axis, passive_data)
 hold on
-plot(x_plt_axis, circshift(active_data, harmonic_number/2))
+plot(x_plt_axis, circshift(active_data, [harmonic_number/2, 0]))
 plot(x_plt_axis, zeros(length(x_plt_axis),1), 'r:')
 hold off
 xlim([x_plt_axis(1) x_plt_axis(end)])
@@ -33,7 +33,7 @@ ylabel('Damping rates (1/turns)')
 legend('Passive', 'Active')
 
 ax2 = subplot(3,1,3);
-plot(x_plt_axis, circshift(f_shifts, harmonic_number/2))
+plot(x_plt_axis, circshift(f_shifts, [harmonic_number/2, 0]))
 xlim([x_plt_axis(1) x_plt_axis(end)])
 title('Tune shift from excitation')
 xlabel('Mode')
