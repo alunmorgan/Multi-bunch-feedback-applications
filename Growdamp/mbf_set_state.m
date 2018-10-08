@@ -25,7 +25,7 @@ mbf_get_then_put([pv_head, Sequencer.holdoff], 0);
 mbf_get_then_put([pv_head, Sequencer.dwell], dwell);
 mbf_get_then_put([pv_head, Sequencer.bank_select], ['Bank ',num2str(bank)]);
 mbf_get_then_put([pv_head, Sequencer.capture_state], capture);
-mbf_get_then_put([pv_head, Sequencer.windowing_state], 'Disabled');
+mbf_get_then_put([pv_head, Sequencer.windowing_state], 'Windowed');
 mbf_get_then_put([pv_head, Sequencer.gain], gain);
 mbf_get_then_put([pv_head, Sequencer.blanking_state], 'Off');
 mbf_get_then_put([pv_head, Sequencer.enable], enable);
