@@ -17,7 +17,6 @@ if ~strcmpi(mbf_axis, 'x')&& ~strcmpi(mbf_axis, 'y') && ~strcmpi(mbf_axis, 's')
 end %if
 [root_string, ~, pv_names, ~] = mbf_system_config;
 root_string = root_string{1};
-% settings = mbf_growdamp_config(mbf_axis);
 % Generate the base PV name.
 pv_head = pv_names.hardware_names.(mbf_axis);
 % getting general environment data.
@@ -53,10 +52,15 @@ end %if
 %Arm
 lcaPut([pv_head, pv_names.tails.triggers.arm], 1)
 % Trigger
-lcaPut([pv_head(1:end-2), pv_names.tails.triggers.soft], 1)
-% readout under a lock
-[growdamp.data, growdamp.data_freq, ~] = mbf_read_det(pv_head(1:end-2),...
+if strcmpi(mbf_axis, 's')
+    lcaPut([pv_head(1:end-3), pv_names.tails.triggers.soft], 1)
+    [growdamp.data, growdamp.data_freq, ~] = mbf_read_det(pv_head(1:end-3),...
+                                                   'axis', chan, 'lock', 180);
+else
+    lcaPut([pv_head(1:end-2), pv_names.tails.triggers.soft], 1)
+    [growdamp.data, growdamp.data_freq, ~] = mbf_read_det(pv_head(1:end-2),...
                                                    'axis', chan, 'lock', 60);
+end
 
 %% saving the data to a file
 save_to_archive(root_string, growdamp)
