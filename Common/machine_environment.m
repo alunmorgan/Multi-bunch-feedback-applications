@@ -7,13 +7,13 @@ function exp_data = machine_environment(exp_data)
 % Example: exp_data = machine_environment(exp_data)
 
 if nargin == 0
-    exp_data = struct('RF',[]);
+    exp_data = struct('RF', []);
 end
 
 % timestamp
 exp_data.time = clock;
 
-%% General machine paramerters
+%% General machine parameters
 % Ring mode
 exp_data.ringmode = lcaGet('SR-CS-RING-01:MODE');
 % Machine current
@@ -28,10 +28,10 @@ try
     exp_data.cavity1_voltage = lcaGet('SR-RF-LLRF-10:CAVVOLTAGE');
 catch
 end
-try
-    exp_data.cavity2_voltage = lcaGet('SR-RF-LLRF-20:CAVVOLTAGE');
-catch
-end
+% try
+%     exp_data.cavity2_voltage = lcaGet('SR-RF-LLRF-20:CAVVOLTAGE');
+% catch
+% end
 try
     exp_data.cavity3_voltage = lcaGet('SR-RF-LLRF-30:CAVVOLTAGE');
 catch
@@ -69,8 +69,8 @@ exp_data.orbit_feedback_status = lcaGet('SR01A-CS-FOFB-01:RUN');
 exp_data.tune_feedback_status = lcaGet('SR-CS-TFB-01:STATUS');
 
 % Emittance
-exp_data.emittance(1) = lcaGet('SR-DI-EMIT-01:HEMIT_MEAN');
-exp_data.emittance(2) = lcaGet('SR-DI-EMIT-01:VEMIT_MEAN');
+exp_data.emittance_h = lcaGet('SR-DI-EMIT-01:HEMIT_MEAN');
+exp_data.emittance_v = lcaGet('SR-DI-EMIT-01:VEMIT_MEAN');
 exp_data.coupling = lcaGet('SR-DI-EMIT-01:COUPLING_MEAN');
 exp_data.espread = lcaGet('SR-DI-EMIT-01:ESPREAD_MEAN');
 
