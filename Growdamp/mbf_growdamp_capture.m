@@ -26,6 +26,9 @@ growdamp.ax_label = mbf_axis;
 % construct name and add it to the structure
 growdamp.base_name = ['Growdamp_' growdamp.ax_label '_axis'];
 
+%Disarm, so that the current settings will be picked up upon arming.
+lcaPut([pv_head, pv_names.tails.triggers.disarm], 1)
+
 % Getting settings for growth, natural damping, and active damping.
 exp_state_names = {'spacer', 'act', 'nat', 'growth'};
 for n=1:4
