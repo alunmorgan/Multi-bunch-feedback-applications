@@ -70,7 +70,7 @@ else
     passive_override = NaN;
     active_override = NaN;
 end %if
-for nq = 1:n_modes %FIXME add PARFOR back in
+parfor nq = 1:n_modes
     %% split up the data into growth, passive damping and active damping.
     data_mode = data(nq,:);
     % growth
@@ -95,12 +95,8 @@ for nq = 1:n_modes %FIXME add PARFOR back in
         delta2 = NaN;
         p2 = NaN;
     else
-        x_ax = 1:length(pd_data);
-        s2 = polyfit(x_ax,log(abs(pd_data)),1);
-        c2 = polyval(s2,x_ax);
-        delta2 = mean(abs(c2 - log(abs(pd_data)))./c2);
-        temp = unwrap(angle(pd_data)) / (2*pi);
-        p2 = polyfit(x_ax,temp,1);
+        [s2, delta2, p2] = mbf_growdamp_basic_fitting(pd_data);
+%         [s2, delta2, p2] = mbf_growdamp_advanced_fitting(pd_data, length_averaging);
     end %if
     
     %active damping
@@ -117,10 +113,8 @@ for nq = 1:n_modes %FIXME add PARFOR back in
         s3 = [NaN,NaN];
         delta3 = NaN;
     else
-        x3_ax = 1:length(ad_data);
-        s3 = polyfit(x3_ax,log(abs(ad_data)),1);
-        c3 = polyval(s3,x3_ax);
-        delta3 = mean(abs(c3 - log(abs(ad_data)))./c3);
+        [s3, delta3, ~] = mbf_growdamp_basic_fitting(ad_data);
+%         [s3, delta3, ~] = mbf_growdamp_advanced_fitting(ad_data, length_averaging);
     end %if
     % Each point is dwell time turns long so the
     % damping time needs to be adjusted accordingly.
