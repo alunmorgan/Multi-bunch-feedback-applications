@@ -16,8 +16,8 @@ function mbf_growdamp_plot_summary(poly_data, frequency_shifts)
 harmonic_number = length(frequency_shifts);
 
 x_plt_axis = (0:harmonic_number-1) - harmonic_number/2;
-passive_data = squeeze(poly_data(:,2,1));
-active_data = squeeze(poly_data(:,3,1));
+passive_data = -squeeze(poly_data(:,2,1));
+active_data = -squeeze(poly_data(:,3,1));
 passive_errors = NaN(length(passive_data),1);
 passive_errors(isnan(passive_data)) = 0;
 active_errors = NaN(length(active_data),1);
