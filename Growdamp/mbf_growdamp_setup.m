@@ -25,6 +25,9 @@ mbf_get_then_put([pv_head pv_names.tails.triggers.mode], 'One Shot');
 % Set the triggering to Soft only
 lcaPut([pv_head pv_names.tails.triggers.('SOFT').enable_status], 'Enable')
 
+% Delay to make sure the currently set up sweeps have finished.
+pause(1) % TODO look for system to be in bank 0.
+
 %% Set up banks
 % bunch output (0=off 1=FIR 2=NCO 3 =NCO+FIR 4=sweep 5=sweep+FIR 6=sweep+NCO 7=sweep+NCO+FIR)
 % bunch bank 1 (the excitation)
