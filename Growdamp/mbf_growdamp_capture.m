@@ -27,7 +27,7 @@ growdamp.ax_label = mbf_axis;
 growdamp.base_name = ['Growdamp_' growdamp.ax_label '_axis'];
 
 %Disarm, so that the current settings will be picked up upon arming.
-lcaPut([pv_head, pv_names.tails.triggers.disarm], 1)
+lcaPut([pv_head, pv_names.tails.triggers.SEQ.disarm], 1)
 
 % Getting settings for growth, natural damping, and active damping.
 exp_state_names = {'spacer', 'act', 'nat', 'growth'};
@@ -53,15 +53,15 @@ elseif strcmp(mbf_axis, 'y')
     chan = 1;
 end %if
 %Arm
-lcaPut([pv_head, pv_names.tails.triggers.arm], 1)
+lcaPut([pv_head, pv_names.tails.triggers.SEQ.arm], 1)
 % Trigger
 if strcmpi(mbf_axis, 's')
-    lcaPut([pv_head(1:end-3), pv_names.tails.triggers.soft], 1)
-    [growdamp.data, growdamp.data_freq, ~] = mbf_read_det(pv_head(1:end-3),...
+    lcaPut([pv_names.hardware_names.L, pv_names.tails.triggers.soft], 1)
+    [growdamp.data, growdamp.data_freq, ~] = mbf_read_det(pv_names.hardware_names.L,...
                                                    'axis', chan, 'lock', 180);
 else
-    lcaPut([pv_head(1:end-2), pv_names.tails.triggers.soft], 1)
-    [growdamp.data, growdamp.data_freq, ~] = mbf_read_det(pv_head(1:end-2),...
+    lcaPut([pv_names.hardware_names.T, pv_names.tails.triggers.soft], 1)
+    [growdamp.data, growdamp.data_freq, ~] = mbf_read_det(pv_names.hardware_names.T,...
                                                    'axis', chan, 'lock', 60);
 end
 

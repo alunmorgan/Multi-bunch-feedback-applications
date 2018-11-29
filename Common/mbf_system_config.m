@@ -28,10 +28,10 @@ for trigger_ind = 1:length(trigger_inputs)
     pv_names.tails.triggers.(trigger).enable_status = [':TRG:SEQ:',trigger,':EN_S'];
     pv_names.tails.triggers.(trigger).blanking_status = [':TRG:SEQ:',trigger,':BL_S'];
 end
-pv_names.tails.triggers.arm = ':TRG:SEQ:ARM_S.PROC';
-pv_names.tails.triggers.disarm = ':TRG:SEQ:DISARM_S.PROC';
-pv_names.tails.triggers.mode = ':TRG:SEQ:MODE_S';
-pv_names.tails.triggers.delay = ':TRG:SEQ:DELAY_S';
+pv_names.tails.triggers.SEQ.arm = ':TRG:SEQ:ARM_S.PROC';
+pv_names.tails.triggers.SEQ.disarm = ':TRG:SEQ:DISARM_S.PROC';
+pv_names.tails.triggers.SEQ.mode = ':TRG:SEQ:MODE_S';
+pv_names.tails.triggers.SEQ.delay = ':TRG:SEQ:DELAY_S';
 % shared with other axis
 pv_names.tails.trigger.mem_arm = ':TRG:MEM:ARM_S.PROC'; % NEED TO TAKE OFF THE X|Y BEFORE USE.
 pv_names.tails.trigger.mem_disarm = ':TRG:MEM:DISARM_S.PROC'; % NEED TO TAKE OFF THE X|Y BEFORE USE.

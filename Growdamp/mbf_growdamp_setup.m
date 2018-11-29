@@ -21,7 +21,7 @@ for trigger_ind = 1:length(trigger_inputs)
 end
 
 % Set the trigger to one shot
-mbf_get_then_put([pv_head pv_names.tails.triggers.mode], 'One Shot');
+mbf_get_then_put([pv_head pv_names.tails.triggers.SEQ.mode], 'One Shot');
 % Set the triggering to Soft only
 lcaPut([pv_head pv_names.tails.triggers.('SOFT').enable_status], 'Enable')
 
