@@ -35,13 +35,19 @@ pv_names.tails.triggers.SEQ.disarm = ':TRG:SEQ:DISARM_S.PROC';
 pv_names.tails.triggers.SEQ.mode = ':TRG:SEQ:MODE_S';
 pv_names.tails.triggers.SEQ.delay = ':TRG:SEQ:DELAY_S';
 % shared with other axis
-pv_names.tails.trigger.mem_arm = ':TRG:MEM:ARM_S.PROC'; % NEED TO TAKE OFF THE X|Y BEFORE USE.
-pv_names.tails.trigger.mem_disarm = ':TRG:MEM:DISARM_S.PROC'; % NEED TO TAKE OFF THE X|Y BEFORE USE.
+pv_names.tails.triggers.MEM.arm = ':TRG:MEM:ARM_S.PROC'; % NEED TO TAKE OFF THE X|Y BEFORE USE.
+pv_names.tails.triggers.MEM.disarm = ':TRG:MEM:DISARM_S.PROC'; % NEED TO TAKE OFF THE X|Y BEFORE USE.
+pv_names.tails.triggers.MEM.mode = ':TRG:MEM:MODE_S'; % NEED TO TAKE OFF THE X|Y BEFORE USE.
+pv_names.tails.triggers.MEM.delay = ':TRG:MEM:DELAY_S'; % NEED TO TAKE OFF THE X|Y BEFORE USE.
 pv_names.tails.triggers.soft = ':TRG:SOFT_S.PROC';  % NEED TO TAKE OFF THE X|Y BEFORE USE.
 pv_names.tails.triggers.soft_settings = ':TRG:SOFT_S.SCAN';  % NEED TO TAKE OFF THE X|Y BEFORE USE.
 pv_names.tails.triggers.shared = ':TRG:MODE_S'; % NEED TO TAKE OFF THE X|Y BEFORE USE.
 pv_names.tails.triggers.blanking_length = ':TRG:BLANKING_S'; % NEED TO TAKE OFF THE X|Y BEFORE USE.
-
+for trigger_ind = 1:length(trigger_inputs)
+    trigger = trigger_inputs{trigger_ind};
+    pv_names.tails.triggers.MEM.(trigger).enable_status = [':TRG:MEM:',trigger,':EN_S'];
+    pv_names.tails.triggers.MEM.(trigger).blanking_status = [':TRG:MEM:',trigger,':BL_S'];
+end
 % Super Sequencer settings
 pv_names.tails.Super_sequencer_count = ':SEQ:SUPER:COUNT_S';
 
@@ -82,7 +88,7 @@ for n_det = 0:3
 end %for
 
 % Memory settings
-pv_names.tails.MEM_status = ':MEM:BUSY';% NEED TO TAKE OFF THE X|Y BEFORE USE.
+pv_names.tails.MEM.status = ':MEM:BUSY';% NEED TO TAKE OFF THE X|Y BEFORE USE.
 pv_names.tails.MEM.channel_select = ':MEM:SELECT_S';% NEED TO TAKE OFF THE X|Y BEFORE USE.
 pv_names.tails.MEM.offset = ':MEM:OFFSET_S';% NEED TO TAKE OFF THE X|Y BEFORE USE.
 pv_names.tails.MEM.runout = ':MEM:RUNOUT_S'; % NEED TO TAKE OFF THE X|Y BEFORE USE.
