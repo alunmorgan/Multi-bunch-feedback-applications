@@ -10,9 +10,11 @@ root_path = {'/dls/ops-data/Diagnostics/MBF/', ...
 harmonic_number = 936;
 
 % Base PVs of the hardware.
-pv_names.hardware_names.x = 'SR23C-DI-TMBF-01:X';
-pv_names.hardware_names.y = 'SR23C-DI-TMBF-01:Y';
-pv_names.hardware_names.s = 'SR23C-DI-LMBF-01:IQ';
+pv_names.hardware_names.T = 'SR23C-DI-TMBF-01';
+pv_names.hardware_names.L = 'SR23C-DI-LMBF-01';
+pv_names.hardware_names.x = [pv_names.hardware_names.T, ':X'];
+pv_names.hardware_names.y = [pv_names.hardware_names.T, ':Y'];
+pv_names.hardware_names.s = [pv_names.hardware_names.L, ':IQ'];
 pv_names.hardware_names.t = 'TS-DI-TMBF-01'; % test system
 
 % External trigger
