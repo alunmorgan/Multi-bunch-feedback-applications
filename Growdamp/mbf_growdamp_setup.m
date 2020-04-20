@@ -11,6 +11,13 @@ function mbf_growdamp_setup(mbf_axis, tune)
 settings = mbf_growdamp_config(mbf_axis);
 % Generate the base PV name.
 pv_head = pv_names.hardware_names.(mbf_axis);
+if strcmp(mbf_axis, 'x') || strcmp(mbf_axis, 'y')
+    pv_head_mem = pv_names.hardware_names.('T');
+elseif strcmp(mbf_axis, 's')
+    pv_head_mem = pv_names.hardware_names.('L');
+elseif strcmp(mbf_axis, 'tx') || strcmp(mbf_axis, 'ty')
+    pv_head_mem = 'TS-DI-TMBF-02';
+end %if
 %% Set up triggering
 % set up the appropriate triggering
 % Stop triggering first, otherwise there's a good chance the first thing
@@ -18,13 +25,20 @@ pv_head = pv_names.hardware_names.(mbf_axis);
 for trigger_ind = 1:length(trigger_inputs)
     trigger = trigger_inputs{trigger_ind};
     mbf_get_then_put([pv_head pv_names.tails.triggers.(trigger).enable_status], 'Ignore');
-end
-
+end %for
+for trigger_ind = 1:length(trigger_inputs)
+    trigger = trigger_inputs{trigger_ind};
+    mbf_get_then_put([pv_head_mem pv_names.tails.triggers.MEM.(trigger).enable_status], 'Ignore');
+    mbf_get_then_put([pv_head_mem pv_names.tails.triggers.MEM.(trigger).blanking_status], 'All');
+end %for
 % Set the trigger to one shot
 mbf_get_then_put([pv_head pv_names.tails.triggers.SEQ.mode], 'One Shot');
+mbf_get_then_put([pv_head_mem pv_names.tails.triggers.MEM.mode], 'One Shot');
 % Set the triggering to Soft only
 lcaPut([pv_head pv_names.tails.triggers.('SOFT').enable_status], 'Enable')
-
+lcaPut([pv_head_mem pv_names.tails.triggers.MEM.('SOFT').enable_status], 'Enable')
+%  set up the memory buffer to capture ADC data.
+mbf_get_then_put([pv_head_mem, pv_names.tails.MEM.channel_select], 'ADC0/ADC1')
 % Delay to make sure the currently set up sweeps have finished.
 pause(1) % TODO look for system to be in bank 0.
 
@@ -41,25 +55,25 @@ mbf_set_bank(mbf_axis, 0, 1) %FIR
 
 %% Set up states
 % state 4
- mbf_set_state(mbf_axis, 4,  tune, 1, ...
-               [num2str(settings.ex_level),'dB'], 'On', ...
-               settings.durations(1), ...
-               settings.dwell, 'Capture') %excitation
- % state 3
- mbf_set_state(mbf_axis, 3, tune, 1, ...
-               '-48dB', 'Off', ...
-               settings.durations(2), ...
-               settings.dwell, 'Capture') %passive damping
- % state 2
- mbf_set_state(mbf_axis, 2, tune, 2, ...
-               '-48dB', 'Off', ...
-               settings.durations(3), ...
-               settings.dwell, 'Capture') %active damping
- % state 1
- mbf_set_state(mbf_axis, 1, tune, 2, ...
-               '-48dB', 'Off', ...
-               settings.durations(4), ...
-               settings.dwell, 'Discard') %Quiecent
+mbf_set_state(mbf_axis, 4,  tune, 1, ...
+    [num2str(settings.ex_level),'dB'], 'On', ...
+    settings.durations(1), ...
+    settings.dwell, 'Capture') %excitation
+% state 3
+mbf_set_state(mbf_axis, 3, tune, 1, ...
+    '-48dB', 'Off', ...
+    settings.durations(2), ...
+    settings.dwell, 'Capture') %passive damping
+% state 2
+mbf_set_state(mbf_axis, 2, tune, 2, ...
+    '-48dB', 'Off', ...
+    settings.durations(3), ...
+    settings.dwell, 'Capture') %active damping
+% state 1
+mbf_set_state(mbf_axis, 1, tune, 2, ...
+    '-48dB', 'Off', ...
+    settings.durations(4), ...
+    settings.dwell, 'Discard') %Quiecent
 
 % start state
 mbf_get_then_put([pv_head pv_names.tails.Sequencer.start_state], 4);
@@ -77,7 +91,7 @@ mbf_get_then_put([pv_head pv_names.tails.Detector.source], 'FIR');
 for n_det = 0:3
     l_det = ['det',num2str(n_det)];
     mbf_get_then_put([pv_head  pv_names.tails.Detector.(l_det).enable], 'Disabled');
-end
+end %for
 lcaPut([pv_head  pv_names.tails.Detector.('det0').enable], 'Enabled');
 % Set the bunch mode to all bunches on detector 0
 mbf_get_then_put([pv_head  pv_names.tails.Detector.('det0').bunch_selection], ones(936,1)');

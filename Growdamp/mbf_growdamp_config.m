@@ -34,4 +34,22 @@ elseif strcmpi(mbf_axis, 's')
     settings.dwell = 480;
     settings.tune_sweep_range = [80.00220, 80.00520];
 %     settings.det_input = 'FIR';
+elseif strcmpi(mbf_axis, 'tx')
+%     settings.axis_label = 'x';
+%     settings.axis_number = 1;
+    settings.ex_level = -18; % excitation level in dB.
+    settings.tune_offset = 0; % an offset to the PLL tune
+    settings.durations = [250, 250, 250, 500]; %[excitation, passive damping, active damping,gap]
+    settings.dwell = 1;
+    settings.tune_sweep_range = [80.00500, 80.49500];
+%     settings.det_input = 'FIR';
+elseif strcmpi(mbf_axis, 'ty')
+%     settings.axis_label = 'y';
+%     settings.axis_number = 2;
+    settings.ex_level = -18; % excitation level in dB.
+    settings.tune_offset = 0; % an offset to the PLL tune
+    settings.durations = [250, 250, 250, 500]; %[excitation, passive damping, active damping,gap]
+    settings.dwell = 1;
+    settings.tune_sweep_range = [80.00500, 80.49500];
+%     settings.det_input = 'FIR';
 end %if

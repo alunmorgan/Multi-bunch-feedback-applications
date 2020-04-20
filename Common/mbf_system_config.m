@@ -15,7 +15,8 @@ pv_names.hardware_names.L = 'SR23C-DI-LMBF-01';
 pv_names.hardware_names.x = [pv_names.hardware_names.T, ':X'];
 pv_names.hardware_names.y = [pv_names.hardware_names.T, ':Y'];
 pv_names.hardware_names.s = [pv_names.hardware_names.L, ':IQ'];
-pv_names.hardware_names.t = 'TS-DI-TMBF-02'; % test system
+pv_names.hardware_names.tx = 'TS-DI-TMBF-02:X'; % test system
+pv_names.hardware_names.ty = 'TS-DI-TMBF-02:Y'; % test system
 
 % External trigger
 pv_names.Hardware_trigger = 'LI-TI-MTGEN-01:BS-DI-MODE';
@@ -71,21 +72,21 @@ pv_names.tails.Bunch_bank.Base = ':BUN:';
 pv_names.tails.Bunch_bank.Gains = ':GAINWF_S';
 pv_names.tails.Bunch_bank.Output_types = ':OUTWF_S';
 pv_names.tails.Bunch_bank.FIR_select = ':FIRWF_S';
-pv_names.tails.Bunch_bank.FIR_enable = ':FIR:ENABLE_S.PROC';
-pv_names.tails.Bunch_bank.NCO1_enable = ':NCO1:ENABLE_S.PROC';
-pv_names.tails.Bunch_bank.NCO2_enable = ':NCO2:ENABLE_S.PROC';
-pv_names.tails.Bunch_bank.SEQ_enable = ':SEQ:ENABLE_S.PROC';
-pv_names.tails.Bunch_bank.PLL_enable = ':PLL:ENABLE_S.PROC';
-pv_names.tails.Bunch_bank.FIR_disable = ':FIR:DISABLE_S.PROC';
-pv_names.tails.Bunch_bank.NCO1_disable = ':NCO1:DISABLE_S.PROC';
-pv_names.tails.Bunch_bank.NCO2_disable = ':NCO2:DISABLE_S.PROC';
-pv_names.tails.Bunch_bank.SEQ_disable = ':SEQ:DISABLE_S.PROC';
-pv_names.tails.Bunch_bank.PLL_disable = ':PLL:DISABLE_S.PROC';
-pv_names.tails.Bunch_bank.FIR_gain = ':FIR:GAIN_S';
-pv_names.tails.Bunch_bank.NCO1_gain = ':NCO1:GAIN_S';
-pv_names.tails.Bunch_bank.NCO2_gain = ':NCO2:GAIN_S';
-pv_names.tails.Bunch_bank.SEQ_gain = ':SEQ:GAIN_S';
-pv_names.tails.Bunch_bank.PLL_gain = ':PLL:GAIN_S';
+pv_names.tails.Bunch_bank.FIR_enable = ':FIR:SET_ENABLE_S';
+pv_names.tails.Bunch_bank.NCO1_enable = ':NCO1:SET_ENABLE_S';
+pv_names.tails.Bunch_bank.NCO2_enable = ':NCO2:SET_ENABLE_S';
+pv_names.tails.Bunch_bank.SEQ_enable = ':SEQ:SET_ENABLE_S';
+pv_names.tails.Bunch_bank.PLL_enable = ':PLL:SET_ENABLE_S';
+pv_names.tails.Bunch_bank.FIR_disable = ':FIR:SET_DISABLE_S';
+pv_names.tails.Bunch_bank.NCO1_disable = ':NCO1:SET_DISABLE_S';
+pv_names.tails.Bunch_bank.NCO2_disable = ':NCO2:SET_DISABLE_S';
+pv_names.tails.Bunch_bank.SEQ_disable = ':SEQ:SET_DISABLE_S';
+pv_names.tails.Bunch_bank.PLL_disable = ':PLL:SET_DISABLE_S';
+pv_names.tails.Bunch_bank.FIR_gains = ':FIR:GAIN_S';
+pv_names.tails.Bunch_bank.NCO1_gains = ':NCO1:GAIN_S';
+pv_names.tails.Bunch_bank.NCO2_gains = ':NCO2:GAIN_S';
+pv_names.tails.Bunch_bank.SEQ_gains = ':SEQ:GAIN_S';
+pv_names.tails.Bunch_bank.PLL_gains = ':PLL:GAIN_S';
 
 
 % Detector settings
