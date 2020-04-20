@@ -19,6 +19,14 @@ end %if
 root_string = root_string{1};
 % Generate the base PV name.
 pv_head = pv_names.hardware_names.(mbf_axis);
+pv_head_mem = pv_names.hardware_names.('T');
+lcaPut([pv_head_mem, pv_names.tails.triggers.MEM.disarm], 1) % TESTING CODE
+temp1 = lcaGet([pv_head_mem pv_names.tails.TRG.memory_status]);
+if strcmp(temp1, 'Idle') == 1
+    mbf_get_then_put({[pv_head_mem pv_names.tails.triggers.MEM.arm]},1);
+else
+    error('Memory is not ready please try again')
+end %if
 % getting general environment data.
 growdamp = machine_environment;
 % Add the axis label to the data structure.
@@ -44,6 +52,11 @@ for n=1:4
     growdamp.([exp_state_names{n}, '_gain']) = lcaGet([pv_head,... 
         pv_names.tails.Sequencer.Base, num2str(n), ...
         pv_names.tails.Sequencer.gain]);
+    % ADD STARTING FREQ
+    %SR23C-DI-TMBF-01:X:SEQ:4:START_FREQ_S
+%     growdamp.([exp_state_names{n}, '_gain']) = lcaGet([pv_head,... 
+%         pv_names.tails.Sequencer.Base, num2str(n), ...
+%         pv_names.tails.Sequencer.gain]);
 end %for
 
 % Trigger the measurement
@@ -64,7 +77,9 @@ else
     [growdamp.data, growdamp.data_freq, ~] = mbf_read_det(pv_names.hardware_names.T,...
                                                    'axis', chan, 'lock', 60);
 end
-
+turn_count = 1250 .* 400;
+turn_offset = 0;
+growdamp.bunch_motion = mbf_read_mem(pv_names.hardware_names.T, turn_count,'offset', turn_offset, 'channel', 0, 'lock', 60);
 %% saving the data to a file
 save_to_archive(root_string, growdamp)
 
