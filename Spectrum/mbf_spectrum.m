@@ -14,7 +14,7 @@ function data = mbf_spectrum(mbf_axis, n_turns, fold, repeat)
 % Example: mbf_spectrum('x',10000)
 
 %% Getting the desired system setup parameters.
-[root_string, harmonic_number, pv_names] = mbf_system_config;
+[root_string, harmonic_number, pv_names, trigger_inputs] = mbf_system_config;
 root_string = root_string{1};
 
 if ~exist('fold','var')
@@ -24,33 +24,53 @@ if ~exist('repeat','var')
     repeat=1;
 end
 
-if strcmpi(mbf_axis, 'x')
-    ax = 1;
-    data.axis_label = 'X axis';
-elseif strcmpi(mbf_axis, 'y')
-    ax = 2;
-    data.axis_label = 'Y axis';
-elseif strcmpi(mbf_axis, 's')
-    ax = 3;
-    data.axis_label = 'S axis';
+% Generate the base PV name.
+pv_head = pv_names.hardware_names.(mbf_axis);
+if strcmpi(mbf_axis, 's')
+    system_name = pv_names.hardware_names.L;
+else
+    system_name = pv_names.hardware_names.T;
 end %if
+% getting general environment data.
+mbf_spec = machine_environment;
+mbf_spec.axis_label = mbf_axis;
 
-mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_input],'ADC');
-mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_trigger_select],'Hardware');
-mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_external_trigger_enable_status],'Ignore');
-mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_post_mortem_trigger_enable_status],'Ignore');
-mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_ADC_trigger_enable_status],'Ignore');
-mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_sequencer_trigger_enable_status],'Enable');
-mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_system_clock_trigger_enable_status],'Ignore');
-mbf_get_then_put([ax2dev(ax) pv_names.tails.Sequencer_trigger_state],0);
-mbf_get_then_put([ax2dev(ax) pv_names.tails.DDR_trigger_mode],'One Shot');
+% Disarm the sequencer and memory triggers
+mbf_get_then_put([pv_names.hardware_names.(mbf_axis) pv_names.tails.triggers.SEQ.disarm], 1)
+mbf_get_then_put([system_name pv_names.tails.triggers.MEM.disarm], 1)
+
+for trigger_ind = 1:length(trigger_inputs)
+    trigger = trigger_inputs{trigger_ind};
+    mbf_get_then_put([pv_head pv_names.tails.triggers.MEM.(trigger).enable_status], 'Ignore');
+    mbf_get_then_put([pv_head pv_names.tails.triggers.MEM.(trigger).blanking_status], 'All');
+end %for
+% Set the trigger to one shot
+mbf_get_then_put([pv_head PVt.triggers.MEM.mode], 'One Shot');
+% Set the triggering to External only
+lcaPut([pv_head pv_head pv_names.triggers.MEM.('EXT').enable_status], 'Enable')
+
+%  set up the memory buffer to capture ADC data.
+mbf_get_then_put([pv_head, pv_head pv_names.MEM.channel_select], 'ADC0/ADC1')
+
 mode_data = zeros(n_turns/fold, harmonic_number);
 bunch_data = zeros(n_turns/2, harmonic_number);
 
+if strcmp(mbf_axis, 'x') || strcmp(mbf_axis, 's')
+    chan = 0;
+elseif strcmp(mbf_axis, 'y')
+    chan = 1;
+end %if
+
 for k=1:repeat
-    lcaPut([ax2dev(ax) pv_names.tails.DDR_arm],1);
-    pause(2)
-    raw_data = tmbf_read(ax2dev(ax), n_turns);
+    
+    lcaPut([ax2dev(ax) pv_names.tails.MEM_arm],1);
+    if strcmpi(mbf_axis, 's')
+        lcaPut([pv_names.hardware_names.L, pv_names.tails.triggers.soft], 1)
+        raw_data = mbf_read_mem(pv_names.hardware_names.L, n_turns,'channel', chan, 'lock', 60);
+    else
+        lcaPut([pv_names.hardware_names.T, pv_names.tails.triggers.soft], 1)
+        raw_data = mbf_read_mem(pv_names.hardware_names.T, n_turns,'channel', chan, 'lock', 60);
+    end %if
     data_length=length(raw_data);
     
     % remove everything that is constant each revolotion
@@ -75,7 +95,7 @@ data.bunch_tune = sum(bunch_data.^2,2);
 data.tune_data = fftshift(mode_data, 2);
 data.mode_modes = sum(bunch_data.^2,1);
 data.mode_tune = sum(mode_data(1:end/2,:).^2, 2);
-[~,pi] = max(data.mode_tune);
+
 
 data.tune_axis = linspace(0,.5,length(data.bunch_tune));
 data.bunch_axis = 1:harmonic_number;
@@ -103,6 +123,7 @@ ylabel('Fractional tune')
 axis tight
 
 % bunches graph
+[~,pi] = max(data.mode_tune);
 ax3 = subplot('position',[.02 .11 .7 .24]);
 plot(data.bunch_data(pi,:))
 xlabel(sprintf('Bunches at peak tune %3.3f',data.tune_axis(pi)))

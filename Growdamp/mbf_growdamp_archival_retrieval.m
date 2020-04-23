@@ -24,7 +24,7 @@ elseif nargin == 3
 end %if
 
 % Getting the desired system setup parameters.
-[root_string, ~, ~] = mbf_system_config;
+[root_string, ~, ~, ~] = mbf_system_config;
 root_string = root_string{1};
 
 if strcmpi(ax, 'x')

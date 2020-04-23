@@ -5,10 +5,11 @@ function mbf_restore_all
 % corresponding arm PV. Does not do anything with other types of PROC
 % files.
 %
-% Example: mbf_restore_all_except_triggers
+% Example: mbf_restore_all
 
-[root_string, ~] = mbf_system_config;
-root_string = root_string{1};
+[root_string, ~, ~, ~] = mbf_system_config;
+% Only interested in the currently used storage location.
+root_string = root_string{1}; 
 
 [pv_files, file_dir] = dir_list_gen(fullfile(root_string, 'captured_config'), 'mat');
 [pv_files1, ~] = dir_list_gen(fullfile(root_string, 'captured_config'), 'PROC');

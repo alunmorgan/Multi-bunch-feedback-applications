@@ -25,7 +25,7 @@ if length(times) < 2
     return
 end %if
 
-[~, harmonic_number, ~] = mbf_system_config;
+[~, harmonic_number, ~, ~] = mbf_system_config;
 x_plt_axis = (0:harmonic_number-1) - harmonic_number/2;
 years_input = {2013, 'r'; 2014, 'b'; 2015, 'k'; 2016, 'g'; 2017, 'c'; 2018, 'm'};
 

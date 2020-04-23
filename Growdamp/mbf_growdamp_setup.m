@@ -7,72 +7,94 @@ function mbf_growdamp_setup(mbf_axis, tune)
 %
 % example: mbf_growdamp_setup('x', 0.17)
 
-[~, harmonic_number, pv_names] = mbf_system_config;
+[~, harmonic_number, pv_names, trigger_inputs] = mbf_system_config;
 settings = mbf_growdamp_config(mbf_axis);
 % Generate the base PV name.
-pv_head = ax2dev(settings.axis_number);
+pv_head = pv_names.hardware_names.(mbf_axis);
+if strcmp(mbf_axis, 'x') || strcmp(mbf_axis, 'y')
+    pv_head_mem = pv_names.hardware_names.('T');
+elseif strcmp(mbf_axis, 's')
+    pv_head_mem = pv_names.hardware_names.('L');
+elseif strcmp(mbf_axis, 'tx') || strcmp(mbf_axis, 'ty')
+    pv_head_mem = 'TS-DI-TMBF-02';
+end %if
 %% Set up triggering
-% set up the apropriate triggering
+% set up the appropriate triggering
 % Stop triggering first, otherwise there's a good chance the first thing
 % we'll do is loose the beam as we change things.
-mbf_get_then_put([pv_head pv_names.tails.Buffer_trigger_stop], 1);
-pause(1)
-
-% Set the DDR Trigger to one shot
-mbf_get_then_put([pv_head pv_names.tails.DDR_trigger_mode], 'One Shot');
-% Set the DDR Trigger to Soft
-mbf_get_then_put([pv_head pv_names.tails.DDR_trigger_select], 'Soft');
-% setting up the sequencer to trigger off the DDR trigger
-mbf_get_then_put([pv_head pv_names.tails.Sequencer_trigger_select], 'DDR trigger') ;
-
-% Set the Buffer Trigger to one shot
-mbf_get_then_put([pv_head pv_names.tails.Buffer_trigger_mode], 'One Shot');
+for trigger_ind = 1:length(trigger_inputs)
+    trigger = trigger_inputs{trigger_ind};
+    mbf_get_then_put([pv_head pv_names.tails.triggers.(trigger).enable_status], 'Ignore');
+end %for
+for trigger_ind = 1:length(trigger_inputs)
+    trigger = trigger_inputs{trigger_ind};
+    mbf_get_then_put([pv_head_mem pv_names.tails.triggers.MEM.(trigger).enable_status], 'Ignore');
+    mbf_get_then_put([pv_head_mem pv_names.tails.triggers.MEM.(trigger).blanking_status], 'All');
+end %for
+% Set the trigger to one shot
+mbf_get_then_put([pv_head pv_names.tails.triggers.SEQ.mode], 'One Shot');
+mbf_get_then_put([pv_head_mem pv_names.tails.triggers.MEM.mode], 'One Shot');
+% Set the triggering to Soft only
+lcaPut([pv_head pv_names.tails.triggers.('SOFT').enable_status], 'Enable')
+lcaPut([pv_head_mem pv_names.tails.triggers.MEM.('SOFT').enable_status], 'Enable')
+%  set up the memory buffer to capture ADC data.
+mbf_get_then_put([pv_head_mem, pv_names.tails.MEM.channel_select], 'ADC0/ADC1')
+% Delay to make sure the currently set up sweeps have finished.
+pause(1) % TODO look for system to be in bank 0.
 
 %% Set up banks
 % bunch output (0=off 1=FIR 2=NCO 3 =NCO+FIR 4=sweep 5=sweep+FIR 6=sweep+NCO 7=sweep+NCO+FIR)
 % bunch bank 1 (the excitation)
-mbf_set_bank(settings.axis_number, 1, 4) %Sweep
+mbf_set_bank(mbf_axis, 1, 4) %Sweep
 
 % bunch bank 2 (the feedback)
-mbf_set_bank(settings.axis_number, 2, 1) %FIR
+mbf_set_bank(mbf_axis, 2, 1) %FIR
 
 % bunch bank 0 (the resting condition)
-mbf_set_bank(settings.axis_number, 0, 1) %FIR
-
-% bank0=lcaGet([pv_head ':BUN:0:OUTWF_S']);
-% bank0(1)=2; 
-% mbf_get_then_put([pv_head ':BUN:0:OUTWF_S'], bank0);
+mbf_set_bank(mbf_axis, 0, 1) %FIR
 
 %% Set up states
 % state 4
- mbf_set_state(settings.axis_number, 4,  tune, 1, [num2str(settings.ex_level),'dB'], settings.durations(1), settings.dwell, 'Capture') %excitation
- % state 3
- mbf_set_state(settings.axis_number, 3, tune, 1, 'Off', settings.durations(2), settings.dwell, 'Capture') %passive damping
- % state 2
- mbf_set_state(settings.axis_number, 2, tune, 2, 'Off', settings.durations(3), settings.dwell, 'Capture') %active damping
- % state 1
- mbf_set_state(settings.axis_number, 1, tune, 2, 'Off', settings.durations(4), settings.dwell, 'Discard') %Quiecent
+mbf_set_state(mbf_axis, 4,  tune, 1, ...
+    [num2str(settings.ex_level),'dB'], 'On', ...
+    settings.durations(1), ...
+    settings.dwell, 'Capture') %excitation
+% state 3
+mbf_set_state(mbf_axis, 3, tune, 1, ...
+    '-48dB', 'Off', ...
+    settings.durations(2), ...
+    settings.dwell, 'Capture') %passive damping
+% state 2
+mbf_set_state(mbf_axis, 2, tune, 2, ...
+    '-48dB', 'Off', ...
+    settings.durations(3), ...
+    settings.dwell, 'Capture') %active damping
+% state 1
+mbf_set_state(mbf_axis, 1, tune, 2, ...
+    '-48dB', 'Off', ...
+    settings.durations(4), ...
+    settings.dwell, 'Discard') %Quiecent
 
 % start state
-mbf_get_then_put([pv_head pv_names.tails.Sequencer_start_state], 4);
+mbf_get_then_put([pv_head pv_names.tails.Sequencer.start_state], 4);
 % steady state bank
-mbf_get_then_put([pv_head pv_names.tails.Sequencer_steady_state_bank], 'Bank 0');
+mbf_get_then_put([pv_head pv_names.tails.Sequencer.steady_state_bank], 'Bank 0');
 
 % set the super sequencer to scan all modes.
 mbf_get_then_put([pv_head pv_names.tails.Super_sequencer_count], harmonic_number);
 
 
 %% Set up data capture
-% Set the input source of the DDR to IQ
-mbf_get_then_put([pv_head pv_names.tails.DDR_input], 'IQ');
-% set the IQ mode to mean
-mbf_get_then_put([pv_head pv_names.tails.DDR_IQ_mode], 'Mean');
-% Set the stop mode of the IQ capture to auto stop
-mbf_get_then_put([pv_head pv_names.tails.DDR_autostop_setting], 'Auto-stop');
 % Set the detector input to FIR
-mbf_get_then_put([pv_head pv_names.tails.Detector_input], settings.det_input);
-% Set the bunch mode to all bunches
-mbf_get_then_put([pv_head pv_names.tails.Detector_mode],'All Bunches');
-% Set detector to fixed gain, autogain does not work with DDR IQ
-mbf_get_then_put([pv_head pv_names.tails.Detector_autogain_state],'Fixed Gain');
+mbf_get_then_put([pv_head pv_names.tails.Detector.source], 'FIR');
+% Enable only detector 0
+for n_det = 0:3
+    l_det = ['det',num2str(n_det)];
+    mbf_get_then_put([pv_head  pv_names.tails.Detector.(l_det).enable], 'Disabled');
+end %for
+lcaPut([pv_head  pv_names.tails.Detector.('det0').enable], 'Enabled');
+% Set the bunch mode to all bunches on detector 0
+mbf_get_then_put([pv_head  pv_names.tails.Detector.('det0').bunch_selection], ones(936,1)');
+
+
 

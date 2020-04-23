@@ -4,7 +4,7 @@ function mbf_get_then_put(pv_name, new_value)
 %
 % example: mbf_get_then_put(pv_name, new_value)
 
-[root_string, ~] = mbf_system_config;
+[root_string, ~, ~, ~] = mbf_system_config;
 root_string = root_string{1};
 
 if iscell(pv_name)
