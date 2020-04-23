@@ -59,7 +59,7 @@ else
     act_dwell = NaN;
 end %if
 
-length_averaging = 5;
+length_averaging = 20;
 if nargin == 2
     user_overide = 1;
     passive_override = overrides(1);
@@ -70,7 +70,8 @@ else
     passive_override = NaN;
     active_override = NaN;
 end %if
-parfor nq = 1:n_modes
+%parfor
+for nq = 1:n_modes
     %% split up the data into growth, passive damping and active damping.
     data_mode = data(nq,:);
     % growth
@@ -88,7 +89,7 @@ parfor nq = 1:n_modes
             pd_data = pd_data(1:passive_override);
         end %if
     else
-        [pd_data] = truncate_if_in_noise(pd_data, length_averaging);
+        [pd_data] = truncate_to_linear(pd_data, length_averaging);
     end %if
     if length(pd_data) < 3
         s2 = [NaN, NaN];
@@ -107,7 +108,7 @@ parfor nq = 1:n_modes
             ad_data = ad_data(1:active_override);
         end %if
     else
-        [ad_data] = truncate_if_in_noise(ad_data, length_averaging);
+        [ad_data] = truncate_to_linear(ad_data, length_averaging);
     end %if
     if length(x3) < 3
         s3 = [NaN,NaN];
