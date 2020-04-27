@@ -1,14 +1,46 @@
-function mbf_growdamp_setup(mbf_axis, tune)
+function mbf_growdamp_setup(mbf_axis, tune, varargin)
 % Sets up the MBF system to be ready for a growdamp measurement.
 %
 %   Args:
 %       mbf_axis (str): Selects which MBF axis to work on (x, y, s).
 %       tune (float): Tune of the machine.
+%       varargin: other settings (dwell, excitation, etc)
 %
 % example: mbf_growdamp_setup('x', 0.17)
+if strcmpi(mbf_axis, 'x') || strcmpi(mbf_axis, 'y') || strcmpi(mbf_axis, 'tx') || strcmpi(mbf_axis, 'ty')
+    default_durations = [250, 250, 250, 500];
+    default_dwell = 1;
+    default_tune_sweep_range = [80.00500, 80.49500];
+    default_tune_offset = 0;
+    default_excitation_level = -18;
+elseif strcmpi(mbf_axis, 's')
+    default_durations = [10, 10, 50, 100];
+    default_dwell = 480;
+    default_tune_sweep_range = [80.00220, 80.00520];
+    default_tune_offset = 0;
+    default_excitation_level = -18;
+else
+    error('Incorrect axis selected. Should be x, y, s, tx, ty')
+end %if
+p = inputParser;
+p.StructExpand = false;
+p.CaseSensitive = false;
+valid_durations = @(x) isnumeric(x) && length(x) == 4;
+valid_number = @(x) isnumeric(x);
+valid_sweep = @(x) isnumeric(x) && length(x) == 2;
+addRequired(p, 'mbf_axis');
+addRequired(p, 'tune', valid_number);
+addParameter(p, 'durations', default_durations, valid_durations);
+addParameter(p, 'dwell', default_dwell, valid_number);
+addParameter(p, 'tune_sweep_range', default_tune_sweep_range, valid_sweep);
+addParameter(p, 'tune_offset', default_tune_offset, valid_number);
+addParameter(p, 'excitation_level', default_excitation_level, valid_number);
+
+parse(p, mbf_axis, tune, varargin{:});
+
 
 [~, harmonic_number, pv_names, trigger_inputs] = mbf_system_config;
-settings = mbf_growdamp_config(mbf_axis);
+settings = p.Results;
 % Generate the base PV name.
 pv_head = pv_names.hardware_names.(mbf_axis);
 if strcmp(mbf_axis, 'x') || strcmp(mbf_axis, 'y')
@@ -56,7 +88,7 @@ mbf_set_bank(mbf_axis, 0, 1) %FIR
 %% Set up states
 % state 4
 mbf_set_state(mbf_axis, 4,  tune, 1, ...
-    [num2str(settings.ex_level),'dB'], 'On', ...
+    [num2str(settings.excitation_level),'dB'], 'On', ...
     settings.durations(1), ...
     settings.dwell, 'Capture') %excitation
 % state 3
