@@ -15,8 +15,9 @@ pv_names.hardware_names.L = 'SR23C-DI-LMBF-01';
 pv_names.hardware_names.x = [pv_names.hardware_names.T, ':X'];
 pv_names.hardware_names.y = [pv_names.hardware_names.T, ':Y'];
 pv_names.hardware_names.s = [pv_names.hardware_names.L, ':IQ'];
-pv_names.hardware_names.tx = 'TS-DI-TMBF-02:X'; % test system
-pv_names.hardware_names.ty = 'TS-DI-TMBF-02:Y'; % test system
+pv_names.hardware_names.lab = 'TS-DI-TMBF-02';
+pv_names.hardware_names.tx = [pv_names.hardware_names.lab, ':X']; % test system
+pv_names.hardware_names.ty = [pv_names.hardware_names.lab, ':Y']; % test system
 
 % External trigger
 pv_names.Hardware_trigger = 'LI-TI-MTGEN-01:BS-DI-MODE';

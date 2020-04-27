@@ -16,7 +16,7 @@ if strcmp(mbf_axis, 'x') || strcmp(mbf_axis, 'y')
 elseif strcmp(mbf_axis, 's')
     pv_head_mem = pv_names.hardware_names.('L');
 elseif strcmp(mbf_axis, 'tx') || strcmp(mbf_axis, 'ty')
-    pv_head_mem = 'TS-DI-TMBF-02';
+    pv_head_mem = pv_names.hardware_names.('lab');
 end %if
 %% Set up triggering
 % set up the appropriate triggering
