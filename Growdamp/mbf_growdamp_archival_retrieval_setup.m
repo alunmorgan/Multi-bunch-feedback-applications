@@ -79,7 +79,8 @@ for jgr = n_datasets:-1:1
 end %for
 
 seen = zeros(size(dates,2),1);
-sets = {};
+sets = cell(size(dates,2),1);
+tk =1;
 for nwd = 1:size(dates,2)
     if seen(nwd) == 0
         test = NaN(size(selections,1), 1);
@@ -98,15 +99,17 @@ for nwd = 1:size(dates,2)
         end %for
         
         ref_data = test(:,nwd);
-        if isempty(find(ref_data == 0, 1));
-            sets{end+1} = find(~any(~test) == 1);
-            seen(sets{end}) =1;
+        if isempty(find(ref_data == 0, 1))
+            sets{tk} = find(~any(~test) == 1);
+            seen(sets{tk}) =1;
+            tk = tk +1;
         else
             seen(nwd) = 1;
         end %if
         clear test
     end %if
 end %for
+sets(tk:end) = [];
 
 figure
 hold on

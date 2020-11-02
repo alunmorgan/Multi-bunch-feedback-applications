@@ -40,7 +40,7 @@ end %if
 index_name = [filter_name, '_index'];
 
 if bypass_index == 0
-    load(fullfile(root_string, index_name))
+    load(fullfile(root_string, index_name), 'file_index')
     datenums = cellfun(@datenum, file_index(2,:));
     a = find(datenums > date_range(1));
     b = find(datenums <= date_range(2));

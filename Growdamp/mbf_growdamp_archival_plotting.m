@@ -1,4 +1,4 @@
-function mbf_growdamp_archival_plotting(dr_passive, dr_active, error_passive, error_active, times, experimental_setup, selections, extents, plot_error_graphs)
+function mbf_growdamp_archival_plotting(dr_passive, dr_active, error_passive, error_active, times, experimental_setup, selections, extents)
 % Plots the data processed by mbf_growdamp_archival_analysis.
 % Args:
 %      dr_passive (numeric matrix): Passive damping rate.

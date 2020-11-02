@@ -19,6 +19,7 @@ n_tests = 200;
 vals = linspace(p_initial(1), p_initial(1) - 2e-7, n_tests);
 % sweep the gradient. Large changes in sample length indicate that a large
 % fraction of the line has moved from below the line to above it.
+sample_length = NaN(n_tests,1);
 for gra = 1:n_tests
     y = vals(gra) * x_ax + mm(dm_loc + 1);
     weighted_error = (mm(dm_loc+1:end) - y);% .* linspace(length(mm)-1 - dm_loc, 0 , length(mm)-dm_loc);

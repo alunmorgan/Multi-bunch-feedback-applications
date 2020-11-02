@@ -48,6 +48,8 @@ if isempty(full_name) == 1
    dir_paths = {};
     return 
 end
+dir_paths = cell(size(full_name,1));
+f_names = cell(size(full_name,1));
 for pao =1:size(full_name,1)
     nmd = full_name{pao};
     ks = find(nmd == slash,1,'last');

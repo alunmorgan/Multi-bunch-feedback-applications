@@ -26,35 +26,36 @@ inds = any(cat(2, strcmp(fields, 'ax_label'), strcmp(fields, 'filename'),...
 
 fields(inds) = [];
 
+metadata = cell(length(fields), length(requested_data));
 for hse = 1:length(fields)
     for wak = 1:length(requested_data)
         metadata{hse, wak} = requested_data{wak}.(fields{hse});
     end %for
 end %for
 
-% find out if each line has variation
-for sen = 1:size(metadata, 1)
-    reference_data = metadata{sen,1};
-    if iscell(reference_data)
-        reference_data = reference_data{1};
-    end %if
-    for ens = size(metadata, 2):-1:2
-        test_data = metadata{sen, ens};
-        if iscell(test_data)
-            test_data = test_data{1};
-        end %if
-        if ischar(reference_data)
-            variation(sen, ens) = ~strcmp(test_data, reference_data);
-        elseif isvector(reference_data)
-            variation(sen, ens) = max(test_data - reference_data) > 0.01;
-        else
-            variation(sen, ens) = test_data - reference_data > 0.0001;
-        end %if
-    end %for
-end %for
-
-% remove non varying ones
-vary = any(variation,2);
+% % find out if each line has variation
+% for sen = 1:size(metadata, 1)
+%     reference_data = metadata{sen,1};
+%     if iscell(reference_data)
+%         reference_data = reference_data{1};
+%     end %if
+%     for ens = size(metadata, 2):-1:2
+%         test_data = metadata{sen, ens};
+%         if iscell(test_data)
+%             test_data = test_data{1};
+%         end %if
+%         if ischar(reference_data)
+%             variation(sen, ens) = ~strcmp(test_data, reference_data);
+%         elseif isvector(reference_data)
+%             variation(sen, ens) = max(test_data - reference_data) > 0.01;
+%         else
+%             variation(sen, ens) = test_data - reference_data > 0.0001;
+%         end %if
+%     end %for
+% end %for
+% 
+% % remove non varying ones
+% vary = any(variation,2);
 
 for nfe = 1:length(requested_data)
         disp([requested_data{nfe}.('current'), '  ', requested_data{nfe}.('ringmode')])  

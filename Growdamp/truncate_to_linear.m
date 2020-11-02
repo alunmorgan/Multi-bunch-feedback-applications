@@ -107,6 +107,8 @@ function truncation_point_start = find_start_trunction_point(mm, n_tests)
 % Truncate the begining by increasing amounts and find the level of truncation which
 % gives the smallest residuals to a linear fit. This is to deal with odd effects
 % which sometimes happen at the beginning (due to delays in the sysytem?)
+ind = NaN(n_tests,1);
+overall_error = NaN(n_tests,1);
 for gra = 1:n_tests
     ind(gra) = ceil(length(mm).* gra / n_tests);
     if ind(gra) >= length(mm) - 5
@@ -126,12 +128,12 @@ end %for
 truncation_point_start = ind(x_of_min);
 end %function
 
-function data = remove_peak(data, centre_x, peak_extent)
-x1 = centre_x - peak_extent;
-x2 = centre_x + peak_extent;
-y1 = data(centre_x - peak_extent);
-y2 = data(centre_x + peak_extent);
-replacement_data = interp1([x1, x2], [y1, y2], x1:x2);
-data(x1:x2) = replacement_data;
-
-end %function
+% function data = remove_peak(data, centre_x, peak_extent)
+% x1 = centre_x - peak_extent;
+% x2 = centre_x + peak_extent;
+% y1 = data(centre_x - peak_extent);
+% y2 = data(centre_x + peak_extent);
+% replacement_data = interp1([x1, x2], [y1, y2], x1:x2);
+% data(x1:x2) = replacement_data;
+% 
+% end %function
