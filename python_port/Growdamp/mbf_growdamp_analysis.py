@@ -1,9 +1,16 @@
 import numpy
-from Growdamp import truncateToLinear, mbfGrowdampBasicFitting
+
+from Growdamp import (
+    mbfGrowdampAdvancedFitting,
+    mbfGrowdampBasicFitting,
+    truncateToLinear,
+)
 
 
-def mbfGrowdampAnalysis(exp_data, passive_override=None, active_override=None):
-    """ takes the data from mbf growdamp capture and fits it with a series of
+def mbfGrowdampAnalysis(
+    exp_data, passive_override=None, active_override=None, len_averaging=None
+):
+    """takes the data from mbf growdamp capture and fits it with a series of
     linear fits to get the damping times for each mode.
 
     Args:
@@ -22,13 +29,13 @@ def mbfGrowdampAnalysis(exp_data, passive_override=None, active_override=None):
     Example: poly_data, frequency_shifts = tmbf_growdamp_analysis(exp_data)
     """
 
-    harmonic_number = len(exp_data['fill_pattern'])
+    harmonic_number = len(exp_data["fill_pattern"])
     data = numpy.array()
     # Sometimes there is a problem with data transfer. By truncating the data
     # length to a multiple of the harmonic number the analysis can proceed.
-    cycles, stub = numpy.divmod(len(exp_data['data']), harmonic_number)
-    data = exp_data['data'][1:-stub]
-    data = exp_data['data'][1:-stub]
+    cycles, stub = numpy.divmod(len(exp_data["data"]), harmonic_number)
+    data = exp_data["data"][1:-stub]
+    data = exp_data["data"][1:-stub]
     data.reshape(cycles, harmonic_number)
     n_modes = data.shape[1]
     # Preallocation
@@ -36,30 +43,29 @@ def mbfGrowdampAnalysis(exp_data, passive_override=None, active_override=None):
     # frequency_shifts = NaN(harmonic_number, 1)
 
     # Find the idicies for the end of each period.
-    end_of_growth = exp_data['growth_turns']
-    end_of_passive = end_of_growth + exp_data['nat_turns']
-    end_of_active = end_of_passive + exp_data['act_turns']
+    end_of_growth = exp_data["growth_turns"]
+    end_of_passive = end_of_growth + exp_data["nat_turns"]
+    end_of_active = end_of_passive + exp_data["act_turns"]
 
     if data.shape[0] < end_of_active:
-        print(''.join(('No valid data for ', exp_data['filename'])))
+        print("".join(("No valid data for ", exp_data["filename"])))
         return [], []
 
-    if 'growth_dwell' in exp_data:
-        growth_dwell = exp_data['growth_dwell']
+    if "growth_dwell" in exp_data:
+        growth_dwell = exp_data["growth_dwell"]
     else:
         growth_dwell = None
 
-    if 'nat_dwell' in exp_data:
-        nat_dwell = exp_data['nat_dwell']
+    if "nat_dwell" in exp_data:
+        nat_dwell = exp_data["nat_dwell"]
     else:
         nat_dwell = None
 
-    if 'act_dwell' in exp_data:
-        act_dwell = exp_data['act_dwell']
+    if "act_dwell" in exp_data:
+        act_dwell = exp_data["act_dwell"]
     else:
         act_dwell = None
 
-    len_averaging = 20
     s1_acum = []
     s2_acum = []
     s3_acum = []
@@ -91,8 +97,10 @@ def mbfGrowdampAnalysis(exp_data, passive_override=None, active_override=None):
             delta2 = None
             p2 = None
         else:
-            s2, delta2, p2 = mbfGrowdampBasicFitting(pd_data)
-    #         s2, delta2, p2 = mbf_growdamp_advanced_fitting(pd_data, len_averaging)
+            if len_averaging is None:
+                s2, delta2, p2 = mbfGrowdampBasicFitting(pd_data)
+            else:
+                s2, delta2, p2 = mbfGrowdampAdvancedFitting(pd_data, len_averaging)
 
         # active damping
         x3 = end_of_passive + range(end_of_active)
@@ -107,8 +115,10 @@ def mbfGrowdampAnalysis(exp_data, passive_override=None, active_override=None):
             s3 = [None, None]
             delta3 = None
         else:
-            s3, delta3, _1 = mbfGrowdampBasicFitting(ad_data)
-    #         s3, delta3, _1 = mbf_growdamp_advanced_fitting(ad_data, len_averaging)
+            if len_averaging is None:
+                s3, delta3, _1 = mbfGrowdampBasicFitting(ad_data)
+            else:
+                s3, delta3, _1 = mbfGrowdampAdvancedFitting(ad_data, len_averaging)
 
         # Each point is dwell time turns long so the
         # damping time needs to be adjusted accordingly.
