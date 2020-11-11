@@ -1,4 +1,4 @@
-function mbf_pll_start(name,pllbunches,guardbunches)
+function mbf_pll_start(name, pllbunches, guardbunches)
 % function mbf_pll_start(name,pllbunches,guardbunches)
 %
 % name          <EPICS device>:<axis>
@@ -8,14 +8,14 @@ function mbf_pll_start(name,pllbunches,guardbunches)
 
 % ugly check to see if guardbunches are specified
 if nargin<3
-    guardbunches=2;
+    guardbunches = 2;
 end
 
 % initialise pll pattern
 pllpattern=false(1,936);
 % Matlab counts idices from 1, but at DLS we count bunches from 0, thus we need to
 % add one.
-pllpattern(pllbunches+1)=true;
+pllpattern(pllbunches+1) = true;
 
 % now we want to create a pattern with a little more room around the
 % pll bunches. It's a little tricky with a general pattern, and the cirular
@@ -23,15 +23,15 @@ pllpattern(pllbunches+1)=true;
 
 guardpattern=true(1,936);
 for n=-guardbunches:guardbunches
-    guardpattern(circshift(pllpattern,n))=false;
+    guardpattern(circshift(pllpattern,n)) = false;
 end
 
 % Set up PLL bunches in banks 0 and 1 (those are used in typcal sweeps), 
 % and in PLL detector.
 
-lcaPut([name ':BUN:0:PLL:ENABLE_S'],double(pllpattern));
-lcaPut([name ':BUN:1:PLL:ENABLE_S'],double(pllpattern));
-lcaPut([name ':PLL:DET:BUNCHES_S'],double(pllpattern));
+lcaPut([name ':BUN:0:PLL:ENABLE_S'], double(pllpattern));
+lcaPut([name ':BUN:1:PLL:ENABLE_S'], double(pllpattern));
+lcaPut([name ':PLL:DET:BUNCHES_S'], double(pllpattern));
 
 % Set sweep (SEQ) and its detector (#1) to NOT operate on these and
 % guard bunches around, ie only on guardpattern. This is maybe a little
