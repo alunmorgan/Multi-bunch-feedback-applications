@@ -1,0 +1,15 @@
+{
+    "python.pythonPath": "/scratch/afdm76/pipenv/python_port-oskq4Pgl/bin/python",
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestPath": "/home/afdm76/Remote_repositories/Multi-bunch-feedback-applications/python_port",
+    "python.linting.flake8Enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.enabled": true,
+    "python.formatting.provider": "black",
+    "python.linting.mypyArgs": [
+        "--follow-imports=silent",
+        "--show-column-numbers"
+    ]
+}
