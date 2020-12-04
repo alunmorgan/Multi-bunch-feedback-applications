@@ -6,7 +6,7 @@ from mbf_applications.Common.construct_datastamped_filename import (
 from mbf_applications.Common.tree_gen import treeGen
 
 
-def saveToArchive(root_string, data, graph_handles):
+def saveToArchive(root_string, data, graph_handles=None):
     """Saves the requested variables in the given filename in a location
     detemined by the time_value.
     The relavent folder structure will be generated.
@@ -32,7 +32,7 @@ def saveToArchive(root_string, data, graph_handles):
         root_string, data["time"][0], mth, dy, "".join((data["filename"], ".mat"))
     )
     savemat(save_name, data)
-    if nargin > 3:
+    if not graph_handles is None:
         for heaq in range(len(graph_handles)):
             if ishandle(graph_handles(heaq)):
                 graph_save_name = os.path.join(
