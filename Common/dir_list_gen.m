@@ -89,6 +89,24 @@ names = cellstr(names);
 %% Finding the apropriate filetype in the list
 if strcmp(file_type,'dirs')
     dirs = names(dir_state == 1);
+    dot_ind = 0;
+    dot_dot_ind = 0;
+    for hd = 1:length(dirs)
+        % remove the . and .. found on linux systems.
+        if strcmp(dirs(hd),'.')
+            dot_ind = hd;
+        end %if
+        if strcmp(dirs(hd),'..')
+            dot_dot_ind = hd;
+        end %if
+    end %for
+    if dot_ind ~= 0 && dot_dot_ind ~= 0
+        dirs([dot_ind, dot_dot_ind]) = [];
+    elseif dot_ind == 0 && dot_dot_ind ~= 0
+        dirs(dot_dot_ind) = [];
+    elseif dot_ind ~= 0 && dot_dot_ind == 0
+        dirs(dot_ind) = [];
+    end %if
     if isempty(dirs)
         names = [];
         if quiet_flag ~= 1

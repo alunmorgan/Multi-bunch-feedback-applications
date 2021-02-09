@@ -1,3 +1,4 @@
 *.asv
 *.m~
-python_port/.vscode/settings.json
+.vscode/*
+*.pyc

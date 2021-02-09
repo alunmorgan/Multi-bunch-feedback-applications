@@ -30,14 +30,14 @@ end
 % Set up PLL bunches in banks 0 and 1 (those are used in typcal sweeps), 
 % and in PLL detector.
 
-lcaPut([name ':BUN:0:PLL:ENABLE_S'], double(pllpattern));
-lcaPut([name ':BUN:1:PLL:ENABLE_S'], double(pllpattern));
-lcaPut([name ':PLL:DET:BUNCHES_S'], double(pllpattern));
+lcaPut([name 'BUN:0:PLL:ENABLE_S'], double(pllpattern));
+lcaPut([name 'BUN:1:PLL:ENABLE_S'], double(pllpattern));
+lcaPut([name 'PLL:DET:BUNCHES_S'], double(pllpattern));
 
 % Set sweep (SEQ) and its detector (#1) to NOT operate on these and
 % guard bunches around, ie only on guardpattern. This is maybe a little
 % keen, as there might be other things configured, which this will jjst
 % plow over. Maybe we should check or add to any previous config...
 
-lcaPut([name ':BUN:1:SEQ:ENABLE_S'],double(guardpattern));
-lcaPut([name ':DET:0:BUNCHES_S'],double(guardpattern));
+lcaPut([name 'BUN:1:SEQ:ENABLE_S'],double(guardpattern));
+lcaPut([name 'DET:0:BUNCHES_S'],double(guardpattern));

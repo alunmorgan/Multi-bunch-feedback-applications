@@ -15,15 +15,15 @@ end %if
 
 % Disable PLL and turn off the NCO
 lcaPut([base, 'PLL:CTRL:STOP_S.PROC'], 1);
-lcaPut([base ':PLL:NCO:ENABLE_S'],'Off');
+lcaPut([base 'PLL:NCO:ENABLE_S'],'Off');
 % Load tune peak value into the NCO as starting frequency, load recorded phase as set point
 lcaPut([base, 'PLL:NCO:FREQ_S'], tune_frequency_from_sweep)
 lcaPut([base, 'PLL:CTRL:TARGET_S'], tune_phase_from_sweep)
 % Limit tune range of the NCO to +/- 0.002
 lcaPut([base, 'PLL:CTRL:MAX_OFFSET_S'], 0.002)
 % Enable the NCO and PLL
-lcaPut([base ':PLL:NCO:GAIN_DB_S'],-30);
-lcaPut([base ':PLL:NCO:ENABLE_S'],'On');
+lcaPut([base 'PLL:NCO:GAIN_DB_S'],-30);
+lcaPut([base 'PLL:NCO:ENABLE_S'],'On');
 lcaPut([base, 'PLL:CTRL:START_S.PROC'], 1)
 % Wait until PLL has locked (set lower bound to phase error?)
 t1 = now;
