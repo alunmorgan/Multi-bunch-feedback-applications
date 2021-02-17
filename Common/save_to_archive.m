@@ -40,8 +40,15 @@ end %if
 disp(['Data saved to:  ',save_name])
 
 index_name = [data.base_name, '_index'];
-load(fullfile(root_string, index_name), 'file_index')
-file_index{1, end+1} = save_name;
-file_index{2, end+1} = data.time;
-save(fullfile(root_string, index_name), 'file_index')
-disp('Index updated')
+if exist(fullfile(root_string, [index_name, '.mat']),'file')
+    load(fullfile(root_string, index_name), 'file_index')
+    file_index{1, end+1} = save_name;
+    file_index{2, end+1} = data.time;
+    save(fullfile(root_string, index_name), 'file_index')
+    disp('Index updated')
+else
+    file_index{1, 1} = save_name;
+    file_index{2, 1} = data.time;
+    save(fullfile(root_string, index_name), 'file_index')
+    disp('New index file created')
+end %if
