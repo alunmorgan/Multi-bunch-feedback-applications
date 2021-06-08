@@ -21,7 +21,8 @@ valid_string = @(x) ischar(x);
 addRequired(p, 'poly_data');
 addRequired(p, 'frequency_shifts');
 addParameter(p, 'outputs', 'passive', valid_string);
-parse(p, mbf_axis, tune, varargin{:});
+addParameter(p, 'axis', '', valid_string);
+parse(p, poly_data, frequency_shifts, varargin{:});
 % Getting the desired system setup parameters.
 harmonic_number = size(frequency_shifts, 1);
 
@@ -36,12 +37,12 @@ active_errors(isnan(active_data)) = 0;
 figure
 ax1 = subplot(3,1,1:2);
 hold on
-if strcmpi(outputs, 'passive') || strcmpi(outputs, 'both')
+if strcmpi(p.Results.outputs, 'passive') || strcmpi(p.Results.outputs, 'both')
     plot(x_plt_axis, circshift(passive_data, -harmonic_number/2, 1), 'b', 'DisplayName', 'Passive')
     go1 = plot(x_plt_axis, circshift(passive_errors, -harmonic_number/2, 1), 'c*');
     go1.Annotation.LegendInformation.IconDisplayStyle = 'off';
 end %if
-if strcmpi(outputs, 'active') || strcmpi(outputs, 'both')
+if strcmpi(p.Results.outputs, 'active') || strcmpi(p.Results.outputs, 'both')
     plot(x_plt_axis, circshift(active_data, -harmonic_number/2, 1), 'g', 'DisplayName', 'Active')
     go2 = plot(x_plt_axis, circshift(active_errors, -harmonic_number/2, 1), 'm*');
     go2.Annotation.LegendInformation.IconDisplayStyle = 'off';
@@ -50,7 +51,7 @@ go3 = plot(x_plt_axis, zeros(length(x_plt_axis),1), 'r:');
 go3.Annotation.LegendInformation.IconDisplayStyle = 'off';
 hold off
 xlim([x_plt_axis(1) x_plt_axis(end)])
-title('MBF growdamp results')
+title(['MBF growdamp results (', p.Results.axis, ')'])
 xlabel('Mode')
 ylabel('Damping rates (1/turns)')
 legend
@@ -58,10 +59,10 @@ grid on
 
 ax2 = subplot(3,1,3);
     hold on
-if strcmpi(outputs, 'passive') || strcmpi(outputs, 'both')
+if strcmpi(p.Results.outputs, 'passive') || strcmpi(p.Results.outputs, 'both')
     plot(x_plt_axis, circshift(frequency_shifts(:,1), -harmonic_number/2, 1), 'b', 'DisplayName', 'Passive')
 end %if
-if strcmpi(outputs, 'active') || strcmpi(outputs, 'both')
+if strcmpi(p.Results.outputs, 'active') || strcmpi(p.Results.outputs, 'both')
     plot(x_plt_axis, circshift(frequency_shifts(:,2), -harmonic_number/2, 1), 'g', 'DisplayName', 'Active')
 end %if
     hold off
