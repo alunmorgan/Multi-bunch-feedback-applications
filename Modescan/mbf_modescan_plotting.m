@@ -6,7 +6,7 @@ function mbf_modescan_plotting(modescan)
 %
 % Example: mbf_modescan_plotting(modescan)
 harmonic_number = 936;
-figure(1)
+figure
 subplot(2,1,1)
 plot(abs(modescan.magnitude(1:harmonic_number)))
 title(['Amplitude (', modescan.ax_label, ' ', num2str(modescan.time(3)),...
