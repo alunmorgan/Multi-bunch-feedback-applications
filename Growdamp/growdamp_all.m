@@ -1,6 +1,17 @@
-function growdamp_all(x_tune, y_tune, s_tune)
+function growdamp_all
+% Top level function to run all growdamp measurements of each plane
+% sequentially.
 
 mbf_tools
+
+% Programatiaclly press the tune only button on each system
+% then get the tunes
+setup_operational_mode("x", "TuneOnly")
+x_tune = lcaGet('SR23C-DI-TMBF-01:X:TUNE:TUNE');
+setup_operational_mode("y", "TuneOnly")
+y_tune =  lcaGet('SR23C-DI-TMBF-01:Y:TUNE:TUNE');
+setup_operational_mode("s", "TuneOnly")
+s_tune = lcaGet('SR23C-DI-LMBF-01:IQ:TUNE:TUNE');
 
 mbf_growdamp_setup('x', x_tune)
 growdamp_x = mbf_growdamp_capture('x');
@@ -20,3 +31,7 @@ growdamp_s = mbf_growdamp_capture('s');
 mbf_growdamp_plot_summary(poly_data_s, frequency_shifts_s,...
     'outputs', 'both', 'axis', 's')
 
+% Programatiaclly press the tune only button on each system
+setup_operational_mode("x", "TuneOnly")
+setup_operational_mode("y", "TuneOnly")
+setup_operational_mode("s", "TuneOnly")
