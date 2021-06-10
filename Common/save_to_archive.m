@@ -1,4 +1,4 @@
-function save_to_archive(root_string, data, graph_handles)
+function save_to_archive(root_string, data)
 % Saves the requested variables in the given filename in a location
 % detemined by the time_value.
 % The relavent folder structure will be generated.
@@ -27,15 +27,6 @@ end
 save_name = fullfile(root_string, num2str(data.time(1)), mth, dy, ...
     [data.filename '.mat']);
 save(save_name, 'data')
-if nargin > 3
-    for heaq = 1:length(graph_handles)
-        if ishandle(graph_handles(heaq))
-            graph_save_name = fullfile(root_string, num2str(data.time(1)), mth, dy, data.filename);
-            saveas(graph_handles(heaq), [graph_save_name, '_figure_', num2str(heaq), '.png'])
-            saveas(graph_handles(heaq), [graph_save_name, '_figure_', num2str(heaq), '.fig'])
-        end %if
-    end %for
-end %if
 
 disp(['Data saved to:  ',save_name])
 
