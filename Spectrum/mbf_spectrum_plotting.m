@@ -1,4 +1,4 @@
-function mbf_spectrum_plotting(data)
+function mbf_spectrum_plotting(data, meta_data)
 % Plots the data saved and analysed by the earlier mbf_spectrum functions.
 % Args:
 %         data(structure): analysed data.
@@ -15,7 +15,7 @@ set(ax1,'YAxisLocation','right');
 set(ax1,'YDir','normal')
 set(ax1, 'XTick', [])
 set(ax1, 'YTick', [])
-title(data.axis_label)
+title(meta_data.axis)
 
 % Frequencies graph
 ax2 = subplot('position',[.72 .35 .18 .6]);
@@ -64,3 +64,6 @@ axis tight
 
 linkaxes([ax4, ax6], 'x')
 linkaxes([ax4, ax5], 'y')
+
+[root_string, ~, ~, ~] = mbf_system_config;
+archive_graphs(root_string, meta_data, graph_handles)
