@@ -37,4 +37,4 @@ root_string = root_string{1};
  [poly_data_x{ne}, frequency_shifts_x{ne}] = mbf_growdamp_analysis(temp);
  end %for
 mbf_growdamp_plot_summary_multi_f(poly_data_x, frequency_shifts_x, list_of_tunes,...
-    'outputs', 'both', 'axis', 'x')
+    'outputs', 'both', 'axis', mbf_axis)
