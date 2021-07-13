@@ -50,6 +50,8 @@ else
     disp('Bypassing index. This will be slower but is useful if the index is damaged and cannot be imediately regenerated.')
     datasets = dir_list_gen_tree(root_string, '.mat', 1);
     wanted_datasets_type = datasets(find_position_in_cell_lst(strfind(datasets, filter_name)));
+    % removing the index file
+    wanted_datasets_type(find_position_in_cell_lst(strfind(wanted_datasets_type, index_name))) = [];
     % Prefiltering on folder structure so that the code stays fast as more data
     % is added to the data store.
     tunc = regexprep(wanted_datasets_type, root_string, '');
@@ -60,8 +62,8 @@ else
         day = str2double(tunc{ha}(ind(2)+1: ind(3)-1));
         folder_dates(ha) = datenum(year, month, day);
     end %for
-    a = find(folder_dates > date_range(1));
-    b = find(folder_dates <= date_range(2));
+    a = find(folder_dates >= floor(date_range(1)) & folder_dates <= floor(date_range(2)) + 1);
+    b = find(folder_dates <= floor(date_range(2)) + 1);
     wanted_datasets_type_prefiltered = wanted_datasets_type(intersect(a,b));
     in_time = zeros(length(wanted_datasets_type_prefiltered),1);
     for kse = 1:length(wanted_datasets_type_prefiltered)

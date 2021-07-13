@@ -1,138 +1,145 @@
-function mbf_growdamp_archival_retrieval_setup(requested_data)
+function mbf_growdamp_archival_retrieval_setup(axis, date_range, varargin)
+
+default_sweep_parameter = 'current';
+default_current_range = 350;
+default_fillpattern_range = 1000;
+default_tune_range = 0.5;
+default_cavity1_voltage_range = 0.1;
+default_cavity2_voltage_range = 0.1;
+default_wiggler_field_I12_range = 0.1;
+default_wiggler_field_I15_range = 0.1;
+
+default_parameter_step_size = 0.1;
+
+p = inputParser;
+validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
+addRequired(p, 'axis',@ischar);
+addRequired(p, 'date_range');
+addOptional(p, 'analysis_type', 'collate', @ischar)
+addParameter(p, 'sweep_parameter', default_sweep_parameter, @ischar);
+addParameter(p, 'parameter_step', default_parameter_step_size, validScalarPosNum);
+addParameter(p, 'current_range', default_current_range, validScalarPosNum);
+addParameter(p, 'fillpattern_range', default_fillpattern_range, validScalarPosNum);
+addParameter(p, 'tune_range', default_tune_range, validScalarPosNum);
+addParameter(p, 'cavity1_voltage_range', default_cavity1_voltage_range, validScalarPosNum);
+addParameter(p, 'cavity2_voltage_range', default_cavity2_voltage_range, validScalarPosNum);
+addParameter(p, 'wiggler_field_I12_range', default_wiggler_field_I12_range, validScalarPosNum);
+addParameter(p, 'wiggler_field_I15_range', default_wiggler_field_I15_range, validScalarPosNum);
+addParameter(p, 'overrides', [NaN, NaN]);
+addParameter(p, 'debug', 0);
+p.PartialMatching = false;
+
+parse(p,axis, date_range, varargin{:});
 
 selections = {...
-    'current', 350;
-    'fill_pattern', 10;
-    'tune', 0.5;
-    'cavity1_voltage', 0.1;
-    'cavity2_voltage', 0.1;
-    'wiggler_field_I12', 0.1;
-    'wiggler_field_I15', 0.1;
+    'current', p.Results.current_range;
+    'fill_pattern', p.Results.fillpattern_range;
+    'tune', p.Results.tune_range;
+    'cavity1_voltage', p.Results.cavity1_voltage_range;
+    'cavity3_voltage', p.Results.cavity2_voltage_range;
+    'wiggler_field_I12', p.Results.wiggler_field_I12_range;
+    'wiggler_field_I15', p.Results.wiggler_field_I15_range;
     };
 
-%     'ringmodes', 0;
-%     'growth_gains', 0 ...
+requested_data = mbf_growdamp_archival_retrieval(axis, date_range, 1);
+disp('Retrieval complete')
+conditioned_data = condition_mbf_metadata(requested_data);
+
+if iscell(p.Results.sweep_parameter)
+    conditioned_data = filter_on_multiple_parameters(conditioned_data, selections);
+end %if
+
+if isempty(conditioned_data)
+    disp('No data meeting the requirements')
+else
+    if strcmp(p.Results.analysis_type, 'collate')
+        [dr_passive, dr_active, error_passive, error_active, times, setup, extents] = mbf_growdamp_archival_analysis(conditioned_data, 'collate',...
+            'overrides', p.Results.overrides, 'debug', p.Results.debug);
+    elseif strcmp(p.Results.analysis_type, 'sweep')
+        [dr_passive, dr_active, error_passive, error_active, times, setup, extents] = mbf_growdamp_archival_analysis(conditioned_data, 'parameter_sweep', ...
+            'sweep_parameter',p.Results.sweep_parameter, 'parameter_step', p.Results.parameter_step,...
+            'overrides', p.Results.overrides, 'debug', p.Results.debug);
+    else
+        error('Please select collate or sweep as the analysis type');
+    end %if
+    setup.axis = axis;
+    mbf_growdamp_archival_plotting(dr_passive, dr_active, error_passive, error_active, times, setup, selections, extents);
+    
+end %if
+end %function
+
+function output_data = condition_mbf_metadata(input_data)
+% Mapping values in old datasets to defined variables.
 
 %Initialisation
-n_datasets = length(requested_data);
-current = NaN(n_datasets,1);
-ringmode = cell(n_datasets,1);
-fill_pattern = NaN(n_datasets, 1);
-cavity1_voltage = NaN(n_datasets,1);
-cavity2_voltage = NaN(n_datasets,1);
-wiggler_field_I12 = NaN(n_datasets,1);
-wiggler_field_I15 = NaN(n_datasets,1);
-tune = NaN(n_datasets,1);
+n_datasets = length(input_data);
+output_data = input_data;
 
-% Mapping values in old datasets to defined variables.
 for jgr = n_datasets:-1:1
-    try
-        current(jgr) = requested_data{jgr}.current;
-    catch
-        current(jgr) = requested_data{jgr}.I_bpm;
-    end %try
-    ringmode{jgr} = requested_data{jgr}.ringmode{1};
-    try
-        fill_pattern(jgr,1:length(requested_data{jgr}.fill_pattern)) = requested_data{jgr}.fill_pattern;
-    catch
-        fill_pattern(jgr,1:length(requested_data{jgr}.fill)) = requested_data{jgr}.fill;
-    end %try
-    try
-        cavity1_voltage(jgr) = requested_data{jgr}.cavity1_voltage;
-    catch
-        cavity1_voltage(jgr) = requested_data{jgr}.RFread(1);
-    end %try
-    try
-        cavity2_voltage(jgr) = requested_data{jgr}.cavity2_voltage;
-    catch
-        cavity2_voltage(jgr) = requested_data{jgr}.RFread(2);
-    end %try
-    try
-        wiggler_field_I12(jgr) = requested_data{jgr}.wiggler_field_I12;
-    catch
-        wiggler_field_I12(jgr) = requested_data{jgr}.id.i12field;
-    end %try
-    try
-        wiggler_field_I15(jgr) = requested_data{jgr}.wiggler_field_I15;
-    catch
-        wiggler_field_I15(jgr) = requested_data{jgr}.id.i15field;
-    end %try
-    try
-        tune(jgr) = requested_data{jgr}.tune;
-    catch
-        try
-            if strcmp(requested_data{jgr}.ax_label, 'y')
-                tune(jgr) = requested_data{jgr}.qy;
-            elseif strcmp(requested_data{jgr}.ax_label, 'x')
-                tune(jgr) = requested_data{jgr}.qx;
-            end %if
-        catch
-            tune(jgr) = NaN;
-        end %try
-    end %try
-    try
-        growth_gain{jgr} = requested_data{jgr}.growth_gain{1};
-    catch
-        growth_gain{jgr} = NaN;
-    end %try
-    dates(jgr) = datenum(requested_data{jgr}.time);
-end %for
-
-seen = zeros(size(dates,2),1);
-sets = cell(size(dates,2),1);
-tk =1;
-for nwd = 1:size(dates,2)
-    if seen(nwd) == 0
-        test = NaN(size(selections,1), 1);
-        for law = 1:size(selections,1)
-            test_vals = eval(selections{law,1});
-            if iscell(test_vals)
-                temp = strcmp(test_vals{nwd}, test_vals);
-            elseif size(test_vals,2) == 1
-                temp = abs(test_vals - test_vals(nwd)) < selections{law,2};
-            else
-                temp = abs(test_vals - repmat(test_vals(nwd,:),size(test_vals,1), 1)) < selections{law,2};
-                temp = ~any(~temp,2);
-            end %if
-            test(law,1:length(temp)) = temp;
-            clear temp
-        end %for
-        
-        ref_data = test(:,nwd);
-        if isempty(find(ref_data == 0, 1))
-            sets{tk} = find(~any(~test) == 1);
-            seen(sets{tk}) =1;
-            tk = tk +1;
-        else
-            seen(nwd) = 1;
-        end %if
-        clear test
+    if isfield(input_data{jgr}, 'I_bpm')
+        output_data{jgr}.current(jgr) = input_data{jgr}.I_bpm;
     end %if
+    
+    if isfield(input_data{jgr}, 'fill')
+        output_data{jgr}.fill_pattern = input_data{jgr}.fill;
+    end %if
+    
+    if isfield(input_data{jgr}, 'RFread')
+        output_data{jgr}.cavity1_voltage = input_data{jgr}.RFread(1);
+        output_data{jgr}.cavity2_voltage = input_data{jgr}.RFread(2);
+    end %if
+    
+    if isfield(input_data{jgr}, 'id')
+        output_data{jgr}.wiggler_field_I12 = input_data{jgr}.id.i12field;
+        output_data{jgr}.wiggler_field_I15 = input_data{jgr}.id.i15field;
+    end %if
+    
+    if isfield(input_data{jgr}, 'qy')
+        output_data{jgr}.tune = input_data{jgr}.qy;
+    end %if
+    
+    if isfield(input_data{jgr}, 'qx')
+        output_data{jgr}.tune = input_data{jgr}.qx;
+    end %if
+    
+end %for
+end %function
+
+function sets = filter_on_multiple_parameters(input_data, selections)
+% returns the sets of data which have metatdata values below thoise given in
+% selections
+%
+%   Args:
+%       input_data{cell array of structures}
+%       selections{cell array}: collumn 1 is the name of the field in the
+%                               metatdata, collumn2 is the value to be below.
+%   Returns:
+%       sets {cell array of structures}: Datasets which matched the criteria.
+sets = cell(length(input_data),1);
+tk =1;
+for nwd = 1:length(input_data)
+    test = NaN(size(selections,1), 1);
+    for law = 1:size(selections,1)
+        ref_val = selections{law,2};
+        test_val = input_data.(selections{law,1});
+        if iscell(test_val)
+            temp = strcmp(test_val{nwd}, test_val);
+        elseif size(test_val,2) == 1
+            temp = abs(test_val - test_val(nwd)) < ref_val;
+        else
+            temp = abs(test_val - repmat(test_val(nwd,:),size(test_val,1), 1)) < ref_val;
+            temp = ~any(~temp,2);
+        end %if
+        test(law,1:length(temp)) = temp;
+        clear temp
+    end %for
+    
+    ref_data = test(:,nwd);
+    if isempty(find(ref_data == 0, 1))
+        sets{tk} = find(~any(~test) == 1);
+        tk = tk +1;
+    end %if
+    clear test
 end %for
 sets(tk:end) = [];
-
-figure
-hold on
-for lse = 1:length(sets)
-    plot(dates(sets{lse}),current(sets{lse}), 'o:')
-end %for
-hold off
-datetick
-
-for jfwe = 1:length(sets)
-    clear full_data temp_data dates_temp
-    dates_temp = dates(sets{jfwe});
-    if length(dates_temp) ==1
-        continue
-    end %if
-    parfor nse = 1:length(dates_temp)
-        temp_data = mbf_growdamp_archival_retrieval('y', [dates_temp(nse)-3e-4, dates_temp(nse)+3e-4]);
-        full_data{nse} = temp_data{1};
-    end %for
-    %     try
-    [dr_passive, dr_active, error_passive, error_active, times, setup, extents] = mbf_growdamp_archival_analysis(full_data, 'collate');
-    mbf_growdamp_archival_plotting(dr_passive, dr_active, error_passive, error_active, times, setup, selections, extents);
-    %     catch
-    %         disp(num2str(jfwe))
-    %     end %try
-end %for
+end %function

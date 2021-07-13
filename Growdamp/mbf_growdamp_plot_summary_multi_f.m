@@ -54,12 +54,12 @@ hold on
 if strcmpi(p.Results.outputs, 'passive') || strcmpi(p.Results.outputs, 'both')
     plot(x_plt_axis, circshift(passive_data, -harmonic_number/2, 1), 'b', 'DisplayName', 'Passive')
     go1 = plot(x_plt_axis, circshift(passive_errors, -harmonic_number/2, 1), 'c*');
-    go1.Annotation.LegendInformation.IconDisplayStyle = 'off';
+%     go1.Annotation.LegendInformation.IconDisplayStyle = 'off';
 end %if
 if strcmpi(p.Results.outputs, 'active') || strcmpi(p.Results.outputs, 'both')
     plot(x_plt_axis, circshift(active_data, -harmonic_number/2, 1), 'g', 'DisplayName', 'Active')
     go2 = plot(x_plt_axis, circshift(active_errors, -harmonic_number/2, 1), 'm*');
-    go2.Annotation.LegendInformation.IconDisplayStyle = 'off';
+%     go2.Annotation.LegendInformation.IconDisplayStyle = 'off';
 end %if
 go3 = plot(x_plt_axis, zeros(length(x_plt_axis),1), 'r:');
 go3.Annotation.LegendInformation.IconDisplayStyle = 'off';
@@ -72,18 +72,18 @@ legend
 grid on
 
 ax2 = subplot(3,1,3);
-    hold on
-if strcmpi(p.Results.outputs, 'passive') || strcmpi(p.Results.outputs, 'both')
-    plot(x_plt_axis, circshift(frequency_shifts(:,1), -harmonic_number/2, 1), 'b', 'DisplayName', 'Passive')
-end %if
-if strcmpi(p.Results.outputs, 'active') || strcmpi(p.Results.outputs, 'both')
-    plot(x_plt_axis, circshift(frequency_shifts(:,2), -harmonic_number/2, 1), 'g', 'DisplayName', 'Active')
-end %if
-    hold off
-xlim([x_plt_axis(1) x_plt_axis(end)])
-xlabel('Mode')
-ylabel({'Difference from';'excitation tune'})
-legend
-grid on
+%     hold on
+% if strcmpi(p.Results.outputs, 'passive') || strcmpi(p.Results.outputs, 'both')
+%     plot(x_plt_axis, circshift(frequency_shifts(:,1), -harmonic_number/2, 1), 'b', 'DisplayName', 'Passive')
+% end %if
+% if strcmpi(p.Results.outputs, 'active') || strcmpi(p.Results.outputs, 'both')
+%     plot(x_plt_axis, circshift(frequency_shifts(:,2), -harmonic_number/2, 1), 'g', 'DisplayName', 'Active')
+% end %if
+%     hold off
+% xlim([x_plt_axis(1) x_plt_axis(end)])
+% xlabel('Mode')
+% ylabel({'Difference from';'excitation tune'})
+% legend
+% grid on
 
 linkaxes([ax1, ax2], 'x')
