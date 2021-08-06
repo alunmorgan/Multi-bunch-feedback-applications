@@ -8,15 +8,15 @@ function mbf_modescan_setup(mbf_axis, tune, varargin)
 % example: mbf_modescan_setup('x', 0.17)
 
 if strcmpi(mbf_axis, 'x') || strcmpi(mbf_axis, 'y')
-    default_dwell = 200;
-    default_detector_gain = -24; % detector gain in dB.
-    default_sequencer_gain = -42; % sequencer gain in dB.
-        default_excitation_level = -18; % excitation level in dB.
+    default_dwell = 500;
+    default_detector_gain = -12; % detector gain in dB.
+    default_sequencer_gain = -36; % sequencer gain in dB.
+        default_excitation_level = -12; % excitation level in dB.
 elseif strcmpi(mbf_axis, 's')
-    default_dwell = 200;
-    default_detector_gain = -24; % detector gain in dB.
-    default_sequencer_gain = -42; % sequencer gain in dB.
-        default_excitation_level = -18; % excitation level in dB.
+    default_dwell = 500;
+    default_detector_gain = -12; % detector gain in dB.
+    default_sequencer_gain = -36; % sequencer gain in dB.
+        default_excitation_level = -12; % excitation level in dB.
 end %if
 p = inputParser;
 p.StructExpand = false;
