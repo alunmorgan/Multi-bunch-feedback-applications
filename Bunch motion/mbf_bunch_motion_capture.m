@@ -5,7 +5,7 @@ function bunch_motion = mbf_bunch_motion_capture
 % Example: bunch_motion = mbf_bunch_motion_capture
 
 %% Getting the desired system setup parameters.
-[root_string, ~, pv_names, ~] = mbf_system_config;
+[root_string, num_buckets, pv_names, ~] = mbf_system_config;
 root_string = root_string{1};
 
 [turn_count, turn_offset] = mbf_bunch_motion_config;
@@ -50,7 +50,7 @@ bunch_motion_temp = mbf_read_mem(pv_names.hardware_names.T, turn_count,'offset',
 bunch_motion.x = bunch_motion_temp(:,1);
 bunch_motion.y = bunch_motion_temp(:,2);
 bunch_motion.z = mbf_read_mem(pv_names.hardware_names.L, turn_count, 'offset', turn_offset,'channel', 0, 'lock', 60);
-
+bunch_motion.num_buckets = num_buckets;
 
 %% saving the data to a file
 save_to_archive(root_string, bunch_motion)

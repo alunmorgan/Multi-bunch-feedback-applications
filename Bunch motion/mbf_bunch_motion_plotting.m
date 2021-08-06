@@ -1,15 +1,12 @@
 function mbf_bunch_motion_plotting(data)
 
-%% Getting the desired system setup parameters.
-[~, num_buckets, ~] = mbf_system_config;
-
 xlimits = [min(data.x) max(data.x)];
 ylimits = [min(data.y) max(data.y)];
 zlimits = [min(data.z) max(data.z)];
 
-x = reshape(data.x, num_buckets, []);
-y = reshape(data.y, num_buckets, []);
-z = reshape(data.z, num_buckets, []);
+x = reshape(data.x, data.num_buckets, []);
+y = reshape(data.y, data.num_buckets, []);
+z = reshape(data.z, data.num_buckets, []);
 
 figure(1)
 ax1 = axes('OuterPosition',[0 0.5 0.5 0.5]);
@@ -35,7 +32,7 @@ axes(ax4);
 hold on
 axes(ax3);
 hold on
-for js = 1:num_buckets
+for js = 1:data.num_buckets
     warning('off','all')
     shp1 = alphaShape(cat(2,squeeze(z(js,:))', squeeze(x(js,:))'));
     shp2 = alphaShape(cat(2,squeeze(z(js,:))', squeeze(y(js,:))'));
@@ -46,19 +43,19 @@ for js = 1:num_buckets
     
     
     plot(shp1, 'FaceAlpha', 0.5, 'EdgeAlpha', 0 ,...
-        'FaceColor', [(num_buckets - js)/ num_buckets, 0, js/num_buckets],...
+        'FaceColor', [(data.num_buckets - js)/ data.num_buckets, 0, js/data.num_buckets],...
         'Parent', ax1)
     
     plot(shp2, 'FaceAlpha', 0.5, 'EdgeAlpha', 0  ,...
-        'FaceColor', [(num_buckets - js)/ num_buckets, 0, js/num_buckets],...
+        'FaceColor', [(data.num_buckets - js)/ data.num_buckets, 0, js/data.num_buckets],...
         'Parent', ax2)
     
     plot(shp4, 'FaceAlpha', 0.5, 'EdgeAlpha', 0  ,...
-        'FaceColor', [(num_buckets - js)/ num_buckets, 0, js/num_buckets],...
+        'FaceColor', [(data.num_buckets - js)/ data.num_buckets, 0, js/data.num_buckets],...
         'Parent', ax4)
     
     plot(shp3, 'FaceAlpha', 0.5, 'EdgeAlpha', 0  ,...
-        'FaceColor', [(num_buckets - js)/ num_buckets, 0, js/num_buckets],...
+        'FaceColor', [(data.num_buckets - js)/ data.num_buckets, 0, js/data.num_buckets],...
         'Parent', ax3)
 end %for
 
