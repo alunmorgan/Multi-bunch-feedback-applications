@@ -38,6 +38,8 @@ function [dr_passive, dr_active, error_passive, error_active, times, experimenta
 
 default_sweep_parameter = 'current';
 default_parameter_step_size = 0.1;
+defaultOverrides = [NaN, NaN];
+defaultAnalysisSetting = 0;
 
 
 p = inputParser;
@@ -46,7 +48,8 @@ addRequired(p, 'data_requested',@iscell);
 addOptional(p, 'analysis_type', 'collate', @ischar)
 addParameter(p, 'sweep_parameter', default_sweep_parameter, @ischar);
 addParameter(p, 'parameter_step', default_parameter_step_size, validScalarPosNum);
-addParameter(p, 'overrides', [NaN, NaN]);
+addParameter(p, 'overrides', defaultOverrides);
+addParameter(p,'advanced_fitting', defaultAnalysisSetting, @isnumeric);
 addParameter(p, 'debug', 0);
 p.PartialMatching = false;
 
@@ -57,6 +60,7 @@ sweep_parameter = p.Results.sweep_parameter;
 parameter_step_size = p.Results.parameter_step;
 overrides = p.Results.overrides;
 debug = p.Results.debug;
+advanced_fitting = p.Results.advanced_fitting;
 
 %condition the data in order to harmonise data changes made over time.
 for nd = length(data_requested):-1:1
@@ -64,7 +68,10 @@ for nd = length(data_requested):-1:1
 end
 
 for nd = length(data_requested):-1:1
-    [s_poly_data, ~] = mbf_growdamp_analysis(data_requested{nd}, 'override', overrides,'debug', debug);
+    [s_poly_data, ~] = mbf_growdamp_analysis(data_requested{nd},...
+        'override', overrides,...
+        'advanced_fitting',advanced_fitting, ...
+        'debug', debug);
     times(nd) = datenum(data_requested{nd}.time);
     dr_passive(nd,:) = fftshift(squeeze(-s_poly_data(:,2,1))');
     dr_active(nd,:) = fftshift(squeeze(-s_poly_data(:,3,1))');
@@ -80,10 +87,10 @@ fprintf('\n')
 
 % Removing datasets whose mean error is < 0.02 for the passive section.
 error_av_p = mean(error_passive,2,'omitnan');
-error_av_a = mean(error_active,2,'omitnan');
-wanted1 = find(abs(error_av_p) < 0.01);
-wanted2 = find(abs(error_av_a) < 0.01);
-wanted = intersect(wanted1, wanted2);
+% error_av_a = mean(error_active,2,'omitnan');
+wanted = find(abs(error_av_p) < 0.01);
+% wanted2 = find(abs(error_av_a) < 0.01);
+% wanted = intersect(wanted1, wanted2);
 dr_passive = dr_passive(wanted,:);
 dr_active = dr_active(wanted,:);
 error_passive = error_passive(wanted,:);

@@ -10,6 +10,8 @@ default_wiggler_field_I12_range = 0.1;
 default_wiggler_field_I15_range = 0.1;
 
 default_parameter_step_size = 0.1;
+defaultOverrides = [NaN, NaN];
+defaultAnalysisSetting = 0;
 
 p = inputParser;
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
@@ -25,7 +27,8 @@ addParameter(p, 'cavity1_voltage_range', default_cavity1_voltage_range, validSca
 addParameter(p, 'cavity2_voltage_range', default_cavity2_voltage_range, validScalarPosNum);
 addParameter(p, 'wiggler_field_I12_range', default_wiggler_field_I12_range, validScalarPosNum);
 addParameter(p, 'wiggler_field_I15_range', default_wiggler_field_I15_range, validScalarPosNum);
-addParameter(p, 'overrides', [NaN, NaN]);
+addParameter(p, 'overrides', defaultOverrides);
+addParameter(p,'advanced_fitting',defaultAnalysisSetting, @isnumeric);
 addParameter(p, 'debug', 0);
 p.PartialMatching = false;
 
@@ -53,12 +56,19 @@ if isempty(conditioned_data)
     disp('No data meeting the requirements')
 else
     if strcmp(p.Results.analysis_type, 'collate')
-        [dr_passive, dr_active, error_passive, error_active, times, setup, extents] = mbf_growdamp_archival_analysis(conditioned_data, 'collate',...
-            'overrides', p.Results.overrides, 'debug', p.Results.debug);
+        [dr_passive, dr_active, error_passive, error_active, times, setup, extents] = ...
+            mbf_growdamp_archival_analysis(conditioned_data, 'collate',...
+            'overrides', p.Results.overrides, ...
+            'advanced_fitting', p.Results.advanced_fitting,...
+            'debug', p.Results.debug);
     elseif strcmp(p.Results.analysis_type, 'sweep')
-        [dr_passive, dr_active, error_passive, error_active, times, setup, extents] = mbf_growdamp_archival_analysis(conditioned_data, 'parameter_sweep', ...
-            'sweep_parameter',p.Results.sweep_parameter, 'parameter_step', p.Results.parameter_step,...
-            'overrides', p.Results.overrides, 'debug', p.Results.debug);
+        [dr_passive, dr_active, error_passive, error_active, times, setup, extents] = ...
+            mbf_growdamp_archival_analysis(conditioned_data, 'parameter_sweep', ...
+            'sweep_parameter',p.Results.sweep_parameter,...
+            'parameter_step', p.Results.parameter_step,...
+            'overrides', p.Results.overrides, ...
+            'advanced_fitting', p.Results.advanced_fitting,...
+            'debug', p.Results.debug);
     else
         error('Please select collate or sweep as the analysis type');
     end %if
