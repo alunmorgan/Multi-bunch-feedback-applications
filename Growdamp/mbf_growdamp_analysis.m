@@ -94,7 +94,7 @@ if p.Results.debug == 1
         plot([end_of_active, end_of_active], data_range, ':c','DisplayName', 'end of active')
         legend
         hold off
-        pause(0.6)
+        pause(0.3)
         clf(h)
     end %for
     close(h)
@@ -124,12 +124,12 @@ parfor nq = 1:n_modes %par if it behaving
     % passive damping
     x2 = end_of_growth + 1:end_of_passive;
     pd_data = data_mode(x2);
-    [s2, delta2, p2] = get_damping(pd_data, nat_dwell, passive_override, length_averaging, adv_fitting);
+    [s2, delta2, p2] = get_damping(pd_data, nat_dwell, passive_override, length_averaging, adv_fitting, p.Results.debug);
     
     %active damping
     x3 = end_of_passive + 1:end_of_active;
     ad_data = data_mode(x3);
-    [s3, delta3, p3] = get_damping(ad_data, act_dwell, active_override, length_averaging, adv_fitting);
+    [s3, delta3, p3] = get_damping(ad_data, act_dwell, active_override, length_averaging, adv_fitting, p.Results.debug);
     
     s1_acum(nq,:) = s1;
     s2_acum(nq,:) = s2;
@@ -154,7 +154,7 @@ frequency_shifts(:,2) = p3_acum;
 disp('')
 end %function
 
-function [s, delta, p] = get_damping(data, dwell, override, length_averaging, adv_fitting)
+function [s, delta, p] = get_damping(data, dwell, override, length_averaging, adv_fitting, debug)
 
 if ~isnan(override)
     if override < length(data)
@@ -169,9 +169,9 @@ if length(data) < 3
     p = NaN;
 else
     if adv_fitting == 0
-        [s, delta, p] = mbf_growdamp_basic_fitting(data);
+        [s, delta, p] = mbf_growdamp_basic_fitting(data, debug);
     else
-        [s, delta, p] = mbf_growdamp_advanced_fitting(data, length_averaging);
+        [s, delta, p] = mbf_growdamp_advanced_fitting(data, length_averaging, debug);
     end %if
 end %if
 % Each point is dwell time turns long so the
