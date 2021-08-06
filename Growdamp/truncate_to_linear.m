@@ -14,68 +14,33 @@ if p(1) > 0
     return
 end %if
 
-% fft_mm = fft(mm);
-% % figure(21)
-% % plot(abs(fft_mm))
-% peaks = [0.1056];
-% harmonics = 2;
-% for psk = 1:length(peaks)
-%     for snw = 1:harmonics
-%         peak_ind = round(peaks(psk) * length(fft_mm));
-%         window_length = ceil(15/2500 * length(fft_mm));
-%         fft_mm = remove_peak(fft_mm, snw * peak_ind, window_length);
-%         fft_mm = remove_peak(fft_mm, length(fft_mm) - snw * peak_ind, window_length);
-%         fft_mm = remove_peak(fft_mm, (length(fft_mm) - peak_ind) ./ 2 - (snw-1) * peak_ind, window_length);
-%         fft_mm = remove_peak(fft_mm, (length(fft_mm) + peak_ind) ./ 2 + (snw-1) * peak_ind, window_length);
-%         end %for
-% end %for
-% mm = abs(ifft(fft_mm));
-
-% hold all
-% plot(abs(fft_mm))
-% hold off
-% figure(22)
-% plot(mm, 'r')
-% hold all
-% plot(abs(ifft(fft_mm)), 'm')
-% hold off
-
+%take the log of the data as we expect an exponential decay. meaning that the
+%log(data) should be linear
+mm = log(abs(mm));
 
 truncation_point_end = find_end_trunction_point(mm, n_tests);
 if truncation_point_end < 10
-    disp('truncate_to_linear: Truncation would be too severe.  Returning original data.')
+%     disp('truncate_to_linear: Truncation would be too severe.  Returning original data.')
     data_out = data_in;
     return
 end %if
 
 truncation_point_start = find_start_trunction_point(mm(1:truncation_point_end), n_tests);
 if truncation_point_start > truncation_point_end - 10
-    disp('truncate_to_linear: Truncation would be too severe.  Setting start truncation to 1')
+%     disp('truncate_to_linear: Truncation would be too severe.  Setting start truncation to 1')
     data_out = data_in(1:truncation_point_end);
     return
 end %if
 
 truncation_point_end = find_end_trunction_point(mm(truncation_point_start:end), n_tests);
 if truncation_point_end < truncation_point_start + 10
-    disp('truncate_to_linear: Truncation would be too severe.  Returning original data.')
+%     disp('truncate_to_linear: Truncation would be too severe.  Returning original data.')
     data_out = data_in;
     return
 end %if
 
-data_out = data_in(truncation_point_start:truncation_point_end);
+data_out = data_in(truncation_point_start:truncation_point_end + truncation_point_start - 1);
 
-% figure(1)
-% clf
-% hold all
-% plot(abs(data_in),'b')
-% plot(mm, 'r')
-% plot(polyval(p,linspace(1,length(data_in), length(data_in))), 'g')
-% plot(truncation_point_end, mm(truncation_point_end), 'oc')
-% plot(truncation_point_start, mm(truncation_point_start), 'oc')
-% p = polyfit(truncation_point_start:truncation_point_end, mm(truncation_point_start:truncation_point_end), 1);
-% plot(polyval(p,linspace(1,length(data_in), length(data_in))), 'c')
-% hold off
-% ylim([0 inf])
 end %function
 
 function truncation_point_end = find_end_trunction_point(mm, n_tests)
@@ -127,13 +92,3 @@ end %for
 [~, x_of_min] = min(overall_error);
 truncation_point_start = ind(x_of_min);
 end %function
-
-% function data = remove_peak(data, centre_x, peak_extent)
-% x1 = centre_x - peak_extent;
-% x2 = centre_x + peak_extent;
-% y1 = data(centre_x - peak_extent);
-% y2 = data(centre_x + peak_extent);
-% replacement_data = interp1([x1, x2], [y1, y2], x1:x2);
-% data(x1:x2) = replacement_data;
-% 
-% end %function
