@@ -8,7 +8,7 @@ function mbf_growdamp_setup(mbf_axis, tune, varargin)
 %
 % example: mbf_growdamp_setup('x', 0.17)
 if strcmpi(mbf_axis, 'x') || strcmpi(mbf_axis, 'y') || strcmpi(mbf_axis, 'tx') || strcmpi(mbf_axis, 'ty')
-    default_durations = [250, 250, 250, 500];
+    default_durations = [250, 500, 500, 2000];
     default_dwell = 1;
     default_tune_sweep_range = [80.00500, 80.49500];
     default_tune_offset = 0;
