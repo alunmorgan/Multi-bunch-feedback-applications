@@ -1,9 +1,9 @@
-function peakfreq=mbf_pll_blowup_scan_power(axis);
+function mbf_pll_blowup_scan_power(axis)
 switch axis
     case 'X'
-        emitPV='HEMIT'
+        emitPV = 'HEMIT';
     case 'Y'
-        emitPV='VEMIT'
+        emitPV = 'VEMIT';
 end
 
 p=linspace(-50,-10,50);
