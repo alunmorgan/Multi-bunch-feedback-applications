@@ -4,9 +4,19 @@ function mbf_growdamp_setup(mbf_axis, tune, varargin)
 %   Args:
 %       mbf_axis (str): Selects which MBF axis to work on (x, y, s).
 %       tune (float): Tune of the machine.
-%       varargin: other settings (dwell, excitation, etc)
+%       durations (list of ints): number of turns for excitation, 
+%                                 pasive daming and active damping
+%       dwell (int): number of turns at each point.
+%       tune_sweep_range (list of floats), tune range to sweep over
+%       tune_offset (float): Tune fraction to offset from the peak.
+%       excitation_level (float): Strength of the excitation oscillation.
+%       fll_tracking (str): yes or no.
+%       fll_bunches (float): bunches the fll is active on.
+%       fll_guard_bunches (float): the number of bunches surrounding the fll
+%                                  bunches for which feedback is switched off.
 %
 % example: mbf_growdamp_setup('x', 0.17)
+
 if strcmpi(mbf_axis, 'x') || strcmpi(mbf_axis, 'y') || strcmpi(mbf_axis, 'tx') || strcmpi(mbf_axis, 'ty')
     default_durations = [250, 500, 500, 2000];
     default_dwell = 1;
@@ -28,6 +38,8 @@ p.CaseSensitive = false;
 valid_durations = @(x) isnumeric(x) && length(x) == 4;
 valid_number = @(x) isnumeric(x);
 valid_sweep = @(x) isnumeric(x) && length(x) == 2;
+binary_string = {'yes', 'no'};
+
 addRequired(p, 'mbf_axis');
 addRequired(p, 'tune', valid_number);
 addParameter(p, 'durations', default_durations, valid_durations);
@@ -35,19 +47,29 @@ addParameter(p, 'dwell', default_dwell, valid_number);
 addParameter(p, 'tune_sweep_range', default_tune_sweep_range, valid_sweep);
 addParameter(p, 'tune_offset', default_tune_offset, valid_number);
 addParameter(p, 'excitation_level', default_excitation_level, valid_number);
+addParameter(p, 'fll_tracking', 'no', @(x) any(validatestring(x,binary_string)));
+addParameter(p, 'fll_bunches', 400, valid_number);
+addParameter(p, 'fll_guard_bunches', 10, valid_number);
+addParameter(p, 'single_mode', NaN, valid_number);
 
 parse(p, mbf_axis, tune, varargin{:});
 
-
 [~, harmonic_number, pv_names, trigger_inputs] = mbf_system_config;
 settings = p.Results;
+
+% Change the tune to be around the chosen mode.
+if ~isnan(settings.single_mode)
+    settings.tune = ...
+        settings.single_mode + mod(settings.tune,1);
+end %if
+
 % Generate the base PV name.
-pv_head = pv_names.hardware_names.(mbf_axis);
-if strcmp(mbf_axis, 'x') || strcmp(mbf_axis, 'y')
+pv_head = pv_names.hardware_names.(settings.mbf_axis);
+if strcmp(settings.mbf_axis, 'x') || strcmp(settings.mbf_axis, 'y')
     pv_head_mem = pv_names.hardware_names.('T');
-elseif strcmp(mbf_axis, 's')
+elseif strcmp(settings.mbf_axis, 's')
     pv_head_mem = pv_names.hardware_names.('L');
-elseif strcmp(mbf_axis, 'tx') || strcmp(mbf_axis, 'ty')
+elseif strcmp(settings.mbf_axis, 'tx') || strcmp(settings.mbf_axis, 'ty')
     pv_head_mem = pv_names.hardware_names.('lab');
 end %if
 %% Set up triggering
@@ -77,32 +99,32 @@ pause(1) % TODO look for system to be in bank 0.
 %% Set up banks
 % bunch output (0=off 1=FIR 2=NCO 3 =NCO+FIR 4=sweep 5=sweep+FIR 6=sweep+NCO 7=sweep+NCO+FIR)
 % bunch bank 1 (the excitation)
-mbf_set_bank(mbf_axis, 1, 4) %Sweep
+mbf_set_bank(settings.mbf_axis, 1, 4) %Sweep
 
 % bunch bank 2 (the feedback)
-mbf_set_bank(mbf_axis, 2, 1) %FIR
+mbf_set_bank(settings.mbf_axis, 2, 1) %FIR
 
 % bunch bank 0 (the resting condition)
-mbf_set_bank(mbf_axis, 0, 1) %FIR
+mbf_set_bank(settings.mbf_axis, 0, 1) %FIR
 
 %% Set up states
 % state 4
-mbf_set_state(mbf_axis, 4,  tune, 1, ...
+mbf_set_state(settings.mbf_axis, 4,  settings.tune, 1, ...
     [num2str(settings.excitation_level),'dB'], 'On', ...
     settings.durations(1), ...
     settings.dwell, 'Capture') %excitation
 % state 3
-mbf_set_state(mbf_axis, 3, tune, 1, ...
+mbf_set_state(settings.mbf_axis, 3, settings.tune, 1, ...
     '-48dB', 'Off', ...
     settings.durations(2), ...
     settings.dwell, 'Capture') %passive damping
 % state 2
-mbf_set_state(mbf_axis, 2, tune, 2, ...
+mbf_set_state(settings.mbf_axis, 2, settings.tune, 2, ...
     '-48dB', 'Off', ...
     settings.durations(3), ...
     settings.dwell, 'Capture') %active damping
 % state 1
-mbf_set_state(mbf_axis, 1, tune, 2, ...
+mbf_set_state(settings.mbf_axis, 1, settings.tune, 2, ...
     '-48dB', 'Off', ...
     settings.durations(4), ...
     settings.dwell, 'Discard') %Quiecent
@@ -113,9 +135,23 @@ mbf_get_then_put([pv_head pv_names.tails.Sequencer.start_state], 4);
 mbf_get_then_put([pv_head pv_names.tails.Sequencer.steady_state_bank], 'Bank 0');
 
 % set the super sequencer to scan all modes.
-mbf_get_then_put([pv_head pv_names.tails.Super_sequencer_count], harmonic_number);
+if isnan(p.Results.single_mode)
+    mbf_get_then_put([pv_head pv_names.tails.Super_sequencer_count], harmonic_number);
+else
+    mbf_get_then_put([pv_head pv_names.tails.Super_sequencer_count], 1);
+end %if
 
 
+if strcmp(p.Results.fll_tracking, 'yes')
+    mbf_fll_setup('x', p.Results.fll_bunches, p.Results.fll_guard_bunches)
+    name = pv_names.hardware_names.(settings.mbf_axis);
+    lcaPut([name, 'NCO2:TUNE_PLL_S'],'Follow');
+    lcaPut([name, 'NCO2:GAIN_DB_S'],-30);
+    fillx=lcaGet([name, 'BUN:1:SEQ:ENABLE_S']);
+    lcaPut([name, 'BUN:0:NCO2:ENABLE_S'],fillx)
+    lcaPut([name, 'BUN:1:NCO2:ENABLE_S'],fillx)
+    lcaPut([name, 'NCO2:ENABLE_S'],'On');
+end %if
 %% Set up data capture
 % Set the detector input to FIR
 mbf_get_then_put([pv_head pv_names.tails.Detector.source], 'FIR');
