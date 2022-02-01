@@ -1,10 +1,17 @@
-function [x_tune, y_tune, s_tune] = get_all_tunes
+function tunes = get_all_tunes(selected_axes)
 % captures the current tune on all MBF systems.
 % if the value is NaN the code will try again for up to 20 tries.
+%   Args:
+%       selected_axes(str): 'xys'
 %
-% Example: [x_tune, y_tune, s_tune] = get_all_tunes
+%   Returns:
+%       tunes(struct): tune and sideband values.
+%
+% Example: tunes = get_all_tunes('xy')
 
 % The while loops are there as for low currents the tune value is not always good.
+
+if contains(selected_axes, 'x')
 x_tune.tune = NaN;
 count_x = 0;
 while isnan(x_tune.tune)
@@ -20,6 +27,10 @@ while isnan(x_tune.tune)
         pause(0.3)
     end %if
 end %while
+tunes.x_tune = x_tune;
+end %if
+
+if contains(selected_axes, 'y')
 y_tune.tune = NaN;
 count_y = 0;
 while isnan(y_tune.tune)
@@ -35,6 +46,10 @@ while isnan(y_tune.tune)
         pause(0.3)
     end %if
 end %while
+tunes.y_tune = y_tune;
+end %if
+
+if contains(selected_axes, 's')
 s_tune.tune = NaN;
 count_s = 0;
 while isnan(s_tune.tune)
@@ -58,3 +73,5 @@ while isnan(s_tune.tune)
         pause(0.3)
     end %if
 end %while
+tunes.s_tune = s_tune;
+end %if
