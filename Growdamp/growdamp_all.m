@@ -5,7 +5,10 @@ function growdamp_all
 mbf_tools
 
 % Get the tunes
-[x_tune, y_tune, s_tune] = get_all_tunes;
+ tunes = get_all_tunes('xys');
+x_tune = tunes.x_tune;
+y_tune = tunes.y_tunes;
+s_tune = tunes_s_tunes;
 
 if isnan(x_tune.tune) || ...
     isnan(y_tune.tune) || ...

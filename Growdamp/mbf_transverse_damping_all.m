@@ -6,7 +6,9 @@ function [tdx, tdy] = mbf_transverse_damping_all(mbf_mode)
 mbf_tools
 
 % Get the tunes
-[x_tune, y_tune, ~] = get_all_tunes;
+ tunes = get_all_tunes('xys');
+x_tune = tunes.x_tune;
+y_tune = tunes.y_tunes;
 
 if isnan(x_tune.upper_sideband) || ...
     isnan(y_tune.upper_sideband) 
