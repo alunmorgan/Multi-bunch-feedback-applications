@@ -40,16 +40,23 @@ adv_fitting = p.Results.advanced_fitting;
 length_averaging = p.Results.length_averaging;
 
 harmonic_number = length(exp_data.fill_pattern);
+
+% Preallocation
+poly_data = NaN(harmonic_number,3,3);
+frequency_shifts = NaN(harmonic_number, 1);
+
+if ~isfield(exp_data, 'data') && isfield(exp_data, 'gddata')
+    exp_data.data = exp_data.gddata;
+end %if
+if ~isfield(exp_data, 'data')
+    return
+end %if
 % Sometimes there is a problem with data transfer. By truncating the data
 % length to a multiple of the harmonic number the analysis can proceed.
 exp_data.data = exp_data.data(1:end - rem(length(exp_data.data), harmonic_number));
 exp_data.data = exp_data.data(1:end - rem(length(exp_data.data), harmonic_number));
 exp_data.data = reshape(exp_data.data,[],harmonic_number)';
 n_modes = size(exp_data.data,1);
-
-% Preallocation
-poly_data = NaN(harmonic_number,3,3);
-frequency_shifts = NaN(harmonic_number, 1);
 
 % Find the idicies for the end of each period.
 try

@@ -1,5 +1,5 @@
 function [dr_passive, dr_active, error_passive, error_active, times, experimental_setup, extents] = ...
-    mbf_growdamp_archival_analysis(data_requested, anal_type, varargin)
+    mbf_growdamp_archival_analysis(data_requested, varargin)
 % Takes the data extracted by mbf_growdamp_archival_retreval and operates
 % across all datasets. Then plots the results.
 %
@@ -32,7 +32,7 @@ function [dr_passive, dr_active, error_passive, error_active, times, experimenta
 %         times (numeric vector): Datenums of the datasets.
 %         experimental_setup (structure): The setup parameters for the
 %                                         analysis.
-%         extents (structure): Contains the max and min values of the machine operating parameters. 
+%         extents (structure): Contains the max and min values of the machine operating parameters.
 %
 % Example:[dr_passive, dr_active, error_passive, error_active, times, experimental_setup, extents] = mbf_growdamp_archival_analysis(data_requested, 'average')
 
@@ -45,7 +45,7 @@ defaultAnalysisSetting = 0;
 p = inputParser;
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
 addRequired(p, 'data_requested',@iscell);
-addOptional(p, 'analysis_type', 'collate', @ischar)
+addParameter(p, 'analysis_type', 'collate', @ischar)
 addParameter(p, 'sweep_parameter', default_sweep_parameter, @ischar);
 addParameter(p, 'parameter_step', default_parameter_step_size, validScalarPosNum);
 addParameter(p, 'overrides', defaultOverrides);
@@ -53,7 +53,7 @@ addParameter(p,'advanced_fitting', defaultAnalysisSetting, @isnumeric);
 addParameter(p, 'debug', 0);
 p.PartialMatching = false;
 
-parse(p,data_requested, anal_type, varargin{:});
+parse(p,data_requested, varargin{:});
 
 anal_type = p.Results.analysis_type;
 sweep_parameter = p.Results.sweep_parameter;
@@ -77,13 +77,16 @@ for nd = length(data_requested):-1:1
     dr_active(nd,:) = fftshift(squeeze(-s_poly_data(:,3,1))');
     error_passive(nd,:) = squeeze(-s_poly_data(:,2,3))';
     error_active(nd,:) = squeeze(-s_poly_data(:,3,3))';
+    if isfield(data_requested{nd}, 'I_dcct5')
+        data_requested{nd}.current = data_requested{nd}.I_dcct5;
+    end %if
     if strcmp(anal_type, 'parameter_sweep') && nargin >2
         param(nd) = data_requested{nd}.(sweep_parameter);
     end %if
     fprintf('.')
 end %for
 fprintf('\n')
-    extents = growdamp_archive_calculate_extents(data_requested);
+extents = growdamp_archive_calculate_extents(data_requested);
 
 % Removing datasets whose mean error is < 0.02 for the passive section.
 error_av_p = mean(error_passive,2,'omitnan');
@@ -96,28 +99,30 @@ dr_active = dr_active(wanted,:);
 error_passive = error_passive(wanted,:);
 error_active = error_active(wanted,:);
 times = times(wanted);
-param = param(wanted);
+if strcmp(anal_type, 'parameter_sweep')
+    param = param(wanted);
+end %if
 
 
 experimental_setup.anal_type = anal_type;
-    if strcmp(anal_type, 'parameter_sweep')
-        experimental_setup.sweep_parameter = sweep_parameter;
-        experimental_setup.parameter_step_size = parameter_step_size;
-        if isempty(dr_passive)
-            disp('No data left. Try changing analysis settings.')
-            return
-        else
+if strcmp(anal_type, 'parameter_sweep')
+    experimental_setup.sweep_parameter = sweep_parameter;
+    experimental_setup.parameter_step_size = parameter_step_size;
+    if isempty(dr_passive)
+        disp('No data left. Try changing analysis settings.')
+        return
+    else
         [dr_passive, experimental_setup.param] = mbf_analysis_reorganise_for_parameter_sweep(dr_passive, param, parameter_step_size);
         [dr_active, ~] = mbf_analysis_reorganise_for_parameter_sweep(dr_active, param, parameter_step_size);
         [error_passive, ~] = mbf_analysis_reorganise_for_parameter_sweep(error_passive, param, parameter_step_size);
         [error_active, ~] = mbf_analysis_reorganise_for_parameter_sweep(error_active, param, parameter_step_size);
-        end %if
-    elseif strcmp(anal_type, 'average')
-        warning('Ignoring the last two parameters as "average" is set')
-        dr_passive = mean(dr_passive,1, 'omitnan');
-        dr_active = mean(dr_active,1, 'omitnan');
-        error_passive = mean(error_passive,1, 'omitnan'); %is it OK to just average the errors?
-        error_active = mean(errorr_active,1, 'omitnan');
     end %if
+elseif strcmp(anal_type, 'average')
+    warning('Ignoring the last two parameters as "average" is set')
+    dr_passive = mean(dr_passive,1, 'omitnan');
+    dr_active = mean(dr_active,1, 'omitnan');
+    error_passive = mean(error_passive,1, 'omitnan'); %is it OK to just average the errors?
+    error_active = mean(errorr_active,1, 'omitnan');
 end %if
+
 
