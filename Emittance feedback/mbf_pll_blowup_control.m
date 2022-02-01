@@ -6,6 +6,10 @@ addRequired(p, 'hemit_target', validScalarPosNum);
 addRequired(p, 'vemit_target', validScalarPosNum);
 parse(p,hemit_target,vemit_target);
 
+if lcaGet('SR-DI-DCCT-01:SIGNAL') < 1 %mA
+    disp('This needs to be run with beam. No changes have been made.')
+    return
+end %if
 existing_excitation_x = lcaGet('SR23C-DI-TMBF-01:X:NCO2:GAIN_DB_S');
 existing_excitation_y = lcaGet('SR23C-DI-TMBF-01:Y:NCO2:GAIN_DB_S');
 
