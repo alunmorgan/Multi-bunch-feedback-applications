@@ -10,7 +10,7 @@ function mbf_restore_pv(pv_name)
 [root_string, ~, ~, ~] = mbf_system_config;
 root_string = root_string{1};
 
-load(fullfile(root_string, 'captured_config', pv_name))
+load(fullfile(root_string, 'captured_config', pv_name), 'original_value')
 lcaPut(pv_name(1:end-4), original_value)
 
 

@@ -12,14 +12,17 @@ end
 
 start=lcaGet([name ':PLL:CTRL:TARGET_S']);
 phase=[(start-range):step:(start+range) (start+range):-step:(start-range)];
-for n=1:length(phase);
+mag = NaN(length(phase));
+iq = NaN(length(phase));
+f = NaN(length(phase));
+for n=1:length(phase)
     lcaPut([name ':PLL:CTRL:TARGET_S'],mod(phase(n)+180,360)-180) %the funny mod is required to get into the right range of -180 to +179
     pause(.2) %This will depend on the dwell time and PLL config, but works with the default
     mag(n)=lcaGet([name ':PLL:FILT:MAG']); %get magnitude
-    iq(n)=[1 i]*lcaGet({[name ':PLL:FILT:I'];[name ':PLL:FILT:Q']});
+    iq(n)=[1 1i]*lcaGet({[name ':PLL:FILT:I'];[name ':PLL:FILT:Q']});
     f(n)=lcaGet([name ':PLL:NCO:FREQ']);
 end
-[m,mi]=max(abs(mag));
+[~,mi]=max(abs(mag));
 peak=phase(mi);
 figure;
 plot(phase,mag,[peak peak],[min(mag) max(mag) ])

@@ -7,16 +7,18 @@ if iscell(tmp) == 0
         sel = 1;
     else
         sel  = [];
-    end
+    end %if
 else
     hsd = 1;
+    sel = NaN(length(tmp));
     for he = 1:length(tmp)
         if isempty(tmp{he}) == 0
             sel(hsd) = he;
             hsd = hsd +1;
-        end
-    end
+        end %if
+    end %for
+    sel(hsd:end) = [];
     if hsd == 1
         sel = [];
-    end
-end
+    end %if
+end %if

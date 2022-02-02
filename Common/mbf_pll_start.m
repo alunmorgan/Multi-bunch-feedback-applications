@@ -65,7 +65,7 @@ lcaPut([name ':PLL:CTRL:TARGET_S'],-180);
 % feedback has brought the tune to the desired value...)
 
 tune=lcaGet([name ':TUNE:CENTRE:TUNE'],1,'double');
-if isnan(tune);
+if isnan(tune)
     error('Tune fit invalid, cannot start PLL.')
     %tune=37.45;
 end

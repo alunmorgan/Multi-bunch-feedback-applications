@@ -89,6 +89,24 @@ names = cellstr(names);
 %% Finding the apropriate filetype in the list
 if strcmp(file_type,'dirs')
     dirs = names(dir_state == 1);
+    dot_ind = 0;
+    dot_dot_ind = 0;
+    for hd = 1:length(dirs)
+        % remove the . and .. found on linux systems.
+        if strcmp(dirs(hd),'.')
+            dot_ind = hd;
+        end %if
+        if strcmp(dirs(hd),'..')
+            dot_dot_ind = hd;
+        end %if
+    end %for
+    if dot_ind ~= 0 && dot_dot_ind ~= 0
+        dirs([dot_ind, dot_dot_ind]) = [];
+    elseif dot_ind == 0 && dot_dot_ind ~= 0
+        dirs(dot_dot_ind) = [];
+    elseif dot_ind ~= 0 && dot_dot_ind == 0
+        dirs(dot_ind) = [];
+    end %if
     if isempty(dirs)
         names = [];
         if quiet_flag ~= 1
@@ -107,13 +125,16 @@ else
         ind = regexpi(names,['\.' file_type '$']);
     end
     fk = 1;
+    ind2 = NaN(size(ind,1));
     for kjsd = 1:size(ind,1)
         if isempty(cell2mat(ind(kjsd))) ~= 1
             ind2(fk) = kjsd;
             fk = fk +1;
-        end
-    end
-    if exist('ind2','var') == 0
+        end %if
+    end %for
+    ind2(fk:end) = [];
+    
+    if fk == 1
         if quiet_flag ~= 1
             disp(['No files with extension ' file_type ' found']);
         end

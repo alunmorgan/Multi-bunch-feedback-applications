@@ -6,6 +6,7 @@ function mbf_spectrum_setup(mbf_axis)
 % Example mbf_spectrum_setup('x')
 
 [~, ~, pv_names, trigger_inputs] = mbf_system_config;
+pv_head = pv_names.hardware_names.(mbf_axis);
 
 % Disarm the sequencer and memory triggers
 mbf_get_then_put([pv_names.hardware_names.(mbf_axis) pv_names.tails.triggers.SEQ.disarm], 1)
