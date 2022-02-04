@@ -4,11 +4,16 @@ def mbfSystemConfig():
 
     # The first entry in root_path is the currently used location for capture.
     # Additional locations are for alternative archival locations only.
+    # FOR INITIAL LIVE TESTING THIS IS CHANGED TO A TEST FOLDER. FIXME
     root_path = [
-        "/dls/ops-data/Diagnostics/MBF/",
-        "/dls/ops-data/Diagnostics/TMBF/",
-        "/dls/ops-data/Diagnostics/LMBF/",
+        "/dls/ops-data/Diagnostics/TEST/",
     ]
+    
+    #root_path = [
+    #    "/dls/ops-data/Diagnostics/MBF/",
+    #    "/dls/ops-data/Diagnostics/TMBF/",
+    #    "/dls/ops-data/Diagnostics/LMBF/",
+    #]
     harmonic_number = 936
     pv_names = {}
     # Base PVs of the hardware.
