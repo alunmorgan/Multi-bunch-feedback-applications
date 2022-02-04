@@ -1,4 +1,13 @@
 function emittance_control_loop(selected_axis, emittance_target)
+% This changes the gain of the excitation for the selected axis in order to
+% reach the requested emittance target.
+% This presumes that mbf_emittance_setup has been run beforehand.
+%   Args:
+%       selected_axis(str): 'X' or 'Y'
+%       emittance_target(float): nm rad for horizontal, pm rad for vertical. 
+%
+% Example: emittance_control_loop('Y', 9)
+
 if strcmp(selected_axis, 'X')
     em_axis = 'H';
 elseif strcmp(selected_axis, 'Y')
