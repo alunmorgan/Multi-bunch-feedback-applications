@@ -1,4 +1,4 @@
-function mbf_pll_setup_blowup(mbf_axis, varargin)
+function mbf_emittance_setup(mbf_axis, varargin)
 % Sets up the Multibunch feedback system to run a frequency locked loop on a
 % single bunch in each plane. The use the tracked frequency to run an
 % oscillator on the sideband of the tune.
@@ -10,7 +10,7 @@ function mbf_pll_setup_blowup(mbf_axis, varargin)
 %                            for which the feedback is turned off. 
 %                            This is to reduce distortion of the monitored signal
 %
-% Example: mbf_pll_setup_blowup(mbf_axis)
+% Example: mbf_emittance_setup(mbf_axis)
 
 default_excitation = -60;
 default_fll_monitor_bunches=400;
@@ -39,7 +39,7 @@ leftSB = tunes.([mbf_axis, '_tune']).lower_sideband;
 % slightly higher frequency ~5MHz, where the amplifiers/stripline provide
 % better efficiency. This will produce more blowup per RF power.
 
-harmonic=10;
+harmonic = 10;
 lcaPut([mbf_name, 'NCO2:FREQ_S'], leftSB + harmonic);
 
 %% Setting up the NCO gains and setting the tune sweep to follow the FLL.
@@ -47,7 +47,7 @@ lcaPut([mbf_name, 'NCO2:TUNE_PLL_S'],'Follow');
 lcaPut([mbf_name, 'NCO2:GAIN_DB_S'],p.Results.excitation);
 
 %% Extracting the bunches the feedback is operating on 
-fillx=lcaGet([mbf_name, 'BUN:1:SEQ:ENABLE_S']);
+fillx = lcaGet([mbf_name, 'BUN:1:SEQ:ENABLE_S']);
 %% and applying the same mapping to the NCO
 lcaPut([mbf_name, 'BUN:0:NCO2:ENABLE_S'],fillx)
 lcaPut([mbf_name, 'BUN:1:NCO2:ENABLE_S'],fillx)

@@ -10,6 +10,7 @@ default_fll_min_magnitude = 0;
 default_fll_max_offset = 0.02;
 default_fll_nco_gain = -30; % in dB
 default_tune_override = NaN;
+default_fll_target_phase = 180;
 % For LMBF
 %  default_fll_ki =100; %safe also for for low charge, sharp resonance
 %     default_fll_kp = 0;
@@ -24,6 +25,7 @@ addParameter(p, 'fll_kp', default_fll_kp, validScalarNum);
 addParameter(p, 'fll_min_magnitude', default_fll_min_magnitude, validScalarNum);
 addParameter(p, 'fll_max_offset', default_fll_max_offset, validScalarPosNum);
 addParameter(p, 'fll_nco_gain', default_fll_nco_gain, validScalarNum);
+addParameter(p, 'fll_target_phase', default_fll_target_phase, validScalarNum);
 addParameter(p, 'tune_override', default_tune_override, validScalarNum);
 
 parse(p,name,varargin{:});
@@ -35,14 +37,12 @@ parse(p,name,varargin{:});
 if isnan(p.Results.tune_override)
     % Perform a TUNE sweep, record phase at tune peak and the tune value
     tune_frequency_from_sweep = lcaGet([name, ':TUNE:TUNE']);
-    tune_phase_from_sweep = lcaGet([name, ':TUNE:PHASE']);
-    if isnan(tune_frequency_from_sweep) || isnan(tune_phase_from_sweep)
+    if isnan(tune_frequency_from_sweep)
         error('Tune fit invalid, cannot start PLL.')
         return
     end %if
 else
     tune_frequency_from_sweep = p.Results.tune_override;
-    tune_phase_from_sweep = -180;
     disp(['Using tune override of ', num2str(p.Results.tune_override)])
 end %if
 
@@ -54,7 +54,7 @@ lcaPut([name ':PLL:NCO:ENABLE_S'],'Off');
 lcaPut([name ':PLL:CTRL:KI_S'],p.Results.fll_ki); 
 lcaPut([name ':PLL:CTRL:KP_S'],p.Results.fll_kp);
 lcaPut([name ':PLL:CTRL:MIN_MAG_S'],p.Results.fll_min_magnitude);
-lcaPut([name, ':PLL:CTRL:TARGET_S'], tune_phase_from_sweep)
+lcaPut([name, ':PLL:CTRL:TARGET_S'], p.Results.fll_target_phase)
 
 % Set up the NCO
 lcaPut([name ':PLL:NCO:GAIN_DB_S'],p.Results.fll_nco_gain);
@@ -69,7 +69,7 @@ lcaPut([name, ':PLL:CTRL:START_S.PROC'], 1)
 % Wait until PLL has locked (set lower bound to phase error?)
 t1 = now;
 while abs(abs(lcaGet([name, ':PLL:FILT:PHASE'])) - ...
-        abs( tune_phase_from_sweep)) > 1 % within one degree of target.
+        abs( p.Results.fll_target_phase)) > 1 % within one degree of target.
     time = (now - t1) *24* 3600;
     if time >10
         disp('Unable to lock within 10 seconds')
