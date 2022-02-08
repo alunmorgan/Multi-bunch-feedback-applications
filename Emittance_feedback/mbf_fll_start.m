@@ -15,7 +15,7 @@ p.StructExpand = false;
 p.CaseSensitive = false;
 addRequired(p, 'mbf_axis');
 addParameter(p, 'fllbunches', NaN);
-addParameter(p, 'guardbunches', NaN);
+addParameter(p, 'guardbunches', 2);
 
 parse(p, mbf_axis, varargin{:});
 

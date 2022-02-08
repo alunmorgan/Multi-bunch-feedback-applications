@@ -1,42 +1,78 @@
-function [iq,f,phase]=mbf_pll_peakfind(name,range,step)
-% function mbf_pll_peak(name,range)
+function fll_phase_scan = mbf_pll_peakfind(mbf_axis, varargin)
 %
-% name          <EPICS device>:<axis>
-% range         phase range id degree to search around current target phase
-% step          step in degree, default is 5 degrees
+%       Args:
+%           mbf_axis(str): 'x' or 'y'
+%           range(int): phase range in degree to search around the 
+%                       current target phase default is 80 degrees
+%           step(int): step in degree, default is 5 degrees
+%       Returns:
+%          fll_phase_scan(struct): structure containing captured data from 
+%                                  the MBF plus general operating 
+%                                  conditions of the machine 
+% 
+% Example: fll_phase_scan = mbf_pll_peakfind('x')
 
-% ugly check to see if step are specified
-if nargin<3
-    step=5;
-end
+default_step = 5;
+default_range = 80;
+
+validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
+p = inputParser;
+addRequired(p, 'name', @ischar);
+addParameter(p, 'range', default_range, validScalarPosNum);
+addParameter(p, 'step', default_step, validScalarPosNum);
+
+parse(p,mbf_axis,varargin{:});
+range = p.Results.range;
+step = p.Results.step;
+
+[root_path, ~, pv_names, ~] = mbf_system_config;
+fll_phase_scan = machine_environment;
+fll_phase_scan.ax_label = mbf_axis;
+fll_phase_scan.base_name = ['fll_phase_scan_' fll_phase_scan.ax_label '_axis'];
+name = pv_names.hardware_names.(mbf_axis);
 
 start=lcaGet([name ':PLL:CTRL:TARGET_S']);
-phase=[(start-range):step:(start+range) (start+range):-step:(start-range)];
-mag = NaN(length(phase));
-iq = NaN(length(phase));
-f = NaN(length(phase));
-for n=1:length(phase)
-    lcaPut([name ':PLL:CTRL:TARGET_S'],mod(phase(n)+180,360)-180) %the funny mod is required to get into the right range of -180 to +179
+fll_phase_scan.phase=[(start - range):step:(start + range) (start + range):-step:(start - range)];
+fll_phase_scan.mag = NaN(length(fll_phase_scan.phase));
+fll_phase_scan.iq = NaN(length(fll_phase_scan.phase));
+fll_phase_scan.f = NaN(length(fll_phase_scan.phase));
+for n=1:length(fll_phase_scan.phase)
+     %the funny mod is required to get into the right range of -180 to +179
+    lcaPut([name ':PLL:CTRL:TARGET_S'],mod(fll_phase_scan.phase(n)+180,360)-180)
     pause(.2) %This will depend on the dwell time and PLL config, but works with the default
-    mag(n)=lcaGet([name ':PLL:FILT:MAG']); %get magnitude
-    iq(n)=[1 1i]*lcaGet({[name ':PLL:FILT:I'];[name ':PLL:FILT:Q']});
-    f(n)=lcaGet([name ':PLL:NCO:FREQ']);
+    fll_phase_scan.mag(n)=lcaGet([name ':PLL:FILT:MAG']); %get magnitude
+    fll_phase_scan.iq(n)=[1 1i]*lcaGet({[name ':PLL:FILT:I'];[name ':PLL:FILT:Q']});
+    fll_phase_scan.f(n)=lcaGet([name ':PLL:NCO:FREQ']);
 end
-[~,mi]=max(abs(mag));
-peak=phase(mi);
-figure;
-plot(phase,mag,[peak peak],[min(mag) max(mag) ])
+
+save_to_archive(root_path{1}, fll_phase_scan)
+disp(['Data saved to ', fullfile(root_path{1}, fll_phase_scan.base_name)])
+
+[~,mi]=max(abs(fll_phase_scan.mag));
+peak=fll_phase_scan.phase(mi);
+figure('Position', [50, 100, 1024, 768])
+subplot(1,3,1)
+plot(fll_phase_scan.phase, fll_phase_scan.mag, ...
+     [peak peak],[min(fll_phase_scan.mag) max(fll_phase_scan.mag) ])
 xlabel('target phase')
-ylabel('PLL detected magnitude')
-figure
-plot(iq)
+ylabel('FLL detected magnitude')
+subplot(1,3,2)
+plot(fll_phase_scan.phase, fll_phase_scan.f)
+xlabel('target phase')
+ylabel('FLL detected frequency')
+title({'Phase scan of frequency locked loop'; ...
+    ['RF frequency = ', num2str(fll_phase_scan.RF)];...
+    ['Current = ', num2str(fll_phase_scan.current)]})
+subplot(1,3,3)
+plot(fll_phase_scan.iq)
+xlabel('i')
+ylabel('q')
 
 status=lcaGet([name ':PLL:CTRL:STATUS']);
 if strcmp(status,'Running')
-    lcaPut([name ':PLL:CTRL:TARGET_S'],mod(peak+180,360)-180);
-    display([name ':PLL:CTRL:TARGET_S set to ' num2str(mod(peak+180,360)-180)])
+    lcaPut([name ':PLL:CTRL:TARGET_S'],start);
 else
-    error('PLL stoped during phase sweep, please restart using mbf_pll_start')
+    error('PLL stopped during phase sweep, please restart using mbf_fll_start')
 end
     
 
