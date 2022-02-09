@@ -2,18 +2,22 @@ function fll_phase_scan = mbf_pll_peakfind(mbf_axis, varargin)
 %
 %       Args:
 %           mbf_axis(str): 'x' or 'y'
-%           range(int): phase range in degree to search around the 
+%           range(int): phase range in degree to search around the
 %                       current target phase default is 80 degrees
 %           step(int): step in degree, default is 5 degrees
 %       Returns:
-%          fll_phase_scan(struct): structure containing captured data from 
-%                                  the MBF plus general operating 
-%                                  conditions of the machine 
-% 
+%          fll_phase_scan(struct): structure containing captured data from
+%                                  the MBF plus general operating
+%                                  conditions of the machine
+%
 % Example: fll_phase_scan = mbf_pll_peakfind('x')
 
-default_step = 5;
-default_range = 80;
+default_step = 1;
+if strcmp(mbf_axis, 'x')
+    default_range = 80;
+elseif strcmp(mbf_axis, 'y')
+    default_range = 60;
+end %if
 
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
 p = inputParser;
@@ -32,12 +36,12 @@ fll_phase_scan.base_name = ['fll_phase_scan_' fll_phase_scan.ax_label '_axis'];
 name = pv_names.hardware_names.(mbf_axis);
 
 start=lcaGet([name ':PLL:CTRL:TARGET_S']);
-fll_phase_scan.phase=[(start - range):step:(start + range) (start + range):-step:(start - range)];
+fll_phase_scan.phase=[start:step:(start + range) (start + range):-step:(start - range) (start - range):step:(start+ range) (start+ range):-step:start ];
 fll_phase_scan.mag = NaN(length(fll_phase_scan.phase));
 fll_phase_scan.iq = NaN(length(fll_phase_scan.phase));
 fll_phase_scan.f = NaN(length(fll_phase_scan.phase));
 for n=1:length(fll_phase_scan.phase)
-     %the funny mod is required to get into the right range of -180 to +179
+    %the funny mod is required to get into the right range of -180 to +179
     lcaPut([name ':PLL:CTRL:TARGET_S'],mod(fll_phase_scan.phase(n)+180,360)-180)
     pause(.2) %This will depend on the dwell time and PLL config, but works with the default
     fll_phase_scan.mag(n)=lcaGet([name ':PLL:FILT:MAG']); %get magnitude
@@ -48,25 +52,7 @@ end
 save_to_archive(root_path{1}, fll_phase_scan)
 disp(['Data saved to ', fullfile(root_path{1}, fll_phase_scan.base_name)])
 
-[~,mi]=max(abs(fll_phase_scan.mag));
-peak=fll_phase_scan.phase(mi);
-figure('Position', [50, 100, 1024, 768])
-subplot(1,3,1)
-plot(fll_phase_scan.phase, fll_phase_scan.mag, ...
-     [peak peak],[min(fll_phase_scan.mag) max(fll_phase_scan.mag) ])
-xlabel('target phase')
-ylabel('FLL detected magnitude')
-subplot(1,3,2)
-plot(fll_phase_scan.phase, fll_phase_scan.f)
-xlabel('target phase')
-ylabel('FLL detected frequency')
-title({'Phase scan of frequency locked loop'; ...
-    ['RF frequency = ', num2str(fll_phase_scan.RF)];...
-    ['Current = ', num2str(fll_phase_scan.current)]})
-subplot(1,3,3)
-plot(fll_phase_scan.iq)
-xlabel('i')
-ylabel('q')
+f1 = fll_phase_scan_plotting(fll_phase_scan);
 
 status=lcaGet([name ':PLL:CTRL:STATUS']);
 if strcmp(status,'Running')
@@ -74,5 +60,5 @@ if strcmp(status,'Running')
 else
     error('PLL stopped during phase sweep, please restart using mbf_fll_start')
 end
-    
+
 

@@ -4,7 +4,7 @@ function fll_initialisation(name, varargin)
 % improve tracking. if signal is lost this process can be run again.
 % base          <EPICS device>:<axis>
 
-default_fll_ki = 1000; %safe also for for low charge, sharp resonance
+default_fll_ki = 1000; %safe also for for low charge, sharp resonance 
 default_fll_kp = 0;
 default_fll_min_magnitude = 0;
 default_fll_max_offset = 0.02;
