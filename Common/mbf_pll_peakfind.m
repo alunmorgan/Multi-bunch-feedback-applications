@@ -35,11 +35,20 @@ fll_phase_scan.ax_label = mbf_axis;
 fll_phase_scan.base_name = ['fll_phase_scan_' fll_phase_scan.ax_label '_axis'];
 name = pv_names.hardware_names.(mbf_axis);
 
+fll_phase_scan.scan_step = step;
+fll_phase_scan.scan_range = range;
+
+fll_phase_scan.mbf_fll.target_bunches = lcaGet([name, ':PLL:DET:BUNCHES_S']);
+fll_phase_scan.mbf_fll.gain = lcaGet([name, ':PLL:NCO:GAIN_DB_S']);
+fll_phase_scan.mbf_fll.target_phase = lcaGet([name, ':PLL:CTRL:TARGET_S']);
+fll_phase_scan.mbf_fll.KI = lcaGet([name, ':X:PLL:CTRL:KI_S']);
+fll_phase_scan.mbf_fll.KP = lcaGet([name, ':PLL:CTRL:KP_S']);
+
 start=lcaGet([name ':PLL:CTRL:TARGET_S']);
 fll_phase_scan.phase=[start:step:(start + range) (start + range):-step:(start - range) (start - range):step:(start+ range) (start+ range):-step:start ];
-fll_phase_scan.mag = NaN(length(fll_phase_scan.phase));
-fll_phase_scan.iq = NaN(length(fll_phase_scan.phase));
-fll_phase_scan.f = NaN(length(fll_phase_scan.phase));
+fll_phase_scan.mag = NaN(length(fll_phase_scan.phase),1);
+fll_phase_scan.iq = NaN(length(fll_phase_scan.phase),1);
+fll_phase_scan.f = NaN(length(fll_phase_scan.phase),1);
 for n=1:length(fll_phase_scan.phase)
     %the funny mod is required to get into the right range of -180 to +179
     lcaPut([name ':PLL:CTRL:TARGET_S'],mod(fll_phase_scan.phase(n)+180,360)-180)
