@@ -44,7 +44,9 @@ Additional to the data from the multi bunch hardware, more general machine param
 
 
 \chapter{Frontend phase scans}
-In order to work optimally the feedback systems need to be matched in timing/phase with the beam phase (not the RF phase). Conceptually this comprises a master phase shifter (LO) which moves all three systems and allows the complete system to be adjusted to changes in beam phase, combined with three subsidiary phase shifters, one for each axis to allow the axes to be individually tuned.
+In order to work optimally the feedback systems need to be matched in timing/phase with the beam phase (not the RF phase). Conceptually this comprises a master phase shifter (LO) which moves all three systems and allows the complete system to be adjusted to changes in beam phase, combined with three subsidiary phase shifters, one for each axis to allow the axes to be individually tuned in order to account for differences in the phase delay of the different chaannels. 
+
+The practical implementation will depend on the details of your frontend hardware. For example you may have automatic beam phase following which renders the LO phase scans largely redundent.
 \begin{figure}[hbt]
    \centering
     \begin{subfigure}[b]{0.45\textwidth}
@@ -90,7 +92,7 @@ Additionally, the timing of the clocks in the digital part of the system need to
 Typical output:
 
 Often you can just use \verb|BBBFE_LO_scan| to tune all four phase shifters, as one is aiming to have the peaks of the three curves at the same phase angle.
-
+Note: The Libera bunch by bunch frontend seems to get into problems when scanning the LO phase shifter. It is probably best not to use \verb|BBBFE_LO_scan| if you have that frontend.
 \section{Examples}
 
 Scan the local oscillator 45 degrees either side of 90 degrees. This is the first check to see if the three systems are aligned to the beam phase.
@@ -152,7 +154,7 @@ Typical output:
 \end{verbatim}
 
 \chapter{Growdamp}
-The measurement comprises a series of excitations at set frequencies followed by capture of the evolution of bunch centroid positions.
+The measurement comprises a series of excitations at set harmonics of the tune frequency followed by capture of the evolution of bunch centroid positions, both with and without feedback active.
 \section{Capturing data}
 The parameters for the length of excitation and  capture are set in \verb|mbf_growdamp_config.m|. The \verb|mbf_growdamp_setup| code sets up the hardware for the correct type of measurement. \verb|mbf_growdamp_capture| triggers the measurement, captures the data and stores it in the file structure defined in \verb|mbf_system_config|. Finally \verb|mbf_restore_all| returns the settings for the MBF system to their original states.
 
@@ -187,8 +189,36 @@ The parameters for the length of excitation and  capture are set in \verb|mbf_gr
     \end{subfigure}
     \caption{Code trees to restore the mbf system and analyse the data}\label{fig:growdamp_code_trees2}
 \end{figure}
+\chapter{Transverse damping}
 
-\section{Analysing saved data}
+\chapter{Emittance control}
+This uses one of the oscillators to excite the selected bunches at one of the sideband frequencies. This has the effect of blowing up the beam.
+\chapter{Bunch motion capture}
+The three systems are setup to be ready to capture on the next external trigger. Once that trigger arrives, the three systems simultaneously capture bunch centroid motion. This is useful for capturing injection transients. \verb|mbf_bunch_motion_setup| sets up all three systems to use the appropriate triggers. \verb|mbf_bunch_motion_capture| arms the systems, and once triggered by an external trigger, will capture and store the data. As with the growdamp application, \verb|mbf_restore_all| will bring the systems back to their original state.
+
+\begin{figure}[hbt]
+\centering
+    \begin{subfigure}[b]{0.3\textwidth}
+  \includegraphics[width=\textwidth]{mbf_bunch_motion_setup.pdf}\\
+  \caption{Code tree for bunch motion setup}\label{fig:code_tree_bunch_motion_setup}
+    \end{subfigure}
+       \begin{subfigure}[b]{0.6\textwidth}
+  \includegraphics[width=\textwidth]{mbf_bunch_motion_capture.pdf}\\
+  \caption{Code tree for bunch motion capture}\label{fig:code_tree_bunch_motion_capture}
+    \end{subfigure}
+    \caption{Code trees bunch motion}\label{fig:growdamp_archival_code_trees}
+\end{figure}
+
+\section{Examples}
+
+\begin{verbatim}
+mbf_bunch_motion_setup
+bunch_motion = mbf_bunch_motion_capture
+mbf_restore_all
+mbf_bunch_motion_plotting(bunch_motion)  <--- Experimental!
+\end{verbatim}
+
+\chapter{Analysing saved data}
 Although one can analyse the data imediately using \verb|mbf_growdamp_analysis|, it is often more useful to analyse a set of previously captured data. \verb|mbf_growdamp_archival_retrival| will return all the data sets within a user defined time period. These data sets can then be passed to \verb|mbf_growdamp_archival_analysis| where the data can either just be plotted for visual comparison, be averaged, or to be plotted against one of the machine parameters also stored in the data sets.
 
 \begin{figure}[hbt]
@@ -256,29 +286,6 @@ requested_data = mbf_growdamp_archival_retrieval('y', [now-5, now-1]);
 mbf_growdamp_archival_analysis(requested_data, 'parameter_sweep', 'current', 20)
 \end{verbatim}
 
-\chapter{Bunch motion capture}
-The three systems are setup to be ready to capture on the next external trigger. Once that trigger arrives, the three systems simultaneously capture bunch centroid motion. This is useful for capturing injection transients. \verb|mbf_bunch_motion_setup| sets up all three systems to use the appropriate triggers. \verb|mbf_bunch_motion_capture| arms the systems, and once triggered by an external trigger, will capture and store the data. As with the growdamp application, \verb|mbf_restore_all| will bring the systems back to their original state.
 
-\begin{figure}[hbt]
-\centering
-    \begin{subfigure}[b]{0.3\textwidth}
-  \includegraphics[width=\textwidth]{mbf_bunch_motion_setup.pdf}\\
-  \caption{Code tree for bunch motion setup}\label{fig:code_tree_bunch_motion_setup}
-    \end{subfigure}
-       \begin{subfigure}[b]{0.6\textwidth}
-  \includegraphics[width=\textwidth]{mbf_bunch_motion_capture.pdf}\\
-  \caption{Code tree for bunch motion capture}\label{fig:code_tree_bunch_motion_capture}
-    \end{subfigure}
-    \caption{Code trees bunch motion}\label{fig:growdamp_archival_code_trees}
-\end{figure}
-
-\section{Examples}
-
-\begin{verbatim}
-mbf_bunch_motion_setup
-bunch_motion = mbf_bunch_motion_capture
-mbf_restore_all
-mbf_bunch_motion_plotting(bunch_motion)  <--- Experimental!
-\end{verbatim}
 
 \end{document} 
