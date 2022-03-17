@@ -4,10 +4,11 @@ function fll_initialisation(name, varargin)
 % improve tracking. if signal is lost this process can be run again.
 % base          <EPICS device>:<axis>
 
-default_fll_ki = 1000; %safe also for for low charge, sharp resonance
+default_fll_ki = 1000; %safe also for for low charge, sharp resonance 
 default_fll_kp = 0;
 default_fll_min_magnitude = 0;
-default_fll_max_offset = 0.02;
+default_fll_locking_max_offset = 0.003;
+default_fll_tracking_max_offset = 0.02;
 default_fll_nco_gain = -30; % in dB
 default_tune_override = NaN;
 default_fll_target_phase = 180;
@@ -23,7 +24,8 @@ addRequired(p, 'name', @ischar);
 addParameter(p, 'fll_ki', default_fll_ki, validScalarPosNum);
 addParameter(p, 'fll_kp', default_fll_kp, validScalarNum);
 addParameter(p, 'fll_min_magnitude', default_fll_min_magnitude, validScalarNum);
-addParameter(p, 'fll_max_offset', default_fll_max_offset, validScalarPosNum);
+addParameter(p, 'fll_locking_max_offset', default_fll_locking_max_offset, validScalarPosNum);
+addParameter(p, 'fll_tracking_max_offset', default_fll_tracking_max_offset, validScalarPosNum);
 addParameter(p, 'fll_nco_gain', default_fll_nco_gain, validScalarNum);
 addParameter(p, 'fll_target_phase', default_fll_target_phase, validScalarNum);
 addParameter(p, 'tune_override', default_tune_override, validScalarNum);
@@ -59,8 +61,8 @@ lcaPut([name, ':PLL:CTRL:TARGET_S'], p.Results.fll_target_phase)
 % Set up the NCO
 lcaPut([name ':PLL:NCO:GAIN_DB_S'],p.Results.fll_nco_gain);
 lcaPut([name, ':PLL:NCO:FREQ_S'], tune_frequency_from_sweep)
-% Limit tune range of the NCO to +/- 0.002 for initial peak finding.
-lcaPut([name, ':PLL:CTRL:MAX_OFFSET_S'], 0.002)
+% Limit tune range of the NCO for initial peak finding.
+lcaPut([name, ':PLL:CTRL:MAX_OFFSET_S'], p.Results.fll_locking_max_offset)
 
 % Enable the NCO and PLL
 lcaPut([name ':PLL:NCO:ENABLE_S'],'On');
@@ -77,5 +79,5 @@ while abs(abs(lcaGet([name, ':PLL:FILT:PHASE'])) - ...
     end %if
 end %while
 % Once locked widen the NCO limits to max required for tracking
-lcaPut([name ':PLL:CTRL:MAX_OFFSET_S'],p.Results.fll_max_offset);
+lcaPut([name ':PLL:CTRL:MAX_OFFSET_S'],p.Results.fll_tracking_max_offset);
 

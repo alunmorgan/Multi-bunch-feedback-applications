@@ -14,6 +14,7 @@ function mbf_growdamp_setup(mbf_axis, tune, varargin)
 %       fll_bunches (float): bunches the fll is active on.
 %       fll_guard_bunches (float): the number of bunches surrounding the fll
 %                                  bunches for which feedback is switched off.
+%       single_mode(int): The mode you want to operate on.
 %
 % example: mbf_growdamp_setup('x', 0.17)
 
