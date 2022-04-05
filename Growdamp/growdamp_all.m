@@ -5,10 +5,10 @@ function growdamp_all
 mbf_tools
 
 % Get the tunes
- tunes = get_all_tunes('xys');
+tunes = get_all_tunes('xys');
 x_tune = tunes.x_tune;
-y_tune = tunes.y_tunes;
-s_tune = tunes_s_tunes;
+y_tune = tunes.y_tune;
+s_tune = tunes.s_tune;
 
 if isnan(x_tune.tune) || ...
     isnan(y_tune.tune) || ...
@@ -19,12 +19,15 @@ end %if
 
 mbf_growdamp_setup('x', x_tune.tune)
 growdamp_x = mbf_growdamp_capture('x');
+disp('Horizontal measurement done.');
 
 mbf_growdamp_setup('y', y_tune.tune)
 growdamp_y = mbf_growdamp_capture('y');
+disp('Vertical measurement done.');
 
 mbf_growdamp_setup('s', s_tune.tune)
 growdamp_s = mbf_growdamp_capture('s');
+disp('Longitudinal measurement done.');
 
 
 [poly_data_x, frequency_shifts_x] = mbf_growdamp_analysis(growdamp_x);
