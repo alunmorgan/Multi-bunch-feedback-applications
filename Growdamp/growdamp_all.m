@@ -20,7 +20,7 @@ mbf_tools
 
 % Get the tunes
 tunes = get_all_tunes(mbf_axis);
-tune = tunes.([mbf_axis,'_tune']);
+tune = tunes.([mbf_axis,'_tune']).tune;
 
 if isnan(tune)
     disp('Could not get all tune values')
