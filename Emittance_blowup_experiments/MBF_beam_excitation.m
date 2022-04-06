@@ -82,10 +82,11 @@ mbf_emittance_setup(mbf_axis, 'excitation', excitation_gain(1),...
 % plot_pinhole_image(emittance_blowup.pinhole2_image)
 
 %% Do measurement
+orig_gain = lcaGet([mbf_name, 'NCO2:GAIN_DB_S']);
+orig_freq = lcaGet([mbf_name, 'NCO2:FREQ_S']);
 
 if length(p.Results.excitation_gain) > 1
-    orig_gain = lcaGet([mbf_name, 'NCO2:GAIN_DB_S']);
-    
+        
     for whd = 1:length(p.Results.excitation_gain)        
         lcaPut([mbf_name, 'NCO2:GAIN_DB_S'],p.Results.harmonic + p.Results.excitation_gain(whd));        
         % There is an additional 5 second delay in the BPM capture function.
@@ -96,21 +97,19 @@ if length(p.Results.excitation_gain) > 1
         % emittance_blowup.pinhole1_image = get_Pinhole_image('SR01C-DI-DCAM-04');
         % emittance_blowup.pinhole2_image = get_Pinhole_image('SR01C-DI-DCAM-05');
     end %for
-    
-    lcaPut([mbf_name, 'NCO2:GAIN_DB_S'], orig_gain)
-    
+        
 elseif length(p.Results.excitation_frequency) > 1
-    orig_freq = lcaGet([mbf_name, 'NCO2:FREQ_S']);
+    
     
     for nwa = 1:length(p.Results.excitation_frequency)        
         lcaPut([mbf_name, 'NCO2:FREQ_S'], p.Results.excitation_frequency(nwa));        
         % There is an additional 5 second delay in the BPM capture function.
         emittance_blowup.scan{nwa}.bpm_data = get_BPM_FA_data(p.Results.BPM_data_capture_length);
+        emittance_blowup.scan{nwa}.mbf_data_x = lcaGet('SR23C-DI-TMBF-01:X:ADC:MMS:STD');
+        emittance_blowup.scan{nwa}.mbf_data_y = lcaGet('SR23C-DI-TMBF-01:Y:ADC:MMS:STD');
         emittance_blowup.scan{nwa}.pinhole_data = pinhole_cal_capture('pinhole3', 'no','save_data', 'no');   
     end %for
-    
-    lcaPut([mbf_name, 'NCO2:FREQ_S'], orig_freq)
-    
+        
 else
     emittance_blowup.scan{1}.bpm_data = get_BPM_FA_data(p.Results.BPM_data_capture_length);
     emittance_blowup.scan{1}.pinhole_data = pinhole_cal_capture('pinhole3', 'no','save_data', 'no');
@@ -118,6 +117,9 @@ else
 %     emittance_blowup.pinhole2_image = get_Pinhole_image('SR01C-DI-DCAM-05');
     
 end %if
+
+lcaPut([mbf_name, 'NCO2:GAIN_DB_S'], orig_gain)
+lcaPut([mbf_name, 'NCO2:FREQ_S'], orig_freq)
 
 %% optional loop for gain scan
 % if length(p.Results.excitation_gain) > 1
@@ -147,7 +149,7 @@ end %if
 
 bpm_nr = 1;
 
-for i = 1:length(scan)
+for i = 1:length(emittance_blowup.scan)
         
     emittance_blowup.beam_oscillation_x(i) = std(emittance_blowup.scan{i}.bpm_data.X(bpm_nr,:));
     emittance_blowup.beam_oscillation_y(i) = std(emittance_blowup.scan{i}.bpm_data.Y(bpm_nr,:));
