@@ -17,6 +17,12 @@ if isnan(x_tune.tune) || ...
     return
 end %if
 
+% Get feedback gains before measurement
+orig_gain_x = lcaGet('SR23C-DI-TMBF-01:X:FIR:GAIN_S');
+orig_gain_y = lcaGet('SR23C-DI-TMBF-01:Y:FIR:GAIN_S');
+orig_gain_s = lcaGet('SR23C-DI-LMBF-01:IQ:FIR:GAIN_S');
+
+% Run measurements
 mbf_growdamp_setup('x', x_tune.tune)
 growdamp_x = mbf_growdamp_capture('x');
 disp('Horizontal measurement done.');
@@ -45,8 +51,8 @@ mbf_growdamp_plot_summary(poly_data_s, frequency_shifts_s,...
 % Programatically press the Feedback and tune button on each system
 % and set the feedback gain to 0dB.
 setup_operational_mode("x", "Feedback")
-lcaPut('SR23C-DI-TMBF-01:X:FIR:GAIN_S', '0dB')
+lcaPut('SR23C-DI-TMBF-01:X:FIR:GAIN_S', orig_gain_x)
 setup_operational_mode("y", "Feedback")
-lcaPut('SR23C-DI-TMBF-01:Y:FIR:GAIN_S', '0dB')
+lcaPut('SR23C-DI-TMBF-01:Y:FIR:GAIN_S', orig_gain_y)
 setup_operational_mode("s", "Feedback")
-lcaPut('SR23C-DI-LMBF-01:IQ:FIR:GAIN_S', '0dB')
+lcaPut('SR23C-DI-LMBF-01:IQ:FIR:GAIN_S', orig_gain_s)
