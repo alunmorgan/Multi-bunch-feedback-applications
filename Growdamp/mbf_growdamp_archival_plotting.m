@@ -21,9 +21,9 @@ function mbf_growdamp_archival_plotting(dr_passive, dr_active, error_passive, er
 if isempty(times)
     return
 end %if
-if length(times) < 2
-    return
-end %if
+% if length(times) < 2
+%     return
+% end %if
 
 [~, harmonic_number, ~, ~] = mbf_system_config;
 x_plt_axis = (0:harmonic_number-1) - harmonic_number/2;
