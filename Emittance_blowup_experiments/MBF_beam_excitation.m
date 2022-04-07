@@ -68,54 +68,43 @@ mbf_name = mbf_axis_to_name(mbf_axis);
 mbf_emittance_setup(mbf_axis, 'excitation', excitation_gain(1),...
     'excitation_frequency',excitation_frequency(1), 'harmonic', p.Results.harmonic)
 
-%% Capture data
-% % There is an additional 5 second delay in the BPM capture function.
-% Move this inside loop
-% emittance_blowup.bpm_data = get_BPM_FA_data(p.Results.BPM_data_capture_length);
-% emittance_blowup.pinhole_data = pinhole_cal_capture('pinhole3', 'no','save_data', 'no');
-% emittance_blowup.pinhole1_image = get_Pinhole_image('SR01C-DI-DCAM-04');
-% emittance_blowup.pinhole2_image = get_Pinhole_image('SR01C-DI-DCAM-05');
-
-%plotting
-% plot_BPM_FA_data(emittance_blowup.bpm_data)
-% plot_pinhole_image(emittance_blowup.pinhole1_image)
-% plot_pinhole_image(emittance_blowup.pinhole2_image)
-
 %% Do measurement
 orig_gain = lcaGet([mbf_name, 'NCO2:GAIN_DB_S']);
 orig_freq = lcaGet([mbf_name, 'NCO2:FREQ_S']);
 
 if length(p.Results.excitation_gain) > 1
-        
-    for whd = 1:length(p.Results.excitation_gain)        
-        lcaPut([mbf_name, 'NCO2:GAIN_DB_S'],p.Results.harmonic + p.Results.excitation_gain(whd));        
+    
+    for whd = 1:length(p.Results.excitation_gain)
+        lcaPut([mbf_name, 'NCO2:GAIN_DB_S'],p.Results.harmonic + p.Results.excitation_gain(whd));
         % There is an additional 5 second delay in the BPM capture function.
         emittance_blowup.scan{whd}.bpm_data = get_BPM_FA_data(p.Results.BPM_data_capture_length);
-        emittance_blowup.scan{whd}.pinhole_data = pinhole_cal_capture('pinhole3', 'no','save_data', 'no');
-        %emittance_blowup.gain_scan{whd}.bpm_data = get_BPM_FA_data(p.Results.BPM_data_capture_length);
-        %emittance_blowup.gain_scan{whd}.pinhole_data = pinhole_cal_capture('pinhole3', 'no','save_data', 'no');
-        % emittance_blowup.pinhole1_image = get_Pinhole_image('SR01C-DI-DCAM-04');
-        % emittance_blowup.pinhole2_image = get_Pinhole_image('SR01C-DI-DCAM-05');
+        emittance_blowup.scan{whd}.pinhole_settings = get_pinhole_settings;
+        emittance_blowup.scan{whd}.pinhole1_image = get_pinhole_image('SR01C-DI-DCAM-04');
+        emittance_blowup.scan{whd}.pinhole2_image = get_pinhole_image('SR01C-DI-DCAM-05');
+        emittance_blowup.scan{whd}.beam_sizes = get_beam_sizes;
+        emittance_blowup.scan{whd}.emittance = get_emittance;
     end %for
-        
+    
 elseif length(p.Results.excitation_frequency) > 1
-    
-    
-    for nwa = 1:length(p.Results.excitation_frequency)        
-        lcaPut([mbf_name, 'NCO2:FREQ_S'], p.Results.excitation_frequency(nwa));        
+    for nwa = 1:length(p.Results.excitation_frequency)
+        lcaPut([mbf_name, 'NCO2:FREQ_S'], p.Results.excitation_frequency(nwa));
         % There is an additional 5 second delay in the BPM capture function.
         emittance_blowup.scan{nwa}.bpm_data = get_BPM_FA_data(p.Results.BPM_data_capture_length);
         emittance_blowup.scan{nwa}.mbf_data_x = lcaGet('SR23C-DI-TMBF-01:X:ADC:MMS:STD');
         emittance_blowup.scan{nwa}.mbf_data_y = lcaGet('SR23C-DI-TMBF-01:Y:ADC:MMS:STD');
-        emittance_blowup.scan{nwa}.pinhole_data = pinhole_cal_capture('pinhole3', 'no','save_data', 'no');   
-    end %for
-        
+        emittance_blowup.scan{whd}.pinhole_settings = get_pinhole_settings;
+        emittance_blowup.scan{whd}.pinhole1_image = get_pinhole_image('SR01C-DI-DCAM-04');
+        emittance_blowup.scan{whd}.pinhole2_image = get_pinhole_image('SR01C-DI-DCAM-05');
+        emittance_blowup.scan{whd}.beam_sizes = get_beam_sizes;
+        emittance_blowup.scan{whd}.emittance = get_emittance;
+    end %for  
 else
     emittance_blowup.scan{1}.bpm_data = get_BPM_FA_data(p.Results.BPM_data_capture_length);
-    emittance_blowup.scan{1}.pinhole_data = pinhole_cal_capture('pinhole3', 'no','save_data', 'no');
-%     emittance_blowup.pinhole1_image = get_Pinhole_image('SR01C-DI-DCAM-04');
-%     emittance_blowup.pinhole2_image = get_Pinhole_image('SR01C-DI-DCAM-05');
-    
+    emittance_blowup.scan{whd}.pinhole_settings = get_pinhole_settings;
+    emittance_blowup.scan{whd}.pinhole1_image = get_pinhole_image('SR01C-DI-DCAM-04');
+    emittance_blowup.scan{whd}.pinhole2_image = get_pinhole_image('SR01C-DI-DCAM-05');
+    emittance_blowup.scan{whd}.beam_sizes = get_beam_sizes;
+    emittance_blowup.scan{whd}.emittance = get_emittance;
 end %if
 
 lcaPut([mbf_name, 'NCO2:GAIN_DB_S'], orig_gain)
@@ -147,37 +136,15 @@ lcaPut([mbf_name, 'NCO2:FREQ_S'], orig_freq)
 
 %% Calculate output
 
-bpm_nr = 1;
+bpm_number = 1;
 
 for i = 1:length(emittance_blowup.scan)
-        
-    emittance_blowup.beam_oscillation_x(i) = std(emittance_blowup.scan{i}.bpm_data.X(bpm_nr,:));
-    emittance_blowup.beam_oscillation_y(i) = std(emittance_blowup.scan{i}.bpm_data.Y(bpm_nr,:));
+    emittance_blowup.beam_oscillation_x(i) = std(emittance_blowup.scan{i}.bpm_data.X(bpm_number,:));
+    emittance_blowup.beam_oscillation_y(i) = std(emittance_blowup.scan{i}.bpm_data.Y(bpm_number,:));
     
-    emittance_blowup.emittance_x(i) = emittance_blowup.scan{i}.pinhole_data.hemit;
-    emittance_blowup.emittance_y(i) = emittance_blowup.scan{i}.pinhole_data.veimt;
-    
-end
-
-%% Plot results
-
-figure(1)
-yyaxis left
-plot(excitation_frequency,emittance_blowup.beam_oscillation_x.*1e-3,'.-')
-xlabel('Excitation frequency [tune]')
-ylabel('Hor. RMS oscillation [\mum]')
-yyaxis right
-plot(excitation_frequency,emittance_blowup.emittance_x,'.-')
-ylabel('Hor. emittance [nm rad]')
-
-figure(2)
-yyaxis left
-plot(excitation_frequency,emittance_blowup.beam_oscillation_y.*1e-3,'.-')
-xlabel('Excitation frequency [tune]')
-ylabel('Ver. RMS oscillation [\mum]')
-yyaxis right
-plot(excitation_frequency,emittance_blowup.emittance_y,'.-')
-ylabel('Ver. emittance [pm rad]')
+    emittance_blowup.emittance_x(i) = emittance_blowup.scan{i}.emittance.hemit;
+    emittance_blowup.emittance_y(i) = emittance_blowup.scan{i}.emittance.veimt;   
+end %for
 
 %% saving the data to a file
 if strcmp(mbf_axis, 'x') || strcmp(mbf_axis, 'y')|| strcmp(mbf_axis, 's')
@@ -189,7 +156,6 @@ if strcmp(mbf_axis, 'x') || strcmp(mbf_axis, 'y')|| strcmp(mbf_axis, 's')
         save(additional_save_location, emittance_blowup)
     end %if
 end %if
-
 
 if nargout == 1
     varargout{1} = emittance_blowup;
