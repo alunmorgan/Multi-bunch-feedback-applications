@@ -112,18 +112,6 @@ end %if
 lcaPut([mbf_name, 'NCO2:GAIN_DB_S'], orig_gain)
 lcaPut([mbf_name, 'NCO2:FREQ_S'], orig_freq)
 
-%% Calculate output
-
-bpm_number = 1;
-
-for i = 1:length(emittance_blowup.scan)
-    emittance_blowup.beam_oscillation_x(i) = std(emittance_blowup.scan{i}.bpm_data.X(bpm_number,:));
-    emittance_blowup.beam_oscillation_y(i) = std(emittance_blowup.scan{i}.bpm_data.Y(bpm_number,:));
-    
-    emittance_blowup.emittance_x(i) = emittance_blowup.scan{i}.emittance.hemit;
-    emittance_blowup.emittance_y(i) = emittance_blowup.scan{i}.emittance.veimt;
-end %for
-
 %% saving the data to a file
 if strcmp(mbf_axis, 'x') || strcmp(mbf_axis, 'y')|| strcmp(mbf_axis, 's')
     %     only save if not on test system
