@@ -52,6 +52,7 @@ emittance_blowup.base_name = ['emittance_blowup_' emittance_blowup.ax_label '_ax
 % Excitation frequency and gain
 emittance_blowup.excitation_gain = excitation_gain;
 emittance_blowup.excitation_frequency = excitation_frequency;
+emittance_blowup.harmonic = p.Results.harmonic;
 
 % Tune sweeps (do we need all of these?)
 emittance_blowup.tune_x_sweep = lcaGet('SR23C-DI-TMBF-01:X:TUNE:DMAGNITUDE');
