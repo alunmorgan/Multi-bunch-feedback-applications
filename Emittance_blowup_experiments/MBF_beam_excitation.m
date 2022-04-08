@@ -73,8 +73,8 @@ mbf_emittance_setup(mbf_axis, 'excitation', excitation_gain(1),...
 orig_gain = lcaGet([mbf_name, 'NCO2:GAIN_DB_S']);
 orig_freq = lcaGet([mbf_name, 'NCO2:FREQ_S']);
 
+% gain scan
 if length(p.Results.excitation_gain) > 1
-    
     for whd = 1:length(p.Results.excitation_gain)
         lcaPut([mbf_name, 'NCO2:GAIN_DB_S'],p.Results.harmonic + p.Results.excitation_gain(whd));
         % There is an additional 5 second delay in the BPM capture function.
@@ -86,6 +86,7 @@ if length(p.Results.excitation_gain) > 1
         emittance_blowup.scan{whd}.emittance = get_emittance;
     end %for
     
+% frequency scan
 elseif length(p.Results.excitation_frequency) > 1
     for nwa = 1:length(p.Results.excitation_frequency)
         lcaPut([mbf_name, 'NCO2:FREQ_S'], p.Results.excitation_frequency(nwa));
@@ -98,7 +99,7 @@ elseif length(p.Results.excitation_frequency) > 1
         emittance_blowup.scan{nwa}.pinhole2_image = get_pinhole_image('SR01C-DI-DCAM-05');
         emittance_blowup.scan{nwa}.beam_sizes = get_beam_sizes;
         emittance_blowup.scan{nwa}.emittance = get_emittance;
-    end %for  
+    end %for
 else
     emittance_blowup.scan{1}.bpm_data = get_BPM_FA_data(p.Results.BPM_data_capture_length);
     emittance_blowup.scan{1}.pinhole_settings = get_pinhole_settings;
@@ -111,30 +112,6 @@ end %if
 lcaPut([mbf_name, 'NCO2:GAIN_DB_S'], orig_gain)
 lcaPut([mbf_name, 'NCO2:FREQ_S'], orig_freq)
 
-%% optional loop for gain scan
-% if length(p.Results.excitation_gain) > 1
-%     orig_gain = lcaGet([mbf_name, 'NCO2:GAIN_DB_S']);
-%     for whd = 1:length(p.Results.excitation_gain)
-%         lcaPut([mbf_name, 'NCO2:GAIN_DB_S'],p.Results.harmonic + p.Results.excitation_gain(whd));
-%         % There is an additional 5 second delay in the BPM capture function.
-%         emittance_blowup.gain_scan{whd}.bpm_data = get_BPM_FA_data(p.Results.BPM_data_capture_length);
-%         emittance_blowup.gain_scan{whd}.pinhole_data = pinhole_cal_capture('pinhole3', 'no','save_data', 'no');
-%     end %for
-%     lcaPut([mbf_name, 'NCO2:GAIN_DB_S'], orig_gain)
-% end %if
-
-%% optional loop for frequency scan
-% if length(p.Results.excitation_frequency) > 1
-%     orig_freq = lcaGet([mbf_name, 'NCO2:FREQ_S']);
-%     for nwa = 1:length(p.Results.excitation_frequency)
-%         lcaPut([mbf_name, 'NCO2:FREQ_S'], p.Results.excitation_frequency(nwa));
-%         % There is an additional 5 second delay in the BPM capture function.
-%         emittance_blowup.freq_scan{nwa}.bpm_data = get_BPM_FA_data(p.Results.BPM_data_capture_length);
-%         emittance_blowup.freq_scan{nwa}.pinhole_data = pinhole_cal_capture('pinhole3', 'no','save_data', 'no');
-%     end %for
-%     lcaPut([mbf_name, 'NCO2:FREQ_S'], orig_freq)
-% end %if
-
 %% Calculate output
 
 bpm_number = 1;
@@ -144,7 +121,7 @@ for i = 1:length(emittance_blowup.scan)
     emittance_blowup.beam_oscillation_y(i) = std(emittance_blowup.scan{i}.bpm_data.Y(bpm_number,:));
     
     emittance_blowup.emittance_x(i) = emittance_blowup.scan{i}.emittance.hemit;
-    emittance_blowup.emittance_y(i) = emittance_blowup.scan{i}.emittance.veimt;   
+    emittance_blowup.emittance_y(i) = emittance_blowup.scan{i}.emittance.veimt;
 end %for
 
 %% saving the data to a file
