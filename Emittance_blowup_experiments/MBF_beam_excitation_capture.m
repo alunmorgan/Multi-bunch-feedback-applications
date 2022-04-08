@@ -1,4 +1,4 @@
-function varargout = MBF_beam_excitation(mbf_axis, excitation_gain, excitation_frequency, varargin)
+function varargout = MBF_beam_excitation_capture(mbf_axis, excitation_gain, excitation_frequency, varargin)
 % Sets up the FLL with an additional excitation at a user defined gain and
 % frequency/tune.
 %   Args:
