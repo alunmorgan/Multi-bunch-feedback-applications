@@ -92,19 +92,19 @@ elseif length(p.Results.excitation_frequency) > 1
         emittance_blowup.scan{nwa}.bpm_data = get_BPM_FA_data(p.Results.BPM_data_capture_length);
         emittance_blowup.scan{nwa}.mbf_data_x = lcaGet('SR23C-DI-TMBF-01:X:ADC:MMS:STD');
         emittance_blowup.scan{nwa}.mbf_data_y = lcaGet('SR23C-DI-TMBF-01:Y:ADC:MMS:STD');
-        emittance_blowup.scan{whd}.pinhole_settings = get_pinhole_settings;
-        emittance_blowup.scan{whd}.pinhole1_image = get_pinhole_image('SR01C-DI-DCAM-04');
-        emittance_blowup.scan{whd}.pinhole2_image = get_pinhole_image('SR01C-DI-DCAM-05');
-        emittance_blowup.scan{whd}.beam_sizes = get_beam_sizes;
-        emittance_blowup.scan{whd}.emittance = get_emittance;
+        emittance_blowup.scan{nwa}.pinhole_settings = get_pinhole_settings;
+        emittance_blowup.scan{nwa}.pinhole1_image = get_pinhole_image('SR01C-DI-DCAM-04');
+        emittance_blowup.scan{nwa}.pinhole2_image = get_pinhole_image('SR01C-DI-DCAM-05');
+        emittance_blowup.scan{nwa}.beam_sizes = get_beam_sizes;
+        emittance_blowup.scan{nwa}.emittance = get_emittance;
     end %for  
 else
     emittance_blowup.scan{1}.bpm_data = get_BPM_FA_data(p.Results.BPM_data_capture_length);
-    emittance_blowup.scan{whd}.pinhole_settings = get_pinhole_settings;
-    emittance_blowup.scan{whd}.pinhole1_image = get_pinhole_image('SR01C-DI-DCAM-04');
-    emittance_blowup.scan{whd}.pinhole2_image = get_pinhole_image('SR01C-DI-DCAM-05');
-    emittance_blowup.scan{whd}.beam_sizes = get_beam_sizes;
-    emittance_blowup.scan{whd}.emittance = get_emittance;
+    emittance_blowup.scan{1}.pinhole_settings = get_pinhole_settings;
+    emittance_blowup.scan{1}.pinhole1_image = get_pinhole_image('SR01C-DI-DCAM-04');
+    emittance_blowup.scan{1}.pinhole2_image = get_pinhole_image('SR01C-DI-DCAM-05');
+    emittance_blowup.scan{1}.beam_sizes = get_beam_sizes;
+    emittance_blowup.scan{1}.emittance = get_emittance;
 end %if
 
 lcaPut([mbf_name, 'NCO2:GAIN_DB_S'], orig_gain)
