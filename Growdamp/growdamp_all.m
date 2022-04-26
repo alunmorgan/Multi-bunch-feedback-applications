@@ -57,3 +57,4 @@ elseif strcmp(mbf_axis, 'y')
 elseif strcmp(mbf_axis, 's')
     lcaPut('SR23C-DI-LMBF-01:IQ:FIR:GAIN_S', orig_fir_gain)
 end %if
+
