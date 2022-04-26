@@ -25,3 +25,4 @@ for n=1:n_bpms
     output.(bpm_name).C = squeeze(BPM_TbT_data(n, 6, :));
     output.(bpm_name).D = squeeze(BPM_TbT_data(n, 7, :));
 end
+
