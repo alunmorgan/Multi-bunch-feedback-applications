@@ -5,11 +5,12 @@ function image = get_pinhole_data_after_trigger(channel)
 % values match.
 original_imagewidth = lcaGet([channel ':IMAGEWIDTH']);
 lcaPut([channel ':IMAGEWIDTH'], 1024)
+image_pv =[channel ':PROXY:DATA'];
+lcaSetMonitor(image_pv)
+lcaNewMonitorWait(image_pv) % initial data
+lcaNewMonitorWait(image_pv) % experimental data
 
-lcaSetMonitor(pv)
-lcaNewMonitorWait(pv)
-
-[image.image, image.timestamp] = lcaGet([channel ':PROXY:DATA'],0,'byte');
+[image.image, image.timestamp] = lcaGet(image_pv,0,'byte');
 im_temp = lcaGet({[channel ':WIDTH'];...
                   [channel ':HEIGHT'];...
                   [channel ':XSCALEMAX'];...
