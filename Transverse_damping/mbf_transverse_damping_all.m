@@ -25,7 +25,7 @@ mbf_tools
 
 % Get the tunes
  tunes = get_all_tunes(mbf_axis);
-tune = tunes.(['mbf_axis','_tune']);
+tune = tunes.([mbf_axis,'_tune']);
 
 if isnan(tune.upper_sideband)
     disp('Could not get the tune values')
@@ -39,6 +39,7 @@ td = mbf_transverse_damping_capture(mbf_axis);
 % Programatically press the Feedback and tune button on each system
 % and set the feedback gain to 0dB.
 setup_operational_mode(mbf_axis, "Feedback")
+% FIXME - remove hard coded paths.
 lcaPut(['SR23C-DI-TMBF-01:',upper(mbf_axis),':FIR:GAIN_S', '0dB'])
 
 
