@@ -76,9 +76,14 @@ orig_freq = lcaGet([mbf_name, 'NCO2:FREQ_S']);
 % gain scan
 if length(p.Results.excitation_gain) > 1
     for whd = 1:length(p.Results.excitation_gain)
+        lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 0); 
         lcaPut([mbf_name, 'NCO2:GAIN_DB_S'],p.Results.harmonic + p.Results.excitation_gain(whd));
-        % There is an additional 5 second delay in the BPM capture function.
-        emittance_blowup.scan{whd}.bpm_data = get_BPM_FA_data(p.Results.BPM_data_capture_length);
+        arm_BPM_TbT_capture
+        pause(5) % Wait for emittance to stablise
+        lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 1);
+        emittance_blowup.scan{whd}.bpm_data = get_BPM_TbT_data;
+        emittance_blowup.scan{nwa}.mbf_data_x = lcaGet('SR23C-DI-TMBF-01:X:ADC:MMS:STD');
+        emittance_blowup.scan{nwa}.mbf_data_y = lcaGet('SR23C-DI-TMBF-01:Y:ADC:MMS:STD');
         emittance_blowup.scan{whd}.pinhole_settings = get_pinhole_settings;
         emittance_blowup.scan{whd}.pinhole1_image = get_pinhole_image('SR01C-DI-DCAM-04');
         emittance_blowup.scan{whd}.pinhole2_image = get_pinhole_image('SR01C-DI-DCAM-05');
@@ -89,9 +94,13 @@ if length(p.Results.excitation_gain) > 1
 % frequency scan
 elseif length(p.Results.excitation_frequency) > 1
     for nwa = 1:length(p.Results.excitation_frequency)
+        lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 0); 
         lcaPut([mbf_name, 'NCO2:FREQ_S'], p.Results.excitation_frequency(nwa));
-        % There is an additional 5 second delay in the BPM capture function.
-        emittance_blowup.scan{nwa}.bpm_data = get_BPM_FA_data(p.Results.BPM_data_capture_length);
+        arm_BPM_TbT_capture
+        pause(1)
+        lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 1);
+        pause(6) % Wait for emittance to stablise
+        emittance_blowup.scan{nwa}.bpm_data = get_BPM_TbT_data;
         emittance_blowup.scan{nwa}.mbf_data_x = lcaGet('SR23C-DI-TMBF-01:X:ADC:MMS:STD');
         emittance_blowup.scan{nwa}.mbf_data_y = lcaGet('SR23C-DI-TMBF-01:Y:ADC:MMS:STD');
         emittance_blowup.scan{nwa}.pinhole_settings = get_pinhole_settings;
@@ -101,7 +110,14 @@ elseif length(p.Results.excitation_frequency) > 1
         emittance_blowup.scan{nwa}.emittance = get_emittance;
     end %for
 else
-    emittance_blowup.scan{1}.bpm_data = get_BPM_FA_data(p.Results.BPM_data_capture_length);
+    lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 0); 
+        arm_BPM_TbT_capture
+        pause(1) % Wait for emittance to stablise
+        lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 1);
+               pause(6) % Wait for emittance to stablise
+    emittance_blowup.scan{1}.bpm_data = get_BPM_TbT_data;
+    emittance_blowup.scan{nwa}.mbf_data_x = lcaGet('SR23C-DI-TMBF-01:X:ADC:MMS:STD');
+    emittance_blowup.scan{nwa}.mbf_data_y = lcaGet('SR23C-DI-TMBF-01:Y:ADC:MMS:STD');
     emittance_blowup.scan{1}.pinhole_settings = get_pinhole_settings;
     emittance_blowup.scan{1}.pinhole1_image = get_pinhole_image('SR01C-DI-DCAM-04');
     emittance_blowup.scan{1}.pinhole2_image = get_pinhole_image('SR01C-DI-DCAM-05');
@@ -111,7 +127,7 @@ end %if
 
 lcaPut([mbf_name, 'NCO2:GAIN_DB_S'], orig_gain)
 lcaPut([mbf_name, 'NCO2:FREQ_S'], orig_freq)
-
+lcaPut([mbf_name, 'NCO2:ENABLE_S'], 0)
 %% saving the data to a file
 if strcmp(mbf_axis, 'x') || strcmp(mbf_axis, 'y')|| strcmp(mbf_axis, 's')
     %     only save if not on test system
