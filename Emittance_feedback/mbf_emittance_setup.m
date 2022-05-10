@@ -46,11 +46,11 @@ mbf_name = mbf_axis_to_name(mbf_axis);
 mbf_fll_start(mbf_axis, 'fllbunches',p.Results.fll_monitor_bunches,...
     'guardbunches',p.Results.guardbunches)
 
-lcaPut([mbf_name, 'NCO2:FREQ_S'], p.Results.excitation_frequency);
+lcaPut([mbf_name, 'NCO2:FREQ_S'], p.Results.harmonic + p.Results.excitation_frequency);
 
 %% Setting up the NCO gains and setting the tune sweep to follow the FLL.
 lcaPut([mbf_name, 'NCO2:TUNE_PLL_S'],'Follow');
-lcaPut([mbf_name, 'NCO2:GAIN_DB_S'],p.Results.harmonic + p.Results.excitation);
+lcaPut([mbf_name, 'NCO2:GAIN_DB_S'],p.Results.excitation);
 
 %% Extracting the bunches the feedback is operating on 
 fillx = lcaGet([mbf_name, 'BUN:1:SEQ:ENABLE_S']);
