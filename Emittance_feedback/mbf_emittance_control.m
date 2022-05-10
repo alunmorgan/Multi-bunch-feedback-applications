@@ -12,8 +12,8 @@ addParameter(p, 'hemit_target', NaN, validScalarPosNum);
 addParameter(p, 'vemit_target', NaN, validScalarPosNum);
 parse(p,varargin{:});
 
-if isnan(p.Results.hemit_target) && isnan(p.Results.hemit_target)
-    disp('You need to select either a hemit_target, or a vemit_target, ot both.')
+if isnan(p.Results.hemit_target) && isnan(p.Results.vemit_target)
+    disp('You need to select either a hemit_target (nm rad), or a vemit_target (pm rad), or both.')
     return
 end %if
 
