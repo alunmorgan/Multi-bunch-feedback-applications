@@ -26,20 +26,20 @@ end
 
 save_name = fullfile(root_string, num2str(data.time(1)), mth, dy, ...
     [data.filename '.mat']);
-save(save_name, 'data')
+save(save_name, 'data','-v7.3')
 
 disp(['Data saved to:  ',save_name])
 
 index_name = [data.base_name, '_index'];
 if exist(fullfile(root_string, [index_name, '.mat']),'file')
-    load(fullfile(root_string, index_name), 'file_index')
+    load(fullfile(root_string, [index_name, '.mat']), 'file_index')
     file_index{1, end+1} = save_name;
     file_index{2, end+1} = data.time;
-    save(fullfile(root_string, index_name), 'file_index')
+    save(fullfile(root_string, [index_name, '.mat']), 'file_index','-v7.3')
     disp('Index updated')
 else
     file_index{1, 1} = save_name;
     file_index{2, 1} = data.time;
-    save(fullfile(root_string, index_name), 'file_index')
+    save(fullfile(root_string, [index_name, '.mat']), 'file_index','-v7.3')
     disp('New index file created')
 end %if

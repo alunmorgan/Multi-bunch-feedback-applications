@@ -12,8 +12,8 @@ addParameter(p, 'hemit_target', NaN, validScalarPosNum);
 addParameter(p, 'vemit_target', NaN, validScalarPosNum);
 parse(p,varargin{:});
 
-if isnan(p.Results.hemit_target) && isnan(p.Results.hemit_target)
-    disp('You need to select either a hemit_target, or a vemit_target, ot both.')
+if isnan(p.Results.hemit_target) && isnan(p.Results.vemit_target)
+    disp('You need to select either a hemit_target (nm rad), or a vemit_target (pm rad), or both.')
     return
 end %if
 
@@ -24,12 +24,12 @@ end %if
 
 if ~isnan(p.Results.hemit_target)
 existing_excitation_x = lcaGet('SR23C-DI-TMBF-01:X:NCO2:GAIN_DB_S');
-mbf_emittance_setup('excitation',existing_excitation_x, 'fll_monitor_bunches', 300)
+mbf_emittance_setup('x', 'excitation',existing_excitation_x, 'fll_monitor_bunches', 300)
 emittance_control_loop('X', p.Results.hemit_target)
 end %if
 
 if ~isnan(p.Results.vemit_target)
 existing_excitation_y = lcaGet('SR23C-DI-TMBF-01:Y:NCO2:GAIN_DB_S');
-mbf_emittance_setup('excitation',existing_excitation_y, 'fll_monitor_bunches', 400)
-emittance_control_loop('Y', p.Results.vemit_targetY)
+mbf_emittance_setup('y', 'excitation',existing_excitation_y, 'fll_monitor_bunches', 400)
+emittance_control_loop('Y', p.Results.vemit_target)
 end %if

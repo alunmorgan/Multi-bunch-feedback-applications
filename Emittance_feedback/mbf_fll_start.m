@@ -15,7 +15,8 @@ p.StructExpand = false;
 p.CaseSensitive = false;
 addRequired(p, 'mbf_axis');
 addParameter(p, 'fllbunches', NaN);
-addParameter(p, 'guardbunches', NaN);
+addParameter(p, 'guardbunches', 2);
+addParameter(p, 'fll_nco_gain', -30);
 
 parse(p, mbf_axis, varargin{:});
 
@@ -34,4 +35,4 @@ else
     mbf_fll_bank_setup(pv_names.hardware_names.(mbf_axis))
 end
 mbf_fll_detector_setup(pv_names.hardware_names.(mbf_axis))
-fll_initialisation(pv_names.hardware_names.(mbf_axis), 'fll_target_phase', target_phase)
+fll_initialisation(pv_names.hardware_names.(mbf_axis), 'fll_target_phase', target_phase, 'fll_nco_gain', p.Results.fll_nco_gain)
