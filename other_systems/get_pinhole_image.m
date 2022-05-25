@@ -17,12 +17,14 @@ original_imagewidth = lcaGet([channel ':IMAGEWIDTH']);
 % settings. So set the selection area to max so that all of the scale
 % values match.
 lcaPut([channel ':IMAGEWIDTH'], 1024)
-
 [image.image, image.timestamp] = lcaGet([channel ':PROXY:DATA'],0,'byte');
 neg=find(image.image < 0);
 image.image(neg)=256 + image.image(neg);
-image.width = lcaGet([channel ':WIDTH']);
-image.height = lcaGet([channel ':HEIGHT']);
+%image.width = lcaGet([channel ':WIDTH']);
+%image.height = lcaGet([channel ':HEIGHT']);
+% FIX ME
+image.width = 1024;
+image.height = 768;
 image.xmax = lcaGet([channel ':XSCALEMAX']);
 image.xmin = lcaGet([channel ':XSCALEMIN']);
 image.ymax = lcaGet([channel ':YSCALEMAX']);
