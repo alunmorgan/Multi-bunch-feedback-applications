@@ -1,29 +1,29 @@
-function modscan_all
-% top level function to run the modescan for all planes sequentially.
+function modscan_all(mbf_axis)
+% top level function to run the modescan for all selected plane.
+p = inputParser;
+p.StructExpand = false;
+p.CaseSensitive = false;
+axis_string = {'x', 'y', 's'};
 
+addRequired(p, 'mbf_axis', @(x) any(validatestring(x, axis_string)));
+
+parse(p, mbf_axis);
 mbf_tools
 % Programatiaclly press the tune only button on each system
 % then get the tunes
-setup_operational_mode("x", "TuneOnly")
-x_tune = lcaGet('SR23C-DI-TMBF-01:X:TUNE:TUNE');
-setup_operational_mode("y", "TuneOnly")
-y_tune =  lcaGet('SR23C-DI-TMBF-01:Y:TUNE:TUNE');
-setup_operational_mode("s", "TuneOnly")
-s_tune = lcaGet('SR23C-DI-LMBF-01:IQ:TUNE:TUNE');
+setup_operational_mode(mbf_axis, "TuneOnly")
+% Get the tunes
+tunes = get_all_tunes(mbf_axis);
+tune = tunes.([mbf_axis,'_tune']).tune;
 
-mbf_modescan_setup('x', x_tune)
-modescan_x = mbf_modescan_capture('x');
-mbf_modescan_plotting(modescan_x)
+if isnan(tune)
+    disp('Could not get tune value')
+    return
+end %if
 
-mbf_modescan_setup('y', y_tune)
-modescan_y = mbf_modescan_capture('y');
-mbf_modescan_plotting(modescan_y)
-
-mbf_modescan_setup('s', s_tune)
-modescan_s = mbf_modescan_capture('s');
-mbf_modescan_plotting(modescan_s)
+mbf_modescan_setup(mbf_axis, tune)
+modescan = mbf_modescan_capture(mbf_axis);
+mbf_modescan_plotting(modescan)
 
 % Programatiaclly press the tune only button on each system
-setup_operational_mode("x", "TuneOnly")
-setup_operational_mode("y", "TuneOnly")
-setup_operational_mode("s", "TuneOnly")
+setup_operational_mode(mbf_axis, "TuneOnly")

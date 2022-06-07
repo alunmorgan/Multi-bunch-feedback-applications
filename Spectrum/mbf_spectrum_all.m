@@ -1,24 +1,23 @@
-function mbf_spectrum_all
-% Top level function to run all spectral measurements of each plane
-% sequentially.
+function mbf_spectrum_all(mbf_axis)
+% Top level function to run all spectral measurements on selected plane.
 
+p = inputParser;
+p.StructExpand = false;
+p.CaseSensitive = false;
+axis_string = {'x', 'y', 's'};
+
+addRequired(p, 'mbf_axis', @(x) any(validatestring(x, axis_string)));
+
+parse(p, mbf_axis);
 mbf_tools
 
-% Programatiaclly press the tune only button on each system
-% then get the tunes
-setup_operational_mode("x", "TuneOnly")
-setup_operational_mode("y", "TuneOnly")
-setup_operational_mode("s", "TuneOnly")
-mbf_axes = {'x', 'y', 's'};
+% Programatically press the tune only button on each system.
+setup_operational_mode(mbf_axis, "TuneOnly")
 
-for tk = 1:length(mbf_axes)
- mbf_spectrum_setup(mbf_axes{tk})
- data = mbf_spectrum_capture(mbf_axes{tk}, n_turns, repeat);
- analysed_data = mbf_spectrum_analysis(data, fold);
- mbf_spectrum_plotting(analysed_data, data.meta_data)
-end %for
+mbf_spectrum_setup(mbf_axis)
+data = mbf_spectrum_capture(mbf_axis, n_turns, repeat);
+analysed_data = mbf_spectrum_analysis(data, fold);
+mbf_spectrum_plotting(analysed_data, data.meta_data)
 
-% Programatiaclly press the tune only button on each system
-setup_operational_mode("x", "TuneOnly")
-setup_operational_mode("y", "TuneOnly")
-setup_operational_mode("s", "TuneOnly")
+% Programatically press the tune only button on each system.
+setup_operational_mode(mbf_axis, "TuneOnly")
