@@ -48,9 +48,10 @@ lcaPut([name ':BUN:1:PLL:ENABLE_S'], double(pllpattern));
 lcaPut([name ':PLL:DET:BUNCHES_S'], double(pllpattern));
 
 % Set sweep (SEQ) and its detector (#1) to NOT operate on these and
-% guard bunches around, ie only on guardpattern. This is maybe a little
-% keen, as there might be other things configured, which this will jjst
-% plow over. Maybe we should check or add to any previous config...
-
-lcaPut([name ':BUN:1:SEQ:ENABLE_S'],double(guardpattern));
-lcaPut([name ':DET:0:BUNCHES_S'],double(guardpattern));
+% guard bunches around, ie only on guardpattern. 
+%check or add to any previous config and uses logical AND to insert the
+%guardpattern into the existing setup.
+sequencer =lcaGet([name ':BUN:1:SEQ:ENABLE_S']);
+detector = lcaGet([name ':DET:0:BUNCHES_S']);
+lcaPut([name ':BUN:1:SEQ:ENABLE_S'],double(and(guardpattern, sequencer)));
+lcaPut([name ':DET:0:BUNCHES_S'],double(and(guardpattern, detector)));
