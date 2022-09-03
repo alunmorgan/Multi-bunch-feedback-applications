@@ -16,10 +16,14 @@ else
     error('Invalid axis selected for emittance control loop')
 end %if
 slew_rate_limit = 0.2;
-low_limit = -78;
+low_limit = 0.00098; %~-60dB
+high_limit = 0.0625; %~-20dB
+start_level = 0.004; %~-46dB
 output_lim = 1;
+lcaPut(['SR23C-DI-TMBF-01:',selected_axis,':NCO2:GAIN_SCALAR_S'], start_level);
 while true
-    if lcaGet('SR-CS-FILL-01:COUNTDOWN') > 0  && lcaGet('SR-DI-DCCT-01:SIGNAL') > 10
+    % The ~=0 accounts for the -1 when topup is turned off as well as the usual countdown when it is on.
+    if lcaGet('SR-CS-FILL-01:COUNTDOWN') ~= 0  && lcaGet('SR-DI-DCCT-01:SIGNAL') > 10 && strcmp(lcaGet('SR-DI-EMIT-01:STATUS'), 'Successful')
         if output_lim >100
             fprintf('.\n')
             output_lim = 1;
@@ -38,26 +42,33 @@ while true
                 ~strcmp(error_user{1}, 'Ok')
             error([selected_axis,' frequency locked loop has stopped']);
         end %if
+        if ~strcmp(lcaGet(['SR23C-DI-TMBF-01:',selected_axis,':NCO2:ENABLE_S']), 'On')
+            error('Excitation manually terminated')
+        end %if
         
         tune = lcaGet(['SR23C-DI-TMBF-01:',selected_axis,':TUNE:CENTRE:TUNE']);
         emit=lcaGet(['SR-DI-EMIT-01:',em_axis,'EMIT_MEAN']);
-        power=lcaGet(['SR23C-DI-TMBF-01:',selected_axis,':NCO2:GAIN_DB_S']);
-        % Too much excitation causes the tune value to be lost. The solution is
-        % to reduce the exciation value
+        power=lcaGet(['SR23C-DI-TMBF-01:',selected_axis,':NCO2:GAIN_SCALAR_S']);
+        
         if isnan(tune)
-            lcaPut(['SR23C-DI-TMBF-01:',selected_axis,':NCO2:GAIN_DB_S'],power-0.2);
+            % pause if tune value is invalid.
+            pause(1)
+%             % Too much excitation causes the tune value to be lost. The solution is
+%         % to reduce the exciation value
+%             lcaPut(['SR23C-DI-TMBF-01:',selected_axis,':NCO2:GAIN_SCALAR_S'],power-0.001);
         else
-            emit_error=log10(emit / emittance_target);
+            emit_error= 1E-3 * log10(emit / emittance_target);
             if abs(emit_error) > slew_rate_limit
                 emit_error = sign(emit_error) * slew_rate_limit;
             end %if
-            if power - emit_error > low_limit
-                lcaPut(['SR23C-DI-TMBF-01:',selected_axis,':NCO2:GAIN_DB_S'], power - emit_error);
+            if power - emit_error > low_limit && power - emit_error < high_limit
+                lcaPut(['SR23C-DI-TMBF-01:',selected_axis,':NCO2:GAIN_SCALAR_S'], power - emit_error);
             end %if
         end %if
         pause(0.5)
     else
-        % pause if top up is running or the current is below 10mA
+        % pause if top up is running or the current is below 10mA or the
+        % beam is injecting.
         pause(1)
         if output_lim >100
             fprintf('*\n')
