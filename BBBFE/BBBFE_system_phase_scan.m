@@ -1,4 +1,4 @@
-function BBBFE_system_phase_scan(mbf_ax)
+function BBBFE_system_phase_scan(mbf_ax, single_bunch_location)
 % Scans one of the individual axis system phase shifts in the 
 % bunch by bunch frontend and records the strength of the tune signal.
 % Restores the original value after the scan.
@@ -7,20 +7,10 @@ function BBBFE_system_phase_scan(mbf_ax)
 %      mbf_ax (str): specifies which axis 'X','Y', 'S', 'IT', 'IL'
 %      'S' maps to 'IT' 
 %
-% Setup: (manual for the time being...)
-% press tune only
-% fill some charge in bunch 1 (0.2nC)
-% set bunch mode single bunch
-% set single bunch 1
-% press setup tune
-% set up the individual tune detectors to run on 0,1,2
-% SR23C-DI-TMBF-01:DET:BUNCH0_S 0
-% SR23C-DI-TMBF-01:DET:BUNCH1_S 0
-% SR23C-DI-TMBF-01:DET:BUNCH2_S 0
-% set sweep gain to -18
-% set detector fixed gain
+% Machine setup
+% fill some charge in bunch 'single_bunch_location' (0.2nC)
 %
-% Example: BBBFE_system_phase_scan('X')
+% Example: BBBFE_system_phase_scan('X', 400)
 
 if strcmp(mbf_ax, 'X')
     ax = 1;
@@ -38,10 +28,13 @@ else
     error('BBBFE_system_phase_scan: Input error. Should be X, Y,or IT')
 end %if
 
+BBBFE_setup(mbf_ax, single_bunch_location)
+
 [root_string, ~] = mbf_system_config;
 root_string = root_string{1};
 
 data.frontend_pv = 'SR23C-DI-BBFE-01';
+data.mbf_pv = ['SR23C-DI-TMBF-01:', mbf_ax];
 p=lcaGet([data.frontend_pv ':PHA:OFF:' mbf_ax]);
 for pp=p:-20:-180
     lcaPut([data.frontend_pv ':PHA:OFF:' mbf_ax], pp)
@@ -55,9 +48,9 @@ data.side2 = NaN(length(data.phase));
 for x = 1:length(data.phase)
     lcaPut([data.frontend_pv ':PHA:OFF:' mbf_ax], data.phase(x))
     pause(2)
-    data.side1(x) = max(lcaGet([ax2dev(ax) ':DET:POWER:0']));
-    data.main(x) = max(lcaGet([ax2dev(ax) ':DET:POWER:1']));
-    data.side2(x) = max(lcaGet([ax2dev(ax) ':DET:POWER:2']));
+    data.side1(x) = max(lcaGet([data.mbf_pv, ':DET:1:POWER']));
+    data.main(x) = max(lcaGet([data.mbf_pv, ':DET:2:POWER']));
+    data.side2(x) = max(lcaGet([data.mbf_pv, ':DET:3:POWER']));
 end
 for pp=-180:20:p
     lcaPut([data.frontend_pv ':PHA:OFF:' mbf_ax], pp)
@@ -66,14 +59,21 @@ end
 lcaPut([data.frontend_pv ':PHA:OFF:' mbf_ax], p)
 
 graph_handles(1) = figure;
-semilogy(data.phase, data.main, data.phase, data.side1, data.phase, data.side2)
+hold all
+semilogy(data.phase, data.main)
+semilogy(data.phase, data.side1)
+semilogy(data.phase, data.side2)
 legend('Excited bunch', 'preceeding', 'following')
 xlabel('phase (degrees)')
 ylabel('Signal')
-title(['Phase sweep for TMBF0' num2str(ax)])
+title(['Phase sweep for MBF ', mbf_ax, ' axis'])
+grid on
+hold off
+
+BBBFE_restore(mbf_ax)
 
 data.time = clock;
 data.base_name = 'system_phase_scan';
 %% saving the data to a file
-save_to_archive(root_string, data, graph_handles)
+save_to_archive(root_string, data)
 
