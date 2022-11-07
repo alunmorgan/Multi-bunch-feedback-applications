@@ -1,6 +1,5 @@
-function output = get_BPM_TbT_data
+function output = get_BPM_TbT_data(n_bpms)
 
-n_bpms = [163,164,167,168];
 
 BPM_TbT_data = NaN(length(n_bpms), 7);
 for n = 1:length(n_bpms)

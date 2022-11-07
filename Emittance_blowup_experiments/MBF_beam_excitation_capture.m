@@ -16,7 +16,7 @@ function varargout = MBF_beam_excitation_capture(mbf_axis, excitation_gain, exci
 %
 % Example: data = MBF_beam_excitation_capture('x', -18, 0.27, 'save_to_archive', 'no');
 
-
+n_bpms = [163,164,167,168];
 % Define input and default values
 binary_string = {'yes', 'no'};
 validScalarNum = @(x) isnumeric(x) && isscalar(x);
@@ -86,7 +86,7 @@ if length(p.Results.excitation_gain) > 1
         while ~strcmp('Fit Forced',lcaGet('SR-DI-EMIT-01:STATUS')) && ~strcmp('Successful',lcaGet('SR-DI-EMIT-01:STATUS'))
             pause(0.2);
         end
-        emittance_blowup.scan{whd}.bpm_data = get_BPM_TbT_data;
+        emittance_blowup.scan{whd}.bpm_data = get_BPM_TbT_data(n_bpms);
         emittance_blowup.scan{whd}.mbf_data_x = lcaGet('SR23C-DI-TMBF-01:X:ADC:MMS:STD');
         emittance_blowup.scan{whd}.mbf_data_y = lcaGet('SR23C-DI-TMBF-01:Y:ADC:MMS:STD');
         emittance_blowup.scan{whd}.pinhole_settings = get_pinhole_settings;
@@ -109,7 +109,7 @@ elseif length(p.Results.excitation_frequency) > 1
         while ~strcmp('Fit Forced',lcaGet('SR-DI-EMIT-01:STATUS')) && ~strcmp('Successful',lcaGet('SR-DI-EMIT-01:STATUS'))
             pause(0.2);
         end
-        emittance_blowup.scan{nwa}.bpm_data = get_BPM_TbT_data;
+        emittance_blowup.scan{nwa}.bpm_data = get_BPM_TbT_data(n_bpms);
         emittance_blowup.scan{nwa}.mbf_data_x = lcaGet('SR23C-DI-TMBF-01:X:ADC:MMS:STD');
         emittance_blowup.scan{nwa}.mbf_data_y = lcaGet('SR23C-DI-TMBF-01:Y:ADC:MMS:STD');
         emittance_blowup.scan{nwa}.pinhole_settings = get_pinhole_settings;
@@ -127,7 +127,7 @@ else
     while ~strcmp('Fit Forced',lcaGet('SR-DI-EMIT-01:STATUS')) && ~strcmp('Successful',lcaGet('SR-DI-EMIT-01:STATUS'))
         pause(0.2);
     end    
-    emittance_blowup.scan{1}.bpm_data = get_BPM_TbT_data;
+    emittance_blowup.scan{1}.bpm_data = get_BPM_TbT_data(n_bpms);
     emittance_blowup.scan{1}.mbf_data_x = lcaGet('SR23C-DI-TMBF-01:X:ADC:MMS:STD');
     emittance_blowup.scan{1}.mbf_data_y = lcaGet('SR23C-DI-TMBF-01:Y:ADC:MMS:STD');
     emittance_blowup.scan{1}.pinhole_settings = get_pinhole_settings;
