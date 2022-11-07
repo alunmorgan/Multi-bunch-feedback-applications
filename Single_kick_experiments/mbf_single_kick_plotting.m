@@ -25,24 +25,24 @@ if isfield(single_kick_pp, 'beam_oscillation_x_gain_scan')
 end %if
 
 % plots for a single capture.
-if isfield(single_kick, 'bpm_data')
-    % Raw time plots
-    used_bpms = fieldnames(single_kick.bpm_data);
+if isfield(single_kick, 'bpm_TbT_data')
+%     % Raw time plots
+    used_bpms = fieldnames(single_kick.bpm_TbT_data);
     figure
     hold on
     for kds = 1:length(used_bpms)
-        plot(single_kick.bpm_data.(used_bpms{kds}).X);
+        plot(single_kick.bpm_TbT_data.(used_bpms{kds}).X);
     end %for
     legend(used_bpms)
-    ylabel('BPM motion [\mum]')
+    ylabel('Turn by turn BPM motion [\mum]')
     xlabel('Time')
     figure
     hold on
     for kds = 1:length(used_bpms)
-        plot(single_kick.bpm_data.(used_bpms{kds}).Y);
+        plot(single_kick.bpm_TbT_data.(used_bpms{kds}).Y);
     end %for
     legend(used_bpms)
-    ylabel('BPM motion [\mum]')
+    ylabel('Turn by turn BPM motion [\mum]')
     xlabel('Time')
     
     % RMS motion plots
@@ -51,7 +51,6 @@ if isfield(single_kick, 'bpm_data')
     for kds = 1:length(used_bpms)
         plot(kds, single_kick_pp.beam_oscillation_x(kds), '*');
     end %for
-    legend(used_bpms)
     ylabel('Ver. RMS oscillation (baseline removed) [\mum]')
     title('Horizontal kick')
     figure
@@ -59,7 +58,43 @@ if isfield(single_kick, 'bpm_data')
     for kds = 1:length(used_bpms)
         plot(kds, single_kick_pp.beam_oscillation_y(kds), '*');
     end %for
-    legend(used_bpms)
+    ylabel('Ver. RMS oscillation (baseline removed) [\mum]')
+    title('Vertical kick')
+end %if
+
+if isfield(single_kick, 'bpm_FT_data')
+%     % Raw time plots
+    used_bpms = fieldnames(single_kick.bpm_FT_data);
+%     figure
+%     hold on
+%     for kds = 1:length(used_bpms)
+%         plot(single_kick.bpm_FT_data.(used_bpms{kds}).X);
+%     end %for
+%     legend(used_bpms)
+%     ylabel('First turn BPM motion [\mum]')
+%     xlabel('Time')
+%     figure
+%     hold on
+%     for kds = 1:length(used_bpms)
+%         plot(single_kick.bpm_FT_data.(used_bpms{kds}).Y);
+%     end %for
+%     legend(used_bpms)
+%     ylabel('First turn BPM motion [\mum]')
+%     xlabel('Time')
+    
+    % RMS motion plots
+    figure
+    hold on
+    for kds = 1:length(used_bpms)
+        plot(kds, single_kick_pp.beam_oscillation_x(kds), '*');
+    end %for
+    ylabel('Ver. RMS oscillation (baseline removed) [\mum]')
+    title('Horizontal kick')
+    figure
+    hold on
+    for kds = 1:length(used_bpms)
+        plot(kds, single_kick_pp.beam_oscillation_y(kds), '*');
+    end %for
     ylabel('Ver. RMS oscillation (baseline removed) [\mum]')
     title('Vertical kick')
 end %if

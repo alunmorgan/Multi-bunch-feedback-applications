@@ -31,8 +31,11 @@ addRequired(p, 'excitation_frequency');
 addParameter(p, 'save_to_archive', 'yes', @(x) any(validatestring(x,binary_string)));
 addParameter(p, 'additional_save_location', NaN, valid_string);
 addParameter(p, 'harmonic', 0, validScalarNum);
-addParameter(p, 'BPM_data_capture_length', 1, validScalarNum);
+addParameter(p, 'excitation_delay', 1, validScalarNum);
+addParameter(p, 'BPMs_to_capture', 1:173);
 parse(p, mbf_axis, excitation_gain, excitation_frequency, varargin{:});
+
+nbpms = p.Results.BPMs_to_capture;
 
 % Set up MBF environment
 [root_string, ~, ~, ~] = mbf_system_config;
@@ -53,71 +56,76 @@ single_kick.base_name = ['single_kick_' single_kick.ax_label '_axis'];
 single_kick.excitation_gain = excitation_gain;
 single_kick.excitation_frequency = excitation_frequency;
 single_kick.harmonic = p.Results.harmonic;
-
-% Tune sweeps (do we need all of these?)
-single_kick.tune_x_sweep = lcaGet('SR23C-DI-TMBF-01:X:TUNE:DMAGNITUDE');
-single_kick.tune_x_sweep_model = lcaGet('SR23C-DI-TMBF-01:X:TUNE:MMAGNITUDE');
-single_kick.tune_x_scale = lcaGet('SR23C-DI-TMBF-01:X:TUNE:SCALE');
-single_kick.tune_y_sweep = lcaGet('SR23C-DI-TMBF-01:Y:TUNE:DMAGNITUDE');
-single_kick.tune_y_sweep_model = lcaGet('SR23C-DI-TMBF-01:Y:TUNE:MMAGNITUDE');
-single_kick.tune_y_scale = lcaGet('SR23C-DI-TMBF-01:Y:TUNE:SCALE');
-single_kick.tunes = get_all_tunes('xys');
+single_kick.excitation_delay = p.Results.excitation_delay;
 
 %% Set up MBF excitation
 mbf_name = mbf_axis_to_name(mbf_axis);
-orig_gain = lcaGet([mbf_name, 'NCO2:GAIN_DB_S']);
-orig_freq = lcaGet([mbf_name, 'NCO2:FREQ_S']);
 orig_seq = lcaGet([mbf_name, 'TRG:SEQ:MODE_S']);
 mbf_name = mbf_axis_to_name(mbf_axis);
-mbf_single_kick_setup(mbf_axis, 'excitation_gain', excitation_gain(1),...
-    'excitation_frequency',excitation_frequency(1), 'harmonic', p.Results.harmonic)
 
+%% Set up BPM capture
+bpm_capture_length = 1024; %Turns
+setup_BPM_TbT_capture(nbpms, bpm_capture_length)
 %% Do measurements
 
 % gain scan
 if length(p.Results.excitation_gain) > 1
     for whd = 1:length(p.Results.excitation_gain)
         fprintf('Measurement %d\n',whd);
-        lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 0);
-        lcaPut([mbf_name, 'NCO2:GAIN_DB_S'],p.Results.harmonic + p.Results.excitation_gain(whd));
-        lcaPut([mbf_name, 'NCO2:ENABLE_S'],'On');
+        mbf_single_kick_setup(mbf_axis,...
+            'excitation_gain', p.Results.excitation_gain(whd),...
+            'excitation_frequency',p.Results.excitation_frequency(1), ...
+            'harmonic', p.Results.harmonic,...
+            'delay', p.Results.excitation_delay)
         % might need to trigger without capture in order to get the system to
         % honour the settings changes.
         lcaPut([mbf_name, 'TRG:SEQ:ARM_S.PROC'], 1)
-        arm_BPM_TbT_capture
-        pause(1)
-        lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 1);
-        single_kick.gain_scan{whd} = single_kick_dataset_capture;
+            arm_BPM_TbT_capture(nbpms)
+%     BPM_set_switching_off(nbpms)
+    pause(1)
+    lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 1);
+    single_kick.bpm_TbT_data = get_BPM_TbT_data_XY_only(nbpms, bpm_capture_length);
+% single_kick.bpm_FT_data = get_BPM_FT_data_XY_only(nbpms);
+%     BPM_set_switching_on(nbpms)
     end %for
 end %if
 % frequency scan
 if length(p.Results.excitation_frequency) > 1
     for nwa = 1:length(p.Results.excitation_frequency)
         fprintf('Measurement %d\n',nwa);
-        lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 0);
-        lcaPut([mbf_name, 'NCO2:FREQ_S'], p.Results.excitation_frequency(nwa));
-        lcaPut([mbf_name, 'NCO2:ENABLE_S'],'On');
+        mbf_single_kick_setup(mbf_axis,...
+            'excitation_gain', p.Results.excitation_gain(1),...
+            'excitation_frequency',p.Results.excitation_frequency(nwa), ...
+            'harmonic', p.Results.harmonic,...
+            'delay', p.Results.excitation_delay)
         lcaPut([mbf_name, 'TRG:SEQ:ARM_S.PROC'], 1)
-        arm_BPM_TbT_capture
-        pause(1)
-        lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 1);
-        single_kick.f_scan{nwa} = single_kick_dataset_capture;
+            arm_BPM_TbT_capture(nbpms)
+%     BPM_set_switching_off(nbpms)
+    pause(1)
+    lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 1);
+    single_kick.bpm_TbT_data = get_BPM_TbT_data_XY_only(nbpms, bpm_capture_length);
+% single_kick.bpm_FT_data = get_BPM_FT_data_XY_only(nbpms);
+%     BPM_set_switching_on(nbpms)
     end %for
 end %if
 
 if length(p.Results.excitation_frequency) == 1 && ...
         length(p.Results.excitation_gain) == 1
-    lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 0);
+    mbf_single_kick_setup(mbf_axis,...
+            'excitation_gain', p.Results.excitation_gain(1),...
+            'excitation_frequency',p.Results.excitation_frequency(1), ...
+            'harmonic', p.Results.harmonic,...
+            'delay', p.Results.excitation_delay)
     lcaPut([mbf_name, 'TRG:SEQ:ARM_S.PROC'], 1)
-    arm_BPM_TbT_capture
+    arm_BPM_TbT_capture(nbpms)
+%     BPM_set_switching_off(nbpms)
     pause(1)
     lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 1);
-    single_kick = single_kick_dataset_capture;
+    single_kick.bpm_TbT_data = get_BPM_TbT_data_XY_only(nbpms, bpm_capture_length);
+% single_kick.bpm_FT_data = get_BPM_FT_data_XY_only(nbpms);
+%     BPM_set_switching_on(nbpms)
 end %if
 
-lcaPut([mbf_name, 'NCO2:GAIN_DB_S'], orig_gain);
-lcaPut([mbf_name, 'NCO2:FREQ_S'], orig_freq);
-lcaPut([mbf_name, 'NCO2:ENABLE_S'], 'Off');
 lcaPut([mbf_name, 'TRG:SEQ:MODE_S'], orig_seq);
 
 %% saving the data to a file

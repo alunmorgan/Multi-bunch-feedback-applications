@@ -26,10 +26,18 @@ if isfield(single_kick, 'f_scan')
     end %for
 end %if
 
-if isfield(single_kick, 'bpm_data')
-     used_bpms = fieldnames(single_kick.bpm_data);
+if isfield(single_kick, 'bpm_TbT_data')
+     used_bpms = fieldnames(single_kick.bpm_TbT_data);
     for kds = 1:length(used_bpms)
-        single_kick_pp.beam_oscillation_x(kds) = std(single_kick.bpm_data.(used_bpms{kds}).X);
-        single_kick_pp.beam_oscillation_y(kds) = std(single_kick.bpm_data.(used_bpms{kds}).Y);
+        single_kick_pp.beam_oscillation_x(kds) = std(single_kick.bpm_TbT_data.(used_bpms{kds}).X);
+        single_kick_pp.beam_oscillation_y(kds) = std(single_kick.bpm_TbT_data.(used_bpms{kds}).Y);
+    end %for
+end %if
+
+if isfield(single_kick, 'bpm_FT_data')
+     used_bpms = fieldnames(single_kick.bpm_FT_data);
+    for kds = 1:length(used_bpms)
+        single_kick_pp.beam_oscillation_x(kds) = std(single_kick.bpm_FT_data.(used_bpms{kds}).X);
+        single_kick_pp.beam_oscillation_y(kds) = std(single_kick.bpm_FT_data.(used_bpms{kds}).Y);
     end %for
 end %if

@@ -13,19 +13,18 @@ function mbf_single_kick_setup(mbf_axis, varargin)
 %
 % Example: mbf_emittance_setup('x')
 
-default_excitation = -60; %dB
+default_excitation_frequency = 0.28; %dB
+default_excitation_gain = -60; %dB
 default_harmonic = 10;
-% Grab frequencies of left sideband from swept tune fitter
-tunes = get_all_tunes(mbf_axis);
-leftSB = tunes.([mbf_axis, '_tune']).lower_sideband;
-default_excitation_frequency = leftSB;
+default_delay = 1;
 
 validScalarNum = @(x) isnumeric(x) && isscalar(x);
 p = inputParser;
 addRequired(p, 'mbf_axis');
-addParameter(p, 'excitation_gain', default_excitation, validScalarNum);
+addParameter(p, 'excitation_gain', default_excitation_gain, validScalarNum);
 addParameter(p, 'harmonic', default_harmonic, validScalarNum);
 addParameter(p, 'excitation_frequency', default_excitation_frequency, validScalarNum)
+addParameter(p, 'delay', default_delay, validScalarNum)
 parse(p,mbf_axis, varargin{:});
 
 mbf_name = mbf_axis_to_name(mbf_axis);
@@ -33,12 +32,23 @@ mbf_name = mbf_axis_to_name(mbf_axis);
 lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 0);
 
 %% Setting up the sequencer for single shot
-lcaPut([mbf_name, 'TRG:SEQ:MODE_S'], 'Oneshot') %FIXME - need to check the value
+lcaPut([mbf_name, 'TRG:SEQ:MODE_S'], 'One Shot') 
 
 %% Setting up the excitation
-lcaPut([mbf_name, 'NCO2:FREQ_S'], p.Results.harmonic + p.Results.excitation_frequency);
-lcaPut([mbf_name, 'NCO2:GAIN_DB_S'],p.Results.excitation);
-lcaPut([mbf_name, 'NCO2:ENABLE_S'],'On');
+lcaPut([mbf_name, 'SEQ:PC_S'], 2)
+lcaPut([mbf_name, 'SEQ:2:BANK_S'], 'Bank 1')
+lcaPut([mbf_name, 'SEQ:2:START_FREQ_S'], p.Results.excitation_frequency)
+lcaPut([mbf_name, 'SEQ:2:STEP_FREQ_S'], 0)
+lcaPut([mbf_name, 'SEQ:2:COUNT_S'], 1)
+lcaPut([mbf_name, 'SEQ:2:DWELL_S'], p.Results.delay)
+lcaPut([mbf_name, 'SEQ:2:ENABLE_S'], 'Off')
+lcaPut([mbf_name, 'SEQ:1:START_FREQ_S'], p.Results.excitation_frequency)
+lcaPut([mbf_name, 'SEQ:1:STEP_FREQ_S'], 0)
+lcaPut([mbf_name, 'SEQ:1:COUNT_S'], 1)
+lcaPut([mbf_name, 'SEQ:1:DWELL_S'], 1)
+lcaPut([mbf_name, 'SEQ:1:ENABLE_S'], 'On')
+lcaPut([mbf_name, 'SEQ:1:GAIN_DB_S'], p.Results.excitation_gain)
+
 
 
 
