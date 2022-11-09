@@ -82,17 +82,26 @@ if length(p.Results.excitation_gain) > 1
     for whd = 1:length(p.Results.excitation_gain)
         fprintf('Measurement %d\n',whd);
         lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 0);
-        lcaPut([mbf_name, 'NCO2:GAIN_DB_S'],p.Results.harmonic + p.Results.excitation_gain(whd));
+        lcaPut([mbf_name, 'NCO2:GAIN_DB_S'],p.Results.excitation_gain(whd));
         pause(1)
         PPRE.scan{whd} = PPRE_aquisition(p.Results.repeat_datapoints);
     end %for
-
-% frequency scan
+    
+    % frequency scan
 elseif length(p.Results.excitation_frequency) > 1
     for nwa = 1:length(p.Results.excitation_frequency)
         fprintf('Measurement %d\n',nwa);
         lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 0);
-        lcaPut([mbf_name, 'NCO2:FREQ_S'], p.Results.excitation_frequency(nwa));
+        lcaPut([mbf_name, 'NCO2:FREQ_S'], p.Results.harmonic(1) + p.Results.excitation_frequency(nwa));
+        pause(1)
+        PPRE.scan{nwa} = PPRE_aquisition(p.Results.repeat_datapoints);
+    end %for
+    % harmonic scan
+elseif length(p.Results.harmonic) > 1
+    for nwa = 1:length(p.Results.excitation_frequency)
+        fprintf('Measurement %d\n',nwa);
+        lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 0);
+        lcaPut([mbf_name, 'NCO2:FREQ_S'], p.Results.harmonic(nwa) + p.Results.excitation_frequency(1));
         pause(1)
         PPRE.scan{nwa} = PPRE_aquisition(p.Results.repeat_datapoints);
     end %for
