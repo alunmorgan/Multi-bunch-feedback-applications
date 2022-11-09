@@ -40,13 +40,18 @@ addParameter(p, 'harmonic', default_harmonic, validScalarNum);
 addParameter(p, 'excitation_frequency', default_excitation_frequency, validScalarNum)
 parse(p,mbf_axis, varargin{:});
 
+if isnan(p.Results.excitation)
+    excitation_frequency = default_excitation_frequency;
+else
+    excitation_frequency = p.Results.excitation_frequency;
+end %if
 mbf_name = mbf_axis_to_name(mbf_axis);
 
 % initialise FLL on selected bunches.
 mbf_fll_start(mbf_axis, 'fllbunches',p.Results.fll_monitor_bunches,...
     'guardbunches',p.Results.guardbunches)
 
-lcaPut([mbf_name, 'NCO2:FREQ_S'], p.Results.harmonic + p.Results.excitation_frequency);
+lcaPut([mbf_name, 'NCO2:FREQ_S'], p.Results.harmonic + excitation_frequency);
 
 %% Setting up the NCO gains and setting the tune sweep to follow the FLL.
 lcaPut([mbf_name, 'NCO2:TUNE_PLL_S'],'Follow');

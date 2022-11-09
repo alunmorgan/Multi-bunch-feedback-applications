@@ -1,10 +1,9 @@
-function output = get_BPM_TbT_data
+function output = get_BPM_TbT_data(n_bpms)
 
-n_bpms = [160,162:164, 166];
 
 BPM_TbT_data = NaN(length(n_bpms), 7);
 for n = 1:length(n_bpms)
-    BPM_name = fa_id2name(n_bpms(n))
+    BPM_name = fa_id2name(n_bpms(n));
     BPM_data_temp = lcaGet({[BPM_name, ':TT:WFS'];...
         [BPM_name, ':TT:WFX'];...
         [BPM_name, ':TT:WFY'];...

@@ -1,9 +1,9 @@
-function arm_BPM_TbT_capture
+function arm_BPM_TbT_capture(nbpms)
 
-nBPMs = 173;
 
-BPM_names = fa_id2name(1:nBPMs);
-for n = 1:nBPMs
+
+BPM_names = fa_id2name(nbpms);
+for n = 1:length(nbpms)
     BPM_names{n} = [BPM_names{n}, ':TT:ARM'];
 end %for
 lcaPut(BPM_names', 1)
