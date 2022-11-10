@@ -1,101 +1,57 @@
 function mbf_single_kick_plotting(single_kick, single_kick_pp)
 
-if isfield(single_kick_pp, 'beam_oscillation_x_f_scan')
+if strcmp(single_kick.scan_label, 'Frequency')
     plot_single_kick_scan(single_kick.excitation_frequency, ...
-        single_kick_pp.beam_oscillation_x_f_scan, 'Excitation frequency [tune]',...
+        single_kick_pp.beam_oscillation_x, 'Excitation frequency [tune]',...
         'Horizontal kick')
-end %if
-
-if isfield(single_kick_pp, 'beam_oscillation_y_f_scan')
     plot_single_kick_scan(single_kick.excitation_frequency, ...
-        single_kick_pp.beam_oscillation_y_f_scan, 'Excitation frequency [tune]',...
+        single_kick_pp.beam_oscillation_y, 'Excitation frequency [tune]',...
         'Vertical kick')
 end %if
-
-if isfield(single_kick_pp, 'beam_oscillation_x_gain_scan')
-    plot_single_kick_scan(single_kick.excitation_gain, ...
-        single_kick_pp.beam_oscillation_x_gain_scan, 'Excitation gain [dB]',...
+if strcmp(single_kick.scan_label, 'Harmonic')
+    plot_single_kick_scan(single_kick.harmonic, ...
+        single_kick_pp.beam_oscillation_x, 'Excitation frequency [tune]',...
         'Horizontal kick')
-end %if
-
-if isfield(single_kick_pp, 'beam_oscillation_x_gain_scan')
-    plot_single_kick_scan(single_kick.excitation_gain, ...
-        single_kick_pp.beam_oscillation_y_gain_scan, 'Excitation gain [dB]', ...
+    plot_single_kick_scan(single_kick.harmonic, ...
+        single_kick_pp.beam_oscillation_y, 'Excitation frequency [tune]',...
         'Vertical kick')
 end %if
-
-% plots for a single capture.
-if isfield(single_kick, 'bpm_TbT_data')
-%     % Raw time plots
-    used_bpms = fieldnames(single_kick.bpm_TbT_data);
+if strcmp(single_kick.scan_label, 'Gain')
+    plot_single_kick_scan(single_kick.excitation_gain, ...
+        single_kick_pp.beam_oscillation_x, 'Excitation gain [dB]',...
+        'Horizontal kick')
+    plot_single_kick_scan(single_kick.excitation_gain, ...
+        single_kick_pp.beam_oscillation_y, 'Excitation gain [dB]', ...
+        'Vertical kick')
+end %if
+if strcmp(single_kick.scan_label, '')
+    % plots for a single capture.
+    %     % Raw time plots
+    used_bpms = single_kick_pp.used_bpms;
     figure
     hold on
     for kds = 1:length(used_bpms)
-        plot(single_kick.bpm_TbT_data.(used_bpms{kds}).X);
+        plot(squeeze(single_kick_pp.beam_signal_x(1, kds, :)));
     end %for
     legend(used_bpms)
-    ylabel('Turn by turn BPM motion [\mum]')
+    ylabel('BPM motion [\mum]')
     xlabel('Time')
     figure
     hold on
     for kds = 1:length(used_bpms)
-        plot(single_kick.bpm_TbT_data.(used_bpms{kds}).Y);
+        plot(squeeze(single_kick_pp.beam_signal_y(1, kds, :)));
     end %for
     legend(used_bpms)
-    ylabel('Turn by turn BPM motion [\mum]')
+    ylabel('BPM motion [\mum]')
     xlabel('Time')
     
     % RMS motion plots
     figure
-    hold on
-    for kds = 1:length(used_bpms)
-        plot(kds, single_kick_pp.beam_oscillation_x(kds), '*');
-    end %for
+    plot(1:length(used_bpms), single_kick_pp.beam_oscillation_x(1, :), '*');
     ylabel('Ver. RMS oscillation (baseline removed) [\mum]')
     title('Horizontal kick')
     figure
-    hold on
-    for kds = 1:length(used_bpms)
-        plot(kds, single_kick_pp.beam_oscillation_y(kds), '*');
-    end %for
+    plot(1:length(used_bpms), single_kick_pp.beam_oscillation_y(1,:), '*');
     ylabel('Ver. RMS oscillation (baseline removed) [\mum]')
     title('Vertical kick')
 end %if
-
-if isfield(single_kick, 'bpm_FT_data')
-%     % Raw time plots
-    used_bpms = fieldnames(single_kick.bpm_FT_data);
-%     figure
-%     hold on
-%     for kds = 1:length(used_bpms)
-%         plot(single_kick.bpm_FT_data.(used_bpms{kds}).X);
-%     end %for
-%     legend(used_bpms)
-%     ylabel('First turn BPM motion [\mum]')
-%     xlabel('Time')
-%     figure
-%     hold on
-%     for kds = 1:length(used_bpms)
-%         plot(single_kick.bpm_FT_data.(used_bpms{kds}).Y);
-%     end %for
-%     legend(used_bpms)
-%     ylabel('First turn BPM motion [\mum]')
-%     xlabel('Time')
-    
-    % RMS motion plots
-    figure
-    hold on
-    for kds = 1:length(used_bpms)
-        plot(kds, single_kick_pp.beam_oscillation_x(kds), '*');
-    end %for
-    ylabel('Ver. RMS oscillation (baseline removed) [\mum]')
-    title('Horizontal kick')
-    figure
-    hold on
-    for kds = 1:length(used_bpms)
-        plot(kds, single_kick_pp.beam_oscillation_y(kds), '*');
-    end %for
-    ylabel('Ver. RMS oscillation (baseline removed) [\mum]')
-    title('Vertical kick')
-end %if
-

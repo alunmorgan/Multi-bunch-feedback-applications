@@ -1,43 +1,25 @@
 function single_kick_pp = mbf_single_kick_postprocessing(single_kick)
 
-if isfield(single_kick, 'gain_scan')
-    for i = 1:length(single_kick.gain_scan)
-        used_bpms = fieldnames(single_kick.gain_scan{i}.bpm_data);
-        if i == 1
-            single_kick_pp.used_bpms = used_bpms;
-        end %if
-        for kds = 1:length(used_bpms)
-            single_kick_pp.beam_oscillation_x_gain_scan(i, kds) = std(single_kick.gain_scan{i}.bpm_data.(used_bpms{kds}).X);
-            single_kick_pp.beam_oscillation_y_gain_scan(i, kds) = std(single_kick.gain_scan{i}.bpm_data.(used_bpms{kds}).Y);
-        end %for
-    end %for
-end %if
+bpm_datatypes = {'bpm_FR_data', 'bpm_FT_data', 'bpm_TbT_data'};
+selected_datatype = bpm_datatypes{1};
 
-if isfield(single_kick, 'f_scan')
-    for i = 1:length(single_kick.f_scan)
-        used_bpms = fieldnames(single_kick.f_scan{i}.bpm_data);
-        if i == 1
-            single_kick_pp.used_bpms = used_bpms;
-        end %if
-        for kds = 1:length(used_bpms)
-            single_kick_pp.beam_oscillation_x_f_scan(i, kds) = std(single_kick.f_scan{i}.bpm_data.(used_bpms{kds}).X);
-            single_kick_pp.beam_oscillation_y_f_scan(i, kds) = std(single_kick.f_scan{i}.bpm_data.(used_bpms{kds}).Y);
-        end %for
-    end %for
-end %if
+scan_length = length(single_kick.bpm_data);
+used_bpms = fieldnames(single_kick.bpm_data{1}.(selected_datatype){1});
+n_repeats = length(single_kick.bpm_data{1}.(selected_datatype));
 
-if isfield(single_kick, 'bpm_TbT_data')
-     used_bpms = fieldnames(single_kick.bpm_TbT_data);
+for nfe = 1:scan_length
     for kds = 1:length(used_bpms)
-        single_kick_pp.beam_oscillation_x(kds) = std(single_kick.bpm_TbT_data.(used_bpms{kds}).X);
-        single_kick_pp.beam_oscillation_y(kds) = std(single_kick.bpm_TbT_data.(used_bpms{kds}).Y);
+        for shd = 1:n_repeats
+            x_data_temp(shd,:) = single_kick.bpm_data{nfe}.(selected_datatype){shd}.(used_bpms{kds}).X;
+            y_data_temp(shd,:) = single_kick.bpm_data{nfe}.(selected_datatype){shd}.(used_bpms{kds}).Y;
+        end %for
+        x_mean = mean(x_data_temp, 1);
+        y_mean = mean(y_data_temp, 1);
+        single_kick_pp.beam_signal_x(nfe, kds, :) = x_mean;
+        single_kick_pp.beam_signal_y(nfe, kds, :) = y_mean;
+        single_kick_pp.beam_oscillation_x(nfe, kds) = std(x_mean);
+        single_kick_pp.beam_oscillation_y(nfe, kds) = std(y_mean);
+        clear x_data_temp y_data_temp x_mean y_mean
     end %for
-end %if
-
-if isfield(single_kick, 'bpm_FT_data')
-     used_bpms = fieldnames(single_kick.bpm_FT_data);
-    for kds = 1:length(used_bpms)
-        single_kick_pp.beam_oscillation_x(kds) = std(single_kick.bpm_FT_data.(used_bpms{kds}).X);
-        single_kick_pp.beam_oscillation_y(kds) = std(single_kick.bpm_FT_data.(used_bpms{kds}).Y);
-    end %for
-end %if
+end %for
+single_kick.used_bpms = used_bpms;
