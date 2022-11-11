@@ -21,6 +21,7 @@ function mbf_emittance_setup(mbf_axis, varargin)
 % Example: mbf_emittance_setup('x')
 
 default_excitation = -60; %dB
+default_excitation_pattern = ones(936,1);
 default_fll_monitor_bunches=400;
 default_guardbunches = 10;
 default_harmonic = 10;
@@ -34,6 +35,7 @@ validNum = @(x) isnumeric(x);
 p = inputParser;
 addRequired(p, 'mbf_axis');
 addParameter(p, 'excitation', default_excitation, validScalarNum);
+addParameter(p, 'excitation_pattern', default_excitation_pattern);
 addParameter(p, 'fll_monitor_bunches', default_fll_monitor_bunches, validNum);
 addParameter(p, 'guardbunches', default_guardbunches, validScalarNum);
 addParameter(p, 'harmonic', default_harmonic, validScalarNum);
@@ -59,9 +61,11 @@ lcaPut([mbf_name, 'NCO2:GAIN_DB_S'],p.Results.excitation);
 
 %% Extracting the bunches the feedback is operating on 
 fillx = lcaGet([mbf_name, 'BUN:1:SEQ:ENABLE_S']);
-%% and applying the same mapping to the NCO
-lcaPut([mbf_name, 'BUN:0:NCO2:ENABLE_S'],fillx)
-lcaPut([mbf_name, 'BUN:1:NCO2:ENABLE_S'],fillx)
+
+%% Applying the same mapping to the NCO and combining it with the user defined pattern
+pattern = AND(fillx, p.Results.exitation_pattern); 
+lcaPut([mbf_name, 'BUN:0:NCO2:ENABLE_S'],pattern)
+lcaPut([mbf_name, 'BUN:1:NCO2:ENABLE_S'],pattern)
 
 %% Switching on the excitation
 lcaPut([mbf_name, 'NCO2:ENABLE_S'],'On');
