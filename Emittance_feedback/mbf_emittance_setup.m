@@ -1,4 +1,4 @@
-function mbf_emittance_setup(mbf_axis, varargin)
+function varargout = mbf_emittance_setup(mbf_axis, varargin)
 % Sets up the Multibunch feedback system to run a frequency locked loop on a
 % single bunch in each plane. The use the tracked frequency to run an
 % oscillator on the sideband of the tune.
@@ -63,14 +63,16 @@ lcaPut([mbf_name, 'NCO2:GAIN_DB_S'],p.Results.excitation);
 fillx = lcaGet([mbf_name, 'BUN:1:SEQ:ENABLE_S']);
 
 %% Applying the same mapping to the NCO and combining it with the user defined pattern
-pattern = AND(fillx, p.Results.exitation_pattern); 
-lcaPut([mbf_name, 'BUN:0:NCO2:ENABLE_S'],pattern)
-lcaPut([mbf_name, 'BUN:1:NCO2:ENABLE_S'],pattern)
+pattern = and(fillx, p.Results.excitation_pattern'); 
+lcaPut([mbf_name, 'BUN:0:NCO2:ENABLE_S'],double(pattern))
+lcaPut([mbf_name, 'BUN:1:NCO2:ENABLE_S'],double(pattern))
 
 %% Switching on the excitation
 lcaPut([mbf_name, 'NCO2:ENABLE_S'],'On');
 
-
+if nargout > 0 
+    varargout{1} = pattern;
+end%if
 
 
 
