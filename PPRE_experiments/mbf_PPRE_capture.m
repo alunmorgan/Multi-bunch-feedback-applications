@@ -1,4 +1,4 @@
-function varargout = mbf_PPRE_capture(mbf_axis, excitation_gain, excitation_frequency, varargin)
+function varargout = mbf_PPRE_capture(mbf_axis, varargin)
 % Sets up the FLL with an additional excitation at a user defined gain and
 % frequency/tune.
 %   Args:
@@ -24,19 +24,21 @@ tunes = get_all_tunes(mbf_axis);
 leftSB = tunes.([mbf_axis, '_tune']).lower_sideband;
 default_excitation_frequency = leftSB;
 default_excitation_gain = -60; %dB
+default_excitation_pattern = ones(936,1);
 
 p = inputParser;
 p.StructExpand = false;
 p.CaseSensitive = false;
 valid_string = @(x) ischar(x);
 addRequired(p, 'mbf_axis');
-addParameter(p, 'excitation_gain', default_excitation_gain, validScalarNum);
-addParameter(p, 'excitation_frequency',default_excitation_frequency, validScalarNum);
+addParameter(p, 'excitation_gain', default_excitation_gain);
+addParameter(p, 'excitation_frequency',default_excitation_frequency);
+addParameter(p, 'excitation_pattern', default_excitation_pattern);
 addParameter(p, 'save_to_archive', 'yes', @(x) any(validatestring(x,binary_string)));
 addParameter(p, 'additional_save_location', NaN, valid_string);
 addParameter(p, 'harmonic', 0, validScalarNum);
-addParameter(p, 'repeat_datapoints', 10, validScalarNum);
-parse(p, mbf_axis, excitation_gain, excitation_frequency, varargin{:});
+addParameter(p, 'repeat_datapoints', 20, validScalarNum);
+parse(p, mbf_axis, varargin{:});
 
 % Set up MBF environment
 [root_string, ~, ~, ~] = mbf_system_config;
@@ -54,8 +56,8 @@ PPRE.ax_label = mbf_axis;
 PPRE.base_name = ['PPRE_' PPRE.ax_label '_axis'];
 
 % Excitation frequency and gain
-PPRE.excitation_gain = excitation_gain;
-PPRE.excitation_frequency = excitation_frequency;
+PPRE.excitation_gain = p.Results.excitation_gain;
+PPRE.excitation_frequency = p.Results.excitation_frequency;
 PPRE.harmonic = p.Results.harmonic;
 
 % Tune sweeps (do we need all of these?)
@@ -70,8 +72,11 @@ PPRE.tunes = get_all_tunes('xys');
 %% Set up MBF excitation
 
 mbf_name = mbf_axis_to_name(mbf_axis);
-mbf_emittance_setup(mbf_axis, 'excitation', excitation_gain(1),...
-    'excitation_frequency',excitation_frequency(1), 'harmonic', p.Results.harmonic)
+PPRE.excitation_pattern = mbf_emittance_setup(mbf_axis, ...
+    'excitation', p.Results.excitation_gain(1),...
+    'excitation_frequency',p.Results.excitation_frequency(1),...
+    'excitation_pattern', p.Results.excitation_pattern, ...
+    'harmonic', p.Results.harmonic);
 
 %% Do measurement
 orig_gain = lcaGet([mbf_name, 'NCO2:GAIN_DB_S']);

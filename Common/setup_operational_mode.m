@@ -5,9 +5,11 @@ function setup_operational_mode(mbf_axis, operational_mode)
 %       mbf_axis (char): x, y or  s
 %       operational_mode (char): 'TuneOnly', 'TuneSpecial' or 'Feedback'
 mbf_axis = upper(mbf_axis);
-expected_axis_values = ["X", "Y", "S"];
+expected_axis_values = ["X", "Y", "S", "IT"];
 mbf_axis = validatestring(mbf_axis, expected_axis_values);
-
+if strcmp(mbf_axis, "IT")
+    mbf_axis = "S";
+end %if
 expected_operational_modes = ["TuneOnly", "TuneSpecial", "Feedback"];
 action = validatestring(operational_mode, expected_operational_modes);
 
