@@ -17,7 +17,7 @@ if strcmp(mbf_ax, 'X')
 elseif strcmp(mbf_ax, 'Y')
     ax = 2;
 elseif strcmp(mbf_ax, 'S')
-    mbf_ax = 'IT';
+%     mbf_ax = 'IT';
     ax = 3;
 elseif strcmp(mbf_ax, 'IT')
     ax = 3;
@@ -35,12 +35,15 @@ root_string = root_string{1};
 
 data.frontend_pv = 'SR23C-DI-BBFE-01';
 data.mbf_pv = ['SR23C-DI-TMBF-01:', mbf_ax];
-p=lcaGet([data.frontend_pv ':PHA:OFF:' mbf_ax]);
-for pp=p:-20:-180
+original_setting=lcaGet([data.frontend_pv ':PHA:OFF:' mbf_ax]);
+
+% moving to starting point in scan
+for pp=original_setting:-20:-180
     lcaPut([data.frontend_pv ':PHA:OFF:' mbf_ax], pp)
     pause(.5)
 end
 
+% measurement
 data.phase=[-180:20:180 160:-20:-180];
 data.side1 = NaN(length(data.phase));
 data.main = NaN(length(data.phase));
@@ -52,13 +55,17 @@ for x = 1:length(data.phase)
     data.main(x) = max(lcaGet([data.mbf_pv, ':DET:2:POWER']));
     data.side2(x) = max(lcaGet([data.mbf_pv, ':DET:3:POWER']));
 end
-for pp=-180:20:p
+
+% move back to the original setting
+for pp=-180:20:original_setting
     lcaPut([data.frontend_pv ':PHA:OFF:' mbf_ax], pp)
     pause(.5)
 end
-lcaPut([data.frontend_pv ':PHA:OFF:' mbf_ax], p)
 
-graph_handles(1) = figure;
+BBBFE_restore(mbf_ax)
+
+% plotting
+figure;
 hold all
 semilogy(data.phase, data.main)
 semilogy(data.phase, data.side1)
@@ -69,8 +76,6 @@ ylabel('Signal')
 title(['Phase sweep for MBF ', mbf_ax, ' axis'])
 grid on
 hold off
-
-BBBFE_restore(mbf_ax)
 
 data.time = clock;
 data.base_name = 'system_phase_scan';

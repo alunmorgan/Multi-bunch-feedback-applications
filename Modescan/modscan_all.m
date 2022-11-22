@@ -1,13 +1,18 @@
-function modscan_all(mbf_axis)
+function modscan_all(mbf_axis, varargin)
 % top level function to run the modescan for all selected plane.
 p = inputParser;
 p.StructExpand = false;
 p.CaseSensitive = false;
 axis_string = {'x', 'y', 's'};
+validScalarNum = @(x) isnumeric(x) && isscalar(x);
+
+default_n_repeats = 10;
 
 addRequired(p, 'mbf_axis', @(x) any(validatestring(x, axis_string)));
+addParameter(p, 'n_repeats', default_n_repeats, validScalarNum);
 
-parse(p, mbf_axis);
+
+parse(p, mbf_axis, varargin{:});
 mbf_tools
 % Programatiaclly press the tune only button on each system
 % then get the tunes
@@ -22,7 +27,8 @@ if isnan(tune)
 end %if
 
 mbf_modescan_setup(mbf_axis, tune)
-modescan = mbf_modescan_capture(mbf_axis);
+pause(2)
+modescan = mbf_modescan_capture(mbf_axis, p.Results.n_repeats);
 mbf_modescan_plotting(modescan)
 
 % Programatiaclly press the tune only button on each system
