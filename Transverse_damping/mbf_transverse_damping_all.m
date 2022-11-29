@@ -15,9 +15,12 @@ p.StructExpand = false;
 p.CaseSensitive = false;
 valid_number = @(x) isnumeric(x);
 axis_string = {'x', 'y', 's'};
+boolean_string = {'yes', 'no'};
+
 
 addRequired(p, 'mbf_axis', @(x) any(validatestring(x, axis_string)));
 addParameter(p, 'mbf_mode', NaN, valid_number);
+addParameter(p, 'plotting', default_plotting, @(x) any(validatestring(x, boolean_string)));
 
 parse(p, mbf_axis, varargin{:});
 
