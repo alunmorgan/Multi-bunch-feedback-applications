@@ -1,4 +1,4 @@
-function mbf_growdamp_plot_summary(poly_data, frequency_shifts, varargin)
+function mbf_growdamp_plot_summary(poly_data, frequency_shifts, metadata, varargin)
 % Plots the driven growth rates, and the active and pasive damping rates
 % across all modes.
 %
@@ -24,14 +24,12 @@ valid_string = @(x) ischar(x);
 addRequired(p, 'poly_data');
 addRequired(p, 'frequency_shifts');
 addParameter(p, 'outputs', 'passive', valid_string);
-addParameter(p, 'axis', '', valid_string);
 addParameter(p, 'plot_mode', 'pos', valid_string);
 parse(p, poly_data, frequency_shifts, varargin{:});
 
 % Getting the desired system setup parameters.
 harmonic_number = size(frequency_shifts, 1);
 
-%x_plt_axis = (0:harmonic_number-1) - harmonic_number/2;
 passive_data = -squeeze(poly_data(:,2,1));
 active_data = -squeeze(poly_data(:,3,1));
 passive_errors = NaN(length(passive_data),1);
@@ -53,26 +51,20 @@ elseif strcmpi(p.Results.plot_mode, 'neg')
     
 end
 
-figure
+figure('Position', [20, 40, 600, 600])
 ax1 = subplot(3,1,1:2);
 hold on
 if strcmpi(p.Results.outputs, 'passive') || strcmpi(p.Results.outputs, 'both')
-    %plot(x_plt_axis, circshift(passive_data, -harmonic_number/2, 1), 'b', 'DisplayName', 'Passive')
     plot(x_plt_axis, passive_data, 'b', 'DisplayName', 'Passive')
-    %go1 = plot(x_plt_axis, circshift(passive_errors, -harmonic_number/2, 1), 'c*');
-    %go1.Annotation.LegendInformation.IconDisplayStyle = 'off';
 end %if
 if strcmpi(p.Results.outputs, 'active') || strcmpi(p.Results.outputs, 'both')
-    %plot(x_plt_axis, circshift(active_data, -harmonic_number/2, 1), 'g', 'DisplayName', 'Active')
     plot(x_plt_axis, active_data, 'g', 'DisplayName', 'Active')
-    %go2 = plot(x_plt_axis, circshift(active_errors, -harmonic_number/2, 1), 'm*');
-    %go2.Annotation.LegendInformation.IconDisplayStyle = 'off';
 end %if
-%go3 = plot(x_plt_axis, zeros(length(x_plt_axis),1), 'r:');
-%go3.Annotation.LegendInformation.IconDisplayStyle = 'on';
+
 hold off
 xlim([x_plt_axis(1) x_plt_axis(end)])
-title(['MBF growdamp results (', p.Results.axis, ')'])
+title({['MBF growdamp results (', metadata.ax_label,' ', datestr(metadata.time),')'];...
+    ['Current: ', num2str(round(metadata.current)), 'mA']})
 xlabel('Mode')
 ylabel('Damping rates (1/turns)')
 legend

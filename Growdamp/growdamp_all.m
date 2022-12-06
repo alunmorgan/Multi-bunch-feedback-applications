@@ -62,6 +62,6 @@ end %if
 
 if strcmp(p.Results.plotting, 'yes')
     [poly_data, frequency_shifts] = mbf_growdamp_analysis(growdamp);
-    mbf_growdamp_plot_summary(poly_data, frequency_shifts, ...
-        'outputs', 'both', 'axis', mbf_axis)
+    mbf_growdamp_plot_summary(poly_data, frequency_shifts, growdamp.data, ...
+        'outputs', 'both')
 end %if
