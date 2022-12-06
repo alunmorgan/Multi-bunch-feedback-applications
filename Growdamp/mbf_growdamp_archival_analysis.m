@@ -1,11 +1,11 @@
-function [dr_passive, dr_active, error_passive, error_active, times, experimental_setup, extents] = ...
+function [dr_passive, dr_active, error_passive, error_active, times, experimental_setup] = ...
     mbf_growdamp_archival_analysis(data_requested, varargin)
 % Takes the data extracted by mbf_growdamp_archival_retreval and operates
 % across all datasets. Then plots the results.
 %
 % Args:
 %       data_requested (cell array of structures) : Data to be analysed.
-%       anal_type (str): To select the type of analysis
+%       analysis_type (str): To select the type of analysis
 %                       (collate, average, parameter_sweep)
 %       sweep_parameter (str): Parameter to be used. This name must exist
 %                              in the data structure. (only needed if
@@ -86,7 +86,6 @@ for nd = length(data_requested):-1:1
     fprintf('.')
 end %for
 fprintf('\n')
-extents = growdamp_archive_calculate_extents(data_requested);
 
 % Removing datasets whose mean error is < 0.02 for the passive section.
 error_av_p = mean(error_passive,2,'omitnan');

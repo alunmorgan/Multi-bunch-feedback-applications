@@ -1,4 +1,4 @@
-function mbf_growdamp_archival_plotting(dr_passive, dr_active, error_passive, error_active, times, experimental_setup, selections, extents)
+function mbf_growdamp_archival_plotting(requested_data, dr_passive, dr_active, error_passive, error_active, times, experimental_setup)
 % Plots the data processed by mbf_growdamp_archival_analysis.
 % Args:
 %      dr_passive (numeric matrix): Passive damping rate.
@@ -21,41 +21,22 @@ function mbf_growdamp_archival_plotting(dr_passive, dr_active, error_passive, er
 if isempty(times)
     return
 end %if
-% if length(times) < 2
-%     return
-% end %if
 
 [~, harmonic_number, ~, ~] = mbf_system_config;
 x_plt_axis = (0:harmonic_number-1) - harmonic_number/2;
 this_year = str2double(datestr(floor(now), 'YYYY'));
+ranges_to_display = {'RF', 'time','current'};
+
+extents = growdamp_archive_calculate_extents(requested_data);
 
 years_input = {this_year-5, 'r'; this_year-4, 'b'; this_year-3, 'k'; this_year-2, 'g'; this_year-1, 'c'; this_year, 'm'};
 
-graph_text{1} = 'Selection criteria';
-for hea = length(selections):-1:1
-    graph_text{hea+1} = [selections{hea,1}, ' within ', num2str(selections{hea,2})];
-end %for
-
+graph_text{1} = ['Analysis type: ', experimental_setup.anal_type];
+graph_text_2 = cell(1, 2 * length(ranges_to_display) + 1);
 graph_text_2{1} = 'Data ranges';
-for whe = size(selections, 1):-1:1
-    if isfield(extents, selections{whe,1})
-        if isnumeric(extents.(selections{whe,1}){1})
-            if strcmp(selections{whe}, 'fill_pattern')
-                graph_text_2{whe + 1} = [selections{whe, 1}, ' : '];
-                fp1 = extents.(selections{whe, 1}){1};
-                fp2 = extents.(selections{whe, 1}){2};
-            else
-                graph_text_2{whe + 1} = [selections{whe, 1}, ' : ', ...
-                    num2str(extents.(selections{whe, 1}){1}), ' to ', num2str(extents.(selections{whe, 1}){2})];
-            end %if
-        elseif ischar(extents.(selections{whe, 1}){1})
-            graph_text_2{whe + 1} = [selections{whe,1}, ' : ', extents.(selections{whe,1}){1}];
-        elseif iscell(extents.(selections{whe, 1}){1})
-            if ischar(extents.(selections{whe, 1}){1})
-                graph_text_2{whe + 1} = [selections{whe, 1}, ' : ', extents.(selections{whe, 1}){1}{1}];
-            end %if
-        end %if
-    end %if
+for whe = 1:2:length(ranges_to_display)
+    graph_text_2{whe + 1} = ranges_to_display{whe};
+    graph_text_2{whe + 2} = [num2str(extents.(ranges_to_display{whe}){1}), ' to ', num2str(extents.(ranges_to_display{whe}){2})];
 end %for
 
 graph_title = 'Damping rates for different modes';
@@ -63,6 +44,7 @@ graph_title = 'Damping rates for different modes';
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     graph_title = {['Damping rates for different modes as a function of ', experimental_setup.sweep_parameter];...
         ['Using a step size of ', num2str(experimental_setup.parameter_step_size), ' in the ', experimental_setup.axis, ' axis']};
+    graph_labels = cell(1, length(experimental_setup.param));
     for hw = 1:length(experimental_setup.param)
         graph_labels{hw}=num2str(experimental_setup.param(hw));
     end % if
@@ -118,9 +100,10 @@ grid on
 hold off
 
 axfp = axes('OuterPosition', [0 0.45 0.2 0.3]);
-area(fp1, 'EdgeColor', 'none');
-hold on;
-area(fp2, 'EdgeColor', 'None', 'FaceColor', 'w');
+    hold on
+for hkw = 1:length(requested_data)
+    plot(1:harmonic_number, requested_data{hkw}.fill_pattern, 'b')
+end %for
 ylim([0 inf])
 xlim([1 936])
 set(axfp, 'XTick', [])
@@ -221,7 +204,21 @@ figure
 plot(times, zeros(length(times),1), 'o:')
 xlabel('Time')
 datetick
-
+for hrd = 1:length(ranges_to_display)
+    if strcmp(ranges_to_display{hrd}, 'time')
+        continue
+    else
+        for hse = 1:length(times)
+            data_temp(hse) = requested_data{hse}.(ranges_to_display{hrd});
+        end %for
+        figure
+        plot(times, data_temp, 'o:')
+        xlabel('Time')
+        datetick
+        title(ranges_to_display{hrd})
+        clear data_temp
+    end %if
+end %for
 
 if nargin == 9
     figure
@@ -253,22 +250,22 @@ for esr = size(years_input,1):-1:1
 end %for
 sample_year_temp = datevec(times);
 year_list = sample_year_temp(:,1);
-if length(unique(year_list)) < 2 
-for ner = 1:size(input_data, 1)
-    sample_time = datevec(times(ner));
-    sample_time = datestr(sample_time);
-    plot(x_plt_axis, input_data(ner,:), 'DisplayName', sample_time);
-end %for
+if length(unique(year_list)) < 2
+    for ner = 1:size(input_data, 1)
+        sample_time = datevec(times(ner));
+        sample_time = datestr(sample_time);
+        plot(x_plt_axis, input_data(ner,:), 'DisplayName', sample_time);
+    end %for
 else
-for ner = 1:size(input_data, 1)
-    years_ind = find(year_list(ner)== years);
-    if states(years_ind) == 0
-        plot(x_plt_axis, input_data(ner,:), cols{years_ind}, 'DisplayName', num2str(sample_year));
-        states(years_ind) = 1;
-    else
-        plot(x_plt_axis, input_data(ner,:), cols{years_ind}, 'HandleVisibility', 'off')
-    end %if
-end %for
+    for ner = 1:size(input_data, 1)
+        years_ind = find(year_list(ner)== years);
+        if states(years_ind) == 0
+            plot(x_plt_axis, input_data(ner,:), cols{years_ind}, 'DisplayName', num2str(sample_year));
+            states(years_ind) = 1;
+        else
+            plot(x_plt_axis, input_data(ner,:), cols{years_ind}, 'HandleVisibility', 'off')
+        end %if
+    end %for
 end %if
 xlim([x_plt_axis(1) x_plt_axis(end)])
 ylim([y_min y_max])
