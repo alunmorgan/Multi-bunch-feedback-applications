@@ -7,9 +7,12 @@ function [poly_data, frequency_shifts] = mbf_growdamp_analysis(exp_data, varargi
 %                             captured.
 %       overrides (list of ints): Two values setting the number of turns to
 %                                 analyse (passive, active)
-%       analysis_setting (bool): switches between simple and advanced fitting.
+%       advanced_fitting (bool): switches between simple (0) 
+%                                and advanced fitting (1).
+%       length_averaging(int): Determines the strength of the filtering out
+%                              of high frequecies in the data.
 %       debug(int): if 1 then outputs graphs of individual modes to allow
-%                                    selection nof appropriate overrides.
+%                                    selection of appropriate overrides.
 %
 %   Returns:
 %       poly_data (3 by 3 matrix): axis 1 is coupling mode.
@@ -20,6 +23,7 @@ function [poly_data, frequency_shifts] = mbf_growdamp_analysis(exp_data, varargi
 %       frequency_shifts (list of floats): The frequency shift of each mode.
 %
 % Example: [poly_data, frequency_shifts] = tmbf_growdamp_analysis(exp_data)
+
 defaultOverrides = [NaN, NaN];
 defaultAnalysisSetting = 0;
 defaultLengthAveraging = 20;
@@ -115,6 +119,7 @@ delta1_acum = NaN(n_modes,1);
 delta2_acum = NaN(n_modes,1);
 delta3_acum = NaN(n_modes,1);
 p2_acum = NaN(n_modes,1);
+debug_flag = p.Results.debug;
 parfor nq = 1:n_modes %par if it behaving
     %% split up the data into growth, passive damping and active damping.
     data_mode = data(nq,:);
@@ -131,12 +136,12 @@ parfor nq = 1:n_modes %par if it behaving
     % passive damping
     x2 = end_of_growth + 1:end_of_passive;
     pd_data = data_mode(x2);
-    [s2, delta2, p2] = get_damping(pd_data, nat_dwell, passive_override, length_averaging, adv_fitting, p.Results.debug);
+    [s2, delta2, p2] = get_damping(pd_data, nat_dwell, passive_override, length_averaging, adv_fitting, debug_flag);
     
     %active damping
     x3 = end_of_passive + 1:end_of_active;
     ad_data = data_mode(x3);
-    [s3, delta3, p3] = get_damping(ad_data, act_dwell, active_override, length_averaging, adv_fitting, p.Results.debug);
+    [s3, delta3, p3] = get_damping(ad_data, act_dwell, active_override, length_averaging, adv_fitting, debug_flag);
     
     s1_acum(nq,:) = s1;
     s2_acum(nq,:) = s2;
@@ -159,29 +164,3 @@ poly_data(:,3,3) = delta3_acum;
 frequency_shifts(:,1) = p2_acum;
 frequency_shifts(:,2) = p3_acum;
 disp('')
-end %function
-
-function [s, delta, p] = get_damping(data, dwell, override, length_averaging, adv_fitting, debug)
-
-if ~isnan(override)
-    if override < length(data)
-        data = data(1:override);
-    end %if
-else
-    [data] = truncate_to_linear(data, length_averaging);
-end %if
-if length(data) < 3
-    s = [NaN, NaN];
-    delta = NaN;
-    p = NaN;
-else
-    if adv_fitting == 0
-        [s, delta, p] = mbf_growdamp_basic_fitting(data, debug);
-    else
-        [s, delta, p] = mbf_growdamp_advanced_fitting(data, length_averaging, debug);
-    end %if
-end %if
-% Each point is dwell time turns long so the
-% damping time needs to be adjusted accordingly.
-s(1) = s(1) ./ dwell;
-end %function
