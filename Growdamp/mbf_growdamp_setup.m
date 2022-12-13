@@ -58,42 +58,42 @@ parse(p, mbf_axis, tune, varargin{:});
 [~, harmonic_number, pv_names, trigger_inputs] = mbf_system_config;
 settings = p.Results;
 
+pv_head = pv_names.hardware_names.(settings.mbf_axis);
+pv_head_mem = pv_names.hardware_names.mem.(settings.mbf_axis);
+triggers = pv_names.tails.triggers;
+memory = pv_names.tails.MEM;
+Sequencer = pv_names.tails.Sequencer;
+Detector = pv_names.tails.Detector;
+Bunch_bank = pv_names.tails.Bunch_bank;
+NCO = pv_names.tails.NCO;
+
 % Change the tune to be around the chosen mode.
 if ~isnan(settings.single_mode)
     settings.tune = ...
         settings.single_mode + mod(settings.tune,1);
 end %if
 
-% Generate the base PV name.
-pv_head = pv_names.hardware_names.(settings.mbf_axis);
-if strcmp(settings.mbf_axis, 'x') || strcmp(settings.mbf_axis, 'y')
-    pv_head_mem = pv_names.hardware_names.('T');
-elseif strcmp(settings.mbf_axis, 's')
-    pv_head_mem = pv_names.hardware_names.('L');
-elseif strcmp(settings.mbf_axis, 'tx') || strcmp(settings.mbf_axis, 'ty')
-    pv_head_mem = pv_names.hardware_names.('lab');
-end %if
 %% Set up triggering
 % set up the appropriate triggering
 % Stop triggering first, otherwise there's a good chance the first thing
 % we'll do is loose the beam as we change things.
 for trigger_ind = 1:length(trigger_inputs)
     trigger = trigger_inputs{trigger_ind};
-    lcaPut([pv_head pv_names.tails.triggers.(trigger).enable_status], 'Ignore');
+    lcaPut([pv_head triggers.(trigger).enable_status], 'Ignore');
 end %for
 for trigger_ind = 1:length(trigger_inputs)
     trigger = trigger_inputs{trigger_ind};
-    lcaPut([pv_head_mem pv_names.tails.triggers.MEM.(trigger).enable_status], 'Ignore');
-    lcaPut([pv_head_mem pv_names.tails.triggers.MEM.(trigger).blanking_status], 'All');
+    lcaPut([pv_head_mem triggers.MEM.(trigger).enable_status], 'Ignore');
+    lcaPut([pv_head_mem triggers.MEM.(trigger).blanking_status], 'All');
 end %for
 % Set the trigger to one shot
-lcaPut([pv_head pv_names.tails.triggers.SEQ.mode], 'One Shot');
-lcaPut([pv_head_mem pv_names.tails.triggers.MEM.mode], 'One Shot');
+lcaPut([pv_head triggers.SEQ.mode], 'One Shot');
+lcaPut([pv_head_mem triggers.MEM.mode], 'One Shot');
 % Set the triggering to Soft only
-lcaPut([pv_head pv_names.tails.triggers.('SOFT').enable_status], 'Enable')
-lcaPut([pv_head_mem pv_names.tails.triggers.MEM.('SOFT').enable_status], 'Enable')
+lcaPut([pv_head triggers.('SOFT').enable_status], 'Enable')
+lcaPut([pv_head_mem triggers.MEM.('SOFT').enable_status], 'Enable')
 %  set up the memory buffer to capture ADC data.
-lcaPut([pv_head_mem, pv_names.tails.MEM.channel_select], 'ADC0/ADC1')
+lcaPut([pv_head_mem, memory.channel_select], 'ADC0/ADC1')
 % Delay to make sure the currently set up sweeps have finished.
 pause(1) % TODO look for system to be in bank 0.
 
@@ -131,9 +131,9 @@ mbf_set_state(settings.mbf_axis, 1, settings.tune, 2, ...
     settings.dwell, 'Discard') %Quiecent
 
 % start state
-lcaPut([pv_head pv_names.tails.Sequencer.start_state], 4);
+lcaPut([pv_head Sequencer.start_state], 4);
 % steady state bank
-lcaPut([pv_head pv_names.tails.Sequencer.steady_state_bank], 'Bank 0');
+lcaPut([pv_head Sequencer.steady_state_bank], 'Bank 0');
 
 % set the super sequencer to scan all modes.
 if isnan(p.Results.single_mode)
@@ -145,25 +145,22 @@ end %if
 
 if strcmp(p.Results.fll_tracking, 'yes')
     mbf_fll_setup('x', p.Results.fll_bunches, p.Results.fll_guard_bunches)
-    name = pv_names.hardware_names.(settings.mbf_axis);
-    lcaPut([name, 'NCO2:TUNE_PLL_S'],'Follow');
-    lcaPut([name, 'NCO2:GAIN_DB_S'],-30);
-    fillx=lcaGet([name, 'BUN:1:SEQ:ENABLE_S']);
-    lcaPut([name, 'BUN:0:NCO2:ENABLE_S'],fillx)
-    lcaPut([name, 'BUN:1:NCO2:ENABLE_S'],fillx)
-    lcaPut([name, 'NCO2:ENABLE_S'],'On');
+    lcaPut([pv_head, NCO.Base,'2', NCO.PLL_follow], 'Follow');
+    lcaPut([pv_head, NCO.Base,'2', NCO.gaindb],-30);
+    fillx=lcaGet([pv_head, Bunch_bank.Base, ':1', Bunch_bank.SEQ_enable]);
+    lcaPut([pv_head, Bunch_bank.Base,':0', Bunch_bank.NCO2_enable], fillx)
+    lcaPut([pv_head, Bunch_bank.Base,':1', Bunch_bank.NCO2_enable], fillx)
+    lcaPut([pv_head, NCO.Base,'2', NCO.enable],'On');
 end %if
 %% Set up data capture
 % Set the detector input to FIR
-lcaPut([pv_head pv_names.tails.Detector.source], 'FIR');
+lcaPut([pv_head Detector.source], 'FIR');
 % Enable only detector 0
 for n_det = 0:3
     l_det = ['det',num2str(n_det)];
-    mbf_get_then_put([pv_head  pv_names.tails.Detector.(l_det).enable], 'Disabled');
+    mbf_get_then_put([pv_head  Detector.(l_det).enable], 'Disabled');
 end %for
-lcaPut([pv_head  pv_names.tails.Detector.('det0').enable], 'Enabled');
+lcaPut([pv_head  Detector.('det0').enable], 'Enabled');
 % Set the bunch mode to all bunches on detector 0
-lcaPut([pv_head  pv_names.tails.Detector.('det0').bunch_selection], ones(936,1)');
-
-
+lcaPut([pv_head  Detector.('det0').bunch_selection], ones(936,1)');
 

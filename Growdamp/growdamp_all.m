@@ -14,22 +14,19 @@ p.CaseSensitive = false;
 axis_string = {'x', 'y', 's'};
 boolean_string = {'yes', 'no'};
 
-
 addRequired(p, 'mbf_axis', @(x) any(validatestring(x, axis_string)));
 addParameter(p, 'plotting', default_plotting, @(x) any(validatestring(x, boolean_string)));
 
 parse(p, mbf_axis);
 mbf_tools
 
+[~, ~, pv_names, ~] = mbf_system_config;
+
+pv_head = pv_names.hardware_names.(mbf_axis);
+Bunch_bank = pv_names.tails.Bunch_bank;
+
 % Get the current FIR gain
-% FIXME - cluncky need to remove hard coded paths
-if strcmp(mbf_axis, 'x')
-    orig_fir_gain = lcaGet('SR23C-DI-TMBF-01:X:FIR:GAIN_S');
-elseif strcmp(mbf_axis, 'y')
-    orig_fir_gain = lcaGet('SR23C-DI-TMBF-01:Y:FIR:GAIN_S');
-elseif strcmp(mbf_axis, 's')
-    orig_fir_gain = lcaGet('SR23C-DI-LMBF-01:IQ:FIR:GAIN_S');
-end %if
+orig_fir_gain = lcaGet([pv_head, Bunch_bank.FIR_gains]);
 
 % putting the system into a known state.
 setup_operational_mode(mbf_axis, "Feedback")
@@ -51,14 +48,7 @@ growdamp = mbf_growdamp_capture(mbf_axis);
 setup_operational_mode(mbf_axis, "Feedback")
 
 % Setting the FIR gain to its original value.
-% FIXME - cluncky need to remove hard coded paths
-if strcmp(mbf_axis, 'x')
-    lcaPut('SR23C-DI-TMBF-01:X:FIR:GAIN_S', orig_fir_gain)
-elseif strcmp(mbf_axis, 'y')
-    lcaPut('SR23C-DI-TMBF-01:Y:FIR:GAIN_S', orig_fir_gain)
-elseif strcmp(mbf_axis, 's')
-    lcaPut('SR23C-DI-LMBF-01:IQ:FIR:GAIN_S', orig_fir_gain)
-end %if
+lcaPut([pv_head, Bunch_bank.FIR_gains], orig_fir_gain)
 
 if strcmp(p.Results.plotting, 'yes')
     [poly_data, frequency_shifts] = mbf_growdamp_analysis(growdamp);

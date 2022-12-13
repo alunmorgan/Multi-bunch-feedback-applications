@@ -16,9 +16,11 @@ end %if
 modescan = machine_environment;
 
 [root_string, modescan.harmonic_number, pv_names] = mbf_system_config;
+
 root_string = root_string{1};
-% Generate the base PV name.
+
 pv_head = pv_names.hardware_names.(mbf_axis);
+
 % Add the axis label to the data structure.
 modescan.ax_label = mbf_axis;
 % construct name and add it to the structure

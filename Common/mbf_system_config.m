@@ -12,10 +12,15 @@ harmonic_number = 936;
 % Base PVs of the hardware.
 pv_names.hardware_names.T = 'SR23C-DI-TMBF-01';
 pv_names.hardware_names.L = 'SR23C-DI-LMBF-01';
+pv_names.hardware_names.mem.x = pv_names.hardware_names.T;
+pv_names.hardware_names.mem.y = pv_names.hardware_names.T;
+pv_names.hardware_names.mem.s = pv_names.hardware_names.L;
 pv_names.hardware_names.x = [pv_names.hardware_names.T, ':X'];
 pv_names.hardware_names.y = [pv_names.hardware_names.T, ':Y'];
 pv_names.hardware_names.s = [pv_names.hardware_names.L, ':IQ'];
 pv_names.hardware_names.lab = 'TS-DI-TMBF-02';
+pv_names.hardware_names.mem.tx = pv_names.hardware_names.lab; % test system
+pv_names.hardware_names.mem.ty = pv_names.hardware_names.lab; % test system
 pv_names.hardware_names.tx = [pv_names.hardware_names.lab, ':X']; % test system
 pv_names.hardware_names.ty = [pv_names.hardware_names.lab, ':Y']; % test system
 
@@ -56,11 +61,12 @@ pv_names.tails.Super_sequencer_count = ':SEQ:SUPER:COUNT_S';
 % Sequencer settings
 pv_names.tails.Sequencer.start_state = ':SEQ:PC_S';
 pv_names.tails.Sequencer.steady_state_bank = ':SEQ:0:BANK_S';
-pv_names.tails.Sequencer.Base = ':SEQ:';
+pv_names.tails.Sequencer.Base = ':SEQ';
 pv_names.tails.Sequencer.start_frequency = ':START_FREQ_S';
 pv_names.tails.Sequencer.count = ':COUNT_S';
 pv_names.tails.Sequencer.dwell = ':DWELL_S';
 pv_names.tails.Sequencer.gain = ':GAIN_S';
+pv_names.tails.Sequencer.gaindb = ':GAIN_DB_S';
 pv_names.tails.Sequencer.enable = ':ENABLE_S';
 pv_names.tails.Sequencer.step_frequency = ':STEP_FREQ_S';
 pv_names.tails.Sequencer.holdoff = ':HOLDOFF_S';
@@ -69,14 +75,17 @@ pv_names.tails.Sequencer.capture_state = ':CAPTURE_S';
 pv_names.tails.Sequencer.windowing_state = ':ENWIN_S';
 pv_names.tails.Sequencer.blanking_state = ':BLANK_S';
 
-pv_names.tails.Bunch_bank.Base = ':BUN:';
+pv_names.tails.Bunch_bank.Base = ':BUN';
 pv_names.tails.Bunch_bank.Gains = ':GAINWF_S';
 pv_names.tails.Bunch_bank.Output_types = ':OUTWF_S';
 pv_names.tails.Bunch_bank.FIR_select = ':FIRWF_S';
 pv_names.tails.Bunch_bank.FIR_enable = ':FIR:SET_ENABLE_S';
-pv_names.tails.Bunch_bank.NCO1_enable = ':NCO1:SET_ENABLE_S';
-pv_names.tails.Bunch_bank.NCO2_enable = ':NCO2:SET_ENABLE_S';
-pv_names.tails.Bunch_bank.SEQ_enable = ':SEQ:SET_ENABLE_S';
+pv_names.tails.Bunch_bank.NCO1_set_enable = ':NCO1:SET_ENABLE_S';
+pv_names.tails.Bunch_bank.NCO2_set_enable = ':NCO2:SET_ENABLE_S';
+pv_names.tails.Bunch_bank.NCO1_enable = ':NCO1:ENABLE_S';
+pv_names.tails.Bunch_bank.NCO2_enable = ':NCO2:ENABLE_S';
+pv_names.tails.Bunch_bank.SEQ_set_enable = ':SEQ:SET_ENABLE_S';
+pv_names.tails.Bunch_bank.SEQ_enable = ':SEQ:ENABLE_S';
 pv_names.tails.Bunch_bank.PLL_enable = ':PLL:SET_ENABLE_S';
 pv_names.tails.Bunch_bank.FIR_disable = ':FIR:SET_DISABLE_S';
 pv_names.tails.Bunch_bank.NCO1_disable = ':NCO1:SET_DISABLE_S';
@@ -117,7 +126,9 @@ pv_names.tails.TRG.memory_status = ':TRG:MEM:STATUS';
 pv_names.tails.NCO.Base = ':NCO';
 pv_names.tails.NCO.frequency = ':FREQ_S';
 pv_names.tails.NCO.gain = ':GAIN_S';
+pv_names.tails.NCO.gaindb = ':GAIN_DB_S';
 pv_names.tails.NCO.enable = ':ENABLE_S';
+pv_names.tails.NCO.PLL_follow = ':TUNE_PLL_S';
 
 % FIR settings
 pv_names.tails.FIR.Base = ':FIR:';
