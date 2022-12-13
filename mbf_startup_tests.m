@@ -49,3 +49,8 @@ try
 catch
     disp('Problem with Spectrum in S axis')
 end %try
+
+% Leaving the system in a known state
+setup_operational_mode('x', "TuneOnly")
+setup_operational_mode('y', "TuneOnly")
+setup_operational_mode('s', "TuneOnly")
