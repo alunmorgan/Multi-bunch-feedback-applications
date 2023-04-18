@@ -161,7 +161,7 @@ axis tight
 linkaxes([ax4, ax6], 'x')
 linkaxes([ax4, ax5], 'y')
 
-data.time = clock;
+data.time = datevec(datetime("now"));
 data.base_name = ['Spectrum_', mbf_axis, '_axis'];
 %% saving the data to a file
 save_to_archive(root_string, data, graph_handles)

@@ -39,7 +39,7 @@ end%for
 data.raw_data = raw_data;
 data.meta_data.axis = mbf_axis;
 data.meta_data.n_turns = n_turns;
-data.meta_data.time = clock;
+data.meta_data.time = datevec(datetime("now"));
 data.meta_data.repeat = repeat;
 data.meta_data.env = env;
 data.meta_data.harmonic_number = harmonic_number;

@@ -8,10 +8,10 @@ function output = get_BPM_FA_data(sample_time)
 pause(sample_time + 5)
 BPM_names = fa_id2name(1:173);
 try
-    output = fa_load( now + [-(sample_time +5)./60./60./24 -5./60./60./24], 1:173);
+    output = fa_load( convertTo(datetime("now"),'datenum') + [-(sample_time +5)./60./60./24 -5./60./60./24], 1:173);
 catch
     pause(5)
-    output = fa_load( now + [-(sample_time +5)./60./60./24 -5./60./60./24], 1:173);
+    output = fa_load( convertTo(datetime("now"),'datenum') + [-(sample_time +5)./60./60./24 -5./60./60./24], 1:173);
 end %try
 output.bpm_names = BPM_names;
 output.X = squeeze(output.data(1,:,:));

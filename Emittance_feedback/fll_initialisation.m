@@ -69,11 +69,11 @@ lcaPut([name ':PLL:NCO:ENABLE_S'],'On');
 lcaPut([name, ':PLL:CTRL:START_S.PROC'], 1)
 
 % Wait until PLL has locked (set lower bound to phase error?)
-t1 = now;
+t1 = datetime("now");
 while abs(abs(lcaGet([name, ':PLL:FILT:PHASE'])) - ...
         abs( p.Results.fll_target_phase)) > 1 % within one degree of target.
-    time = (now - t1) *24* 3600;
-    if time >10
+    lock_time = datetime("now");
+    if lock_time > t1 + seconds(10)
         disp('Unable to lock within 10 seconds')
         return
     end %if

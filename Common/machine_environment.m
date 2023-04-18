@@ -11,7 +11,7 @@ if nargin == 0
 end
 
 % timestamp
-exp_data.time = clock;
+exp_data.time = datevec(datetime("now"));
 
 %% General machine parameters
 % Ring mode

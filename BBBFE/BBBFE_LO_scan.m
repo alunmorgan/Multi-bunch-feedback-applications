@@ -35,7 +35,7 @@ xlabel('LO phase (degrees)')
 ylabel('tune max value (normalised)')
 legend('X', 'Y', 'S')
 
-data.time = clock;
+data.time = datevec(datetime("now"));
 data.base_name = 'LO_scan';
 %% saving the data to a file
 save_to_archive(root_string, data, graph_handles)

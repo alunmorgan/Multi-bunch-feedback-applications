@@ -77,7 +77,7 @@ title(['Phase sweep for MBF ', mbf_ax, ' axis'])
 grid on
 hold off
 
-data.time = clock;
+data.time = datevec(datetime("now"));
 data.base_name = 'system_phase_scan';
 %% saving the data to a file
 save_to_archive(root_string, data)
