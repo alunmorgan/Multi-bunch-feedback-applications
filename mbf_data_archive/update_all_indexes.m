@@ -11,5 +11,7 @@ mbf_make_index('Spectrum', 's')
 mbf_make_index('Growdamp', 'x')
 mbf_make_index('Growdamp', 'y')
 mbf_make_index('Growdamp', 's')
+mbf_make_index('fll_phase_scan', 'x')
+mbf_make_index('fll_phase_scan', 'y')
 
 

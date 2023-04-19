@@ -14,18 +14,18 @@ elseif strcmp(mbf_axis, 'y')
     filter_name = 'fll_phase_scan_y_axis';
 end %if
 
-wanted_datasets = mbf_archival_dataset_retrieval(filter_name, date_range,...
-    'bypass_index', 1);
+requested_data = mbf_archival_dataset_retrieval(filter_name, date_range,...
+    'bypass_index', 'no');
 
-requested_data = cell(length(wanted_datasets),1);
-for hse = 1:length(wanted_datasets)
-    temp = load(wanted_datasets{hse});
-    temp.data.f = temp.data.f(:,1); 
-    temp.data.mag = temp.data.mag(:,1);
-    temp.data.iq = temp.data.iq(:,1);
-    requested_data{hse} = temp.data;
-    clear temp
-end %for
+% requested_data = cell(length(requested_data),1);
+% for hse = 1:length(requested_data)
+%     temp = load(requested_data{hse});
+%     temp.data.f = temp.data.f(:,1); 
+%     temp.data.mag = temp.data.mag(:,1);
+%     temp.data.iq = temp.data.iq(:,1);
+%     requested_data{hse} = temp.data;
+%     clear temp
+% end %for
 
 % filter out broken data
 data_state = ones(length(requested_data),1);

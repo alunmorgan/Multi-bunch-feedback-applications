@@ -12,7 +12,6 @@ function mbf_growdamp_archival_plotting(requested_data, dr_passive, dr_active, e
 %      times (numeric vector): Datenums of the datasets.
 %      experimental_setup (structure): The setup parameters for the
 %                                      analysis.
-%      extents (structure): Contains the max and min values of the machine operating parameters.
 %      plot_error_graphs (anything): if present the code will plot the results of the fit errors.
 %
 % Example: mbf_growdamp_archival_plotting(dr_passive, dr_active, error_passive, error_active, times, setup, selections, extents)

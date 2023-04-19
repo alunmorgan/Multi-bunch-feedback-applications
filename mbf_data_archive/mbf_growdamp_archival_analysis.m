@@ -32,7 +32,6 @@ function [dr_passive, dr_active, error_passive, error_active, times, experimenta
 %         times (numeric vector): Datenums of the datasets.
 %         experimental_setup (structure): The setup parameters for the
 %                                         analysis.
-%         extents (structure): Contains the max and min values of the machine operating parameters.
 %
 % Example:[dr_passive, dr_active, error_passive, error_active, times, experimental_setup, extents] = mbf_growdamp_archival_analysis(data_requested, 'average')
 

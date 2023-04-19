@@ -1,35 +1,44 @@
-function mbf_make_index(app, ax)
+function mbf_make_index(application_type, ax)
+% Writes index files to speed up archive retrival functions
+% Args:
+%       application_type(str): either 'Growdamp', 'Bunch_motion', 'Modescan',
+%                           'Spectrum', 'LO_scan', 'system_phase_scan', 
+%                           'clock_phase_scan'.
+%       ax(str): 'x', 'y', or 's'
+%
+% Example mbf_make_index('Growdamp', 'x')
 
 [root_string, ~, ~, ~] = mbf_system_config;
 
-if ~strcmp(app, 'Growdamp') && ~strcmp(app, 'Bunch_motion') ...
-        && ~strcmp(app, 'Modescan') && ~strcmp(app, 'Spectrum') ...
-        && ~strcmp(app, 'LO_scan') && ~strcmp(app, 'system_phase_scan') ...
-        && ~strcmp(app, 'clock_phase_scan')
-    error('mbf_make_index: No valid application given (Growdamp, Bunch_motion, Modescan, Spectrum, LO_scan, system_phase_scan, clock_phase_scan)')
+if ~strcmp(application_type, 'Growdamp') && ~strcmp(application_type, 'Bunch_motion') ...
+        && ~strcmp(application_type, 'Modescan') && ~strcmp(application_type, 'Spectrum') ...
+        && ~strcmp(application_type, 'LO_scan') && ~strcmp(application_type, 'system_phase_scan') ...
+        && ~strcmp(application_type, 'clock_phase_scan')...
+        && ~strcmp(application_type, 'fll_phase_scan')
+    error('mbf_make_index: No valid application given (Growdamp, Bunch_motion, Modescan, Spectrum, LO_scan, system_phase_scan, clock_phase_scan, fll_phase_scan)')
 end %if
 if nargin < 2
     ax = '';
-    if strcmp(app, 'Growdamp') || strcmp(app, 'Modescan') || strcmp(app, 'Spectrum')
+    if strcmp(application_type, 'Growdamp') || strcmp(application_type, 'Modescan') || strcmp(application_type, 'Spectrum')
         error('An axis needs to be specified')
     end %if
 end %if
 
 
-if strcmp(app, 'Bunch_motion') || strcmp(app, 'LO_scan') || ...
-        strcmp(app, 'system_phase_scan') || strcmp(app, 'clock_phase_scan')
+if strcmp(application_type, 'Bunch_motion') || strcmp(application_type, 'LO_scan') || ...
+        strcmp(application_type, 'system_phase_scan') || strcmp(application_type, 'clock_phase_scan')
     index_name = 'index';
-    filter_name = app;
+    filter_name = application_type;
 else
     if strcmpi(ax, 'x')
         index_name = 'x_axis_index';
-        filter_name = [app, '_x_axis'];
+        filter_name = [application_type, '_x_axis'];
     elseif  strcmpi(ax, 'y')
         index_name = 'y_axis_index';
-        filter_name = [app, '_y_axis'];
+        filter_name = [application_type, '_y_axis'];
     elseif strcmpi(ax, 's')
         index_name = 's_axis_index';
-        filter_name = [app, '_s_axis'];
+        filter_name = [application_type, '_s_axis'];
     else
         error('mbf_make_index: No valid axis given (should be x, y or s)')
     end %if
@@ -42,12 +51,17 @@ for nes = 1:length(root_string)
 end %for
 datasets = datasets(2:end);
 wanted_datasets_type = datasets(find_position_in_cell_lst(strfind(datasets, filter_name)));
-disp(['Creating lookup index for ',app, ' ' ax])
+disp(['Creating lookup index for ',application_type, ' ' ax])
 if isempty(wanted_datasets_type)
     disp('No files to index')
 else
     parfor kse = 1:length(wanted_datasets_type)
-        temp = load(wanted_datasets_type{kse});
+        try % handelling corrupted input files
+            temp = load(wanted_datasets_type{kse});
+        catch me1
+            ok(kse) = 0;
+            disp(me1.message)
+        end %try
         data_name = fieldnames(temp);
         % Although the code saves eveything in 'data', older datasets have
         % a variety of names.
@@ -64,5 +78,5 @@ else
     end %parfor
     file_index = cat(1, file_name(ok==1), file_time(ok==1));
     toc
-    save(fullfile(root_string{1}, [app, '_', index_name]), 'file_index')
+    save(fullfile(root_string{1}, [application_type, '_', index_name]), 'file_index')
 end %if

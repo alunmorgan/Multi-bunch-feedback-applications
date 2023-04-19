@@ -1,4 +1,4 @@
-function wanted_datasets = mbf_archival_dataset_retrieval(filter_name, date_range,...
+function conditioned_data = mbf_archival_dataset_retrieval(filter_name, date_range,...
    varargin)
 % Extracts requested data from the data archive between
 % the requested times(date_range), and of the correct type (ax).
@@ -8,27 +8,26 @@ function wanted_datasets = mbf_archival_dataset_retrieval(filter_name, date_rang
 %                         Growdamp_x_axis, Growdamp_y_axis, Growdamp_s_axis
 %                         
 %       date_range (pair of timestamps): The range of time to extract.
-%       bypass_index (int) : 0 for use the pregnerated index (much faster)
-%                            1 for work things out from the file metatdata.
-%                            the default is 0.
+%       bypass_index (str) : 'no' for use the pregnerated index (much faster)
+%                            'yes' for work things out from the file metatdata.
+%                            the default is 'no'.
 %
 % Returns:
-%       requested_data (cell of structures): The group of requested data
+%       conditioned_data (cell of structures): The group of requested data
 %                                            structures.
 %
-% Example: mbf_growdamp_archival_retrieval('x', [now-5, now])
+% Example: mbf_growdamp_archival_retrieval('x', [datetime(2023, 1, 1), datetime("now")])
 
-default_bypass_index = 0;
-
-validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
+default_bypass_index = 'no';
+default_metadata_only_index = 'no';
+boolean_string = {'yes', 'no'};
 p = inputParser;
 addRequired(p, 'filter_name', @ischar);
 addRequired(p, 'date_range');
-addParameter(p, 'bypass_index', default_bypass_index, validScalarPosNum);
+addParameter(p, 'bypass_index', default_bypass_index, @(x) any(validatestring(x, boolean_string)));
+addParameter(p, 'metadata_only', default_metadata_only_index, @(x) any(validatestring(x, boolean_string)));
 
 parse(p,filter_name, date_range, varargin{:});
-bypass_index = p.Results.bypass_index;
-
 
 % Getting the desired system setup parameters.
 [root_string, ~, ~, ~] = mbf_system_config;
@@ -36,11 +35,11 @@ root_string = root_string{1};
 
 index_name = [filter_name, '_index'];
 
-if bypass_index == 0
+if strcmp(p.Results.bypass_index, 'no')
     load(fullfile(root_string, index_name), 'file_index')
-    datenums = cellfun(@datenum, file_index(2,:));
-    a = find(datenums > date_range(1));
-    b = find(datenums <= date_range(2));
+    capture_times = cellfun(@datetime, file_index(2,:));
+    a = find(capture_times > date_range(1));
+    b = find(capture_times <= date_range(2));
     wanted_datasets = file_index(1,(intersect(a,b)));
     disp('')
 else
@@ -76,3 +75,23 @@ else
     wanted_datasets = wanted_datasets_type_prefiltered(in_time == 1);
 end %if
 
+requested_data = cell(length(wanted_datasets),1);
+for jes = 1:length(wanted_datasets)
+    temp = load(wanted_datasets{jes});
+    data_name = fieldnames(temp);
+    % Although the code saves eveything in 'data', older datasets have
+    % a variety of names.
+    if strcmp(data_name{1}, 'data') || ...
+            strcmp(data_name{1}, 'growdamp') || ...
+            strcmp(data_name{1}, 'what_to_save')
+        requested_data{jes} = temp.(data_name{1});
+    end %if
+    if strcmp(p.Results.metadata_only, 'yes')
+        requested_data{jes} = rmfield(requested_data{jes}, 'data');
+    end %if
+    clear data
+end %for
+
+%There was some variation in the use of field names. This regularises them to
+%the current standard.
+conditioned_data = condition_mbf_metadata(requested_data);
