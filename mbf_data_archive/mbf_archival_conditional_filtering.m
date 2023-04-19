@@ -1,4 +1,4 @@
-function mbf_growdamp_archival_retrieval_setup(axis, date_range, varargin)
+function mbf_archival_conditional_filtering(requested_data, varargin)
 
 default_sweep_parameter = 'current';
 default_current_range = 350;
@@ -44,8 +44,6 @@ selections = {...
     'wiggler_field_I15', p.Results.wiggler_field_I15_range;
     };
 
-requested_data = mbf_growdamp_archival_retrieval(axis, date_range, 1);
-disp('Retrieval complete')
 conditioned_data = condition_mbf_metadata(requested_data);
 
 if iscell(p.Results.sweep_parameter)
@@ -72,8 +70,8 @@ else
     else
         error('Please select collate or sweep as the analysis type');
     end %if
-    setup.axis = axis;
-    mbf_growdamp_archival_plotting(dr_passive, dr_active, error_passive, error_active, times, setup, selections, extents);
+%     setup.axis = axis;
+%     mbf_growdamp_archival_plotting(dr_passive, dr_active, error_passive, error_active, times, setup, selections, extents);
     
 end %if
 end %function
