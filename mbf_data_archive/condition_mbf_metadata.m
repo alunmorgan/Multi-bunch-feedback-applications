@@ -7,7 +7,10 @@ output_data = input_data;
 
 for jgr = n_datasets:-1:1
     if isfield(input_data{jgr}, 'I_bpm')
-        output_data{jgr}.current(jgr) = input_data{jgr}.I_bpm;
+        output_data{jgr}.current = input_data{jgr}.I_bpm;
+    end %if
+    if isfield(input_data{jgr}, 'I_dcct5')
+        output_data{jgr}.current = input_data{jgr}.I_dcct5;
     end %if
 
     if isfield(input_data{jgr}, 'fill')
