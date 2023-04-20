@@ -55,7 +55,10 @@ for nwd = 1:length(requested_data)
             test(law) = 1;
             continue
         end %try
-        if iscell(test_val)
+        if isnan(test_val)
+            % If no valid data do not filter.
+            temp = 1;
+        elseif iscell(test_val)
             temp = strcmp(test_val, ref_val);
         elseif length(test_val) == 1
             temp = test_val >= ref_val(1) && test_val <= ref_val(2);
