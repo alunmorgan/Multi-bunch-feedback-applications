@@ -13,5 +13,8 @@ mbf_make_index('Growdamp', 'y')
 mbf_make_index('Growdamp', 's')
 mbf_make_index('fll_phase_scan', 'x')
 mbf_make_index('fll_phase_scan', 'y')
+mbf_make_index('Modescan', 'x')
+mbf_make_index('Modescan', 'y')
+mbf_make_index('Modescan', 's')
 
 
