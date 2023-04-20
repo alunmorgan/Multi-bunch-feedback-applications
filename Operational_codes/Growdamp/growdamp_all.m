@@ -30,6 +30,8 @@ orig_fir_gain = lcaGet([pv_head, Bunch_bank.FIR_gains]);
 
 % putting the system into a known state.
 setup_operational_mode(mbf_axis, "Feedback")
+% Setting the FIR gain to its original value.
+lcaPut([pv_head, Bunch_bank.FIR_gains], orig_fir_gain)
 
 % Get the tunes
 tunes = get_all_tunes(mbf_axis);
