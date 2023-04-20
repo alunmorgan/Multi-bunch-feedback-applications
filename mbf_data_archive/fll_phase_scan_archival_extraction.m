@@ -17,15 +17,12 @@ end %if
 requested_data = mbf_archival_dataset_retrieval(filter_name, date_range,...
     'bypass_index', 'no');
 
-% requested_data = cell(length(requested_data),1);
-% for hse = 1:length(requested_data)
-%     temp = load(requested_data{hse});
-%     temp.data.f = temp.data.f(:,1); 
-%     temp.data.mag = temp.data.mag(:,1);
-%     temp.data.iq = temp.data.iq(:,1);
-%     requested_data{hse} = temp.data;
-%     clear temp
-% end %for
+% some data had many NaN collumns - this is to remove them.
+for nds = 1:length(requested_data)
+    requested_data{nds}.f = requested_data{nds}.f(:,1); 
+    requested_data{nds}.mag = requested_data{nds}.mag(:,1);
+    requested_data{nds}.iq = requested_data{nds}.iq(:,1);
+end %for
 
 % filter out broken data
 data_state = ones(length(requested_data),1);
