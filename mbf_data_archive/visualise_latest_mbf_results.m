@@ -19,7 +19,8 @@ spectrum_s_files = files(contains(files, 'Spectrum_s'));
 if ~isempty(modescan_x_files)
     try
         modescan_x = load(modescan_x_files{end},'data');
-        mbf_modescan_plotting(modescan_x.data)
+        [data_magnitude_x, data_phase_x] = mbf_modescan_analysis(modescan_x.data);
+        mbf_modescan_plotting(data_magnitude_x, data_phase_x, modescan_x.data)
     catch
         disp('Problem with modescan X axis data')
     end %try
@@ -27,7 +28,8 @@ end %if
 if ~isempty(modescan_y_files)
     try
         modescan_y = load(modescan_y_files{end},'data');
-        mbf_modescan_plotting(modescan_y.data)
+        [data_magnitude_y, data_phase_y] = mbf_modescan_analysis(modescan_y.data);
+        mbf_modescan_plotting(data_magnitude_y, data_phase_y, modescan_y.data)
     catch
         disp('Problem with modescan Y axis data')
     end %try
@@ -35,7 +37,8 @@ end %if
 if ~isempty(modescan_s_files)
     try
         modescan_s = load(modescan_s_files{end},'data');
-        mbf_modescan_plotting(modescan_s.data)
+        [data_magnitude_s, data_phase_s] = mbf_modescan_analysis(modescan_s.data);
+        mbf_modescan_plotting(data_magnitude_s, data_phase_s, modescan_s.data)
     catch
         disp('Problem with modescan S axis data')
     end %try
