@@ -34,7 +34,7 @@ setup_operational_mode(mbf_axis, "Feedback")
 lcaPut([pv_head, Bunch_bank.FIR_gains], orig_fir_gain)
 
 % Get the tunes
-tunes = get_all_tunes(mbf_axis);
+tunes = get_all_tunes('xys');
 tune = tunes.([mbf_axis,'_tune']).tune;
 
 if isnan(tune)
@@ -44,7 +44,7 @@ end %if
 
 mbf_growdamp_setup(mbf_axis, tune)
 growdamp = mbf_growdamp_capture(mbf_axis);
-
+growdamp.tunes = tunes;
 % Programatically press the Feedback and tune button on each system
 % and set the feedback gain to the operational value.
 setup_operational_mode(mbf_axis, "Feedback")

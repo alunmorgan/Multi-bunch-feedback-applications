@@ -16,9 +16,12 @@ mbf_tools
 
 % Programatically press the tune only button on each system.
 setup_operational_mode(mbf_axis, "TuneOnly")
+% Get the tunes
+tunes = get_all_tunes('xys');
 
 mbf_spectrum_setup(mbf_axis)
 data = mbf_spectrum_capture(mbf_axis, n_turns, repeat);
+data.tunes = tunes;
 
 % Programatically press the tune only button on each system.
 setup_operational_mode(mbf_axis, "TuneOnly")
