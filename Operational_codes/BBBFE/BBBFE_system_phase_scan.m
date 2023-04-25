@@ -67,10 +67,10 @@ BBBFE_restore(mbf_ax)
 % plotting
 figure;
 hold all
-semilogy(data.phase, data.main)
-semilogy(data.phase, data.side1)
-semilogy(data.phase, data.side2)
-legend('Excited bunch', 'preceeding', 'following')
+semilogy(data.phase, data.main(:,1), 'DisplayName', 'Excited bunch')
+semilogy(data.phase, data.side1(:,1), 'DisplayName','Preceeding bunch')
+semilogy(data.phase, data.side2(:,1), 'DisplayName', 'Following bunch')
+legend
 xlabel('phase (degrees)')
 ylabel('Signal')
 title(['Phase sweep for MBF ', mbf_ax, ' axis'])
