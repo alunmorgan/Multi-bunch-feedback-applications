@@ -74,6 +74,8 @@ exp_data.emittance_v = lcaGet('SR-DI-EMIT-01:VEMIT_MEAN');
 exp_data.coupling = lcaGet('SR-DI-EMIT-01:COUPLING_MEAN');
 exp_data.espread = lcaGet('SR-DI-EMIT-01:ESPREAD_MEAN');
 
+exp_data.tunes = get_all_tunes('xys');
+
 % Lifetime
 exp_data.lifetime = lcaGet('SR-DI-DCCT-01:LIFETIME'); % Lifetime on main display chosen for lowest error.
 exp_data.life.dcct.life30sec = lcaGet('SR-DI-DCCT-01:LIFE30');
