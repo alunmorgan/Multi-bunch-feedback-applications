@@ -2,6 +2,12 @@ function mbf_startup_tests
 % Runs all the regular MBF tests
 %
 % Inject 30mA 900 bunches into the machine before running the tests.
+beam_current = lcaGet('SR-DI-DCCT-01:SIGNAL');
+if beam_current< 10
+    disp('Beam current below 10mA... not running tests.')
+    return
+end %if
+
 try
     modscan_all('x', 'plotting', 'no')
 catch
