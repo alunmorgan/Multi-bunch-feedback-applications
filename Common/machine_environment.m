@@ -1,19 +1,30 @@
-function exp_data = machine_environment(exp_data)
+function exp_data = machine_environment(varargin)
 % captures the environmental variables of the machine
 %
 % exp_data is a structure containing experimental data. The state of the
 % machine is added to the structure and then returned.
 %
+% tunes are the previous captured tune measurements. As depending on the
+% experimental setup it may not be possible to capture them before each capture.
+%
 % Example: exp_data = machine_environment(exp_data)
 
-if nargin == 0
-    exp_data = struct('RF', []);
-end
+p = inputParser;
+p.StructExpand = false;
+p.CaseSensitive = false;
+addParameter(p, 'exp_data', struct('RF', []));
+addParameter(p, 'tunes', NaN);
 
+parse(p, varargin{:});
+exp_data = p.Results.exp_data;
 % timestamp
 exp_data.time = datevec(datetime("now"));
 
 %% General machine parameters
+% Tunes
+if isnan(p.Results.tunes)
+    exp_data.tunes = get_all_tunes('xys');
+end %if
 % Ring mode
 exp_data.ringmode = lcaGet('SR-CS-RING-01:MODE');
 % Machine current
@@ -73,8 +84,6 @@ exp_data.emittance_h = lcaGet('SR-DI-EMIT-01:HEMIT_MEAN');
 exp_data.emittance_v = lcaGet('SR-DI-EMIT-01:VEMIT_MEAN');
 exp_data.coupling = lcaGet('SR-DI-EMIT-01:COUPLING_MEAN');
 exp_data.espread = lcaGet('SR-DI-EMIT-01:ESPREAD_MEAN');
-
-exp_data.tunes = get_all_tunes('xys');
 
 % Lifetime
 exp_data.lifetime = lcaGet('SR-DI-DCCT-01:LIFETIME'); % Lifetime on main display chosen for lowest error.
