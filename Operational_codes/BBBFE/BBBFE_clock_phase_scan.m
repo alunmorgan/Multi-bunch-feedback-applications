@@ -10,7 +10,7 @@ function BBBFE_clock_phase_scan(mbf_ax, single_bunch_location)
 % Machine setup: (manual for the time being...)
 % fill some charge in bunch 1 (0.2nC)
 %
-% Example: BBBFE_clock_phase_scan('X')
+% Example: BBBFE_clock_phase_scan('X', 400)
 if strcmp(mbf_ax, 'Y')
     ax = 3;
 elseif strcmp(mbf_ax, 'X')
@@ -35,9 +35,9 @@ end %for
 
 % measurement
 data.phase = [-180:20:180 160:-20:-180];
-data.side1 = NaN(length(data.phase));
-data.main = NaN(length(data.phase));
-data.side2 = NaN(length(data.phase));
+data.side1 = NaN(length(data.phase), 1);
+data.main = NaN(length(data.phase), 1);
+data.side2 = NaN(length(data.phase), 1);
 for x = 1:length(data.phase)
     lcaPut([data.frontend_pv ':PHA:CLO:' num2str(ax)], data.phase(x))
     pause(2)
@@ -47,7 +47,7 @@ for x = 1:length(data.phase)
 end %for
 
 % move back to the original setting
-for pp = -180:20:original_setting
+for pp = -180:10:original_setting
     lcaPut([data.frontend_pv ':PHA:CLO:' num2str(ax)], pp)
     pause(.5)
 end %for
@@ -57,10 +57,10 @@ BBBFE_restore(mbf_ax)
 % plotting
 figure;
 hold all
-semilogy(data.phase, data.main)
-semilogy(data.phase, data.side1)
-semilogy(data.phase, data.side2)
-legend('Excited bunch', 'preceeding', 'following')
+semilogy(data.phase, data.main, 'DisplayName', 'Excited bunch')
+semilogy(data.phase, data.side1, 'DisplayName','Preceeding bunch')
+semilogy(data.phase, data.side2, 'DisplayName', 'Following bunch')
+legend
 xlabel('phase (degrees)')
 ylabel('Signal')
 title(['Clock sweep for clock' num2str(ax), ' ', mbf_ax, 'axis'])
