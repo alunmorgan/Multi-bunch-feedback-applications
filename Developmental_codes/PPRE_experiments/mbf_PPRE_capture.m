@@ -78,6 +78,12 @@ PPRE.excitation_pattern = mbf_emittance_setup(mbf_axis, ...
     'excitation_pattern', p.Results.excitation_pattern, ...
     'harmonic', p.Results.harmonic);
 
+%% Setup cameras
+lcaPut('SR01C-DI-DCAM-05:IMAGEWIDTH', 1024)
+lcaPut('SR01C-DI-DCAM-04:IMAGEWIDTH', 1024)
+lcaPut('SR01C-DI-PINH-01:POS1', -2.5)
+lcaPut('SR01C-DI-PINH-02:POS1', -2.5)
+
 %% Do measurement
 orig_gain = lcaGet([mbf_name, 'NCO2:GAIN_DB_S']);
 orig_freq = lcaGet([mbf_name, 'NCO2:FREQ_S']);
@@ -88,7 +94,7 @@ if length(p.Results.excitation_gain) > 1
         fprintf('Measurement %d\n',whd);
         lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 0);
         lcaPut([mbf_name, 'NCO2:GAIN_DB_S'],p.Results.excitation_gain(whd));
-        pause(1)
+        pause(10)
         PPRE.scan{whd} = PPRE_aquisition(p.Results.repeat_datapoints);
     end %for
     
@@ -115,6 +121,25 @@ else
     pause(1) % Wait for emittance to stablise
     PPRE.scan{1} = PPRE_aquisition(p.Results.repeat_datapoints);
 end %if
+
+% % gain scan
+% for whd = 1:length(p.Results.excitation_gain)
+%     fprintf('\n');
+%     % frequency scan
+%     for nwa = 1:length(p.Results.excitation_frequency)
+%         fprintf('\n');
+%         % harmonic scan
+%         for kef = 1:length(p.Results.excitation_frequency)
+%             fprintf('.');
+%             lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 0);
+%             lcaPut([mbf_name, 'NCO2:GAIN_DB_S'],p.Results.excitation_gain(whd));
+%             lcaPut([mbf_name, 'NCO2:FREQ_S'], p.Results.harmonic(1) + p.Results.excitation_frequency(nwa));
+%             lcaPut([mbf_name, 'NCO2:FREQ_S'], p.Results.harmonic(kef) + p.Results.excitation_frequency(1));
+%             pause(1)
+%             PPRE.scan{whd, nwa, kef} = PPRE_aquisition(p.Results.repeat_datapoints);
+%         end %for
+%     end %for
+% end %for
 
 lcaPut([mbf_name, 'NCO2:GAIN_DB_S'], orig_gain)
 lcaPut([mbf_name, 'NCO2:FREQ_S'], orig_freq)
