@@ -14,25 +14,12 @@ addRequired(p, 'mbf_axis', @(x) any(validatestring(x, axis_string)));
 addParameter(p, 'n_repeats', default_n_repeats, validScalarNum);
 addParameter(p, 'plotting', default_plotting, @(x) any(validatestring(x, boolean_string)));
 
-
 parse(p, mbf_axis, varargin{:});
-mbf_tools
-% Programatiaclly press the tune only button on each system
-% then get the tunes
-setup_operational_mode(mbf_axis, "TuneOnly")
-% Get the tunes
-tunes = get_all_tunes('xys');
-tune = tunes.([mbf_axis,'_tune']).tune;
 
-if isnan(tune)
-    disp('Could not get tune value')
-    return
-end %if
-
-mbf_modescan_setup(mbf_axis, tune)
+tunes = mbf_modescan_setup(mbf_axis);
 pause(2)
-modescan = mbf_modescan_capture(mbf_axis, p.Results.n_repeats);
-modescan.tunes = tunes;
+modescan = mbf_modescan_capture(mbf_axis, 'tunes', tunes, 'n_repeats', p.Results.n_repeats);
+
 % Programatiaclly press the tune only button on each system
 setup_operational_mode(mbf_axis, "TuneOnly")
 

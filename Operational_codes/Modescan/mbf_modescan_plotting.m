@@ -6,7 +6,7 @@ function mbf_modescan_plotting(data_magnitude, data_phase, modescan)
 %       data_phase():
 %       harmonic_number():
 %
-% Example: mbf_modescan_plotting(data_magnitude, data_phase, harmonic_number)
+% Example: mbf_modescan_plotting(data_magnitude, data_phase, modescan)
 if ~isfield(modescan, 'harmonic_number')
     modescan.harmonic_number = 936;
 end %if

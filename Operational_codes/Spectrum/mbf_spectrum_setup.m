@@ -1,12 +1,19 @@
-function mbf_spectrum_setup(mbf_axis)
+function tunes = mbf_spectrum_setup(mbf_axis)
 % sets up the hardware ready to capture data for a spectrum.
 % Args:
 %       mbf_axis (str): 'x', 'y', 's'. Defines which system you are requesting
 %
 % Example mbf_spectrum_setup('x')
 
+mbf_tools
+
 [~, ~, pv_names, trigger_inputs] = mbf_system_config;
 pv_head = pv_names.hardware_names.(mbf_axis);
+
+% Programatically press the tune only button on each system.
+setup_operational_mode(mbf_axis, "TuneOnly")
+% Get the tunes
+tunes = get_all_tunes('xys');
 
 % Disarm the sequencer and memory triggers
 mbf_get_then_put([pv_names.hardware_names.(mbf_axis) pv_names.tails.triggers.SEQ.disarm], 1)

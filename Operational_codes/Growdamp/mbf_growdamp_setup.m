@@ -1,9 +1,8 @@
-function mbf_growdamp_setup(mbf_axis, tune, varargin)
+function [tunes, orig_fir_gain] = mbf_growdamp_setup(mbf_axis, varargin)
 % Sets up the MBF system to be ready for a growdamp measurement.
 %
 %   Args:
 %       mbf_axis (str): Selects which MBF axis to work on (x, y, s).
-%       tune (float): Tune of the machine.
 %       durations (list of ints): number of turns for excitation, 
 %                                 pasive daming and active damping
 %       dwell (int): number of turns at each point.
@@ -15,8 +14,11 @@ function mbf_growdamp_setup(mbf_axis, tune, varargin)
 %       fll_guard_bunches (float): the number of bunches surrounding the fll
 %                                  bunches for which feedback is switched off.
 %       single_mode(int): The mode you want to operate on.
+%   Returns:
+%       tunes (structure): Tunes of the machine.
+%       orig_fir_gain (float): the FIR gain before the meausurement.
 %
-% example: mbf_growdamp_setup('x', 0.17)
+% example: mbf_growdamp_setup('x')
 
 if strcmpi(mbf_axis, 'x') || strcmpi(mbf_axis, 'y') || strcmpi(mbf_axis, 'tx') || strcmpi(mbf_axis, 'ty')
     default_durations = [250, 500, 500, 2000];
@@ -42,7 +44,6 @@ valid_sweep = @(x) isnumeric(x) && length(x) == 2;
 binary_string = {'yes', 'no'};
 
 addRequired(p, 'mbf_axis');
-addRequired(p, 'tune', valid_number);
 addParameter(p, 'durations', default_durations, valid_durations);
 addParameter(p, 'dwell', default_dwell, valid_number);
 addParameter(p, 'tune_sweep_range', default_tune_sweep_range, valid_sweep);
@@ -53,7 +54,18 @@ addParameter(p, 'fll_bunches', 400, valid_number);
 addParameter(p, 'fll_guard_bunches', 10, valid_number);
 addParameter(p, 'single_mode', NaN, valid_number);
 
-parse(p, mbf_axis, tune, varargin{:});
+parse(p, mbf_axis, varargin{:});
+
+mbf_tools
+
+% Get the tunes
+tunes = get_all_tunes('xys');
+tune = tunes.([mbf_axis,'_tune']).tune;
+
+if isnan(tune)
+    disp('Could not get all tune values')
+    return
+end %if
 
 [~, harmonic_number, pv_names, trigger_inputs] = mbf_system_config;
 settings = p.Results;
@@ -67,10 +79,19 @@ Detector = pv_names.tails.Detector;
 Bunch_bank = pv_names.tails.Bunch_bank;
 NCO = pv_names.tails.NCO;
 
+% Get the current FIR gain
+orig_fir_gain = lcaGet([pv_head, Bunch_bank.FIR_gains]);
+
+% putting the system into a known state.
+setup_operational_mode(mbf_axis, "Feedback")
+% Setting the FIR gain to its original value.
+lcaPut([pv_head, Bunch_bank.FIR_gains], orig_fir_gain)
+
+
 % Change the tune to be around the chosen mode.
 if ~isnan(settings.single_mode)
-    settings.tune = ...
-        settings.single_mode + mod(settings.tune,1);
+    tune = ...
+        settings.single_mode + mod(tune,1);
 end %if
 
 %% Set up triggering
@@ -110,22 +131,22 @@ mbf_set_bank(settings.mbf_axis, 0, 1) %FIR
 
 %% Set up states
 % state 4
-mbf_set_state(settings.mbf_axis, 4,  settings.tune, 1, ...
+mbf_set_state(settings.mbf_axis, 4,  tune, 1, ...
     [num2str(settings.excitation_level),'dB'], 'On', ...
     settings.durations(1), ...
     settings.dwell, 'Capture') %excitation
 % state 3
-mbf_set_state(settings.mbf_axis, 3, settings.tune, 1, ...
+mbf_set_state(settings.mbf_axis, 3, tune, 1, ...
     '-48dB', 'Off', ...
     settings.durations(2), ...
     settings.dwell, 'Capture') %passive damping
 % state 2
-mbf_set_state(settings.mbf_axis, 2, settings.tune, 2, ...
+mbf_set_state(settings.mbf_axis, 2, tune, 2, ...
     '-48dB', 'Off', ...
     settings.durations(3), ...
     settings.dwell, 'Capture') %active damping
 % state 1
-mbf_set_state(settings.mbf_axis, 1, settings.tune, 2, ...
+mbf_set_state(settings.mbf_axis, 1, tune, 2, ...
     '-48dB', 'Off', ...
     settings.durations(4), ...
     settings.dwell, 'Discard') %Quiecent
