@@ -1,27 +1,25 @@
-function mbf_tunescan_over_modes_plotting(data_magnitude, data_phase, tunescan)
+function mbf_tunescan_over_modes_plotting(tunescan)
 % Plots the effectiveness of correction across all modes.
 %
 % Args:
-%       data_magnitude():
-%       data_phase():
-%       harmonic_number():
+%       tunescan (structure): Captured data from a single experiment.
 %
-% Example: mbf_tunescan_plotting(data_magnitude, data_phase, tunescan)
+% Example: mbf_tunescan_plotting(tunescan)
+
 if ~isfield(tunescan, 'harmonic_number')
     tunescan.harmonic_number = 936;
 end %if
 harmonic_number = tunescan.harmonic_number;
-figure
-subplot(2,1,1)
-plot(data_magnitude(1:harmonic_number))
-title(['Amplitude (', tunescan.ax_label, ' ', num2str(tunescan.time(3)),...
-    '/', num2str(tunescan.time(2)), '/',...
-    num2str(tunescan.time(1)), ' - ', num2str(tunescan.time(4)), ':',...
-    num2str(tunescan.time(5)), ')'])
-xlabel('Modes')
-xlim([1,harmonic_number])
-subplot(2,1,2)
-plot(data_phase(1:harmonic_number))
-title('Phase (deg)')
-xlabel('Modes')
-xlim([1, harmonic_number])
+
+% reshape the results
+fracttune = tunescan.scale(1:tunescan.n_captures);
+for n = 1:size(tunescan.data,2)
+    result = reshape(abs(tunescan.data(:,n)), tunescan.n_captures, harmonic_number);
+    % plot the results
+    figure(n)
+    imagesc(1:harmonic_number, fracttune, result)
+    xlabel('mode number')
+    ylabel('fractional tune')
+    yy  = colorbar;
+    ylabel(yy,'magnitude of response')
+end
