@@ -31,6 +31,8 @@ pv_names.Hardware_trigger = 'LI-TI-MTGEN-01:BS-DI-MODE';
 pv_names.emittance = 'SR-DI-EMIT-01:ESPREAD_MEAN';
 
 % Trigger settings
+pv_names.tails.triggers.mode = ':TRG:SEQ:MODE_S';
+pv_names.tails.triggers.arm = ':TRG:SEQ:ARM_S.PROC';
 trigger_inputs = {'SOFT', 'EXT', 'PM', 'ADC0', 'ADC1', 'SEQ0', 'SEQ1'};
 for trigger_ind = 1:length(trigger_inputs)
     trigger = trigger_inputs{trigger_ind};
@@ -57,12 +59,14 @@ for trigger_ind = 1:length(trigger_inputs)
 end
 % Super Sequencer settings
 pv_names.tails.Super_sequencer_count = ':SEQ:SUPER:COUNT_S';
+pv_names.tails.Super_sequencer_reset = ':SEQ:SUPER:RESET_S.PROC';
 
 % Sequencer settings
 pv_names.tails.Sequencer.start_state = ':SEQ:PC_S';
 pv_names.tails.Sequencer.steady_state_bank = ':SEQ:0:BANK_S';
 pv_names.tails.Sequencer.Base = ':SEQ';
 pv_names.tails.Sequencer.start_frequency = ':START_FREQ_S';
+pv_names.tails.Sequencer.end_frequency = ':END_FREQ_S';
 pv_names.tails.Sequencer.count = ':COUNT_S';
 pv_names.tails.Sequencer.dwell = ':DWELL_S';
 pv_names.tails.Sequencer.gain = ':GAIN_S';
@@ -74,12 +78,14 @@ pv_names.tails.Sequencer.bank_select = ':BANK_S';
 pv_names.tails.Sequencer.capture_state = ':CAPTURE_S';
 pv_names.tails.Sequencer.windowing_state = ':ENWIN_S';
 pv_names.tails.Sequencer.blanking_state = ':BLANK_S';
+pv_names.tails.Sequencer.reset = ':RESET_S.PROC';
 
 pv_names.tails.Bunch_bank.Base = ':BUN';
 pv_names.tails.Bunch_bank.Gains = ':GAINWF_S';
 pv_names.tails.Bunch_bank.Output_types = ':OUTWF_S';
 pv_names.tails.Bunch_bank.FIR_select = ':FIRWF_S';
-pv_names.tails.Bunch_bank.FIR_enable = ':FIR:SET_ENABLE_S';
+pv_names.tails.Bunch_bank.FIR_set_enable = ':FIR:SET_ENABLE_S';
+pv_names.tails.Bunch_bank.FIR_enable = ':FIR:ENABLE_S';
 pv_names.tails.Bunch_bank.NCO1_set_enable = ':NCO1:SET_ENABLE_S';
 pv_names.tails.Bunch_bank.NCO2_set_enable = ':NCO2:SET_ENABLE_S';
 pv_names.tails.Bunch_bank.NCO1_enable = ':NCO1:ENABLE_S';
@@ -87,7 +93,8 @@ pv_names.tails.Bunch_bank.NCO2_enable = ':NCO2:ENABLE_S';
 pv_names.tails.Bunch_bank.SEQ_set_enable = ':SEQ:SET_ENABLE_S';
 pv_names.tails.Bunch_bank.SEQ_enable = ':SEQ:ENABLE_S';
 pv_names.tails.Bunch_bank.PLL_enable = ':PLL:SET_ENABLE_S';
-pv_names.tails.Bunch_bank.FIR_disable = ':FIR:SET_DISABLE_S';
+pv_names.tails.Bunch_bank.FIR_set_disable = ':FIR:SET_DISABLE_S';
+pv_names.tails.Bunch_bank.FIR_disable = ':FIR:DISABLE_S';
 pv_names.tails.Bunch_bank.NCO1_disable = ':NCO1:SET_DISABLE_S';
 pv_names.tails.Bunch_bank.NCO2_disable = ':NCO2:SET_DISABLE_S';
 pv_names.tails.Bunch_bank.SEQ_disable = ':SEQ:SET_DISABLE_S';
