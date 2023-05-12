@@ -36,8 +36,6 @@ addParameter(p, 'BPMs_to_capture', 1:173);
 addParameter(p, 'repeat_points', 10, validScalarNum);
 parse(p, mbf_axis, excitation_gain, excitation_frequency, varargin{:});
 
-nbpms = p.Results.BPMs_to_capture;
-
 % Set up MBF environment
 [root_string, ~, ~, ~] = mbf_system_config;
 root_string = root_string{1};

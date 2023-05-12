@@ -9,6 +9,8 @@ n_repeats = length(single_kick.bpm_data{1}.(selected_datatype));
 
 for nfe = 1:scan_length
     for kds = 1:length(used_bpms)
+        x_data_temp = NaN(n_repeats, length(single_kick.bpm_data{nfe}.(selected_datatype){1}.(used_bpms{kds}).X));
+        y_data_temp = NaN(n_repeats, length(single_kick.bpm_data{nfe}.(selected_datatype){1}.(used_bpms{kds}).Y));
         for shd = 1:n_repeats
             x_data_temp(shd,:) = single_kick.bpm_data{nfe}.(selected_datatype){shd}.(used_bpms{kds}).X;
             y_data_temp(shd,:) = single_kick.bpm_data{nfe}.(selected_datatype){shd}.(used_bpms{kds}).Y;

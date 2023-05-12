@@ -12,22 +12,6 @@ function BBBFE_system_phase_scan(mbf_ax, single_bunch_location)
 %
 % Example: BBBFE_system_phase_scan('X', 400)
 
-if strcmp(mbf_ax, 'X')
-    ax = 1;
-elseif strcmp(mbf_ax, 'Y')
-    ax = 2;
-elseif strcmp(mbf_ax, 'S')
-    %     mbf_ax = 'IT';
-    ax = 3;
-elseif strcmp(mbf_ax, 'IT')
-    ax = 3;
-elseif strcmp(mbf_ax, 'IL')
-    ax = 3;
-    warning( 'IL is not currently used')
-else
-    error('BBBFE_system_phase_scan: Input error. Should be X, Y,or IT')
-end %if
-
 BBBFE_setup(mbf_ax, single_bunch_location)
 
 [root_string, ~] = mbf_system_config;

@@ -22,7 +22,7 @@ exp_data.time = datevec(datetime("now"));
 
 %% General machine parameters
 % Tunes
-if isnan(p.Results.tunes)
+if ~isstruct(p.Results.tunes)
     exp_data.tunes = get_all_tunes('xys');
 end %if
 % Ring mode

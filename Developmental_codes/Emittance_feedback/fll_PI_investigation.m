@@ -1,6 +1,15 @@
 I_value = lcaGet('SR23C-DI-TMBF-01:Y:PLL:CTRL:KI_S');
 dwell = lcaGet('SR23C-DI-TMBF-01:Y:PLL:DET:DWELL_S');
-for ewn = 1:20
+
+n_repeats = 20;
+minwf = NaN(n_repeats,1);
+maxwf = NaN(n_repeats,1);
+meanwf = NaN(n_repeats,1);
+stdwf = NaN(n_repeats,1);
+tunewf = NaN(n_repeats,1);
+offsetwf = NaN(n_repeats,1);
+
+for ewn = 1:n_repeats
     data = lcaGet({'SR23C-DI-TMBF-01:Y:PLL:NCO:OFFSETWF';...
         'SR23C-DI-TMBF-01:Y:PLL:NCO:MEAN_OFFSET';...
         'SR23C-DI-TMBF-01:Y:PLL:NCO:STD_OFFSET';...
@@ -21,7 +30,7 @@ save(['/dls/ops-data/Diagnostics/MBF/FLL_investigation/PI_investigation_KI', ...
     'tunewf', 'offsetwf', 'I_value', 'dwell')
 h = figure(1);
 plot(maxwf, 'r', 'DisplayName', 'max');
-hold all; 
+hold all;
 plot(minwf, 'g','DisplayName', 'min');
 plot(meanwf, 'b','DisplayName', 'mean');
 hold off

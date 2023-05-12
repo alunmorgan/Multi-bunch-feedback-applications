@@ -35,7 +35,7 @@ grid off
 view( 2);
 shading interp
 axis tight
-pinhole_info = {};
+pinhole_info = cell(length(coeff_names),1);
 for hd = 1:length(coeff_names)
     pinhole_info{hd} = [coeff_names{hd}, ' = ', num2str(coeff_values(hd))];
 end %for

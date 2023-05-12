@@ -14,6 +14,8 @@ p.CaseSensitive = false;
 axis_string = {'x', 'y', 's'};
 boolean_string = {'yes', 'no'};
 
+default_plotting = 'yes';
+
 addRequired(p, 'mbf_axis', @(x) any(validatestring(x, axis_string)));
 addParameter(p, 'plotting', default_plotting, @(x) any(validatestring(x, boolean_string)));
 

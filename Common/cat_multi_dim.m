@@ -50,7 +50,7 @@ for n=1:3
         %NaN padding matrix into an array of spaces to stop
         %the warning messages.
         if ischar(original_data) == 1
-            od_padding(isnan(od_padding) == 1) = ' ';
+            od_padding(isnan(od_padding)) = ' ';
             od_padding = char(od_padding);
         end
         original_data = cat(pad_dims(n),original_data,od_padding);
@@ -93,7 +93,7 @@ for n=1:3
         %NaN padding matrix into an array of spaces to stop
         %the warning messages.
         if ischar(new_data) == 1
-            nd_padding(isnan(nd_padding) == 1) = ' ';
+            nd_padding(isnan(nd_padding)) = ' ';
             nd_padding = char(nd_padding);
         end
         new_data = cat(pad_dims(n),new_data,nd_padding);

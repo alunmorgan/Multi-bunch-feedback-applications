@@ -3,20 +3,16 @@ function output = get_BPM_FR_data_XY_only(nbpms)
 
 for n = 1:length(nbpms)
     bpm_name = fa_id2name(nbpms(n));
-    while 1==1
-        tk = 1;
+    for tk = 1:10
+        bpm_label = regexprep(bpm_name, '-', '_');
         try
             BPM_data_temp = lcaGet({[bpm_name, ':FR:WFX'];[bpm_name, ':FR:WFY'];});
+            output.(bpm_label).X = BPM_data_temp(1, :);
+            output.(bpm_label).Y = BPM_data_temp(2, :);
             break
         catch
-            if tk >10
-                break
-            end %if
-            tk = tk +1;
+            disp(['Failed to get BPM Free run data for ', bpm_name])
         end %try
-    end %while
-    bpm_label = regexprep(bpm_name, '-', '_');
-    output.(bpm_label).X = BPM_data_temp(1, :);
-    output.(bpm_label).Y = BPM_data_temp(2, :);
+    end %for
 end %for
 

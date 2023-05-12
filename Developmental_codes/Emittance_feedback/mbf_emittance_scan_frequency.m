@@ -19,6 +19,7 @@ end
 
 f_start = lcaGet(['SR23C-DI-TMBF-01:', axis ':NCO2:FREQ_S']);
 f = linspace(f_start - f_range, f_start + f_range, 50);
+emit = NaN(length(f),1);
 for n = 1:length(f)
     lcaPut(['SR23C-DI-TMBF-01:', axis ':NCO2:FREQ_S'], f(n))
     pause(.6)

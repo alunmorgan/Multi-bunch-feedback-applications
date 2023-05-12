@@ -24,7 +24,6 @@ p.StructExpand = false;
 p.CaseSensitive = false;
 valid_number = @(x) isnumeric(x);
 addRequired(p, 'mbf_axis');
-addRequired(p, 'tune', valid_number);
 addParameter(p, 'dwell', default_dwell, valid_number);
 addParameter(p, 'detector_gain', default_detector_gain, valid_number);
 addParameter(p, 'sequencer_gain', default_sequencer_gain, valid_number);

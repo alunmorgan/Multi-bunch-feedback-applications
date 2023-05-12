@@ -5,8 +5,7 @@ function sig = BBBFE_bunch_phase_variation_simulation(ax)
 % The idea of this is to simulate the impact of a phase gradient across the
 % bunch train.
 
-[root_path, harmonic_number, pv_names, trigger_inputs] = mbf_system_config;
-root_path = root_path{1};
+[~, harmonic_number, pv_names, ~] = mbf_system_config;
 
 fir_wf = lcaGet([pv_names.hardware_names.(ax),':BUN:0:FIR:GAIN_S']);
 % put a ramp pattern on the FIR between 0 and 1

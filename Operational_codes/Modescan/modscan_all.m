@@ -24,7 +24,10 @@ modescan = mbf_modescan_capture(mbf_axis, 'tunes', tunes, 'n_repeats', p.Results
 setup_operational_mode(mbf_axis, "TuneOnly")
 
 if strcmp(p.Results.plotting, 'yes')
+    if ~isfield(modescan, 'harmonic_number')
+        modescan.harmonic_number = 936;
+    end %if
     [data_magnitude, data_phase] = mbf_modescan_analysis(modescan);
-    mbf_modescan_plotting(data_magnitude, data_phase, modescan.harmonic_number)
+    mbf_modescan_plotting(data_magnitude, data_phase, modescan)
 end %if
 

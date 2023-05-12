@@ -1,4 +1,4 @@
-function f1 = fll_phase_scan_plotting(fll_phase_scan)
+function varargout = fll_phase_scan_plotting(fll_phase_scan)
 % Plots the results of a FLL phase scan on the
 %multi binch feedback system
 %
@@ -31,3 +31,7 @@ subplot(1,3,3)
 plot(fll_phase_scan.iq)
 xlabel('i')
 ylabel('q')
+
+if nargout == 1
+    varargout{1} = f1;
+end %if

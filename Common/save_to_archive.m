@@ -24,9 +24,11 @@ else
     dy = num2str(dy);
 end
 
+
 save_name = fullfile(root_string, num2str(data.time(1)), mth, dy, ...
     [data.filename '.mat']);
 save(save_name, 'data','-v7.3')
+% disp(['Data saved simulated:  ',save_name])
 
 disp(['Data saved to:  ',save_name])
 

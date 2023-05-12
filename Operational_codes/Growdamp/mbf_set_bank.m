@@ -54,6 +54,9 @@ elseif out_type == 3
 elseif out_type == 4
     % sweep only
     lcaPut([pv_head, BB.FIR_set_disable],1)
+%     Error using lcaPut
+% multi_ezca_get_nelem -  ezcaGetNelem(): could not find process variable :
+% SR23C-DI-TMBF-01:X:BUN1:FIR:SET_DISABLE_S
     lcaPut([pv_head, BB.NCO1_disable],1)
     lcaPut([pv_head, BB.NCO2_disable],1)
     mbf_get_then_put([pv_head, BB.SEQ_gains], ones(1,936) .* 1);

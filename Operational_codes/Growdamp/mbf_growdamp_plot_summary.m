@@ -32,10 +32,6 @@ harmonic_number = size(frequency_shifts, 1);
 
 passive_data = -squeeze(poly_data(:,2,1));
 active_data = -squeeze(poly_data(:,3,1));
-passive_errors = NaN(length(passive_data),1);
-passive_errors(isnan(passive_data)) = 0;
-active_errors = NaN(length(active_data),1);
-active_errors(isnan(active_data)) = 0;
 
 if strcmpi(p.Results.plot_mode, 'pos')
     x_plt_axis = 0:harmonic_number-1;

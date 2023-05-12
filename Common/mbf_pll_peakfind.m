@@ -61,7 +61,7 @@ end
 save_to_archive(root_path{1}, fll_phase_scan)
 disp(['Data saved to ', fullfile(root_path{1}, fll_phase_scan.base_name)])
 
-f1 = fll_phase_scan_plotting(fll_phase_scan);
+fll_phase_scan_plotting(fll_phase_scan);
 
 status=lcaGet([name ':PLL:CTRL:STATUS']);
 if strcmp(status,'Running')

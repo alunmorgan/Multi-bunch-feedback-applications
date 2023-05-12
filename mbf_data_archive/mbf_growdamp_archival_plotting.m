@@ -122,9 +122,9 @@ linkaxes([ax1,ax2],'x')
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     figure('Position',[50, 50, 1400, 800])
     if strcmp(experimental_setup.sweep_parameter, 'current')
-        axc1 = axes('OuterPosition', [0 0 0.48 0.5]);
+        axes('OuterPosition', [0 0 0.48 0.5]);
     else
-        axc1 = axes('OuterPosition', [0 0 1 0.5]);
+        axes('OuterPosition', [0 0 1 0.5]);
     end
     hold on
     plot(experimental_setup.param, dr_passive')
@@ -135,9 +135,9 @@ if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     
     hold off
     if strcmp(experimental_setup.sweep_parameter, 'current')
-        axc2 = axes('OuterPosition', [0 0.5 0.48 0.5]);
+        axes('OuterPosition', [0 0.5 0.48 0.5]);
     else
-        axc2 = axes('OuterPosition', [0 0.5 1 0.5]);
+        axes('OuterPosition', [0 0.5 1 0.5]);
     end
     hold on
     plot(experimental_setup.param, dr_active')
@@ -150,8 +150,8 @@ if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     
     
     if strcmp(experimental_setup.sweep_parameter, 'current')
-        x1 = [0:1:300];
-        axc3 = axes('OuterPosition', [0.52 0 0.48 0.5]);
+        x1 = 0:1:300;
+        axes('OuterPosition', [0.52 0 0.48 0.5]);
         hold on;
         %find modes which go unstable
         test = sign(dr_passive);
@@ -174,7 +174,7 @@ if strcmp(experimental_setup.anal_type, 'parameter_sweep')
         plot([x1(1), x1(end)], [0,0], 'r:', 'HandleVisibility', 'off')
         hold off
         
-        axc4 = axes('OuterPosition', [0.52 0.5 0.48 0.5]);
+        axes('OuterPosition', [0.52 0.5 0.48 0.5]);
         hold on;
         test = sign(dr_active);
         test(test==1) =0;
@@ -207,6 +207,7 @@ for hrd = 1:length(ranges_to_display)
     if strcmp(ranges_to_display{hrd}, 'time')
         continue
     else
+        data_temp = NaN(length(times),1);
         for hse = 1:length(times)
             data_temp(hse) = requested_data{hse}.(ranges_to_display{hrd});
         end %for

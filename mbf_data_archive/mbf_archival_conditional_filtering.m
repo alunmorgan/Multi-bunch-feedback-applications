@@ -43,7 +43,7 @@ selections = {...
     'wiggler_field_I12', p.Results.wiggler_field_I12_range;
     'wiggler_field_I15', p.Results.wiggler_field_I15_range;
     };
-
+select = NaN(length(requested_data),1);
 for nwd = 1:length(requested_data)
     test = NaN(size(selections,1), 1);
     for law = 1:size(selections,1)

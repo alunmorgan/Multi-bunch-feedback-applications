@@ -115,6 +115,7 @@ for hrd = 1:length(ranges_to_display)
     if strcmp(ranges_to_display{hrd}, 'time')
         continue
     else
+        data_temp = NaN(length(times),1);
         for hse = 1:length(times)
             data_temp(hse) = requested_data{hse}.(ranges_to_display{hrd});
         end %for
