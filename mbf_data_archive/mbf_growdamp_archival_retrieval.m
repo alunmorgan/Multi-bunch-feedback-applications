@@ -70,7 +70,7 @@ end %if
 requested_data = mbf_archival_dataset_retrieval(filter_name, date_range,...
     'bypass_index' ,p.Results.bypass_index, 'metadata_only', p.Results.metadata_only);
 
-conditioned_data = mbf_archival_conditional_filtering(requested_data,'current_range', [0 50]);
+conditioned_data = mbf_archival_conditional_filtering(requested_data,'current_range', [0 150]);
 
 if isempty(conditioned_data)
     disp('No data meeting the requirements')

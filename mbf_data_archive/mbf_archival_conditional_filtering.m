@@ -75,4 +75,4 @@ for nwd = 1:length(requested_data)
     select(nwd) = ~any(~test);
     clear test
 end %for
-conditioned_data = requested_data(select);
+conditioned_data = requested_data(boolean(select));

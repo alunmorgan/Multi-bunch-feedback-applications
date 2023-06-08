@@ -1,4 +1,4 @@
-function  [s, delta, p] = mbf_growdamp_advanced_fitting(data, length_averaging, debug)
+function  [s, delta, p] = mbf_growdamp_advanced_fitting(data, length_averaging)
 
 
 temp = unwrap(angle(data)) / (2*pi);
@@ -23,18 +23,6 @@ else
 end %if
 x_ax = 0:length(mm)-1 - dm_loc;
 
-if debug == 1 && p_initial(1) < 0
-    figure(3)
-    plot(0:length(mm) -1, log(abs(data)), 'b', 'DisplayName', 'Raw data')
-    hold all
-    plot([0:dm_loc-1, x_ax + dm_loc], mm, 'r', 'DisplayName', 'Averaged data')
-    plot(1:length(mm), initial_fit_line, 'm', 'DisplayName', 'initial fit')
-%     plot(x_ax + dm_loc, p_initial(1) * x_ax + p_initial(2), 'm', 'DisplayName', 'initial fit')
-%     ylim([0 inf])
-    legend
-    hold off
-end %if
-
 n_tests = 200;
 % compare linear fits to the data.
 vals = linspace(p_initial(1), p_initial(1) - 2e-7, n_tests);
@@ -56,10 +44,7 @@ for gra = 1:n_tests
         break
     end %if
 end %if
-if debug == 1 && p_initial(1) < 0
-    figure(4)
-    plot(diff(sample_length),'*')
-end %if
+
 [~, I] = min(diff(sample_length));
 if I ~= 1
     I = I-1;
@@ -67,16 +52,3 @@ end %if
 s = [vals(I), mm(dm_loc + 1)];
 c = polyval(s,1:length(mm));
 delta = mean(abs(c - log(abs(data)))./c);
-
-if debug == 1 && p_initial(1) < 0
-    figure(3)
-    hold all
-    plot(1:length(mm), c, 'g', 'DisplayName', 'final fit')
-%     ylim([0 inf])
-    hold off
-    test1 = mm-initial_fit_line;
-    test2 = mm-c;
-    figure(5)
-    plot(1:length(mm), test1, 1:length(mm), test2)
-end %if
-% disp('')

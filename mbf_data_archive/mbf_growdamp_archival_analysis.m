@@ -65,7 +65,6 @@ advanced_fitting = p.Results.advanced_fitting;
 for nd = length(data_requested):-1:1
     data_requested{nd} = growdamp_archive_data_conditioning(data_requested{nd});
 end
-
 for nd = length(data_requested):-1:1
     [s_poly_data, ~] = mbf_growdamp_analysis(data_requested{nd},...
         'override', overrides,...

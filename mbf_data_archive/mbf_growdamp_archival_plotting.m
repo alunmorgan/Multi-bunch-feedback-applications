@@ -31,12 +31,12 @@ extents = growdamp_archive_calculate_extents(requested_data);
 years_input = {this_year-5, 'r'; this_year-4, 'b'; this_year-3, 'k'; this_year-2, 'g'; this_year-1, 'c'; this_year, 'm'};
 
 graph_text{1} = ['Analysis type: ', experimental_setup.anal_type];
-graph_text_2 = cell(1, 2 * length(ranges_to_display) + 1);
-graph_text_2{1} = 'Data ranges';
-for whe = 1:2:length(ranges_to_display)
-    graph_text_2{whe + 1} = ranges_to_display{whe};
-    graph_text_2{whe + 2} = [num2str(extents.(ranges_to_display{whe}){1}), ' to ', num2str(extents.(ranges_to_display{whe}){2})];
-end %for
+% graph_text_2 = cell(1, 2 * length(ranges_to_display) + 1);
+% graph_text_2{1} = 'Data ranges';
+% for whe = 1:2:length(ranges_to_display)
+%     graph_text_2{whe + 1} = ranges_to_display{whe};
+%     graph_text_2{whe + 2} = [num2str(extents.(ranges_to_display{whe}){1}), ' to ', num2str(extents.(ranges_to_display{whe}){2})];
+% end %for
 
 graph_title = 'Damping rates for different modes';
 
@@ -51,12 +51,12 @@ end %if
 
 figure('Position',[50, 50, 1400, 800])
 annotation('textbox', [0 1-0.3 0.3 0.3], 'String', graph_text, 'FitBoxToText', 'on', 'Interpreter', 'none');
-annotation('textbox', [0 0.1 0.3 0.3], 'String', graph_text_2, 'FitBoxToText', 'on', 'Interpreter', 'none');
+% annotation('textbox', [0 0.1 0.3 0.3], 'String', graph_text_2, 'FitBoxToText', 'on', 'Interpreter', 'none');
 
 ax1 = axes('OuterPosition', [0.12 0.5 0.95 0.5]);
 hold on
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
-    plot(x_plt_axis, dr_passive)
+    plot(x_plt_axis, dr_passive, 'LineWidth', 2)
     legend(graph_labels)
 else
     populate_graph(dr_passive, years_input, times, x_plt_axis)
@@ -79,7 +79,7 @@ hold off
 ax2 =axes('OuterPosition', [0.12 0 0.95 0.5]);
 hold on
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
-    plot(x_plt_axis, dr_active)
+    plot(x_plt_axis, dr_active, 'LineWidth', 2)
     legend(graph_labels)
 else
     populate_graph(dr_active, years_input, times, x_plt_axis)
@@ -97,8 +97,29 @@ ymax = ymax + ymax /10;
 ylim([ymin ymax]);
 grid on
 hold off
+ck = 1;
+for hrd = 1:length(ranges_to_display)
+    if strcmp(ranges_to_display{hrd}, 'time')
+        continue
+%         plot(times, zeros(length(times),1), 'o:')
+%         datetick
+    else    
+        axes('OuterPosition', [0.01 ck/3 0.2 0.3]);
+    xlabel('Time')
+    title(ranges_to_display{hrd})
+        data_temp = NaN(length(times),1);
+        for hse = 1:length(times)
+            data_temp(hse) = requested_data{hse}.(ranges_to_display{hrd});
+        end %for
+        plot(times, data_temp, 'o:')
+        datetick
+        ylabel(ranges_to_display{hrd})
+        clear data_temp
+        ck = ck +1;
+    end %if
+end %for
 
-axfp = axes('OuterPosition', [0 0.45 0.2 0.3]);
+axfp = axes('OuterPosition', [0.01 0 0.2 0.3]);
     hold on
 for hkw = 1:length(requested_data)
     plot(1:harmonic_number, requested_data{hkw}.fill_pattern, 'b')
@@ -153,45 +174,41 @@ if strcmp(experimental_setup.anal_type, 'parameter_sweep')
         x1 = 0:1:300;
         axes('OuterPosition', [0.52 0 0.48 0.5]);
         hold on;
-        %find modes which go unstable
-        test = sign(dr_passive);
-        test(test==1) =0;
-        test = sum(test,1);
-        unstable_passive_modes = find(test ~=0);
-        %find most unstable / least stable mode
-        [~, ind] = min(dr_passive(end,:));
-        unstable_passive_modes = unique(cat(2, unstable_passive_modes, ind));
-        for ks = 1:length(unstable_passive_modes)
-            P = polyfit(experimental_setup.param',dr_passive(:,unstable_passive_modes(ks)),1);
-            plot(x1, polyval(P,x1),'DisplayName', ['Mode ', num2str(x_plt_axis(unstable_passive_modes(ks)))]);
-            plot(experimental_setup.param', dr_passive(:,unstable_passive_modes(ks)),'ko', 'HandleVisibility', 'off');
-        end
+        for ks = 1:length(dr_passive)
+            P = polyfit(experimental_setup.param',dr_passive(:,ks),1);
+            P_start = find(x1 < min(experimental_setup.param), 1, 'last');
+            P_points = polyval(P,x1);
+            % Find the first time after the lowest current that the extrapolation goes negative. 
+            P_loc = find(sign(P_points(P_start:end))==-1,1, 'first');
+            if ~isempty(P_loc)
+            plot(x1, P_points,'DisplayName', ['Mode ', num2str(x_plt_axis(ks)), ': ', num2str(x1(P_loc)), 'mA'], 'LineWidth', 2);
+            plot(experimental_setup.param', dr_passive(:,ks),'ko', 'HandleVisibility', 'off');
+            end %if
+        end %for
         xlabel(experimental_setup.sweep_parameter)
         ylabel('Passive damping rates (1/turns)')
         title('Extrapolated data')
-        legend
+        legend('Location', 'eastoutside')
         grid on
         plot([x1(1), x1(end)], [0,0], 'r:', 'HandleVisibility', 'off')
         hold off
         
         axes('OuterPosition', [0.52 0.5 0.48 0.5]);
         hold on;
-        test = sign(dr_active);
-        test(test==1) =0;
-        test = sum(test,1);
-        unstable_active_modes = find(test ~=0);
-        %find most unstable / least stable mode
-        [~, ind] = min(dr_active(end,:));
-        unstable_active_modes = unique(cat(2, unstable_active_modes, ind));
-        for ks = 1:length(unstable_active_modes)
-            P = polyfit(experimental_setup.param',dr_active(:,unstable_active_modes(ks)),1);
-            plot(x1, polyval(P,x1),'DisplayName', ['Mode ', num2str(x_plt_axis(unstable_active_modes(ks)))]);
-            plot(experimental_setup.param', dr_active(:,unstable_active_modes(ks)),'ko', 'HandleVisibility', 'off');
-        end
+        for ks = 1:length(dr_active)
+            P = polyfit(experimental_setup.param',dr_active(:,ks),1);
+            P_start = find(x1 < min(experimental_setup.param), 1, 'last');
+             P_points = polyval(P,x1);
+            P_loc = find(sign(P_points(P_start:end))==-1,1, 'first');
+            if ~isempty(P_loc)
+            plot(x1, polyval(P,x1),'DisplayName', ['Mode ', num2str(x_plt_axis(ks)), ': ', num2str(x1(P_loc)), 'mA'], 'LineWidth', 2);
+            plot(experimental_setup.param', dr_active(:,ks),'ko', 'HandleVisibility', 'off');
+            end %if
+        end %for
         xlabel(experimental_setup.sweep_parameter)
         ylabel('Active damping rates (1/turns)')
         title('Extrapolated data')
-        legend
+        legend('Location', 'eastoutside')
         grid on
         plot([x1(1), x1(end)], [0,0], 'r:', 'HandleVisibility', 'off')
         hold off
@@ -199,26 +216,6 @@ if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     
 end %if
 
-figure
-plot(times, zeros(length(times),1), 'o:')
-xlabel('Time')
-datetick
-for hrd = 1:length(ranges_to_display)
-    if strcmp(ranges_to_display{hrd}, 'time')
-        continue
-    else
-        data_temp = NaN(length(times),1);
-        for hse = 1:length(times)
-            data_temp(hse) = requested_data{hse}.(ranges_to_display{hrd});
-        end %for
-        figure
-        plot(times, data_temp, 'o:')
-        xlabel('Time')
-        datetick
-        title(ranges_to_display{hrd})
-        clear data_temp
-    end %if
-end %for
 
 if nargin == 9
     figure
@@ -254,16 +251,16 @@ if length(unique(year_list)) < 2
     for ner = 1:size(input_data, 1)
         sample_time = datevec(times(ner));
         sample_time = datestr(sample_time);
-        plot(x_plt_axis, input_data(ner,:), 'DisplayName', sample_time);
+        plot(x_plt_axis, input_data(ner,:), 'DisplayName', sample_time, 'LineWidth', 2);
     end %for
 else
     for ner = 1:size(input_data, 1)
         years_ind = find(year_list(ner)== years);
         if states(years_ind) == 0
-            plot(x_plt_axis, input_data(ner,:), cols{years_ind}, 'DisplayName', num2str(sample_year));
+            plot(x_plt_axis, input_data(ner,:), cols{years_ind}, 'DisplayName', num2str(sample_year), 'LineWidth', 2);
             states(years_ind) = 1;
         else
-            plot(x_plt_axis, input_data(ner,:), cols{years_ind}, 'HandleVisibility', 'off')
+            plot(x_plt_axis, input_data(ner,:), cols{years_ind}, 'HandleVisibility', 'off', 'LineWidth', 2)
         end %if
     end %for
 end %if

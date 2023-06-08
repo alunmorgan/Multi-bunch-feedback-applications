@@ -7,7 +7,7 @@ function [poly_data, frequency_shifts] = mbf_growdamp_analysis(exp_data, varargi
 %                             captured.
 %       overrides (list of ints): Two values setting the number of turns to
 %                                 analyse (passive, active)
-%       advanced_fitting (bool): switches between simple (0) 
+%       advanced_fitting (bool): switches between simple (0)
 %                                and advanced fitting (1).
 %       length_averaging(int): Determines the strength of the filtering out
 %                              of high frequecies in the data.
@@ -93,24 +93,6 @@ else
     act_dwell = NaN;
 end %if
 
-if p.Results.debug == 1
-    h = figure;
-    for hs = 1:size(data,1)
-        hold on
-        debug_data = abs(data(hs,:));
-        data_range = [min(debug_data), max(debug_data)];
-        plot(debug_data, 'DisplayName', ['Index ', num2str(hs)])
-        plot([end_of_growth, end_of_growth], data_range, ':g','DisplayName', 'End of growth')
-        plot([end_of_passive, end_of_passive], data_range, ':m','DisplayName', 'End of passive')
-        plot([end_of_active, end_of_active], data_range, ':c','DisplayName', 'end of active')
-        legend
-        hold off
-        pause(0.3)
-        clf(h)
-    end %for
-    close(h)
-end %if
-
 %parfor
 s1_acum = NaN(n_modes,2);
 s2_acum = NaN(n_modes,2);
@@ -119,7 +101,6 @@ delta1_acum = NaN(n_modes,1);
 delta2_acum = NaN(n_modes,1);
 delta3_acum = NaN(n_modes,1);
 p2_acum = NaN(n_modes,1);
-debug_flag = p.Results.debug;
 parfor nq = 1:n_modes %par if it behaving
     %% split up the data into growth, passive damping and active damping.
     data_mode = data(nq,:);
@@ -132,17 +113,17 @@ parfor nq = 1:n_modes %par if it behaving
     % Each point is dwell time turns long so the
     % damping time needs to be adjusted accordingly.
     s1(1) = s1(1) ./ growth_dwell;
-    
+
     % passive damping
     x2 = end_of_growth + 1:end_of_passive;
     pd_data = data_mode(x2);
-    [s2, delta2, p2] = get_damping(pd_data, nat_dwell, passive_override, length_averaging, adv_fitting, debug_flag);
-    
+    [s2, delta2, p2] = get_damping(pd_data, nat_dwell, passive_override, length_averaging, adv_fitting);
+
     %active damping
     x3 = end_of_passive + 1:end_of_active;
     ad_data = data_mode(x3);
-    [s3, delta3, p3] = get_damping(ad_data, act_dwell, active_override, length_averaging, adv_fitting, debug_flag);
-    
+    [s3, delta3, p3] = get_damping(ad_data, act_dwell, active_override, length_averaging, adv_fitting);
+
     s1_acum(nq,:) = s1;
     s2_acum(nq,:) = s2;
     s3_acum(nq,:) = s3;
@@ -163,4 +144,44 @@ poly_data(:,2,3) = delta2_acum;
 poly_data(:,3,3) = delta3_acum;
 frequency_shifts(:,1) = p2_acum;
 frequency_shifts(:,2) = p3_acum;
-disp('')
+
+if p.Results.debug == 1
+    h = figure;
+    for hs = 1:size(data,1)
+        hold on
+        debug_data = abs(data(hs,:));
+
+        x_p = end_of_growth + 1:end_of_passive;
+        debug_passive = debug_data(x_p);
+        [debug_passive_s_basic, ~, ~] = get_damping(debug_passive, nat_dwell, NaN, 20, 0);
+        %         [debug_passive_s, ~, ~] = mbf_growdamp_basic_fitting(debug_passive);
+        %         debug_passive_s = polyfit(x_p,log(abs(debug_passive)),1);
+        debug_fit_passive_basic = polyval(debug_passive_s_basic,1:length(debug_passive));
+        [debug_passive_s_advanced, ~, ~] = get_damping(debug_passive, nat_dwell, NaN, 20, 1);
+        debug_fit_passive_advanced = polyval(debug_passive_s_advanced,1:length(debug_passive));
+
+        x_a = end_of_passive + 1:end_of_active;
+        debug_active = debug_data(x_a);
+        [debug_active_s_basic, ~, ~] = get_damping(debug_active, act_dwell, NaN, 20, 0);
+        %         [debug_active_s, ~, ~] = mbf_growdamp_basic_fitting(debug_active);
+        %         debug_active_s = polyfit(x_a,log(abs(debug_active)),1);
+        debug_fit_active_basic = polyval(debug_active_s_basic,1:length(debug_active));
+        [debug_active_s_advanced, ~, ~] = get_damping(debug_active, act_dwell, NaN, 20, 1);
+        debug_fit_active_advanced = polyval(debug_active_s_advanced,1:length(debug_active));
+
+        data_range = [min(debug_data), max(debug_data)];
+        plot(debug_data, 'DisplayName', ['Index ', num2str(hs)])
+        plot(x_p, exp(debug_fit_passive_basic), 'r', 'DisplayName', 'Passive fit (Basic)', 'LineWidth', 2)
+        plot(x_a, exp(debug_fit_active_basic), 'k', 'DisplayName', 'Active fit (Basic)', 'LineWidth', 2)
+        plot(x_p, exp(debug_fit_passive_advanced), ':r', 'DisplayName', 'Passive fit (Advanced)', 'LineWidth', 2)
+        plot(x_a, exp(debug_fit_active_advanced), ':k', 'DisplayName', 'Active fit (Advanced)', 'LineWidth', 2)
+        plot([end_of_growth, end_of_growth], data_range, ':g','DisplayName', 'End of growth', 'LineWidth', 2)
+        plot([end_of_passive, end_of_passive], data_range, ':m','DisplayName', 'End of passive', 'LineWidth', 2)
+        plot([end_of_active, end_of_active], data_range, ':c','DisplayName', 'end of active', 'LineWidth', 2)
+        legend
+        hold off
+        pause(0.3)
+        clf(h)
+    end %for
+    close(h)
+end %if
