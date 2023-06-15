@@ -87,10 +87,7 @@ fprintf('\n')
 
 % Removing datasets whose mean error is < 0.02 for the passive section.
 error_av_p = mean(error_passive,2,'omitnan');
-% error_av_a = mean(error_active,2,'omitnan');
 wanted = find(abs(error_av_p) < 0.01);
-% wanted2 = find(abs(error_av_a) < 0.01);
-% wanted = intersect(wanted1, wanted2);
 dr_passive = dr_passive(wanted,:);
 dr_active = dr_active(wanted,:);
 error_passive = error_passive(wanted,:);
@@ -99,7 +96,6 @@ times = times(wanted);
 if strcmp(anal_type, 'parameter_sweep')
     param = param(wanted);
 end %if
-
 
 experimental_setup.anal_type = anal_type;
 if strcmp(anal_type, 'parameter_sweep')

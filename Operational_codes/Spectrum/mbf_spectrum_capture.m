@@ -23,8 +23,8 @@ valid_number = @(x) isnumeric(x);
 
 addRequired(p, 'mbf_axis');
 addParameter(p, 'tunes', NaN, valid_number);
-addParameter(p, 'n_turns', 1, valid_number);
-addParameter(p, 'repeat',10, valid_number);
+addParameter(p, 'n_turns', 50, valid_number);
+addParameter(p, 'repeat',2, valid_number);
 
 parse(p, mbf_axis, varargin{:});
 
