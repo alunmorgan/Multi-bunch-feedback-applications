@@ -1,45 +1,37 @@
-function [data_out] = truncate_to_linear(data_in, length_averaging, n_tests)
+function [x_data_out, y_data_out] = truncate_to_linear(x_data_in, y_data_in, n_tests)
 % truncating the data if it falls into the noise
 if nargin < 3
     n_tests = 100;
 end %if
 
-% reduce the high frequency noise.
-mm = movmean(abs(data_in), length_averaging);
-p = polyfit(1:length(mm), mm, 1);
-
-if p(1) > 0
-    %growth
-    data_out = data_in;
-    return
-end %if
 
 %take the log of the data as we expect an exponential decay. meaning that the
 %log(data) should be linear
-mm = log(abs(mm));
+mm = log(abs(y_data_in));
 
 truncation_point_end = find_end_trunction_point(mm, n_tests);
-if truncation_point_end < 10
-%     disp('truncate_to_linear: Truncation would be too severe.  Returning original data.')
-    data_out = data_in;
+if truncation_point_end < 10 % if too close to start
+    y_data_out = y_data_in;
+    x_data_out = x_data_in;
     return
 end %if
 
 truncation_point_start = find_start_trunction_point(mm(1:truncation_point_end), n_tests);
-if truncation_point_start > truncation_point_end - 10
-%     disp('truncate_to_linear: Truncation would be too severe.  Setting start truncation to 1')
-    data_out = data_in(1:truncation_point_end);
+if truncation_point_start > truncation_point_end - 10 % if too close to end.
+    y_data_out = y_data_in(1:truncation_point_end);
+    x_data_out = x_data_in(1:truncation_point_end);
     return
 end %if
 
 truncation_point_end = find_end_trunction_point(mm(truncation_point_start:end), n_tests);
-if truncation_point_end < truncation_point_start + 10
-%     disp('truncate_to_linear: Truncation would be too severe.  Returning original data.')
-    data_out = data_in;
+if truncation_point_end < truncation_point_start + 10 % iff too close together.
+    y_data_out = y_data_in;
+    x_data_out = x_data_in;
     return
 end %if
 
-data_out = data_in(truncation_point_start:truncation_point_end + truncation_point_start - 1);
+y_data_out = y_data_in(truncation_point_start:truncation_point_end + truncation_point_start - 1);
+x_data_out = x_data_in(truncation_point_start:truncation_point_end + truncation_point_start - 1);
 
 end %function
 
