@@ -9,22 +9,6 @@ if beam_current< 10
 end %if
 
 try
-    modscan_all('x', 'plotting', 'no')
-catch
-    disp('Problem with Modescan in X axis')
-end %try
-try
-    modscan_all('y', 'plotting', 'no')
-catch
-    disp('Problem with Modescan in Y axis')
-end %try
-try
-    modscan_all('s', 'plotting', 'no')
-catch
-    disp('Problem with Modescan in S axis')
-end %try
-
-try
     growdamp_all('x',  'plotting', 'no')
 catch
     disp('Problem with Growdamp in X axis')
@@ -38,6 +22,22 @@ try
     growdamp_all('s',  'plotting', 'no')
 catch
     disp('Problem with Growdamp in S axis')
+end %try
+
+try
+    modscan_all('x', 'plotting', 'no')
+catch
+    disp('Problem with Modescan in X axis')
+end %try
+try
+    modscan_all('y', 'plotting', 'no')
+catch
+    disp('Problem with Modescan in Y axis')
+end %try
+try
+    modscan_all('s', 'plotting', 'no')
+catch
+    disp('Problem with Modescan in S axis')
 end %try
 
 try
