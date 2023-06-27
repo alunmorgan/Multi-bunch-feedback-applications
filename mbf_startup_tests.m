@@ -8,6 +8,10 @@ if beam_current< 10
     return
 end %if
 
+fir_gain_x = lcaGet('SR23C-DI-TMBF-01:X:FIR:GAIN_S');
+fir_gain_y = lcaGet('SR23C-DI-TMBF-01:Y:FIR:GAIN_S');
+fir_gain_s = lcaGet('SR23C-DI-LMBF-01:IQ:FIR:GAIN_S');
+
 try
     growdamp_all('x',  'plotting', 'no')
 catch
@@ -57,6 +61,12 @@ catch
 end %try
 
 % Leaving the system in a known state
-setup_operational_mode('x', "TuneOnly")
-setup_operational_mode('y', "TuneOnly")
+% setup_operational_mode('x', "TuneOnly")
+% setup_operational_mode('y', "TuneOnly")
+% setup_operational_mode('s', "TuneOnly")
+setup_operational_mode('x', "Feedback")
+setup_operational_mode('y', "Feedback")
 setup_operational_mode('s', "TuneOnly")
+lcaPut('SR23C-DI-TMBF-01:X:FIR:GAIN_S', fir_gain_x );
+lcaPut('SR23C-DI-TMBF-01:Y:FIR:GAIN_S', fir_gain_y);
+lcaPut('SR23C-DI-LMBF-01:IQ:FIR:GAIN_S', fir_gain_s);
