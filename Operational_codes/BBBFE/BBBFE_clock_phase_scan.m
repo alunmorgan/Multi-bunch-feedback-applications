@@ -13,10 +13,15 @@ function BBBFE_clock_phase_scan(mbf_ax, single_bunch_location)
 % Example: BBBFE_clock_phase_scan('X', 400)
 if strcmp(mbf_ax, 'Y')
     ax = 3;
+    data.mbf_pv = ['SR23C-DI-TMBF-01:', mbf_ax];
 elseif strcmp(mbf_ax, 'X')
     ax = 3;
+    data.mbf_pv = ['SR23C-DI-TMBF-01:', mbf_ax];
+elseif strcmp(mbf_ax, 'S')
+    ax = 4;
+    data.mbf_pv = 'SR23C-DI-LMBF-01:IQ';
 else
-    error('Please use input axes X or Y')
+    error('Please use input axes X, Y or S')
 end %if
 BBBFE_setup(mbf_ax, single_bunch_location)
 
@@ -24,7 +29,6 @@ BBBFE_setup(mbf_ax, single_bunch_location)
 root_string = root_string{1};
 
 data.frontend_pv = 'SR23C-DI-BBFE-01';
-data.mbf_pv = ['SR23C-DI-TMBF-01:', mbf_ax];
 original_setting = lcaGet([data.frontend_pv ':PHA:CLO:' num2str(ax)]);
 
 % moving to starting point in scan
