@@ -19,7 +19,8 @@ default_plotting = 'yes';
 addRequired(p, 'mbf_axis', @(x) any(validatestring(x, axis_string)));
 addParameter(p, 'plotting', default_plotting, @(x) any(validatestring(x, boolean_string)));
 
-parse(p, mbf_axis);
+% parse(p, mbf_axis);
+parse(p, mbf_axis, varargin{:});
 
 [~, ~, pv_names, ~] = mbf_system_config;
 pv_head = pv_names.hardware_names.(mbf_axis);
@@ -37,6 +38,6 @@ lcaPut([pv_head, Bunch_bank.FIR_gains], orig_fir_gain)
 
 if strcmp(p.Results.plotting, 'yes')
     [poly_data, frequency_shifts] = mbf_growdamp_analysis(growdamp);
-    mbf_growdamp_plot_summary(poly_data, frequency_shifts, growdamp.data, ...
+    mbf_growdamp_plot_summary(poly_data, frequency_shifts, growdamp, ...
         'outputs', 'both')
 end %if

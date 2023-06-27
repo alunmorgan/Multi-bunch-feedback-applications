@@ -16,7 +16,8 @@ function mbf_set_state(ax, state, tune, bank, gain, enable, duration, dwell, cap
 [~, ~, pv_names, ~] = mbf_system_config;
 
 Sequencer = pv_names.tails.Sequencer;
-pv_head = [pv_names.hardware_names.(ax), Sequencer.Base, num2str(state)];
+% pv_head = [pv_names.hardware_names.(ax), Sequencer.Base, num2str(state)];
+pv_head = [pv_names.hardware_names.(ax), Sequencer.Base, ':', num2str(state)];
 
 mbf_get_then_put([pv_head, Sequencer.start_frequency], tune);
 mbf_get_then_put([pv_head, Sequencer.step_frequency],0);

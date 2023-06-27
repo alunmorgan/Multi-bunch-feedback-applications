@@ -9,6 +9,7 @@ function mbf_growdamp_plot_summary(poly_data, frequency_shifts, metadata, vararg
 %                                  axis 3 is damping time, offset and
 %                                  fractional error.
 %       frequency_shifts (list of floats): The frequency shift of each mode.
+%       metadata (structure): setup information.
 %       outputs (str): 'passive' 'active', or 'both' Determines which traces are
 %                      included in the graphs
 %       axis: 'x', 'y' or 's'

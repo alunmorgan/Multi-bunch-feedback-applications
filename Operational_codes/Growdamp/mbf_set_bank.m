@@ -14,7 +14,9 @@ function mbf_set_bank(ax, bank, out_type)
 
 [~, ~, pv_names, ~] = mbf_system_config;
 BB = pv_names.tails.Bunch_bank;
-pv_head = [pv_names.hardware_names.(ax), BB.Base, num2str(bank)];
+% pv_head = [pv_names.hardware_names.(ax), BB.Base, num2str(bank)];
+pv_head = [pv_names.hardware_names.(ax), BB.Base, ':',num2str(bank)];
+
 %'SR23C-DI-TMBF-01:X:BUN:0:BUNCH_SELECT_S' %FIXME
 % bunch gains
 % mbf_get_then_put([pv_head, BB.Gains], ones(1,936));
