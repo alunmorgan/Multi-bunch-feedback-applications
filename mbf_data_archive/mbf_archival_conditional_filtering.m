@@ -55,6 +55,11 @@ for nwd = 1:length(requested_data)
             test(law) = 1;
             continue
         end %try
+        if strcmp(selections{law}, 'tune')
+            if isstruct(test_val)
+                test_val = test_val.([requested_data{nwd}.ax_label,'_tune']).tune;
+            end %if
+        end %if
         if isnan(test_val)
             % If no valid data do not filter.
             temp = 1;
