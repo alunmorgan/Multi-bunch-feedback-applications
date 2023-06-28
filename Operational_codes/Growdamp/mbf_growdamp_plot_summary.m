@@ -38,13 +38,22 @@ if strcmpi(p.Results.plot_mode, 'pos')
     x_plt_axis = 0:harmonic_number-1;
     passive_frequency_shifts = frequency_shifts(:,1);
     active_frequency_shifts = frequency_shifts(:,2);
-    
+    labelX = 'Mode';
 elseif strcmpi(p.Results.plot_mode, 'neg')
     x_plt_axis = (0:harmonic_number-1) - harmonic_number/2;
     passive_data = circshift(passive_data, -harmonic_number/2, 1);
     active_data = circshift(active_data, -harmonic_number/2, 1);
     passive_frequency_shifts = circshift(frequency_shifts(:,1), -harmonic_number/2, 1);
     active_frequency_shifts = circshift(frequency_shifts(:,2), -harmonic_number/2, 1);
+    labelX = 'Mode';
+elseif strcmpi(p.Results.plot_mode, 'freq')
+    x_plt_axis = (0:harmonic_number-1) - harmonic_number/2;
+    x_plt_axis = x_plt_axis * metadata.RF / harmonic_number * 1E-6;
+    passive_data = circshift(passive_data, -harmonic_number/2, 1);
+    active_data = circshift(active_data, -harmonic_number/2, 1);
+    passive_frequency_shifts = circshift(frequency_shifts(:,1), -harmonic_number/2, 1);
+    active_frequency_shifts = circshift(frequency_shifts(:,2), -harmonic_number/2, 1);
+labelX = 'Frequency (MHz)';
     
 end
 
@@ -62,7 +71,7 @@ hold off
 xlim([x_plt_axis(1) x_plt_axis(end)])
 title({['MBF growdamp results (', metadata.ax_label,' ', datestr(metadata.time),')'];...
     ['Current: ', num2str(round(metadata.current)), 'mA']})
-xlabel('Mode')
+xlabel(labelX)
 ylabel('Damping rates (1/turns)')
 legend
 grid on
@@ -77,7 +86,7 @@ if strcmpi(p.Results.outputs, 'active') || strcmpi(p.Results.outputs, 'both')
 end %if
     hold off
 xlim([x_plt_axis(1) x_plt_axis(end)])
-xlabel('Mode')
+xlabel(labelX)
 ylabel({'Difference from';'excitation tune'})
 legend
 grid on
