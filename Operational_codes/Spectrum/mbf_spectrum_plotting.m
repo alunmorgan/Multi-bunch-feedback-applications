@@ -5,12 +5,17 @@ function mbf_spectrum_plotting(data, meta_data)
 %
 % Example: mbf_spectrum_plotting(data)
 
+if max(max(data.bunch_data)) ==0
+    disp('No data to plot')
+    return
+end %if
+
 graph_handles(1) = figure;
 ax1 = subplot('position',[.02 .35 .7 .6]);
-imagesc(data.bunch_axis,...
-    data.tune_axis,...
-    log10(data.bunch_data),...
-    [-3 0]+log10(max(max(data.bunch_data))));
+imagesc('Xdata', data.bunch_axis,...
+    'Ydata', data.tune_axis,...
+    'Cdata', log10(data.bunch_data),...
+    'CLim', [-3 0]+log10(max(max(data.bunch_data))));
 set(ax1,'YAxisLocation','right');
 set(ax1,'YDir','normal')
 set(ax1, 'XTick', [])
