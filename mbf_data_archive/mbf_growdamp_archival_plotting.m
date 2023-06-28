@@ -257,7 +257,7 @@ else
     for ner = 1:size(input_data, 1)
         years_ind = find(year_list(ner)== years);
         if states(years_ind) == 0
-            plot(x_plt_axis, input_data(ner,:), cols{years_ind}, 'DisplayName', num2str(sample_year), 'LineWidth', 2);
+            plot(x_plt_axis, input_data(ner,:), cols{years_ind}, 'DisplayName', num2str(year_list(ner)), 'LineWidth', 2);
             states(years_ind) = 1;
         else
             plot(x_plt_axis, input_data(ner,:), cols{years_ind}, 'HandleVisibility', 'off', 'LineWidth', 2)
