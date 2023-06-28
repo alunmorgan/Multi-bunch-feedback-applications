@@ -35,8 +35,9 @@ disp(['Data saved to:  ',save_name])
 index_name = [data.base_name, '_index'];
 if exist(fullfile(root_string, [index_name, '.mat']),'file')
     load(fullfile(root_string, [index_name, '.mat']), 'file_index')
-    file_index{1, end+1} = save_name;
-    file_index{2, end+1} = data.time;
+    new_ind = size(file_index, 2) + 1:
+    file_index{1, new_ind} = save_name;
+    file_index{2, new_ind} = data.time;
     save(fullfile(root_string, [index_name, '.mat']), 'file_index','-v7.3')
     disp('Index updated')
 else
