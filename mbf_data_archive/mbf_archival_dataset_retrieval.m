@@ -101,7 +101,11 @@ metadata_conditioned_data = condition_mbf_metadata(requested_data);
 conditioned_data = condition_mbf_data(metadata_conditioned_data);
 %expand old data sweeps so that each data entry has only one
 %measurement.
+if contains(filter_name, 'Growdamp')
 unpacked_data = unpack_old_growdamp_sweeps(conditioned_data);
+else
+    unpacked_data = conditioned_data;
+end %if
 if strcmp(p.Results.metadata_only, 'yes')
     for nxd = 1:length(unpacked_data)
         unpacked_data{nxd} = rmfield(unpacked_data{nxd}, 'data');
