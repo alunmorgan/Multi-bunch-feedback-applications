@@ -13,6 +13,9 @@ function [poly_data, frequency_shifts] = mbf_growdamp_analysis(exp_data, varargi
 %                              of high frequecies in the data.
 %       debug(int): if 1 then outputs graphs of individual modes to allow
 %                                    selection of appropriate overrides.
+%       debug_modes(list of ints): the modes to output the debug graphs for.
+%       keep_debug_graphs(bool): selects if the debug graphs are overwritten (0) or
+%                                kept (1).
 %
 %   Returns:
 %       poly_data (3 by 3 matrix): axis 1 is coupling mode.
@@ -28,6 +31,8 @@ defaultOverrides = [NaN, NaN];
 defaultAnalysisSetting = 0;
 defaultLengthAveraging = 20;
 defaultDebug = 0;
+defaultDebugModes = 1:size(exp_data.data,1);
+defaultKeepDebugGraphs = 0;
 
 p = inputParser;
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
@@ -36,6 +41,8 @@ addOptional(p,'overrides',defaultOverrides);
 addParameter(p,'advanced_fitting',defaultAnalysisSetting, @isnumeric);
 addParameter(p,'length_averaging',defaultLengthAveraging, validScalarPosNum);
 addParameter(p,'debug',defaultDebug, @isnumeric);
+addParameter(p,'debug_modes',defaultDebugModes);
+addParameter(p,'keep_debug_graphs',defaultKeepDebugGraphs, @isnumeric);
 parse(p,exp_data,varargin{:});
 
 passive_override = p.Results.overrides(1);
@@ -148,12 +155,11 @@ frequency_shifts(:,1) = p2_acum;
 frequency_shifts(:,2) = p3_acum;
 
 if p.Results.debug == 1
-    h = figure;
     turns_axis = cat(2, growth_turns, passive_turns, active_turns);
-    for hs = 1:size(data,1)
-        hold on
+    for hs = p.Results.debug_modes
         debug_data = abs(data(hs,:));
-
+        h(hs) = figure('Position', [20, 40, 600, 600]);
+        hold on
         debug_passive = debug_data(passive_samples);
         [debug_passive_s_basic, ~, ~] = get_damping(passive_turns,debug_passive, NaN, 20, 0, threshold_value);
         debug_fit_passive_basic = polyval(debug_passive_s_basic,passive_turns);
@@ -178,8 +184,9 @@ if p.Results.debug == 1
         legend
         xlabel('Turns')
         hold off
-        pause(0.3)
-        clf(h)
+        if p.Results.keep_debug_graphs == 0
+            close(h(hs))
+        end %if
     end %for
-    close(h)
+
 end %if
