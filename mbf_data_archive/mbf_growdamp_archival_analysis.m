@@ -61,10 +61,10 @@ overrides = p.Results.overrides;
 debug = p.Results.debug;
 advanced_fitting = p.Results.advanced_fitting;
 
-%condition the data in order to harmonise data changes made over time.
-for nd = length(data_requested):-1:1
-    data_requested{nd} = growdamp_archive_data_conditioning(data_requested{nd});
-end
+% %condition the data in order to harmonise data changes made over time.
+% for nd = length(data_requested):-1:1
+%     data_requested{nd} = growdamp_archive_data_conditioning(data_requested{nd});
+% end
 for nd = length(data_requested):-1:1
     [s_poly_data, ~] = mbf_growdamp_analysis(data_requested{nd},...
         'override', overrides,...

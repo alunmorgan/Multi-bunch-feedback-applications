@@ -21,6 +21,12 @@ for jgr = n_datasets:-1:1
         output_data{jgr}.cavity1_voltage = input_data{jgr}.RFread(1);
         output_data{jgr}.cavity2_voltage = input_data{jgr}.RFread(2);
     end %if
+    
+    if isfield(input_data{jgr}, 'life')
+        if isfield(input_data{jgr}.life, 'bpm')
+            output_data{jgr}.beam_lifetime = input_data{jgr}.life.bpm.life300sec;
+        end %if
+    end %if
 
     if isfield(input_data{jgr}, 'id')
         output_data{jgr}.wiggler_field_I12 = input_data{jgr}.id.i12field;
@@ -35,4 +41,7 @@ for jgr = n_datasets:-1:1
         output_data{jgr}.tune = input_data{jgr}.qx;
     end %if
 
+    if isfield(input_data{jgr}, 'tunes')
+        output_data{jgr}.tune = input_data{jgr}.tunes;
+    end %if
 end %for

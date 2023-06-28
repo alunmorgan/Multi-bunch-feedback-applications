@@ -1,19 +1,19 @@
-function conditioned_data = mbf_archival_dataset_retrieval(filter_name, date_range,...
-   varargin)
+function unpacked_data = mbf_archival_dataset_retrieval(filter_name, date_range,...
+    varargin)
 % Extracts requested data from the data archive between
 % the requested times(date_range), and of the correct type (ax).
 %
 % Args:
 %       filter_name(str): Name of the file to select for
 %                         Growdamp_x_axis, Growdamp_y_axis, Growdamp_s_axis
-%                         
+%
 %       date_range (pair of timestamps): The range of time to extract.
 %       bypass_index (str) : 'no' for use the pregnerated index (much faster)
 %                            'yes' for work things out from the file metatdata.
 %                            the default is 'no'.
 %
 % Returns:
-%       conditioned_data (cell of structures): The group of requested data
+%       unpacked_data (cell of structures): The group of requested data
 %                                            structures.
 %
 % Example: mbf_growdamp_archival_retrieval('x', [datetime(2023, 1, 1), datetime("now")])
@@ -77,7 +77,13 @@ end %if
 
 requested_data = cell(length(wanted_datasets),1);
 for jes = 1:length(wanted_datasets)
+    try
     temp = load(wanted_datasets{jes});
+    catch
+        [~, corrupt_file, ~] = fileparts(wanted_datasets{jes});
+        disp(['skipping corrupt file(', corrupt_file, ')'])
+        continue
+    end %try
     data_name = fieldnames(temp);
     % Although the code saves eveything in 'data', older datasets have
     % a variety of names.
@@ -86,12 +92,18 @@ for jes = 1:length(wanted_datasets)
             strcmp(data_name{1}, 'what_to_save')
         requested_data{jes} = temp.(data_name{1});
     end %if
-    if strcmp(p.Results.metadata_only, 'yes')
-        requested_data{jes} = rmfield(requested_data{jes}, 'data');
-    end %if
-    clear data
+    clear temp
 end %for
 
 %There was some variation in the use of field names. This regularises them to
 %the current standard.
-conditioned_data = condition_mbf_metadata(requested_data);
+metadata_conditioned_data = condition_mbf_metadata(requested_data);
+conditioned_data = condition_mbf_data(metadata_conditioned_data);
+%expand old data sweeps so that each data entry has only one
+%measurement.
+unpacked_data = unpack_old_growdamp_sweeps(conditioned_data);
+if strcmp(p.Results.metadata_only, 'yes')
+    for nxd = 1:length(unpacked_data)
+        unpacked_data{nxd} = rmfield(unpacked_data{nxd}, 'data');
+    end %for
+end %if
