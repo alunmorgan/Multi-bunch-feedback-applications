@@ -1,6 +1,27 @@
-function visualise_latest_mbf_results
+function visualise_latest_mbf_results(varargin)
 
 [root_path, ~, ~, ~] = mbf_system_config;
+
+
+defaultOverrides = [NaN, NaN];
+defaultAnalysisSetting = 0;
+defaultLengthAveraging = 20;
+defaultDebug = 0;
+defaultDebugModes = 1:936;
+defaultKeepDebugGraphs = 0;
+defaultGrowdamp_plotMode = 'neg';
+
+p = inputParser;
+validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
+addOptional(p,'overrides',defaultOverrides);
+addParameter(p,'advanced_fitting',defaultAnalysisSetting, @isnumeric);
+addParameter(p,'length_averaging',defaultLengthAveraging, validScalarPosNum);
+addParameter(p,'debug',defaultDebug, @isnumeric);
+addParameter(p,'debug_modes',defaultDebugModes);
+addParameter(p,'keep_debug_graphs',defaultKeepDebugGraphs, @isnumeric);
+addParameter(p,'growdamp_plot_mode',defaultGrowdamp_plotMode);
+parse(p,varargin{:});
+
 
 files = dir_list_gen_tree(root_path{1}, '.mat', 1);
 
@@ -47,9 +68,10 @@ end %if
 if ~isempty(growdamp_x_files)
     try
         growdamp_x = load(growdamp_x_files{end},'data');
-        [poly_data_x, frequency_shifts_x] = mbf_growdamp_analysis(growdamp_x.data);
+        [poly_data_x, frequency_shifts_x] = mbf_growdamp_analysis(growdamp_x.data, ...
+            'debug', p.Results.debug, 'debug_modes', p.Results.debug_modes, 'keep_debug_graphs', p.Results.keep_debug_graphs);
         mbf_growdamp_plot_summary(poly_data_x, frequency_shifts_x, growdamp_x.data,...
-            'outputs', 'both')
+            'outputs', 'both', 'plot_mode', p.Results.growdamp_plot_mode)
     catch
         disp('Problem with growdamp X axis data')
     end %try
@@ -57,9 +79,10 @@ end %if
 if ~isempty(growdamp_y_files)
     try
         growdamp_y = load(growdamp_y_files{end},'data');
-        [poly_data_y, frequency_shifts_y] = mbf_growdamp_analysis(growdamp_y.data);
+        [poly_data_y, frequency_shifts_y] = mbf_growdamp_analysis(growdamp_y.data,...
+            'debug', p.Results.debug, 'debug_modes', p.Results.debug_modes, 'keep_debug_graphs', p.Results.keep_debug_graphs);
         mbf_growdamp_plot_summary(poly_data_y, frequency_shifts_y, growdamp_y.data,...
-            'outputs', 'both')
+            'outputs', 'both', 'plot_mode', p.Results.growdamp_plot_mode)
     catch
         disp('Problem with growdamp Y axis data')
     end %try
@@ -67,19 +90,21 @@ end %if
 if ~isempty(growdamp_s_files)
     try
         growdamp_s = load(growdamp_s_files{end},'data');
-        [poly_data_s, frequency_shifts_s] = mbf_growdamp_analysis(growdamp_s.data);
+        [poly_data_s, frequency_shifts_s] = mbf_growdamp_analysis(growdamp_s.data,...
+            'debug', p.Results.debug, 'debug_modes', p.Results.debug_modes, 'keep_debug_graphs', p.Results.keep_debug_graphs);
         mbf_growdamp_plot_summary(poly_data_s, frequency_shifts_s, growdamp_s.data,...
-            'outputs', 'both')
+            'outputs', 'both', 'plot_mode', p.Results.growdamp_plot_mode)
     catch
         disp('Problem with growdamp S axis data')
     end %try
 end %if
 
+fold_data = 1;
 if ~isempty(spectrum_x_files)
     try
         spectrum_x = load(spectrum_x_files{end},'data');
-        analysed_data_x = mbf_spectrum_analysis(spectrum_x.data, fold);
-        mbf_spectrum_plotting(analysed_data_x, spectrum_x.data.meta_data)
+        analysed_data_x = mbf_spectrum_analysis(spectrum_x.data, fold_data);
+        mbf_spectrum_plotting(analysed_data_x, spectrum_x.data)
     catch
         disp('Problem with spectrum X axis data')
     end %try
@@ -87,8 +112,8 @@ end %if
 if ~isempty(spectrum_y_files)
     try
         spectrum_y = load(spectrum_y_files{end},'data');
-        analysed_data_y = mbf_spectrum_analysis(spectrum_y.data, fold);
-        mbf_spectrum_plotting(analysed_data_y, spectrum_y.data.meta_data)
+        analysed_data_y = mbf_spectrum_analysis(spectrum_y.data, fold_data);
+        mbf_spectrum_plotting(analysed_data_y, spectrum_y.data)
     catch
         disp('Problem with spectrum Y axis data')
     end %try
@@ -96,8 +121,8 @@ end %if
 if ~isempty(spectrum_s_files)
     try
         spectrum_s = load(spectrum_s_files{end},'data');
-        analysed_data_s = mbf_spectrum_analysis(spectrum_s.data, fold);
-        mbf_spectrum_plotting(analysed_data_s, spectrum_s.data.meta_data)
+        analysed_data_s = mbf_spectrum_analysis(spectrum_s.data, fold_data);
+        mbf_spectrum_plotting(analysed_data_s, spectrum_s.data)
     catch
         disp('Problem with spectrum S axis data')
     end %try
