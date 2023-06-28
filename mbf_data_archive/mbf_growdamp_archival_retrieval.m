@@ -13,6 +13,8 @@ function conditioned_data = mbf_growdamp_archival_retrieval(ax, date_range, vara
 %       metadata_only(str): 'no' return all data
 %                            'yes' remove the sample data from the output structure.
 %                            the default is 'no'.
+%       analysis_type(str): determines the type of analysis to run 'collate' or
+%                           'sweep', the default is 'collate'.
 %       sweep_parameter (str): Parameter to be used. This name must exist
 %                              in the data structure. (only needed if
 %                              anal_type set to 'parameter sweep')

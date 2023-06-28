@@ -42,6 +42,7 @@ validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
 
 default_sweep_parameter = 'current';
 default_parameter_step_size = 0.1;
+defaultCurrentRange = [2 300];
 
 addRequired(p, 'ax', @(x) any(validatestring(x, axis_string)));
 addRequired(p, 'date_range');
@@ -50,6 +51,7 @@ addParameter(p, 'metadata_only', 'no', @(x) any(validatestring(x, boolean_string
 addParameter(p, 'analysis_type', 'collate', @ischar)
 addParameter(p, 'sweep_parameter', default_sweep_parameter, @ischar);
 addParameter(p, 'parameter_step', default_parameter_step_size, validScalarPosNum);
+addParameter(p,'current_range',defaultCurrentRange);
 
 parse(p, ax, date_range, varargin{:});
 
@@ -65,7 +67,7 @@ end %if
 requested_data = mbf_archival_dataset_retrieval(filter_name, date_range,...
     'bypass_index' ,p.Results.bypass_index, 'metadata_only', p.Results.metadata_only);
 
-conditioned_data = mbf_archival_conditional_filtering(requested_data);
+conditioned_data = mbf_archival_conditional_filtering(requested_data,'current_range', p.Results.current_range);
 
 if isempty(conditioned_data)
     disp('No data meeting the requirements')
