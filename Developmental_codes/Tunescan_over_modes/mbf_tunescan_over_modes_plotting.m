@@ -12,9 +12,9 @@ end %if
 harmonic_number = tunescan.harmonic_number;
 
 % reshape the results
-fracttune = tunescan.scale(1:tunescan.n_captures);
+fracttune = tunescan.scale(1:tunescan.exp_setup.n_captures);
 for n = 1:size(tunescan.data,2)
-    result = reshape(abs(tunescan.data(:,n)), tunescan.n_captures, harmonic_number);
+    result = reshape(abs(tunescan.data(:,n)), tunescan.exp_setup.n_captures, harmonic_number);
     % plot the results
     figure(n)
     imagesc(1:harmonic_number, fracttune, result)

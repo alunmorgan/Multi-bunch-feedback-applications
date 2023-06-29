@@ -1,37 +1,18 @@
-function mbf_tunescan_over_modes_setup(mbf_axis, varargin)
+function mbf_tunescan_over_modes_setup(mbf_axis, exp_setup)
 % Sets up the MBF system to be ready for a tunescan measurement.
 %
 %   Args:
 %       mbf_axis (str): Selects which MBF axis to work on (x, y, s).
-%       drive_bunch = 0:2:935;    % starts at 0
-%       drive_bunch = 123;
-%       fb_on_off = 1;      % 0 => off, 1 => on
-% 
-% example: mbf_tunescan_over_modes_setup('x')
-
-if strcmpi(mbf_axis, 'x') || strcmpi(mbf_axis, 'y')
-    default_drive_bunches = 123;
-    default_fb_on_off = 1;
-elseif strcmpi(mbf_axis, 's')
-    default_drive_bunches = 123;
-    default_fb_on_off = 1;
-end %if
-p = inputParser;
-p.StructExpand = false;
-p.CaseSensitive = false;
-valid_number = @(x) isnumeric(x);
-addRequired(p, 'mbf_axis');
-addParameter(p, 'drive_bunches', default_drive_bunches);
-addParameter(p, 'fb_on_off', default_fb_on_off, valid_number);
-addParameter(p, 'start_mode', default_fb_on_off, valid_number);
-addParameter(p, 'start_frequency', default_fb_on_off, valid_number);
-addParameter(p, 'end_frequency', default_fb_on_off, valid_number);
-addParameter(p, 'n_captures', default_fb_on_off, valid_number);
-
-parse(p, mbf_axis, varargin{:});
+%       exp_setup (struct): Contains all the setup parameters.
+%
+% example: mbf_tunescan_over_modes_setup('x', exp_setup)
 
 mbf_tools
-
+if strcmp(exp_setup.feedback_state, 'on')
+    fb_on_off =1;
+else
+    fb_on_off =0;
+end %if
 [~, harmonic_number, pv_names] = mbf_system_config;
 Detector = pv_names.tails.Detector;
 Sequencer = pv_names.tails.Sequencer;
@@ -44,11 +25,11 @@ pv_head = pv_names.hardware_names.(mbf_axis);
 % then get the tunes
 setup_operational_mode(mbf_axis, "TuneOnly")
 
-detect_bunch = drive_bunches;
+detect_bunch = exp_setup.drive_bunches;
 
 % Only sweep selected bunch
 drive_wf = zeros(1, harmonic_number);
-drive_wf(drive_bunches + 1) = 1;
+drive_wf(exp_setup.drive_bunches + 1) = 1;
 
 % chose which bunches to monitor the response
 detect_wf_1 = zeros(1,936);
@@ -89,8 +70,8 @@ lcaPut([pv_head pv_names.tails.Super_sequencer_reset],1)
 lcaPut([pv_head pv_names.tails.Super_sequencer_count],harmonic_number)
 
 % change the number of captures to speed things up (normally 4096)
-lcaPut([pv_head Sequencer.Base ':1', Sequencer.count],p.Results.n_captures)
+lcaPut([pv_head Sequencer.Base ':1', Sequencer.count],exp_setup.n_captures)
 
 % select the tune sweep frequency / mode
-lcaPut([pv_head Sequencer.Base ':1', Sequencer.start_frequency],p.Results.start_mode + p.Results.start_frequency)
-lcaPut([pv_head Sequencer.Base ':1', Sequencer.end_frequency],  p.Results.start_mode + p.Results.end_frequency)
+lcaPut([pv_head Sequencer.Base ':1', Sequencer.start_frequency],exp_setup.start_mode + exp_setup.start_frequency)
+lcaPut([pv_head Sequencer.Base ':1', Sequencer.end_frequency],  exp_setup.start_mode + exp_setup.end_frequency)
