@@ -16,7 +16,11 @@ BBBFE_setup(mbf_ax, single_bunch_location)
 
 [root_string, ~] = mbf_system_config;
 root_string = root_string{1};
-
+% getting general environment data.
+tunes.x_tune=NaN;
+tunes.y_tune=NaN;
+tunes.s_tune=NaN;
+data = machine_environment('tunes', tunes);
 data.frontend_pv = 'SR23C-DI-BBFE-01';
 if strcmp(mbf_ax, 'X') || strcmp(mbf_ax, 'Y')
     data.mbf_pv = ['SR23C-DI-TMBF-01:', mbf_ax];
@@ -68,21 +72,9 @@ end
 
 BBBFE_restore(mbf_ax)
 
-% plotting
-figure;
-hold all
-semilogy(data.phase, data.main, 'DisplayName', 'Excited bunch')
-semilogy(data.phase, data.side1, 'DisplayName','Preceeding bunch')
-semilogy(data.phase, data.side2, 'DisplayName', 'Following bunch')
-legend
-xlabel('phase (degrees)')
-ylabel('Signal')
-title(['Phase sweep for MBF ', mbf_ax, ' axis'])
-grid on
-hold off
-
 data.time = datevec(datetime("now"));
-data.base_name = 'system_phase_scan';
+data.base_name = ['system_phase_scan_', mbf_ax, '_axis'];
 %% saving the data to a file
 save_to_archive(root_string, data)
-
+%% plotting
+BBBFE_system_phase_scan_plotting(mbf_ax, data)
