@@ -5,12 +5,23 @@ function BBBFE_clock_phase_scan(mbf_ax, single_bunch_location)
 %
 % Args:
 %      ax (str): Specifies which axis.
-%       single_bunch_location (int): the location of teh single bunch.
+%      single_bunch_location (int): the location of the single bunch.
 %
 % Machine setup: (manual for the time being...)
 % fill some charge in bunch 1 (0.2nC)
 %
 % Example: BBBFE_clock_phase_scan('X', 400)
+
+BBBFE_setup(mbf_ax, single_bunch_location)
+[root_string, ~] = mbf_system_config;
+root_string = root_string{1};
+
+% getting general environment data.
+tunes.x_tune=NaN;
+tunes.y_tune=NaN;
+tunes.s_tune=NaN;
+data = machine_environment('tunes', tunes);
+
 if strcmp(mbf_ax, 'Y')
     ax = 3;
     data.mbf_pv = ['SR23C-DI-TMBF-01:', mbf_ax];
@@ -23,10 +34,6 @@ elseif strcmp(mbf_ax, 'S')
 else
     error('Please use input axes X, Y or S')
 end %if
-BBBFE_setup(mbf_ax, single_bunch_location)
-
-[root_string, ~] = mbf_system_config;
-root_string = root_string{1};
 
 data.frontend_pv = 'SR23C-DI-BBFE-01';
 original_setting = lcaGet([data.frontend_pv ':PHA:CLO:' num2str(ax)]);
@@ -58,21 +65,10 @@ end %for
 
 BBBFE_restore(mbf_ax)
 
-% plotting
-figure;
-hold all
-semilogy(data.phase, data.main, 'DisplayName', 'Excited bunch')
-semilogy(data.phase, data.side1, 'DisplayName','Preceeding bunch')
-semilogy(data.phase, data.side2, 'DisplayName', 'Following bunch')
-legend
-xlabel('phase (degrees)')
-ylabel('Signal')
-title(['Clock sweep for clock' num2str(ax), ' ', mbf_ax, 'axis'])
-grid on
-hold off
-
 data.time = datevec(datetime("now"));
-data.base_name = 'clock_phase_scan';
+data.base_name = ['clock_phase_scan_', mbf_ax, '_axis'];
+
 %% saving the data to a file
 save_to_archive(root_string, data)
-
+%% plotting
+BBBFE_clock_phase_scan_plotting(data, ax, mbf_ax)
