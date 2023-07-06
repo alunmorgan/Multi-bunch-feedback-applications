@@ -37,6 +37,37 @@ spectrum_x_files = files(contains(files, 'Spectrum_x'));
 spectrum_y_files = files(contains(files, 'Spectrum_y'));
 spectrum_s_files = files(contains(files, 'Spectrum_s'));
 
+frontend_system_phase_x_files = files(contains(files, 'system_phase_scan_X'));
+frontend_system_phase_y_files = files(contains(files, 'system_phase_scan_Y'));
+frontend_system_phase_s_files = files(contains(files, 'system_phase_scan_S'));
+
+if ~isempty(frontend_system_phase_x_files)
+    try
+        frontend_system_phase_x = load(frontend_system_phase_x_files{end},'data');
+        BBBFE_system_phase_scan_plotting('x', frontend_system_phase_x.data)
+    catch
+        disp('Problem with frontend system phase scan data for x axis')
+    end %try
+end %if
+
+if ~isempty(frontend_system_phase_y_files)
+    try
+        frontend_system_phase_y = load(frontend_system_phase_y_files{end},'data');
+        BBBFE_system_phase_scan_plotting('y', frontend_system_phase_y.data)
+    catch
+        disp('Problem with frontend system phase scan data for y axis')
+    end %try
+end %if
+
+if ~isempty(frontend_system_phase_s_files)
+    try
+        frontend_system_phase_s = load(frontend_system_phase_s_files{end},'data');
+        BBBFE_system_phase_scan_plotting('s', frontend_system_phase_s.data)
+    catch
+        disp('Problem with frontend system phase scan data for s axis')
+    end %try
+end %if
+
 if ~isempty(modescan_x_files)
     try
         modescan_x = load(modescan_x_files{end},'data');
