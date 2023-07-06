@@ -22,13 +22,13 @@ else
     for ner = 1:size(input_data, 1)
         years_ind = find(year_list(ner)== years);
         if states(years_ind) == 0
-            plot(x_plt_axis, input_data(ner,:), cols{years_ind}, 'DisplayName', num2str(sample_year));
+            plot(x_plt_axis, input_data(ner,:), cols{years_ind}, 'DisplayName', num2str(years(years_ind)));
             states(years_ind) = 1;
         else
             plot(x_plt_axis, input_data(ner,:), cols{years_ind}, 'HandleVisibility', 'off')
         end %if
     end %for
 end %if
-xlim([x_plt_axis(1) x_plt_axis(end)])
+xlim([min(x_plt_axis) max(x_plt_axis)])
 ylim([y_min y_max])
 legend('show')
