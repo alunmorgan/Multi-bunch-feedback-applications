@@ -3,6 +3,10 @@ function tunes = mbf_modescan_setup(mbf_axis, varargin)
 %
 %   Args:
 %       mbf_axis (str): Selects which MBF axis to work on (x, y, s).
+%       auto_setup(str): sets whether the setup scripts will be used to put the
+%       system into a particular state. Default is yes.
+%       tunes (structure or NaN): Tune data from a previous measurement. 
+%                                 Defaults to Nan.
 %   Returns:
 %       tunes (structure): Tunes of the machine.
 %
@@ -12,13 +16,16 @@ if strcmpi(mbf_axis, 'x') || strcmpi(mbf_axis, 'y')
     default_dwell = 500;
     default_detector_gain = -12; % detector gain in dB.
     default_sequencer_gain = -36; % sequencer gain in dB.
-        default_excitation_level = -12; % excitation level in dB.
+    default_excitation_level = -12; % excitation level in dB.
 elseif strcmpi(mbf_axis, 's')
     default_dwell = 500;
     default_detector_gain = -12; % detector gain in dB.
     default_sequencer_gain = -36; % sequencer gain in dB.
-        default_excitation_level = -12; % excitation level in dB.
+    default_excitation_level = -12; % excitation level in dB.
 end %if
+
+default_auto_setup = 'yes';
+
 p = inputParser;
 p.StructExpand = false;
 p.CaseSensitive = false;
@@ -28,6 +35,8 @@ addParameter(p, 'dwell', default_dwell, valid_number);
 addParameter(p, 'detector_gain', default_detector_gain, valid_number);
 addParameter(p, 'sequencer_gain', default_sequencer_gain, valid_number);
 addParameter(p, 'excitation_level', default_excitation_level, valid_number);
+addParameter(p, 'auto_setup', default_auto_setup, @(x) any(validatestring(x, boolean_string)));
+addParameter(p, 'tunes', NaN);
 
 parse(p, mbf_axis, varargin{:});
 
@@ -41,11 +50,18 @@ Sequencer = pv_names.tails.Sequencer;
 % Generate the base PV name.
 pv_head = pv_names.hardware_names.(mbf_axis);
 
-% Programatiaclly press the tune only button on each system
-% then get the tunes
-setup_operational_mode(mbf_axis, "TuneOnly")
+if strcmp(p.Results.auto_setup, 'yes')
+    % Programatiaclly press the tune only button on each system
+    % then get the tunes
+    setup_operational_mode(mbf_axis, "TuneOnly")
+end %if
+
+if isnan(p.Results.tunes)
 % Get the tunes
 tunes = get_all_tunes('xys');
+else
+    tunes = p.Results.tunes;
+end %if
 tune = tunes.([mbf_axis,'_tune']).tune;
 
 if isnan(tune)

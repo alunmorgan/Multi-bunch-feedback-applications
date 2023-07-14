@@ -40,18 +40,15 @@ end %if
 
 for k=p.Results.repeat:-1:1
     if strcmpi(mbf_axis, 's')
-%             lcaPut([pv_names.hardware_names.L pv_names.tails.MEM.arm],1);
              lcaPut([pv_names.hardware_names.L pv_names.tails.triggers.MEM.arm],1);
         lcaPut([pv_names.hardware_names.L, pv_names.tails.triggers.soft], 1)
         spectrum.raw_data{k} = mbf_read_mem(pv_names.hardware_names.L, p.Results.n_turns,'channel', chan, 'lock', 60);
     else
-%             lcaPut([pv_names.hardware_names.T pv_names.tails.MEM.arm],1);
               lcaPut([pv_names.hardware_names.T pv_names.tails.triggers.MEM.arm],1);
         lcaPut([pv_names.hardware_names.T, pv_names.tails.triggers.soft], 1)
         spectrum.raw_data{k} = mbf_read_mem(pv_names.hardware_names.T, p.Results.n_turns,'channel', chan, 'lock', 60);
     end %if
 end%for
-% spectrum.raw_data = raw_data;
 spectrum.axis = mbf_axis;
 spectrum.n_turns = p.Results.n_turns;
 spectrum.time = datevec(datetime("now"));

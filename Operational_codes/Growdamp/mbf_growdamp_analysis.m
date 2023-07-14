@@ -114,6 +114,7 @@ delta1_acum = NaN(n_modes,1);
 delta2_acum = NaN(n_modes,1);
 delta3_acum = NaN(n_modes,1);
 p2_acum = NaN(n_modes,1);
+p3_acum = NaN(n_modes,1);
 
 for nq = 1:n_modes %par if it behaving
     %% split up the data into growth, passive damping and active damping.

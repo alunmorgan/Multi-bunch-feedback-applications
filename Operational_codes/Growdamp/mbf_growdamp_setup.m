@@ -3,7 +3,7 @@ function [tunes, orig_fir_gain] = mbf_growdamp_setup(mbf_axis, varargin)
 %
 %   Args:
 %       mbf_axis (str): Selects which MBF axis to work on (x, y, s).
-%       durations (list of ints): number of turns for excitation, 
+%       durations (list of ints): number of turns for excitation,
 %                                 pasive daming and active damping
 %       dwell (int): number of turns at each point.
 %       tune_sweep_range (list of floats), tune range to sweep over
@@ -14,6 +14,10 @@ function [tunes, orig_fir_gain] = mbf_growdamp_setup(mbf_axis, varargin)
 %       fll_guard_bunches (float): the number of bunches surrounding the fll
 %                                  bunches for which feedback is switched off.
 %       single_mode(int): The mode you want to operate on.
+%       auto_setup(str): sets whether the setup scripts will be used to put the
+%       system into a particular state. Default is yes.
+%       tunes (structure or NaN): Tune data from a previous measurement. 
+%                                 Defaults to Nan.
 %   Returns:
 %       tunes (structure): Tunes of the machine.
 %       orig_fir_gain (float): the FIR gain before the meausurement.
@@ -35,13 +39,16 @@ elseif strcmpi(mbf_axis, 's')
 else
     error('Incorrect axis selected. Should be x, y, s, tx, ty')
 end %if
+
+default_auto_setup = 'yes';
+
 p = inputParser;
 p.StructExpand = false;
 p.CaseSensitive = false;
 valid_durations = @(x) isnumeric(x) && length(x) == 4;
 valid_number = @(x) isnumeric(x);
 valid_sweep = @(x) isnumeric(x) && length(x) == 2;
-binary_string = {'yes', 'no'};
+boolean_string = {'yes', 'no'};
 
 addRequired(p, 'mbf_axis');
 addParameter(p, 'durations', default_durations, valid_durations);
@@ -49,17 +56,23 @@ addParameter(p, 'dwell', default_dwell, valid_number);
 addParameter(p, 'tune_sweep_range', default_tune_sweep_range, valid_sweep);
 addParameter(p, 'tune_offset', default_tune_offset, valid_number);
 addParameter(p, 'excitation_level', default_excitation_level, valid_number);
-addParameter(p, 'fll_tracking', 'no', @(x) any(validatestring(x,binary_string)));
+addParameter(p, 'fll_tracking', 'no', @(x) any(validatestring(x,boolean_string)));
 addParameter(p, 'fll_bunches', 400, valid_number);
 addParameter(p, 'fll_guard_bunches', 10, valid_number);
 addParameter(p, 'single_mode', NaN, valid_number);
+addParameter(p, 'auto_setup', default_auto_setup, @(x) any(validatestring(x, boolean_string)));
+addParameter(p, 'tunes', NaN);
 
 parse(p, mbf_axis, varargin{:});
 
 mbf_tools
 
-% Get the tunes
-tunes = get_all_tunes('xys');
+if isnan(p.Results.tunes)
+    % Get the tunes
+    tunes = get_all_tunes('xys');
+else
+    tunes = p.Results.tunes;
+end %if
 tune = tunes.([mbf_axis,'_tune']).tune;
 
 if isnan(tune)
@@ -82,10 +95,12 @@ NCO = pv_names.tails.NCO;
 % Get the current FIR gain
 orig_fir_gain = lcaGet([pv_head, Bunch_bank.FIR_gains]);
 
-% putting the system into a known state.
-setup_operational_mode(mbf_axis, "Feedback")
-% Setting the FIR gain to its original value.
-lcaPut([pv_head, Bunch_bank.FIR_gains], orig_fir_gain)
+if strcmp(p.Results.auto_setup, 'yes')
+    % putting the system into a known state.
+    setup_operational_mode(mbf_axis, "Feedback")
+    % Setting the FIR gain to its original value.
+    lcaPut([pv_head, Bunch_bank.FIR_gains], orig_fir_gain)
+end %if
 
 
 % Change the tune to be around the chosen mode.
@@ -179,7 +194,7 @@ lcaPut([pv_head Detector.source], 'FIR');
 % Enable only detector 0
 for n_det = 0:3
     l_det = ['det',num2str(n_det)];
-    mbf_get_then_put([pv_head  Detector.(l_det).enable], 'Disabled');
+    lcaPut([pv_head  Detector.(l_det).enable], 'Disabled');
 end %for
 lcaPut([pv_head  Detector.('det0').enable], 'Enabled');
 % Set the bunch mode to all bunches on detector 0
