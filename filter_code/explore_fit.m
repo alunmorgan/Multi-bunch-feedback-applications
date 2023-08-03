@@ -32,13 +32,13 @@ end
 
 function redraw(fig, event)
     h = guidata(fig);
-    alpha = get_value(h.alpha)
-    beta = get_value(h.beta)
-    tune = get_value(h.tune)
-    delta = get_value(h.delta)
-    delay = get_value(h.delay)
-    phase = get_value(h.phase)
-    N = get_value(h.N)
+    alpha = get_value(h.alpha);
+    beta = get_value(h.beta);
+    tune = get_value(h.tune);
+    delta = get_value(h.delta);
+    delay = get_value(h.delay);
+    phase = get_value(h.phase);
+    N = get_value(h.N);
 
     test_fit(tune, delta, delay, phase, N, alpha, beta);
 end

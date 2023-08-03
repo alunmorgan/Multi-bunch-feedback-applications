@@ -26,9 +26,9 @@ figure(2)
 yyaxis left
 hold on
 for wse = 1:size(emittance_blowup_pp.beam_oscillation_y,2)
-     temp_y1 = squeeze(emittance_blowup_pp.beam_oscillation_y(:,wse)).*1e-3;
+    temp_y1 = squeeze(emittance_blowup_pp.beam_oscillation_y(:,wse)).*1e-3;
     temp_y1 = temp_y1 - min(temp_y1);
-if max(temp_y1) > max_sig_y
+    if max(temp_y1) > max_sig_y
         bpm_select_y = wse;
         max_sig_y = max(temp_y1);
     end %if
@@ -42,9 +42,9 @@ ylabel('Ver. emittance [pm rad]')
 
 figure(3)
 yyaxis left
-    plot(emittance_blowup.excitation_frequency, ...
-        squeeze(emittance_blowup_pp.beam_oscillation_x(:,bpm_select_x)).*1e-3,'.-',...
-        'DisplayName', regexprep(emittance_blowup_pp.used_bpms{bpm_select_x},'_', ' '))
+plot(emittance_blowup.excitation_frequency, ...
+    squeeze(emittance_blowup_pp.beam_oscillation_x(:,bpm_select_x)).*1e-3,'.-',...
+    'DisplayName', regexprep(emittance_blowup_pp.used_bpms{bpm_select_x},'_', ' '))
 xlabel('Excitation frequency [tune]')
 ylabel('Hor. RMS oscillation [\mum]')
 
@@ -57,9 +57,9 @@ legend()
 figure(4)
 yyaxis left
 hold on
-    plot(emittance_blowup.excitation_frequency, ...
-        squeeze(emittance_blowup_pp.beam_oscillation_y(:,bpm_select_y)).*1e-3,'.-',...
-        'DisplayName', regexprep(emittance_blowup_pp.used_bpms{bpm_select_y},'_', ' '))
+plot(emittance_blowup.excitation_frequency, ...
+    squeeze(emittance_blowup_pp.beam_oscillation_y(:,bpm_select_y)).*1e-3,'.-',...
+    'DisplayName', regexprep(emittance_blowup_pp.used_bpms{bpm_select_y},'_', ' '))
 xlabel('Excitation frequency [tune]')
 ylabel('Ver. RMS oscillation [\mum]')
 yyaxis right
