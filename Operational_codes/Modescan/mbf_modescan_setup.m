@@ -5,7 +5,7 @@ function tunes = mbf_modescan_setup(mbf_axis, varargin)
 %       mbf_axis (str): Selects which MBF axis to work on (x, y, s).
 %       auto_setup(str): sets whether the setup scripts will be used to put the
 %       system into a particular state. Default is yes.
-%       tunes (structure or NaN): Tune data from a previous measurement. 
+%       tunes (structure or NaN): Tune data from a previous measurement.
 %                                 Defaults to Nan.
 %   Returns:
 %       tunes (structure): Tunes of the machine.
@@ -23,6 +23,8 @@ elseif strcmpi(mbf_axis, 's')
     default_sequencer_gain = -36; % sequencer gain in dB.
     default_excitation_level = -12; % excitation level in dB.
 end %if
+
+boolean_string = {'yes', 'no'};
 
 default_auto_setup = 'yes';
 
@@ -56,11 +58,12 @@ if strcmp(p.Results.auto_setup, 'yes')
     setup_operational_mode(mbf_axis, "TuneOnly")
 end %if
 
-if isnan(p.Results.tunes)
-% Get the tunes
-tunes = get_all_tunes('xys');
-else
+if isstruct(p.Results.tunes)
+
     tunes = p.Results.tunes;
+else
+    % Get the tunes
+    tunes = get_all_tunes('xys');
 end %if
 tune = tunes.([mbf_axis,'_tune']).tune;
 

@@ -67,11 +67,11 @@ parse(p, mbf_axis, varargin{:});
 
 mbf_tools
 
-if isnan(p.Results.tunes)
-    % Get the tunes
-    tunes = get_all_tunes('xys');
-else
+if isstruct(p.Results.tunes)
     tunes = p.Results.tunes;
+else
+        % Get the tunes
+    tunes = get_all_tunes('xys');
 end %if
 tune = tunes.([mbf_axis,'_tune']).tune;
 

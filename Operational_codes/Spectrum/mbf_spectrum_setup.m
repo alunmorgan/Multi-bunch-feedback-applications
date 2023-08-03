@@ -4,7 +4,7 @@ function tunes = mbf_spectrum_setup(mbf_axis,  varargin)
 %       mbf_axis (str): 'x', 'y', 's'. Defines which system you are requesting
 %       auto_setup(str): sets whether the setup scripts will be used to put the
 %       system into a particular state. Default is yes.
-%       tunes (structure or NaN): Tune data from a previous measurement. 
+%       tunes (structure or NaN): Tune data from a previous measurement.
 %                                 Defaults to Nan.
 %
 % Example mbf_spectrum_setup('x')
@@ -30,11 +30,11 @@ if strcmp(p.Results.auto_setup, 'yes')
     setup_operational_mode(mbf_axis, "TuneOnly")
 end %if
 
-if isnan(p.Results.tunes)
-% Get the tunes
-tunes = get_all_tunes('xys');
-else
+if isstruct(p.Results.tunes)
     tunes = p.Results.tunes;
+else
+    % Get the tunes
+    tunes = get_all_tunes('xys');
 end %if
 
 % Disarm the sequencer and memory triggers
