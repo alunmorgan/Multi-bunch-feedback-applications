@@ -8,7 +8,7 @@ function mbf_modescan_plotting(data_magnitude, data_phase, modescan)
 %
 % Example: mbf_modescan_plotting(data_magnitude, data_phase, modescan)
 
-figure
+figure("OuterPosition",[30, 400, 700, 900])
 subplot(2,1,1)
 plot(data_magnitude(1:modescan.harmonic_number))
 title(['Amplitude (', modescan.ax_label, ' ', num2str(modescan.time(3)),...
@@ -19,15 +19,18 @@ xlabel('Modes')
 xlim([1,modescan.harmonic_number])
 grid on
 subplot(2,1,2)
-plot(data_phase(1:modescan.harmonic_number), 'DisplayName', 'data', 'LineWidth',2)
-p = polyfit(1:modescan.harmonic_number, data_phase(1:modescan.harmonic_number), 1);
-y = polyval(p,1:modescan.harmonic_number);
+modes = 1:modescan.harmonic_number;
+plot(data_phase(), 'DisplayName', 'data', 'LineWidth',2)
+data_end = sum(data_phase(modes))./ modes(end);
+target_grad = data_end / modes(end);
+y = modes .* target_grad;
 hold on 
+plot(y, 'DisplayName', ['fit', num2str(round(target_grad*100)/100), ' degrees / mode'], 'LineWidth',2)
 plot(1:modescan.harmonic_number, ones(modescan.harmonic_number,1)*-90, ':r', 'DisplayName','Limits', 'LineWidth',2)
 plot(1:modescan.harmonic_number, ones(modescan.harmonic_number,1)*90, ':r', 'LineWidth',2, 'HandleVisibility','off')
 hold off
 title('Phase (deg)')
 xlabel('Modes')
 xlim([1, modescan.harmonic_number])
-legend
+legend('Location','northoutside')
 grid on
