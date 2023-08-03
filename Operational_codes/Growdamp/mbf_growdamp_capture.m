@@ -58,7 +58,7 @@ else
     error('Memory is not ready please try again')
 end %if
 % getting general environment data.
-growdamp = machine_environment('tunes', tunes);
+growdamp = machine_environment('tunes', p.Results.tunes);
 % Add the axis label to the data structure.
 growdamp.ax_label = mbf_axis;
 % construct name and add it to the structure
