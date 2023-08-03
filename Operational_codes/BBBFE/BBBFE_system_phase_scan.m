@@ -22,15 +22,15 @@ tunes.y_tune=NaN;
 tunes.s_tune=NaN;
 data = machine_environment('tunes', tunes);
 data.frontend_pv = 'SR23C-DI-BBFE-01';
-if strcmp(mbf_ax, 'X') || strcmp(mbf_ax, 'Y')
+if strcmpi(mbf_ax, 'X') || strcmpi(mbf_ax, 'Y')
     data.mbf_pv = ['SR23C-DI-TMBF-01:', mbf_ax];
-elseif strcmp(mbf_ax, 'S')
+elseif strcmpi(mbf_ax, 'S')
     data.mbf_pv = ['SR23C-DI-LMBF-01:', 'IQ'];
 end %if
 
-if strcmp(mbf_ax, 'X') || strcmp(mbf_ax, 'Y')
+if strcmpi(mbf_ax, 'X') || strcmpi(mbf_ax, 'Y')
     original_setting=lcaGet([data.frontend_pv ':PHA:OFF:' mbf_ax]);
-elseif strcmp(mbf_ax, 'S')
+elseif strcmpi(mbf_ax, 'S')
     original_setting=lcaGet([data.frontend_pv ':PHA:OFF:IT']);
 end %if
 % moving to starting point in scan
