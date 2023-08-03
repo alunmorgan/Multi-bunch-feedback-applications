@@ -18,21 +18,26 @@ tunes = get_all_tunes('xys');
 try
     setup_operational_mode('x', "Feedback")
     lcaPut('SR23C-DI-TMBF-01:X:FIR:GAIN_S', '0dB')
-    growdamp_all('x',  'plotting', 'no', 'auto_setup', 'no', 'tunes', tunes)
+    [~] = growdamp_all('x',  'plotting', 'no', 'auto_setup', 'no', 'tunes', tunes);
+    setup_operational_mode('x', "Feedback")
+    lcaPut('SR23C-DI-TMBF-01:X:FIR:GAIN_S', fir_gain_x)
 catch
     disp('Problem with Growdamp in X axis')
 end %try
 try
     setup_operational_mode('y', "Feedback")
     lcaPut('SR23C-DI-TMBF-01:Y:FIR:GAIN_S', '0dB')
-    growdamp_all('y',  'plotting', 'no', 'auto_setup', 'no', 'tunes', tunes)
+    [~] = growdamp_all('y',  'plotting', 'no', 'auto_setup', 'no', 'tunes', tunes);
+    setup_operational_mode('y', "Feedback")
+    lcaPut('SR23C-DI-TMBF-01:Y:FIR:GAIN_S', fir_gain_y)
 catch
     disp('Problem with Growdamp in Y axis')
 end %try
 try
     setup_operational_mode('s', "Feedback")
     lcaPut('SR23C-DI-LMBF-01:IQ:FIR:GAIN_S', '0dB')
-    growdamp_all('s',  'plotting', 'no', 'auto_setup', 'no', 'tunes', tunes)
+    [~] = growdamp_all('s',  'plotting', 'no', 'auto_setup', 'no', 'tunes', tunes);
+    setup_operational_mode('s', "TuneOnly")
 catch
     disp('Problem with Growdamp in S axis')
 end %try
@@ -40,12 +45,16 @@ end %try
 try
     setup_operational_mode('x', "TuneOnly")
     modscan_all('x', 'plotting', 'no', 'auto_setup', 'no', 'tunes', tunes)
+        setup_operational_mode('x', "Feedback")
+    lcaPut('SR23C-DI-TMBF-01:X:FIR:GAIN_S', fir_gain_x)
 catch
     disp('Problem with Modescan in X axis')
 end %try
 try
     setup_operational_mode('y', "TuneOnly")
     modscan_all('y', 'plotting', 'no', 'auto_setup', 'no', 'tunes', tunes)
+        setup_operational_mode('y', "Feedback")
+    lcaPut('SR23C-DI-TMBF-01:Y:FIR:GAIN_S', fir_gain_y)
 catch
     disp('Problem with Modescan in Y axis')
 end %try
@@ -59,12 +68,16 @@ end %try
 try
     setup_operational_mode('x', "TuneOnly")
     mbf_spectrum_all('x',  'plotting', 'no', 'auto_setup', 'no', 'tunes', tunes)
+     setup_operational_mode('x', "Feedback")
+    lcaPut('SR23C-DI-TMBF-01:X:FIR:GAIN_S', fir_gain_x)
 catch
     disp('Problem with Spectrum in X axis')
 end %try
 try
     setup_operational_mode('y', "TuneOnly")
     mbf_spectrum_all('y',  'plotting', 'no', 'auto_setup', 'no', 'tunes', tunes)
+        setup_operational_mode('y', "Feedback")
+    lcaPut('SR23C-DI-TMBF-01:Y:FIR:GAIN_S', fir_gain_y)
 catch
     disp('Problem with Spectrum in Y axis')
 end %try
