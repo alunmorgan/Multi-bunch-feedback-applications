@@ -1,6 +1,7 @@
 function unpacked_data = unpack_old_growdamp_sweeps(requested_data)
 
 ck =1;
+unpacked_data = cell(1000, 1);
 for sh = 1:length(requested_data)
     if ~iscell(requested_data{sh}.data)
         unpacked_data{ck} = requested_data{sh};
@@ -23,3 +24,4 @@ for sh = 1:length(requested_data)
 
     end %if
 end %for
+unpacked_data = unpacked_data(1:ck-1);
