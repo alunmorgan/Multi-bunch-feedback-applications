@@ -41,7 +41,6 @@ if isnan(p.Results.tune_override)
     tune_frequency_from_sweep = lcaGet([name, ':TUNE:TUNE']);
     if isnan(tune_frequency_from_sweep)
         error('Tune fit invalid, cannot start PLL.')
-        return
     end %if
 else
     tune_frequency_from_sweep = p.Results.tune_override;
