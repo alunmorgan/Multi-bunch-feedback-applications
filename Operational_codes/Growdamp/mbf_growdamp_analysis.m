@@ -157,8 +157,9 @@ frequency_shifts(:,2) = p3_acum;
 
 if p.Results.debug == 1
     turns_axis = cat(2, growth_turns, passive_turns, active_turns);
-    for hs = p.Results.debug_modes
-        debug_data = abs(data(hs,:));
+    h = gobjects(length(p.Results.debug_modes), 1);
+    for hs = 1:length(p.Results.debug_modes)
+        debug_data = abs(data(p.Results.debug_modes(hs),:));
         h(hs) = figure('Position', [20, 40, 600, 600]);
         hold on
         debug_passive = debug_data(passive_samples);
@@ -174,7 +175,7 @@ if p.Results.debug == 1
         debug_fit_active_advanced = polyval(debug_active_s_advanced,active_turns);
 
         data_range = [min(debug_data), max(debug_data)];
-        plot(turns_axis, debug_data, 'DisplayName', ['Index ', num2str(hs)])
+        plot(turns_axis, debug_data, 'DisplayName', ['Index ', num2str(p.Results.debug_modes(hs))])
         plot(passive_turns, exp(debug_fit_passive_basic), 'r', 'DisplayName', 'Passive fit (Basic)', 'LineWidth', 2)
         plot(active_turns, exp(debug_fit_active_basic), 'k', 'DisplayName', 'Active fit (Basic)', 'LineWidth', 2)
         plot(passive_turns, exp(debug_fit_passive_advanced), ':r', 'DisplayName', 'Passive fit (Advanced)', 'LineWidth', 2)
