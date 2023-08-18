@@ -10,7 +10,7 @@ mm = movmean(abs(data), length_averaging);
 mm = log(abs(mm));
 % Get an initial starting value.
 p_initial = polyfit(1:length(mm), mm, 1);
-initial_fit_line = polyval(p_initial, 1:length(mm));
+% initial_fit_line = polyval(p_initial, 1:length(mm));
 if p_initial(1) < 0
     % damping
     % find the max so as to allow any initial rise in the data to be
