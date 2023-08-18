@@ -12,7 +12,7 @@ function BBBFE_clock_phase_scan(mbf_ax, single_bunch_location)
 %
 % Example: BBBFE_clock_phase_scan('X', 400)
 
-BBBFE_setup(mbf_ax, single_bunch_location)
+BBBFE_detector_setup(mbf_ax, single_bunch_location)
 [root_string, ~] = mbf_system_config;
 root_string = root_string{1};
 
@@ -63,7 +63,7 @@ for pp = -180:10:original_setting
     pause(.5)
 end %for
 
-BBBFE_restore(mbf_ax)
+BBBFE_detector_restore(mbf_ax)
 
 data.time = datevec(datetime("now"));
 data.base_name = ['clock_phase_scan_', mbf_ax, '_axis'];

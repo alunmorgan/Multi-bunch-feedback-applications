@@ -1,5 +1,4 @@
-function BBBFE_setup(mbf_ax, single_bunch_location)
-
+function BBBFE_detector_setup(mbf_ax, single_bunch_location)
 
 % press tune only
 setup_operational_mode(mbf_ax, "TuneOnly")

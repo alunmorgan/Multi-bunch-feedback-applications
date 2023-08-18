@@ -1,4 +1,4 @@
-function BBBFE_restore(mbf_ax)
+function BBBFE_detector_restore(mbf_ax)
 
     
 % set up the individual tune detectors to run on 1,2,3
