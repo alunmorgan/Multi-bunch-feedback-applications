@@ -26,18 +26,9 @@ x_plt_axis = (0:harmonic_number-1) - harmonic_number/2;
 this_year = year(datetime("now"));
 ranges_to_display = {'RF', 'time','current'};
 
-extents = growdamp_archive_calculate_extents(requested_data);
-
 years_input = {this_year-5, 'r'; this_year-4, 'b'; this_year-3, 'k'; this_year-2, 'g'; this_year-1, 'c'; this_year, 'm'};
 
 graph_text{1} = ['Analysis type: ', experimental_setup.anal_type];
-% graph_text_2 = cell(1, 2 * length(ranges_to_display) + 1);
-% graph_text_2{1} = 'Data ranges';
-% for whe = 1:2:length(ranges_to_display)
-%     graph_text_2{whe + 1} = ranges_to_display{whe};
-%     graph_text_2{whe + 2} = [num2str(extents.(ranges_to_display{whe}){1}), ' to ', num2str(extents.(ranges_to_display{whe}){2})];
-% end %for
-
 graph_title = 'Damping rates for different modes';
 
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
@@ -101,8 +92,6 @@ ck = 1;
 for hrd = 1:length(ranges_to_display)
     if strcmp(ranges_to_display{hrd}, 'time')
         continue
-%         plot(times, zeros(length(times),1), 'o:')
-%         datetick
     else    
         axes('OuterPosition', [0.01 ck/3 0.2 0.3]);
     xlabel('Time')
