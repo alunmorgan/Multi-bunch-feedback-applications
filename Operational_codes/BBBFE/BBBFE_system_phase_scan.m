@@ -4,8 +4,7 @@ function BBBFE_system_phase_scan(mbf_ax, single_bunch_location)
 % Restores the original value after the scan.
 %
 % Args:
-%      mbf_ax (str): specifies which axis 'X','Y', 'S', 'IT', 'IL'
-%      'S' maps to 'IT'
+%      mbf_ax (str): specifies which axis 'X','Y','S'
 %
 % Machine setup
 % fill some charge in bunch 'single_bunch_location' (0.2nC)
@@ -14,66 +13,57 @@ function BBBFE_system_phase_scan(mbf_ax, single_bunch_location)
 
 BBBFE_detector_setup(mbf_ax, single_bunch_location)
 
-[root_string, ~] = mbf_system_config;
+[root_string, ~, pv_names, ~] = mbf_system_config;
 root_string = root_string{1};
 % getting general environment data.
 tunes.x_tune=NaN;
 tunes.y_tune=NaN;
 tunes.s_tune=NaN;
 data = machine_environment('tunes', tunes);
-data.frontend_pv = 'SR23C-DI-BBFE-01';
-if strcmpi(mbf_ax, 'X') || strcmpi(mbf_ax, 'Y')
-    data.mbf_pv = ['SR23C-DI-TMBF-01:', mbf_ax];
-elseif strcmpi(mbf_ax, 'S')
-    data.mbf_pv = ['SR23C-DI-LMBF-01:', 'IQ'];
-end %if
+data.time = datevec(datetime("now"));
+data.base_name = ['system_phase_scan_', mbf_ax, '_axis'];
 
-if strcmpi(mbf_ax, 'X') || strcmpi(mbf_ax, 'Y')
-    original_setting=lcaGet([data.frontend_pv ':PHA:OFF:' mbf_ax]);
-elseif strcmpi(mbf_ax, 'S')
-    original_setting=lcaGet([data.frontend_pv ':PHA:OFF:IT']);
-end %if
-% moving to starting point in scan
-for pp=original_setting:-20:-180
-    if strcmp(mbf_ax, 'X') || strcmp(mbf_ax, 'Y')
-        lcaPut([data.frontend_pv ':PHA:OFF:' mbf_ax], pp)
-    elseif strcmp(mbf_ax, 'S')
-        lcaPut([data.frontend_pv ':PHA:OFF:IT'], pp)
-    end %if
-    pause(.5)
-end
-
-% measurement
+%prealloacation
 data.phase=[-180:20:180 160:-20:-180];
 data.side1 = NaN(length(data.phase), 1);
 data.main = NaN(length(data.phase), 1);
 data.side2 = NaN(length(data.phase), 1);
+
+if strcmpi(mbf_ax, 'X')
+    mbf_pv = pv_names.hardware_names.x;
+    fe_phase_pv = [pv_names.frontend.base pv_names.frontend.system_phase.x];
+elseif strcmpi(mbf_ax, 'Y')
+    mbf_pv = pv_names.hardware_names.y;
+    fe_phase_pv = [pv_names.frontend.base pv_names.frontend.system_phase.y];
+elseif strcmpi(mbf_ax, 'S')
+    mbf_pv =pv_names.hardware_names.s;
+    fe_phase_pv = [pv_names.frontend.base pv_names.frontend.system_phase.s];
+end %if
+
+original_setting=lcaGet(fe_phase_pv);
+% moving to starting point in scan
+for pp=original_setting:-20:-180
+    lcaPut(fe_phase_pv, pp)
+    pause(.5)
+end
+
+% measurement
 for x = 1:length(data.phase)
-    if strcmp(mbf_ax, 'X') || strcmp(mbf_ax, 'Y')
-        lcaPut([data.frontend_pv ':PHA:OFF:' mbf_ax], data.phase(x))
-    elseif strcmp(mbf_ax, 'S')
-        lcaPut([data.frontend_pv ':PHA:OFF:IT'], data.phase(x))
-    end %if
+    lcaPut(fe_phase_pv, data.phase(x))
     pause(2)
-    data.side1(x) = max(lcaGet([data.mbf_pv, ':DET:1:POWER']));
-    data.main(x) = max(lcaGet([data.mbf_pv, ':DET:2:POWER']));
-    data.side2(x) = max(lcaGet([data.mbf_pv, ':DET:3:POWER']));
+    data.side1(x) = max(lcaGet([mbf_pv, pv_names.tails.Detector.det1.power]));
+    data.main(x) = max(lcaGet([mbf_pv, pv_names.tails.Detector.det2.power]));
+    data.side2(x) = max(lcaGet([mbf_pv, pv_names.tails.Detector.det3.power]));
 end
 
 % move back to the original setting
 for pp=-180:20:original_setting
-    if strcmp(mbf_ax, 'X') || strcmp(mbf_ax, 'Y')
-        lcaPut([data.frontend_pv ':PHA:OFF:' mbf_ax], pp)
-    elseif strcmp(mbf_ax, 'S')
-        lcaPut([data.frontend_pv ':PHA:OFF:IT'], pp)
-    end %if
+    lcaPut(fe_phase_pv, pp)
     pause(.5)
 end
 
 BBBFE_detector_restore(mbf_ax)
 
-data.time = datevec(datetime("now"));
-data.base_name = ['system_phase_scan_', mbf_ax, '_axis'];
 %% saving the data to a file
 save_to_archive(root_string, data)
 %% plotting

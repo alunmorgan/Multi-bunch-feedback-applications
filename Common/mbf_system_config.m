@@ -9,6 +9,19 @@ root_path = {'/dls/ops-data/Diagnostics/MBF/', ...
              '/dls/ops-data/Diagnostics/LMBF/'};
 harmonic_number = 936;
 
+%% DORIS PVs
+pv_names.doris.phase = 'SR23C-DI-DORIS-01:TARGET_S';
+
+%% Frontend PVs
+pv_names.frontend.base = 'SR23C-DI-BBFE-01';
+pv_names.frontend.system_phase.x = ':PHA:OFF:X';
+pv_names.frontend.system_phase.y = ':PHA:OFF:Y';
+pv_names.frontend.system_phase.s = ':PHA:OFF:IT';
+pv_names.frontend.clock_phase.x = ':PHA:CLO:3';
+pv_names.frontend.clock_phase.y = ':PHA:CLO:3';
+pv_names.frontend.clock_phase.s = ':PHA:CLO:4';
+
+%% Backend PVs
 % Base PVs of the hardware.
 pv_names.hardware_names.T = 'SR23C-DI-TMBF-01';
 pv_names.hardware_names.L = 'SR23C-DI-LMBF-01';
@@ -128,6 +141,7 @@ for n_det = 0:3
     pv_names.tails.Detector.(l_det).scale = [':DET:',n_det_label,':SCALING_S']; % gain?
     pv_names.tails.Detector.(l_det).I = [':DET:',n_det_label,':I'];
     pv_names.tails.Detector.(l_det).Q = [':DET:',n_det_label,':Q'];
+    pv_names.tails.Detector.(l_det).power = [':DET:',n_det_label,':POWER'];
 end %for
 
 % Memory settings

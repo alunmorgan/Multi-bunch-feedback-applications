@@ -13,7 +13,7 @@ function BBBFE_clock_phase_scan(mbf_ax, single_bunch_location)
 % Example: BBBFE_clock_phase_scan('X', 400)
 
 BBBFE_detector_setup(mbf_ax, single_bunch_location)
-[root_string, ~] = mbf_system_config;
+[root_string, ~, pv_names, ~] = mbf_system_config;
 root_string = root_string{1};
 
 % getting general environment data.
@@ -21,26 +21,27 @@ tunes.x_tune=NaN;
 tunes.y_tune=NaN;
 tunes.s_tune=NaN;
 data = machine_environment('tunes', tunes);
+data.time = datevec(datetime("now"));
+data.base_name = ['clock_phase_scan_', mbf_ax, '_axis'];
 
 if strcmp(mbf_ax, 'Y')
-    ax = 3;
-    data.mbf_pv = ['SR23C-DI-TMBF-01:', mbf_ax];
+    mbf_pv = pv_names.hardware_names.y;
+    fe_phase_pv = [pv_names.frontend.base pv_names.frontend.clock_phase.y];
 elseif strcmp(mbf_ax, 'X')
-    ax = 3;
-    data.mbf_pv = ['SR23C-DI-TMBF-01:', mbf_ax];
+    mbf_pv = pv_names.hardware_names.x;
+    fe_phase_pv = [pv_names.frontend.base pv_names.frontend.clock_phase.x];
 elseif strcmp(mbf_ax, 'S')
-    ax = 4;
-    data.mbf_pv = 'SR23C-DI-LMBF-01:IQ';
+    mbf_pv = pv_names.hardware_names.s;
+    fe_phase_pv = [pv_names.frontend.base pv_names.frontend.clock_phase.s];
 else
     error('Please use input axes X, Y or S')
 end %if
 
-data.frontend_pv = 'SR23C-DI-BBFE-01';
-original_setting = lcaGet([data.frontend_pv ':PHA:CLO:' num2str(ax)]);
+original_setting = lcaGet(fe_phase_pv);
 
 % moving to starting point in scan
 for pp = original_setting:-20:-180
-    lcaPut([data.frontend_pv ':PHA:CLO:' num2str(ax)], pp)
+    lcaPut(fe_phase_pv, pp)
     pause(.5)
 end %for
 
@@ -50,25 +51,22 @@ data.side1 = NaN(length(data.phase), 1);
 data.main = NaN(length(data.phase), 1);
 data.side2 = NaN(length(data.phase), 1);
 for x = 1:length(data.phase)
-    lcaPut([data.frontend_pv ':PHA:CLO:' num2str(ax)], data.phase(x))
+    lcaPut(fe_phase_pv, data.phase(x))
     pause(2)
-    data.side1(x) = max(lcaGet([data.mbf_pv, ':DET:1:POWER']));
-    data.main(x) = max(lcaGet([data.mbf_pv, ':DET:2:POWER']));
-    data.side2(x) = max(lcaGet([data.mbf_pv, ':DET:3:POWER']));
+    data.side1(x) = max(lcaGet([mbf_pv, pv_names.tails.Detector.det1.power]));
+    data.main(x) = max(lcaGet([mbf_pv, pv_names.tails.Detector.det2.power]));
+    data.side2(x) = max(lcaGet([mbf_pv, pv_names.tails.Detector.det3.power]));
 end %for
 
 % move back to the original setting
-for pp = -180:10:original_setting
-    lcaPut([data.frontend_pv ':PHA:CLO:' num2str(ax)], pp)
+for pp = -180:20:original_setting
+    lcaPut(fe_phase_pv, pp)
     pause(.5)
 end %for
 
 BBBFE_detector_restore(mbf_ax)
 
-data.time = datevec(datetime("now"));
-data.base_name = ['clock_phase_scan_', mbf_ax, '_axis'];
-
 %% saving the data to a file
 save_to_archive(root_string, data)
 %% plotting
-BBBFE_clock_phase_scan_plotting(data, ax, mbf_ax)
+BBBFE_clock_phase_scan_plotting(data, mbf_ax)
