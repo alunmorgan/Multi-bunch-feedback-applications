@@ -50,7 +50,7 @@ data.mode_modes = sum(bunch_data.^2,1);
 data.mode_tune = sum(mode_data(:,1:end/2).^2, 1);
 
 data.tune_axis = linspace(0,.5,length(data.bunch_tune));
-data.bunch_axis = 1:input_data.harmonic_number;
+data.bunch_axis = 1:length(data.bunch_bunches);
 data.mode_axis = -input_data.harmonic_number/2 : (input_data.harmonic_number/2 -1) ;
 end
 
