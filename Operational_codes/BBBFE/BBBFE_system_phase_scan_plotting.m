@@ -13,7 +13,7 @@ title(['Phase sweep for MBF ', mbf_ax, ' axis on', datestr(data.time)])
 grid on
 hold off
 
-ax2 = subplot(2,1,1);
+ax2 = subplot(2,1,2);
 hold all
 semilogy(data.phase, data.main - data.side1, 'DisplayName', 'Excited bunch - Preceeding bunch')
 semilogy(data.phase, data.main - data.side2, 'DisplayName','Excited bunch - Following bunch')
