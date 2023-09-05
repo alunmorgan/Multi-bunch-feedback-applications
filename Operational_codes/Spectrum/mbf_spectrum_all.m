@@ -28,7 +28,7 @@ parse(p, mbf_axis, varargin{:});
 
 tunes = mbf_spectrum_setup(mbf_axis, ...
     'auto_setup', p.Results.auto_setup, 'tunes', p.Results.tunes);
-n_turns = 100;
+n_turns = 500;
 repeat = 1;
 data = mbf_spectrum_capture(mbf_axis, 'tunes', tunes, 'n_turns', n_turns, 'repeat', repeat);
 data.tunes = tunes;
