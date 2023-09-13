@@ -56,7 +56,7 @@ else
         year = str2double(tunc{ha}(1:ind(1)-1));
         month = str2double(tunc{ha}(ind(1)+1: ind(2)-1));
         day = str2double(tunc{ha}(ind(2)+1: ind(3)-1));
-        folder_dates(ha) = datenum(year, month, day);
+        folder_dates(ha) = datetime(year, month, day);
     end %for
     a = find(folder_dates >= floor(date_range(1)) & folder_dates <= floor(date_range(2)) + 1);
     b = find(folder_dates <= floor(date_range(2)) + 1);
@@ -66,7 +66,7 @@ else
         temp = load(wanted_datasets_type_prefiltered{kse});
         file_time = temp.data.time;
         clear temp
-        if datenum(file_time) >= date_range(1) && datenum(file_time) <= date_range(2)
+        if datetime(file_time) >= date_range(1) && datetime(file_time) <= date_range(2)
             in_time(kse) = 1;
         end %if
         fprintf('.')
