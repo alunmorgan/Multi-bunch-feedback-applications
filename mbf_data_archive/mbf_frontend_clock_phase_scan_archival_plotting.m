@@ -4,7 +4,7 @@ function mbf_frontend_clock_phase_scan_archival_plotting(requested_data, leading
 %      leading (numeric matrix): 
 %      excited (numeric matrix): 
 %      following (numeric matrix): 
-%      times (numeric vector): Datenums of the datasets.
+%      times (numeric vector): Datetimes of the datasets.
 %      experimental_setup (structure): The setup parameters for the
 %                                      analysis.
 %      plot_error_graphs (anything): if present the code will plot the results of the fit errors.

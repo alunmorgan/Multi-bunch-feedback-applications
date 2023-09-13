@@ -3,7 +3,7 @@ function mbf_modescan_archival_plotting(requested_data, data_magnitude, data_pha
 % Args:
 %      data_magnitude (numeric matrix): 
 %      data_phase (numeric matrix): 
-%      times (numeric vector): Datenums of the datasets.
+%      times (numeric vector): Datetimes of the datasets.
 %      experimental_setup (structure): The setup parameters for the
 %                                      analysis.
 %      plot_error_graphs (anything): if present the code will plot the results of the fit errors.

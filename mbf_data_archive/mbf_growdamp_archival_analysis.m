@@ -29,7 +29,7 @@ function [dr_passive, dr_active, error_passive, error_active, times, experimenta
 %                                         damping rate.
 %         error_active (numeric matrix): Error of the fit for the active
 %                                        damping rate.
-%         times (numeric vector): Datenums of the datasets.
+%         times (numeric vector): Datetimes of the datasets.
 %         experimental_setup (structure): The setup parameters for the
 %                                         analysis.
 %
@@ -70,7 +70,7 @@ for nd = length(data_requested):-1:1
         'override', overrides,...
         'advanced_fitting',advanced_fitting, ...
         'debug', debug);
-    times(nd) = datenum(data_requested{nd}.time);
+    times(nd) = datetime(data_requested{nd}.time);
     dr_passive(nd,:) = fftshift(squeeze(-s_poly_data(:,2,1))');
     dr_active(nd,:) = fftshift(squeeze(-s_poly_data(:,3,1))');
     error_passive(nd,:) = squeeze(-s_poly_data(:,2,3))';
@@ -111,7 +111,7 @@ if strcmp(anal_type, 'parameter_sweep')
         [error_active, ~] = mbf_analysis_reorganise_for_parameter_sweep(error_active, param, parameter_step_size);
     end %if
 elseif strcmp(anal_type, 'average')
-    warning('Ignoring the last two parameters as "average" is set')
+    warning('Archive:Growdamp:setting','Ignoring the last two parameters as "average" is set')
     dr_passive = mean(dr_passive,1, 'omitnan');
     dr_active = mean(dr_active,1, 'omitnan');
     error_passive = mean(error_passive,1, 'omitnan'); %is it OK to just average the errors?

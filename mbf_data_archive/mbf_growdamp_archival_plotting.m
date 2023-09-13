@@ -9,7 +9,7 @@ function mbf_growdamp_archival_plotting(requested_data, dr_passive, dr_active, e
 %                                      damping rate.
 %      error_active (numeric matrix): Error of the fit for the active
 %                                     damping rate.
-%      times (numeric vector): Datenums of the datasets.
+%      times (numeric vector): Datetimes of the datasets.
 %      experimental_setup (structure): The setup parameters for the
 %                                      analysis.
 %      plot_error_graphs (anything): if present the code will plot the results of the fit errors.
@@ -42,7 +42,6 @@ end %if
 
 figure('Position',[50, 50, 1400, 800])
 annotation('textbox', [0 1-0.3 0.3 0.3], 'String', graph_text, 'FitBoxToText', 'on', 'Interpreter', 'none');
-% annotation('textbox', [0 0.1 0.3 0.3], 'String', graph_text_2, 'FitBoxToText', 'on', 'Interpreter', 'none');
 
 ax1 = axes('OuterPosition', [0.12 0.5 0.95 0.5]);
 hold on

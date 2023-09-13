@@ -24,7 +24,7 @@ function [leading, excited, following, times, experimental_setup] = ...
 %         leading (numeric matrix):
 %         excited (numeric matrix):
 %         following (numeric matrix):
-%         times (numeric vector): Datenums of the datasets.
+%         times (numeric vector): Datetimes of the datasets.
 %         experimental_setup (structure): The setup parameters for the
 %                                         analysis.
 %
@@ -45,7 +45,7 @@ p.PartialMatching = false;
 parse(p,data_requested, varargin{:});
 
 for nd = length(data_requested):-1:1
-    times(nd) = datenum(data_requested{nd}.time);
+    times(nd) = datetime(data_requested{nd}.time);
     leading(:,nd) = data_requested{nd}.side1(:,1);
     excited(:,nd) = data_requested{nd}.main(:,1);
     following(:,nd) = data_requested{nd}.side2(:,1);
@@ -73,7 +73,7 @@ if strcmp(p.Results.analysis_type, 'parameter_sweep')
         following', param, p.Results.parameter_step);
 
 elseif strcmp(p.Results.analysis_type, 'average')
-    warning('Ignoring the last two parameters as "average" is set')
+    warning('Archive:Frontend:ClockPhase:setting','Ignoring the last two parameters as "average" is set')
     leading = mean(leading, 1, 'omitnan');
     excited = mean(excited, 1, 'omitnan');
     following = mean(following, 1, 'omitnan');

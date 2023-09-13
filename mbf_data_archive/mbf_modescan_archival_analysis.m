@@ -23,7 +23,7 @@ function [data_magnitude, data_phase, times, experimental_setup] = ...
 % Returns:
 %         data_magnitude (numeric matrix):
 %         data_phase (numeric matrix):
-%         times (numeric vector): Datenums of the datasets.
+%         times (numeric vector): Datetimes of the datasets.
 %         experimental_setup (structure): The setup parameters for the
 %                                         analysis.
 %
@@ -44,7 +44,7 @@ p.PartialMatching = false;
 parse(p,data_requested, varargin{:});
 
 for nd = length(data_requested):-1:1
-    times(nd) = datenum(data_requested{nd}.time);
+    times(nd) = datetime(data_requested{nd}.time);
     [data_magnitude(:, nd), data_phase(:, nd)] = mbf_modescan_analysis(data_requested{nd});
     if strcmp(p.Results.analysis_type, 'parameter_sweep')
         param(nd) = data_requested{nd}.(p.Results.sweep_parameter);
@@ -67,7 +67,7 @@ if strcmp(p.Results.analysis_type, 'parameter_sweep')
         data_phase', param, p.Results.parameter_step);
 
 elseif strcmp(p.Results.analysis_type, 'average')
-    warning('Ignoring the last two parameters as "average" is set')
+    warning('Archive:Modescan:setting','Ignoring the last two parameters as "average" is set')
     data_magnitude = mean(data_magnitude, 1, 'omitnan');
     data_phase = mean(data_phase, 1, 'omitnan');
 end %if
