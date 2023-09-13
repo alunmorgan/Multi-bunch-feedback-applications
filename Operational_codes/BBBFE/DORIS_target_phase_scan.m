@@ -1,4 +1,4 @@
-function DORIS_target_phase_scan(single_bunch_location)
+function data = DORIS_target_phase_scan(single_bunch_location)
 % Scans the phase of the DORIS unit upstream of the MBF frontend and
 % records the strength of the tune signal.
 % Restores the original value after the scan.
