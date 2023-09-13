@@ -1,9 +1,9 @@
-function mbf_spectra_archival_plotting(requested_data, bunch_data, tune_data, times, experimental_setup)
+function mbf_spectra_archival_plotting(requested_data, spec_data, times, experimental_setup)
 % Plots the data processed by mbf_growdamp_archival_analysis.
 % Args:
-%      data_magnitude (numeric matrix): 
-%      data_phase (numeric matrix): 
-%      times (numeric vector): Datenums of the datasets.
+%      data_magnitude (numeric matrix):
+%      data_phase (numeric matrix):
+%      times (numeric vector): Datetimes of the datasets.
 %      experimental_setup (structure): The setup parameters for the
 %                                      analysis.
 %      plot_error_graphs (anything): if present the code will plot the results of the fit errors.
@@ -32,57 +32,55 @@ if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     end % if
 end %if
 
-% data.mode_modes = sum(bunch_data.^2,1);
-% data.mode_tune = sum(mode_data(1:end/2,:).^2, 2);
-% 
-bunches = size(bunch_data,2);
-bunch_tunes = size(bunch_data,3);
-% 
-% tune_axis = linspace(0,.5,size(tune_data,2));
-% data.bunch_axis = 1:raw_data.harmonic_number;
-mode_axis = -harmonic_number/2 : (harmonic_number/2 -1) ;
-
-ax1 = axes('OuterPosition', [0.12 0.5 0.95 0.5]);
+ax1 = axes('OuterPosition', [0.12 0.7 0.95 0.3]);
 hold on
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
-    plot(mode_axis, tune_data)
+    scale_length = size(spec_data.bunch_tune_scale,2);
+    for nfd = 1:size(spec_data.bunch_tune_scale,1)
+        plot_data_tune = squeeze(mean(spec_data.bunch_f_data(nfd,:,:),2));
+        plot(spec_data.bunch_tune_scale(nfd,scale_length/2+1:end), plot_data_tune(scale_length/2+1:end))
+    end %for
     legend(graph_labels)
 else
-    populate_archive_graph(tune_data, years_input, times, x_plt_axis)
+    populate_archive_graph(spec_data.tune_data, years_input, times, x_plt_axis)
 end %if
 title(graph_title)
-xlabel('Mode?')
+xlabel('Tune')
 ylabel('Magnitude')
 legend show
-ymin = min(min(tune_data,[],2));
-if ymin > 0
-    ymin = 0;
-end %if
-ymax = max(max(tune_data, [],2));
-ymax = ymax + ymax /10;
-ylim([ymin ymax]);
 grid on
 hold off
+axis tight
 
-if bunch_tunes > 1
-ax2 =axes('OuterPosition', [0.12 0 0.95 0.5]);
+ax2 = axes('OuterPosition', [0.12 0.4 0.95 0.3]);
 hold on
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
-    [X,Y] = meshgrid(1:bunches,1:bunch_tunes);
-    contour(X,Y, squeeze(bunch_data(1,:,:))) %ONLY FOR FIRST DATASET NEED A BETTER SOLUTION
+    for nfd = 1:size(spec_data.bunch_f_scale,1)
+        plot_data_f = squeeze(mean(spec_data.bunch_f_data(nfd,:,:),2));
+        plot(spec_data.bunch_f_scale(nfd,scale_length/2+1:end) * 1E-3, plot_data_f(scale_length/2+1:end))
+    end %for
     legend(graph_labels)
+
 else
-    populate_archive_graph(bunch_data, years_input, times, x_plt_axis)
+    populate_archive_graph(spec_data.tune_data, years_input, times, x_plt_axis)
 end %if
-title(graph_title)
-xlabel('Mode')
-ylabel('Phase')
-ymin = min(min(data_phase,[],2));
-ymax = max(max(data_phase,[],2));
-ymax = ymax + ymax /10;
-ylim([ymin ymax]);
+xlabel('Frequency (kHz)')
+ylabel('Magnitude (Power)')
+legend show
 grid on
 hold off
+axis tight
 
-linkaxes([ax1,ax2],'x')
+ax3 =axes('OuterPosition', [0.12 0 0.95 0.4]);
+bunches = size(spec_data.bunch_f_data,2);
+if strcmp(experimental_setup.anal_type, 'parameter_sweep')
+    plot_data_2d = squeeze(sum(spec_data.bunch_f_data(1,:,:),1));
+    imagesc(squeeze(spec_data.bunch_f_scale(1,scale_length/2+1:end)) * 1E-3, 1:bunches, plot_data_2d(:,scale_length/2+1:end)) % TEMP FIXME
+else
+    populate_archive_graph(spec_data.bunch_data, years_input, times, x_plt_axis)
 end %if
+xlabel('Frequency (kHz)')
+ylabel('Bunch')
+axis tight
+
+linkaxes([ax2, ax3],'x')

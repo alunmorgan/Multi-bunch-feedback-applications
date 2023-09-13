@@ -33,6 +33,8 @@ function conditioned_data = mbf_spectra_archival_retrieval(ax, date_range, varar
 %
 % Example: mbf_modescan_archival_retrieval('x', [datetime(2023, 1, 1), datetime("now")])
 
+harmonicNumber = 936;
+
 p = inputParser;
 p.StructExpand = false;
 p.CaseSensitive = false;
@@ -42,6 +44,7 @@ validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
 
 default_sweep_parameter = 'current';
 default_parameter_step_size = 0.1;
+defaultCurrentRange = [2 150];
 
 addRequired(p, 'ax', @(x) any(validatestring(x, axis_string)));
 addRequired(p, 'date_range');
@@ -50,6 +53,7 @@ addParameter(p, 'metadata_only', 'no', @(x) any(validatestring(x, boolean_string
 addParameter(p, 'analysis_type', 'collate', @ischar)
 addParameter(p, 'sweep_parameter', default_sweep_parameter, @ischar);
 addParameter(p, 'parameter_step', default_parameter_step_size, validScalarPosNum);
+addParameter(p,'current_range',defaultCurrentRange);
 
 parse(p, ax, date_range, varargin{:});
 
@@ -60,27 +64,27 @@ elseif  strcmpi(ax, 'y')
 elseif strcmpi(ax, 's')
     filter_name = 'Spectrum_s_axis';
 else
-    error('mbf_archival_dataset_retrieval: No valid axis given (should be x, y or s)')
+    error('MBF:Archive:Spectra:InputError', 'mbf_archival_dataset_retrieval: No valid axis given (should be x, y or s)')
 end %if
 requested_data = mbf_archival_dataset_retrieval(filter_name, date_range,...
     'bypass_index' ,p.Results.bypass_index, 'metadata_only', p.Results.metadata_only);
 
-conditioned_data = mbf_archival_conditional_filtering(requested_data);
+conditioned_data = mbf_archival_conditional_filtering(requested_data, 'current_range', p.Results.current_range);
 
 if isempty(conditioned_data)
     disp('No data meeting the requirements')
 else
     if strcmp(p.Results.analysis_type, 'collate')
-        [bunch_data, tune_data,  times, setup] = ...
+        [spec_data,  times, setup] = ...
             mbf_spectra_archival_analysis(conditioned_data, 'analysis_type','collate');
     elseif strcmp(p.Results.analysis_type, 'sweep')
-        [bunch_data, tune_data,  times, setup] = ...
+        [spec_data,  times, setup] = ...
             mbf_spectra_archival_analysis(conditioned_data, 'analysis_type','parameter_sweep', ...
             'sweep_parameter',p.Results.sweep_parameter,...
             'parameter_step', p.Results.parameter_step);
     else
-        error('Please select collate or sweep as the analysis type');
+        error('MBF:Archive:Spectra:InputError', 'Please select collate or sweep as the analysis type');
     end %if
     setup.axis = ax;
-    mbf_spectra_archival_plotting(conditioned_data, bunch_data, tune_data, times, setup);
+    mbf_spectra_archival_plotting(conditioned_data, spec_data, times, setup);
 end %if
