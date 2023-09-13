@@ -69,13 +69,13 @@ elseif  strcmpi(ax, 'y')
 elseif strcmpi(ax, 's')
     filter_name = 'Growdamp_s_axis';
 else
-    error('mbf_archival_dataset_retrieval: No valid axis given (should be x, y or s)')
+    error('MBF:Archive:InputError', 'mbf_archival_dataset_retrieval: No valid axis given (should be x, y or s)')
 end %if
 requested_data = mbf_archival_dataset_retrieval(filter_name, date_range,...
     'bypass_index' ,p.Results.bypass_index, 'metadata_only', p.Results.metadata_only);
 
 % Only keeping datasets that satify the requested machine conditions.
-conditioned_data = mbf_archival_conditional_filtering(requested_data,'current_range', p.Results.current_range);
+conditioned_data = mbf_archival_conditional_filtering(requested_data, 'current_range', p.Results.current_range);
 if isempty(conditioned_data)
     disp('No data meeting the requirements')
 else
@@ -94,7 +94,7 @@ else
             'advanced_fitting', p.Results.advanced_fitting,...
             'debug', p.Results.debug);
     else
-        error('Please select collate or sweep as the analysis type');
+        error('MBF:Archive:InputError', 'Please select collate or sweep as the analysis type');
     end %if
     setup.axis = ax;
     mbf_growdamp_archival_plotting(conditioned_data, dr_passive, dr_active, error_passive, error_active, times, setup);
