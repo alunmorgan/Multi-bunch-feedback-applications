@@ -8,7 +8,7 @@ function [out_dr, out_param] = mbf_analysis_reorganise_for_parameter_sweep(dr, p
 
 % ensure the ordering
 [param, I] = sort(param);
-dr = dr(I,:);
+dr = dr(I, :, :);
 acc = 1;
 section_indicies = NaN(length(param),1);
 for ns = param(1):parameter_step_size:param(end)
@@ -22,6 +22,6 @@ end %for
 
 % Take the mean of all the data sets within one parameter step.
 for ess = acc -1:-1:1
-    out_param(ess) = (median(param(section_indicies==ess)));
-    out_dr(ess,:) = nonanmean(dr(section_indicies==ess,:),1);
+    out_param(ess) = round((median(param(section_indicies==ess)))./parameter_step_size) .* parameter_step_size;
+    out_dr(ess,:, :) = nonanmean(dr(section_indicies==ess,:, :),1);
 end %for
