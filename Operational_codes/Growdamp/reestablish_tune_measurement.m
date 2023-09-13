@@ -1,34 +1,62 @@
 function reestablish_tune_measurement(mbf_axis)
+% sets up the tune measurement by setting bank1 and sequencer state one as
+% required.
+%   Args:
+%       mbf_axis(str): 'x','y', or 's'
+% Example: reestablish_tune_measurement('x')
+
+[~, harmonic_number, pv_names, ~] = mbf_system_config;
 
 if strcmpi(mbf_axis,'x')
     sweep_start = 80.139;
-sweep_end = 80.239;
-tune_gain = -54;
-tune_dwell = 100;
+    sweep_end = 80.239;
+    tune_gain = -54;
+    tune_dwell = 100;
+    tune_count = 4096;
+    base = pv_names.hardware_names.x;
 elseif strcmpi(mbf_axis, 'y')
-sweep_start = 80.227;
-sweep_end = 80.327;
-tune_gain = -54;
-tune_dwell = 100;
-end %if
+    sweep_start = 80.227;
+    sweep_end = 80.327;
+    tune_gain = -54;
+    tune_dwell = 100;
+    tune_count = 4096;
+    base = pv_names.hardware_names.y;
+elseif strcmpi(mbf_axis, 's')
     sweep_start = 80.00320;
-sweep_end = 80.00520;
-tune_gain = -18;
-tune_dwell = 100;
+    sweep_end = 80.00520;
+    tune_gain = -18;
+    tune_dwell = 100;
+    tune_count = 4096;
+    base = pv_names.hardware_names.s;
+else
+    error('MBF:InputError','Please set required axis to x, y, or s')
+end %if
 
-lcaPut('SR23C-DI-TMBF-01:X:SEQ:1:START_FREQ_S',sweep_start);
-lcaPut('SR23C-DI-TMBF-01:X:SEQ:1:END_FREQ_S',sweep_end);
-lcaPut('SR23C-DI-SR23C-DI-TMBF-01:X:SEQ:1:ENABLE_S','On');
-lcaPut('TMBF-01:X:SEQ:1:GAIN_DB_S',tune_gain);
-lcaPut('SR23C-DI-TMBF-01:X:SEQ:1:BANK_S',{'Bank 1'});
-lcaPut('SR23C-DI-TMBF-01:X:SEQ:1:TUNE_PLL_S',{'Ignore'});
-lcaPut('SR23C-DI-TMBF-01:X:SEQ:1:COUNT_S',4096);
-lcaPut('SR23C-DI-TMBF-01:X:SEQ:1:DWELL_S',tune_dwell);
+% setting up sequencer state 1 to be the tune sweep.
+lcaPut([base, pv_names.tails.Super_sequencer.count], 1);
+lcaPut([base, pv_names.tails.Sequencer.start_state] ,1);
 
-lcaPut('SR23C-DI-TMBF-01:X:SEQ:1:STATE_HOLDOFF_S',0);
-lcaPut('SR23C-DI-TMBF-01:X:SEQ:1:HOLDOFF_S',0);
-lcaPut('SR23C-DI-TMBF-01:X:SEQ:1:BLANK_S',{'Blanking'});
-lcaPut('SR23C-DI-TMBF-01:X:SEQ:1:ENWIN_S',{'Windowed'});
-lcaPut('SR23C-SR23C-DI-TMBF-01:X:SEQ:PC_S',1);
-lcaPut('DI-TMBF-01:X:SEQ:1:CAPTURE_S',{'Capture'});
-lcaPut('SR23C-DI-TMBF-01:X:SEQ:SUPER:COUNT_S',1);
+tune_sequencer = pv_names.tails.Sequencer.seq1;
+
+lcaPut([base, tune_sequencer.start_frequency], sweep_start);
+lcaPut([base, tune_sequencer.end_frequency], sweep_end);
+lcaPut([base, tune_sequencer.gaindb], tune_gain);
+lcaPut([base, tune_sequencer.count], tune_count);
+lcaPut([base, tune_sequencer.dwell], tune_dwell);
+
+lcaPut([base, tune_sequencer.bank_select], {'Bank 1'});
+lcaPut([base, tune_sequencer.tune_pll_following], {'Ignore'});
+lcaPut([base, tune_sequencer.enable], 'On');
+lcaPut([base, tune_sequencer.holdoff_state], 0);
+lcaPut([base, tune_sequencer.holdoff], 0);
+lcaPut([base, tune_sequencer.blanking_state], {'Blanking'});
+lcaPut([base, tune_sequencer.windowing_state], {'Windowed'});
+lcaPut([base, tune_sequencer.capture_state], {'Capture'});
+
+tune_bank = pv_names.tails.Bunch_bank.bank1;
+% Setting bank 1 to use both the FIR and the sequencer but nothing else.
+lcaPut([base, tune_bank.FIR.enablewf], ones(harmonic_number,1));
+lcaPut([base, tune_bank.NCO1.enablewf], zeros(harmonic_number,1));
+lcaPut([base, tune_bank.NCO2.enablewf], zeros(harmonic_number,1));
+lcaPut([base, tune_bank.SEQ.enablewf], ones(harmonic_number,1));
+lcaPut([base, pv_names.tails.Bunch_bank.bank1.PLL.enablewf], zeros(harmonic_number,1));
