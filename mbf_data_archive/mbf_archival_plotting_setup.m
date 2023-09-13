@@ -2,7 +2,7 @@ function mbf_archival_plotting_setup(requested_data, times, experimental_setup)
 % Plots the data processed by mbf_growdamp_archival_analysis.
 % Args:
 %      requested_data(structure): data and metatdata.
-%      times (numeric vector): Datenums of the datasets.
+%      times (numeric vector): Datetimes of the datasets.
 %      experimental_setup (structure): The setup parameters for the
 %                                      analysis.
 %
