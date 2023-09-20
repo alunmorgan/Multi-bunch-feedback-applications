@@ -1,4 +1,4 @@
-function BBBFE_clock_phase_scan_plotting(data, mbf_ax)
+function BBBFE_clock_phase_scan_plotting( mbf_ax, data)
 
 % plotting
 figure;

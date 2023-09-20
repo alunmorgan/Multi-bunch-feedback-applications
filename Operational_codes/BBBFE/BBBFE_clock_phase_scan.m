@@ -69,4 +69,4 @@ BBBFE_detector_restore(mbf_ax)
 %% saving the data to a file
 save_to_archive(root_string, data)
 %% plotting
-BBBFE_clock_phase_scan_plotting(data, mbf_ax)
+BBBFE_clock_phase_scan_plotting( mbf_ax, data)
