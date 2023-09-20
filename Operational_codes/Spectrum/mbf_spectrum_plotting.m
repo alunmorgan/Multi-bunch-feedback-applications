@@ -5,70 +5,52 @@ function mbf_spectrum_plotting(data, meta_data)
 %
 % Example: mbf_spectrum_plotting(data)
 
-if max(max(data.bunch_data)) ==0
+if max(max(data.bunch_f_data)) ==0
     disp('No data to plot')
     return
 end %if
 
+signal_per_bunch = sum(data.bunch_f_data,2);
+frequency_all_bunches = sum(data.bunch_f_data,1);
 graph_handles(1) = figure;
-ax1 = subplot('position',[.02 .35 .7 .6]);
-imagesc('Xdata', data.bunch_axis,...
-    'Ydata', data.tune_axis,...
-    'Cdata', log10(data.bunch_data),...
-     [-3 0]+log10(max(max(data.bunch_data))));
+graph_handles(1).Position(3:4) = [800, 600];
+ax1 = subplot('position',[.06 .35 .7 .6]);
+imagesc('Xdata', data.bunch_f_scale * 1E-3,...
+    'Ydata', 1:length(data.bunch_f_bunches),...
+    'Cdata', data.bunch_f_data,...
+     [-3 0]+max(max(data.bunch_f_data)));
 set(ax1,'YAxisLocation','right');
 set(ax1,'YDir','normal')
 set(ax1, 'XTick', [])
 set(ax1, 'YTick', [])
+axis tight
 title(meta_data.axis)
 
-% Frequencies graph
-ax2 = subplot('position',[.72 .35 .18 .6]);
-plot(data.bunch_tune ,data.tune_axis);
+% bunches graph
+ax2 = subplot('position',[.76 .35 .12 .6]);
+plot(signal_per_bunch, 1:length(data.bunch_f_bunches))
 set(ax2,'YAxisLocation','right');
 set(ax2,'XAxisLocation','top')
 set(ax2, 'XTick', [])
-ylabel('Fractional tune')
+ylabel('Bunch number')
+grid on
 axis tight
 
-% bunches graph
-[~,pi] = max(data.mode_tune);
-ax3 = subplot('position',[.02 .11 .7 .24]);
-plot(data.bunch_data(pi,:))
-xlabel(sprintf('Bunches at peak tune %3.3f',data.tune_axis(pi)))
-set(ax3, 'YTick', [])
-axis tight
+% Frequency graph
+ax3 = subplot('position',[.06 .15 .7 .20]);
+plot(data.bunch_f_scale*1E-3 ,frequency_all_bunches);
+xlabel('Frequency (KHz)')
+grid on
+xlim([min(data.bunch_f_scale*1E-3) max(data.bunch_f_scale*1E-3)])
+ylim([0 max(frequency_all_bunches)])
 
-linkaxes([ax1, ax3], 'x')
-linkaxes([ax1, ax2], 'y')
+% Tune graph
+ax4 = subplot('position',[.06 .08 .7 .001]);
+plot(data.bunch_tune_scale ,frequency_all_bunches);
+xlabel('Tune')
 
-graph_handles(2) = figure;
-ax4 = subplot('position',[.02 .35 .7 .6]);
-imagesc(data.mode_axis,...
-    data.tune_axis,...
-    log10(data.tune_data(1:end/2,:)),...
-    [-3 0]+log10(max(max(data.tune_data(1:end/2,:)))));
-set(ax4,'YAxisLocation','right');
-set(ax4,'YDir','normal')
-set(ax4, 'XTick', [])
-set(ax4, 'YTick', [])
+ linkaxes([ax1, ax3], 'x')
+ linkaxes([ax1, ax2], 'y')
 
-ax5 = subplot('position',[.72 .35 .18 .6]);
-plot(data.mode_tune,data.tune_axis);
-set(gca,'YAxisLocation','right');
-set(gca,'XAxisLocation','top')
-set(ax5, 'XTick', [])
-ylabel('Fractional tune')
-axis tight
-
-ax6 = subplot('position',[.02 .11 .7 .24]);
-plot(data.mode_axis.',data.tune_data(pi,:))
-xlabel(sprintf('Modes at peak tune %3.3f',data.tune_axis(pi)))
-set(ax6, 'YTick', [])
-axis tight
-
-linkaxes([ax4, ax6], 'x')
-linkaxes([ax4, ax5], 'y')
-
-[root_string, ~, ~, ~] = mbf_system_config;
-archive_graphs(root_string, meta_data, graph_handles)
+% [root_string, ~, ~, ~] = mbf_system_config;
+% archive_graphs(root_string, meta_data, graph_handles)
