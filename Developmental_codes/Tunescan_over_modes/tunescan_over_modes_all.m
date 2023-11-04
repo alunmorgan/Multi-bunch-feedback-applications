@@ -36,7 +36,7 @@ parse(p, mbf_axis, varargin{:});
 
 % Programatiaclly press the tune only button on each system
 setup_operational_mode(mbf_axis, "TuneOnly")
- tunes = get_all_tunes('xys');
+ tunes = get_all_tunes;
  
 exp_setup.n_captures = p.Results.n_captures;
 exp_setup.start_mode = p.Results.start_mode;

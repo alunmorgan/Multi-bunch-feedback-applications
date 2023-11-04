@@ -13,7 +13,7 @@ fir_gain_y = lcaGet('SR23C-DI-TMBF-01:Y:FIR:GAIN_S');
 fir_gain_s = lcaGet('SR23C-DI-LMBF-01:IQ:FIR:GAIN_S');
 
 % Get the tunes
-tunes = get_all_tunes('xys');
+tunes = get_all_tunes;
 
 try
     setup_operational_mode('x', "Feedback")
