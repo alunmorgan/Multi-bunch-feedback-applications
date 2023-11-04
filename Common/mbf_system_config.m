@@ -229,4 +229,7 @@ pv_names.tails.tune.peak.left_area = ':PEAK:LEFT:AREA';
 pv_names.tails.tune.peak.right_area = ':PEAK:RIGHT:AREA';
 pv_names.tails.tune.peak.centre_area = ':PEAK:CENTRE:AREA';
 pv_names.tails.tune.peak.sync_tune = ':PEAK:SYNCTUNE';
+pv_names.tails.tune.centre = ':TUNE:CENTRE:TUNE';
+pv_names.tails.tune.left = ':TUNE:LEFT:TUNE';
+pv_names.tails.tune.right = ':TUNE:RIGHT:TUNE';
 
