@@ -55,8 +55,13 @@ lcaPut([base, tune_sequencer.capture_state], {'Capture'});
 
 tune_bank = pv_names.tails.Bunch_bank.bank1;
 % Setting bank 1 to use both the FIR and the sequencer but nothing else.
-lcaPut([base, tune_bank.FIR.enablewf], ones(harmonic_number,1));
-lcaPut([base, tune_bank.NCO1.enablewf], zeros(harmonic_number,1));
-lcaPut([base, tune_bank.NCO2.enablewf], zeros(harmonic_number,1));
-lcaPut([base, tune_bank.SEQ.enablewf], ones(harmonic_number,1));
-lcaPut([base, pv_names.tails.Bunch_bank.bank1.PLL.enablewf], zeros(harmonic_number,1));
+lcaPut([base, tune_bank.FIR.enablewf], ones(1,harmonic_number));
+lcaPut([base, tune_bank.NCO1.enablewf], zeros(1, harmonic_number));
+lcaPut([base, tune_bank.NCO2.enablewf], zeros(1, harmonic_number));
+lcaPut([base, tune_bank.SEQ.enablewf], ones(1, harmonic_number));
+lcaPut([base, pv_names.tails.Bunch_bank.bank1.PLL.enablewf], zeros(1, harmonic_number));
+
+% triggering
+lcaPut([base, pv_names.tails.triggers.mode], 'Rearm');
+lcaPut([base, pv_names.tails.triggers.EXT.enable_status], 'Enable');
+lcaPut([base, pv_names.tails.triggers.SEQ.arm], 1);
