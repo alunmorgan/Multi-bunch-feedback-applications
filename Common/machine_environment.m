@@ -20,10 +20,11 @@ exp_data = p.Results.exp_data;
 % timestamp
 exp_data.time = datevec(datetime("now"));
 
+lcaSetSeverityWarnLevel(4)
 %% General machine parameters
 % Tunes
 if ~isstruct(p.Results.tunes)
-    exp_data.tunes = get_all_tunes('xys');
+    exp_data.tunes = get_all_tunes;
 end %if
 % Ring mode
 exp_data.ringmode = lcaGet('SR-CS-RING-01:MODE');
@@ -72,7 +73,8 @@ exp_data.wiggler_field_I12 = lcaGet('SR12I-CS-SCMPW-01:B');
 a = lcaGet('SR01C-DI-DCAM-04:PROXY:DATA');
 alims = lcaGet({'SR01C-DI-DCAM-04:WIDTH';'SR01C-DI-DCAM-04:HEIGHT'});
 a = a(1:alims(1) * alims(2));
-a = reshape(a,alims(1),[]);a(a<0) = (a(a<0)) + 256;
+a = reshape(a,alims(1),[]);
+a(a<0) = (a(a<0)) + 256;
 exp_data.pinhole = a;
 
 % Feedback status
@@ -176,3 +178,29 @@ exp_data.id.gap24 = lcaGet('SR24I-MO-SERVC-01:CURRGAPD');
 exp_data.orbit_x = lcaGet('SR-DI-EBPM-01:SA:X');
 exp_data.orbit_y = lcaGet('SR-DI-EBPM-01:SA:Y');
 
+mbf_systems = {'SR23C-DI-TMBF-01:X', 'SR23C-DI-TMBF-01:Y','SR23C-DI-LMBF-01:IQ'};
+mbf_axes = {'x', 'y', 's'};
+for sjkh = 1:length(mbf_systems)
+exp_data.mbf.(mbf_axes{sjkh}).fll.target_bunches = lcaGet([mbf_systems{sjkh}, ':PLL:DET:BUNCHES_S']);
+exp_data.mbf.(mbf_axes{sjkh}).fll.nco.gain = lcaGet([mbf_systems{sjkh}, ':PLL:NCO:GAIN_DB_S']);
+exp_data.mbf.(mbf_axes{sjkh}).fll.nco.freq = lcaGet([mbf_systems{sjkh}, ':PLL:NCO:FREQ_S']);
+exp_data.mbf.(mbf_axes{sjkh}).fll.nco.enable = lcaGet([mbf_systems{sjkh}, ':PLL:NCO:ENABLE_S']);
+exp_data.mbf.(mbf_axes{sjkh}).fll.integral = lcaGet([mbf_systems{sjkh}, ':PLL:CTRL:KI_S']);
+exp_data.mbf.(mbf_axes{sjkh}).fll.proportional = lcaGet([mbf_systems{sjkh}, ':PLL:CTRL:KP_S']);
+exp_data.mbf.(mbf_axes{sjkh}).fll.maglim = lcaGet([mbf_systems{sjkh}, ':PLL:CTRL:MIN_MAG_S']);
+exp_data.mbf.(mbf_axes{sjkh}).fll.offsetlim = lcaGet([mbf_systems{sjkh}, ':PLL:CTRL:MAX_OFFSET_S']);
+exp_data.mbf.(mbf_axes{sjkh}).fll.target_phase = lcaGet([mbf_systems{sjkh}, ':PLL:CTRL:TARGET_S']);
+exp_data.mbf.(mbf_axes{sjkh}).fll.detector.source = lcaGet([mbf_systems{sjkh}, ':PLL:DET:SELECT_S']);
+exp_data.mbf.(mbf_axes{sjkh}).fll.detector.gain = lcaGet([mbf_systems{sjkh}, ':PLL:DET:SCALING_S']);
+exp_data.mbf.(mbf_axes{sjkh}).fll.detector.dwell = lcaGet([mbf_systems{sjkh}, ':PLL:DET:DWELL_S']);
+exp_data.mbf.(mbf_axes{sjkh}).fll.detector.blanking = lcaGet([mbf_systems{sjkh}, ':PLL:DET:BLANKING_S']);
+exp_data.mbf.(mbf_axes{sjkh}).fll.status.state = lcaGet([mbf_systems{sjkh}, ':PLL:CTRL:STATUS']);
+exp_data.mbf.(mbf_axes{sjkh}).fll.status.stopped_by_user = lcaGet([mbf_systems{sjkh}, ':PLL:CTRL:STOP:STOP']);
+exp_data.mbf.(mbf_axes{sjkh}).fll.status.detector_overflow = lcaGet([mbf_systems{sjkh}, ':PLL:STA:DET_OVF']);
+exp_data.mbf.(mbf_axes{sjkh}).fll.status.magnitude_error = lcaGet([mbf_systems{sjkh}, ':PLL:STA:MAG_ERROR']);
+exp_data.mbf.(mbf_axes{sjkh}).fll.status.offset_overflow = lcaGet([mbf_systems{sjkh}, ':PLL:STA:OFFSET_OVF']);
+exp_data.mbf.(mbf_axes{sjkh}).fll.readbacks.magnitude = lcaGet([mbf_systems{sjkh}, ':PLL:FILT:MAG']);
+exp_data.mbf.(mbf_axes{sjkh}).fll.readbacks.magnitudedb = lcaGet([mbf_systems{sjkh}, ':PLL:FILT:MAG_DB']);
+exp_data.mbf.(mbf_axes{sjkh}).fll.readbacks.phase = lcaGet([mbf_systems{sjkh}, ':PLL:FILT:PHASE']);
+end %for
+lcaSetSeverityWarnLevel(3)
