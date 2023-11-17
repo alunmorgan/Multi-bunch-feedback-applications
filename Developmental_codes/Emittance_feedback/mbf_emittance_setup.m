@@ -26,7 +26,7 @@ default_fll_monitor_bunches=400;
 default_guardbunches = 10;
 default_harmonic = 10;
 % Grab frequencies of left sideband from swept tune fitter
-tunes = get_all_tunes(mbf_axis);
+tunes = get_all_tunes;
 leftSB = tunes.([mbf_axis, '_tune']).lower_sideband;
 default_excitation_frequency = leftSB;
 
