@@ -1,4 +1,4 @@
-function varargout = fll_PI_investigation(mbf_axis, p_vals, i_vals, varargin)
+function varargout = fll_PI_scan(mbf_axis, p_vals, i_vals, varargin)
 
 
 default_fll_monitor_bunches=400;
@@ -52,6 +52,7 @@ for ser = 1:n_p
         lcaPut([pv_head, pll_tails.p], p_vals(ser))
         mbf_fll_start(mbf_axis, 'fllbunches',p.Results.fll_monitor_bunches,...
             'guardbunches',p.Results.guardbunches)
+        for 
         for ewn = 1:n_repeats
             pause(1)
             data = lcaGet({[pv_head,pll_tails.nco.offset_waveform];...

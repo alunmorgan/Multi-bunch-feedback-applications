@@ -1,4 +1,4 @@
-function fll_phase_scan = mbf_pll_peakfind(mbf_axis, varargin)
+function fll_phase_scan = mbf_pll_phase_scan(mbf_axis, varargin)
 %
 %       Args:
 %           mbf_axis(str): 'x' or 'y'
