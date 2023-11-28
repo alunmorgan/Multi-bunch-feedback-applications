@@ -233,3 +233,14 @@ pv_names.tails.tune.centre = ':TUNE:CENTRE:TUNE';
 pv_names.tails.tune.left = ':TUNE:LEFT:TUNE';
 pv_names.tails.tune.right = ':TUNE:RIGHT:TUNE';
 
+%PLL settings
+pv_names.tails.pll.detector.dwell = ':PLL:DET:DWELL_S';
+pv_names.tails.pll.nco.offset_waveform = ':PLL:NCO:OFFSETWF';
+pv_names.tails.pll.nco.mean_offset = ':PLL:NCO:MEAN_OFFSET';
+pv_names.tails.pll.nco.std_offset = ':PLL:NCO:STD_OFFSET';
+pv_names.tails.pll.nco.offset = ':PLL:NCO:OFFSET';
+pv_names.tails.pll.nco.tune = ':PLL:NCO:TUNE';
+pv_names.tails.pll.p = ':PLL:CTRL:KP_S';
+pv_names.tails.pll.i = ':PLL:CTRL:KI_S';
+
+
