@@ -235,6 +235,9 @@ pv_names.tails.tune.right = ':TUNE:RIGHT:TUNE';
 
 %PLL settings
 pv_names.tails.pll.detector.dwell = ':PLL:DET:DWELL_S';
+pv_names.tails.pll.detector.target_bunches = ':PLL:DET:BUNCHES_S';
+pv_names.tails.pll.nco.gain = ':PLL:NCO:GAIN_DB_S';
+pv_names.tails.pll.nco.frequency = ':PLL:NCO:FREQ';
 pv_names.tails.pll.nco.offset_waveform = ':PLL:NCO:OFFSETWF';
 pv_names.tails.pll.nco.mean_offset = ':PLL:NCO:MEAN_OFFSET';
 pv_names.tails.pll.nco.std_offset = ':PLL:NCO:STD_OFFSET';
@@ -242,5 +245,11 @@ pv_names.tails.pll.nco.offset = ':PLL:NCO:OFFSET';
 pv_names.tails.pll.nco.tune = ':PLL:NCO:TUNE';
 pv_names.tails.pll.p = ':PLL:CTRL:KP_S';
 pv_names.tails.pll.i = ':PLL:CTRL:KI_S';
+pv_names.tails.pll.target_phase = ':PLL:CTRL:TARGET_S';
+pv_names.tails.pll.status = ':PLL:CTRL:STATUS';
+pv_names.tails.pll.readback.magnitude = ':PLL:FILT:MAG';
+pv_names.tails.pll.readback.phase = ':PLL:FILT:PHASE';
+pv_names.tails.pll.readback.i = ':PLL:FILT:I';
+pv_names.tails.pll.readback.q = ':PLL:FILT:Q';
 
 
