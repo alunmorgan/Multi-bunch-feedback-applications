@@ -1,4 +1,4 @@
-function fll_initialisation(name, varargin)
+function fll_initialisation(mbf_axis, varargin)
 % This is to start the frequency locked loop (fll) [also called pll] from
 % scratch. Once the initial lock is found then the settings are changed to
 % improve tracking. if signal is lost this process can be run again.
@@ -30,7 +30,10 @@ addParameter(p, 'fll_nco_gain', default_fll_nco_gain, validScalarNum);
 addParameter(p, 'fll_target_phase', default_fll_target_phase, validScalarNum);
 addParameter(p, 'tune_override', default_tune_override, validScalarNum);
 
-parse(p,name,varargin{:});
+parse(p,mbf_axis,varargin{:});
+
+[~, ~, pv_names, ~] = mbf_system_config;
+name = pv_names.hardware_names.(mbf_axis);
 
 %% Checking tune
 % starting frequency is taken from swept tune measurement. Can also

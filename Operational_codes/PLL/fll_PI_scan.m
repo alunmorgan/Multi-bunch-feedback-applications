@@ -52,7 +52,6 @@ for ser = 1:n_p
         lcaPut([pv_head, pll_tails.p], p_vals(ser))
         mbf_fll_start(mbf_axis, 'fllbunches',p.Results.fll_monitor_bunches,...
             'guardbunches',p.Results.guardbunches)
-        for 
         for ewn = 1:n_repeats
             pause(1)
             data = lcaGet({[pv_head,pll_tails.nco.offset_waveform];...

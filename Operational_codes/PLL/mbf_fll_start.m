@@ -1,6 +1,6 @@
 function mbf_fll_start(mbf_axis, varargin)
 % sets up the frequency locked loop of the MBF system.
-% but does not start it.
+% and starts.
 %
 %       mbf_axis (str): x, y, or s. Selects which MBF system to operate on.
 %       pllbunches (float or list of floats): Selects which bunches to have the
@@ -14,7 +14,7 @@ p = inputParser;
 p.StructExpand = false;
 p.CaseSensitive = false;
 addRequired(p, 'mbf_axis');
-addParameter(p, 'fllbunches', NaN);
+addParameter(p, 'fllbunches', 400);
 addParameter(p, 'guardbunches', 2);
 addParameter(p, 'fll_nco_gain', -30);
 
@@ -29,10 +29,6 @@ else
     error('Invalid axis selected. (expected x or y)')
 end
 
-if ~isnan(p.Results.fllbunches)
 mbf_fll_bank_setup(pv_names.hardware_names.(mbf_axis), 'fllbunches', p.Results.fllbunches, 'guardbunches', p.Results.guardbunches)
-else
-    mbf_fll_bank_setup(pv_names.hardware_names.(mbf_axis))
-end
 mbf_fll_detector_setup(pv_names.hardware_names.(mbf_axis))
-fll_initialisation(pv_names.hardware_names.(mbf_axis), 'fll_target_phase', target_phase, 'fll_nco_gain', p.Results.fll_nco_gain)
+fll_initialisation(mbf_axis, 'fll_target_phase', target_phase, 'fll_nco_gain', p.Results.fll_nco_gain)
