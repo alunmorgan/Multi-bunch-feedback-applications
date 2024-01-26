@@ -11,7 +11,7 @@ default_fll_locking_max_offset = 0.003;
 default_fll_tracking_max_offset = 0.02;
 default_fll_nco_gain = -30; % in dB
 default_tune_override = NaN;
-default_fll_target_phase = 180;
+default_fll_target_phase = 160;
 % For LMBF
 %  default_fll_ki =100; %safe also for for low charge, sharp resonance
 %     default_fll_kp = 0;
