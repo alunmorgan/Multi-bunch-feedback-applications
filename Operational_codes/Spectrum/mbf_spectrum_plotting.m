@@ -45,7 +45,7 @@ xlim([min(data.bunch_f_scale*1E-3) max(data.bunch_f_scale*1E-3)])
 ylim([0 max(frequency_all_bunches)])
 
 % Tune graph
-ax4 = subplot('position',[.06 .08 .7 .001]);
+subplot('position',[.06 .08 .7 .001]);
 plot(data.bunch_tune_scale ,frequency_all_bunches);
 xlabel('Tune')
 
