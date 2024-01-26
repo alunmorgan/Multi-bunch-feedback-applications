@@ -13,8 +13,8 @@ for hse = 1:2
     % Generate the base PV name.
     pv_head = pv_names.hardware_names.(mbf_systems{hse});
 
-    lcaPut([pv_head PVt.triggers.MEM.('ADC0').blanking_status], 'Blanking')
-        lcaPut([pv_head PVt.triggers.MEM.('ADC1').blanking_status], 'Blanking')
+    set_variable([pv_head PVt.triggers.MEM.('ADC0').blanking_status], 'Blanking')
+        set_variable([pv_head PVt.triggers.MEM.('ADC1').blanking_status], 'Blanking')
     
     %  set up the memory buffer to capture ADC data.
     mbf_get_then_put([pv_head, PVt.MEM.channel_select], 'ADC0/ADC1')

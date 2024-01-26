@@ -24,5 +24,5 @@ for hse = 1:2
     % Set the trigger to one shot
     mbf_get_then_put([pv_head PVt.triggers.MEM.mode], 'One Shot');
     % Set the triggering to External only
-    lcaPut([pv_head PVt.triggers.MEM.('EXT').enable_status], 'Enable')
+    set_variable([pv_head PVt.triggers.MEM.('EXT').enable_status], 'Enable')
 end %for

@@ -41,8 +41,8 @@ modescan.ax_label = mbf_axis;
 modescan.base_name = ['Modescan_' modescan.ax_label '_axis'];
 
 for hs = 1:p.Results.n_repeats
-    modescan.magnitude{hs} = lcaGet([pv_head, ':TUNE:DMAGNITUDE']);
-    modescan.phase{hs} = lcaGet([pv_head, ':TUNE:DPHASE']);
+    modescan.magnitude{hs} = get_variable([pv_head, ':TUNE:DMAGNITUDE']);
+    modescan.phase{hs} = get_variable([pv_head, ':TUNE:DPHASE']);
 end %for
 
 

@@ -51,8 +51,8 @@ tunescan = mbf_tunescan_over_modes_capture(mbf_axis, tunes, exp_setup);
 % reset the sweep
 %%%%Is this section needed or does the TuneOnly script take care of things?
 configure_tune_sweep(mbf_axis , 0:935, 1, 1, 0, 0, 0)
-lcaPut([pv_head pv_names.tails.triggers.mode],'Rearm')
-lcaPut([pv_head Sequencer.Base Sequencer.reset],1)
+set_variable([pv_head pv_names.tails.triggers.mode],'Rearm')
+set_variable([pv_head Sequencer.Base Sequencer.reset],1)
 %%%%%%%
 
 % Programatiaclly press the tune only button on each system

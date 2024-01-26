@@ -37,11 +37,11 @@ else
     error('BBBFE:axiserror','Please use input axes X, Y or S')
 end %if
 
-original_setting = lcaGet(fe_phase_pv);
+original_setting = get_variable(fe_phase_pv);
 
 % moving to starting point in scan
 for pp = original_setting:-20:-180
-    lcaPut(fe_phase_pv, pp)
+    set_variable(fe_phase_pv, pp)
     pause(.5)
 end %for
 
@@ -51,16 +51,16 @@ data.side1 = NaN(length(data.phase), 1);
 data.main = NaN(length(data.phase), 1);
 data.side2 = NaN(length(data.phase), 1);
 for x = 1:length(data.phase)
-    lcaPut(fe_phase_pv, data.phase(x))
+    set_variable(fe_phase_pv, data.phase(x))
     pause(2)
-    data.side1(x) = max(lcaGet([mbf_pv, pv_names.tails.Detector.det1.power]));
-    data.main(x) = max(lcaGet([mbf_pv, pv_names.tails.Detector.det2.power]));
-    data.side2(x) = max(lcaGet([mbf_pv, pv_names.tails.Detector.det3.power]));
+    data.side1(x) = max(get_variable([mbf_pv, pv_names.tails.Detector.det1.power]));
+    data.main(x) = max(get_variable([mbf_pv, pv_names.tails.Detector.det2.power]));
+    data.side2(x) = max(get_variable([mbf_pv, pv_names.tails.Detector.det3.power]));
 end %for
 
 % move back to the original setting
 for pp = -180:20:original_setting
-    lcaPut(fe_phase_pv, pp)
+    set_variable(fe_phase_pv, pp)
     pause(.5)
 end %for
 

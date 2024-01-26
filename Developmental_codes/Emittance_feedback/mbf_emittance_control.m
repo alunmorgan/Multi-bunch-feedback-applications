@@ -17,19 +17,19 @@ if isnan(p.Results.hemit_target) && isnan(p.Results.vemit_target)
     return
 end %if
 
-if lcaGet('SR-DI-DCCT-01:SIGNAL') < 1 %mA
+if get_variable('SR-DI-DCCT-01:SIGNAL') < 1 %mA
     disp('This needs to be run with beam. No changes have been made.')
     return
 end %if
 
 if ~isnan(p.Results.hemit_target)
-existing_excitation_x = lcaGet('SR23C-DI-TMBF-01:X:NCO2:GAIN_DB_S');
+existing_excitation_x = get_variable('SR23C-DI-TMBF-01:X:NCO2:GAIN_DB_S');
 mbf_emittance_setup('x', 'excitation',existing_excitation_x, 'fll_monitor_bunches', 300)
 emittance_control_loop('X', p.Results.hemit_target)
 end %if
 
 if ~isnan(p.Results.vemit_target)
-existing_excitation_y = lcaGet('SR23C-DI-TMBF-01:Y:NCO2:GAIN_DB_S');
+existing_excitation_y = get_variable('SR23C-DI-TMBF-01:Y:NCO2:GAIN_DB_S');
 mbf_emittance_setup('y', 'excitation',existing_excitation_y, 'fll_monitor_bunches', 400)
 emittance_control_loop('Y', p.Results.vemit_target)
 end %if

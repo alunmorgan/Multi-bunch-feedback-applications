@@ -38,20 +38,20 @@ else
 end %if
 
 % Disarm the sequencer and memory triggers
-lcaPut([pv_names.hardware_names.(mbf_axis) pv_names.tails.triggers.SEQ.disarm], 1)
-lcaPut([pv_names.hardware_names.mem.(mbf_axis) pv_names.tails.triggers.MEM.disarm], 1)
+set_variable([pv_names.hardware_names.(mbf_axis) pv_names.tails.triggers.SEQ.disarm], 1)
+set_variable([pv_names.hardware_names.mem.(mbf_axis) pv_names.tails.triggers.MEM.disarm], 1)
 
 for trigger_ind = 1:length(trigger_inputs)
     trigger = trigger_inputs{trigger_ind};
-    lcaPut([pv_names.hardware_names.mem.(mbf_axis) pv_names.tails.triggers.MEM.(trigger).enable_status], 'Ignore');
-    lcaPut([pv_names.hardware_names.mem.(mbf_axis) pv_names.tails.triggers.MEM.(trigger).blanking_status], 'All');
+    set_variable([pv_names.hardware_names.mem.(mbf_axis) pv_names.tails.triggers.MEM.(trigger).enable_status], 'Ignore');
+    set_variable([pv_names.hardware_names.mem.(mbf_axis) pv_names.tails.triggers.MEM.(trigger).blanking_status], 'All');
 
 end %for
 % Set the trigger to one shot
-lcaPut([pv_names.hardware_names.mem.(mbf_axis) pv_names.tails.triggers.MEM.mode], 'One Shot');
+set_variable([pv_names.hardware_names.mem.(mbf_axis) pv_names.tails.triggers.MEM.mode], 'One Shot');
 
 % Set the triggering to External only
-lcaPut([pv_names.hardware_names.mem.(mbf_axis) pv_names.tails.triggers.MEM.('EXT').enable_status], 'Enable')
+set_variable([pv_names.hardware_names.mem.(mbf_axis) pv_names.tails.triggers.MEM.('EXT').enable_status], 'Enable')
 
 %  set up the memory buffer to capture ADC data.
-lcaPut([pv_names.hardware_names.mem.(mbf_axis) pv_names.tails.MEM.channel_select], 'ADC0/ADC1')
+set_variable([pv_names.hardware_names.mem.(mbf_axis) pv_names.tails.MEM.channel_select], 'ADC0/ADC1')

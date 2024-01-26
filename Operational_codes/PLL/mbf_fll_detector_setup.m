@@ -25,8 +25,8 @@ addParameter(p, 'fll_detector_dwell', default_fll_detector_dwell, validScalarPos
 parse(p, name, varargin{:});
 
 % Set up the FLL detector
-lcaPut([name ':PLL:DET:SELECT_S'],p.Results.fll_detector_select);
-lcaPut([name ':ADC:REJECT_COUNT_S'],p.Results.adc_reject_count);
-lcaPut([name ':PLL:DET:SCALING_S'],p.Results.fll_detector_scaling);
-lcaPut([name ':PLL:DET:BLANKING_S'],p.Results.fll_detector_blanking);
-lcaPut([name ':PLL:DET:DWELL_S'],p.Results.fll_detector_dwell);
+set_variable([name ':PLL:DET:SELECT_S'],p.Results.fll_detector_select);
+set_variable([name ':ADC:REJECT_COUNT_S'],p.Results.adc_reject_count);
+set_variable([name ':PLL:DET:SCALING_S'],p.Results.fll_detector_scaling);
+set_variable([name ':PLL:DET:BLANKING_S'],p.Results.fll_detector_blanking);
+set_variable([name ':PLL:DET:DWELL_S'],p.Results.fll_detector_dwell);

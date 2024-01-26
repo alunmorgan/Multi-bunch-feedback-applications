@@ -6,7 +6,7 @@ fll_initialisation(name)
 %lcaSetMonitor([name, 'PLL:CTRL:STATUS'])
 while 1 == 1
 %    lcaNewMonitorWait([name, 'PLL:CTRL:STATUS'])
-    fll_status = lcaGet([name, 'PLL:CTRL:STATUS']);
+    fll_status = get_variable([name, 'PLL:CTRL:STATUS']);
     if strcmpi(fll_status, 'Stopped')
         fll_initialisation(name)
     end %if

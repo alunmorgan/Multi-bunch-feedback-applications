@@ -27,10 +27,10 @@ data.base_name = 'doris_phase_scan';
 data.mbf_pv_x = pv_names.hardware_names.x;
 data.mbf_pv_y = pv_names.hardware_names.y;
 data.doris_pv = pv_names.doris.phase;
-original_setting = lcaGet(data.doris_pv);
+original_setting = get_variable(data.doris_pv);
 
 % moving to starting point in scan
-lcaPut(data.doris_pv, -180)
+set_variable(data.doris_pv, -180)
 
 % measurement
 data.phase = [-180:5:180 160:-5:-180];
@@ -41,18 +41,18 @@ data.side1_y = NaN(length(data.phase), 1);
 data.main_y = NaN(length(data.phase), 1);
 data.side2_y = NaN(length(data.phase), 1);
 for dbf = 1:length(data.phase)
-    lcaPut(data.doris_pv, data.phase(dbf))
+    set_variable(data.doris_pv, data.phase(dbf))
     pause(2)
-    data.side1_x(dbf) = max(lcaGet([data.mbf_pv_x, pv_names.tails.Detector.det1.power]));
-    data.main_x(dbf) = max(lcaGet([data.mbf_pv_x, pv_names.tails.Detector.det2.power]));
-    data.side2_x(dbf) = max(lcaGet([data.mbf_pv_x, pv_names.tails.Detector.det3.power]));
-    data.side1_x(dbf) = max(lcaGet([data.mbf_pv_y, pv_names.tails.Detector.det1.power]));
-    data.main_x(dbf) = max(lcaGet([data.mbf_pv_y, pv_names.tails.Detector.det2.power]));
-    data.side2_x(dbf) = max(lcaGet([data.mbf_pv_y, pv_names.tails.Detector.det3.power]));
+    data.side1_x(dbf) = max(get_variable([data.mbf_pv_x, pv_names.tails.Detector.det1.power]));
+    data.main_x(dbf) = max(get_variable([data.mbf_pv_x, pv_names.tails.Detector.det2.power]));
+    data.side2_x(dbf) = max(get_variable([data.mbf_pv_x, pv_names.tails.Detector.det3.power]));
+    data.side1_x(dbf) = max(get_variable([data.mbf_pv_y, pv_names.tails.Detector.det1.power]));
+    data.main_x(dbf) = max(get_variable([data.mbf_pv_y, pv_names.tails.Detector.det2.power]));
+    data.side2_x(dbf) = max(get_variable([data.mbf_pv_y, pv_names.tails.Detector.det3.power]));
 end %for
 
 % move back to the original setting
-lcaPut(data.doris_pv, original_setting)
+set_variable(data.doris_pv, original_setting)
 
 BBBFE_detector_restore('X')
 BBBFE_detector_restore('Y')

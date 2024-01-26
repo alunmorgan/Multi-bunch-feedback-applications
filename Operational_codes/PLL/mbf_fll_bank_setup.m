@@ -43,15 +43,15 @@ end
 % Set up PLL bunches in banks 0 and 1 (those are used in typcal sweeps), 
 % and in PLL detector.
 
-lcaPut([name ':BUN:0:PLL:ENABLE_S'], double(pllpattern));
-lcaPut([name ':BUN:1:PLL:ENABLE_S'], double(pllpattern));
-lcaPut([name ':PLL:DET:BUNCHES_S'], double(pllpattern));
+set_variable([name ':BUN:0:PLL:ENABLE_S'], double(pllpattern));
+set_variable([name ':BUN:1:PLL:ENABLE_S'], double(pllpattern));
+set_variable([name ':PLL:DET:BUNCHES_S'], double(pllpattern));
 
 % Set sweep (SEQ) and its detector (#1) to NOT operate on these and
 % guard bunches around, ie only on guardpattern. 
 %check or add to any previous config and uses logical AND to insert the
 %guardpattern into the existing setup.
-sequencer =lcaGet([name ':BUN:1:SEQ:ENABLE_S']);
-detector = lcaGet([name ':DET:0:BUNCHES_S']);
-lcaPut([name ':BUN:1:SEQ:ENABLE_S'],double(and(guardpattern, sequencer)));
-lcaPut([name ':DET:0:BUNCHES_S'],double(and(guardpattern, detector)));
+sequencer =get_variable([name ':BUN:1:SEQ:ENABLE_S']);
+detector = get_variable([name ':DET:0:BUNCHES_S']);
+set_variable([name ':BUN:1:SEQ:ENABLE_S'],double(and(guardpattern, sequencer)));
+set_variable([name ':DET:0:BUNCHES_S'],double(and(guardpattern, detector)));

@@ -22,7 +22,7 @@ for hsaw = 1:length(pv_files)
         if ~isempty(strfind(pv_files{hsaw}, ':RESET_S.PROC'))
             %                 Arm the previously disabled trigger
             disp(regexprep(pv_files{hsaw}, ':RESET_S.PROC', ':ARM_S.PROC'))
-            lcaPut(regexprep(pv_files{hsaw}, ':RESET_S.PROC', ':ARM_S.PROC'), 1)
+            set_variable(regexprep(pv_files{hsaw}, ':RESET_S.PROC', ':ARM_S.PROC'), 1)
             delete(fullfile(file_dir, pv_files{hsaw}))
         else
             [~, individual_pv , ~] = fileparts(pv_files{hsaw});

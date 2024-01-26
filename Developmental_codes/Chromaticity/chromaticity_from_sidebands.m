@@ -9,9 +9,9 @@ function chro=chromaticity_from_sidebands(mbf_axis)
 
 [~, ~, pv_names] = mbf_system_config;
 MBF_PV = ax2dev(mbf_axis);
-AL = sqrt(lcaGet([MBF_PV, pv_names.tails.tune.peak.left_area]));
-AR = sqrt(lcaGet([MBF_PV, pv_names.tails.tune.peak.right_area]));
-AC = sqrt(lcaGet([MBF_PV, pv_names.tails.tune.peak.centre_area]));
+AL = sqrt(get_variable([MBF_PV, pv_names.tails.tune.peak.left_area]));
+AR = sqrt(get_variable([MBF_PV, pv_names.tails.tune.peak.right_area]));
+AC = sqrt(get_variable([MBF_PV, pv_names.tails.tune.peak.centre_area]));
 R = (AL + AR) / AC;
 if R < .25
     % If the combined area of the sidebands is less than 25% of the area of
@@ -29,6 +29,6 @@ else
           28.222*R - ...
           1.8186;
 end
-Q_S = lcaGet([MBF_PV, pv_names.tails.tune.peak.sync_tune]);
-sigma_E = lcaGet(pv_names.emittance);
+Q_S = get_variable([MBF_PV, pv_names.tails.tune.peak.sync_tune]);
+sigma_E = get_variable(pv_names.emittance);
 chro = s * Q_S / sigma_E;

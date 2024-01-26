@@ -23,14 +23,14 @@ pv_head_T = pv_names.hardware_names.T;
 pv_head_L = pv_names.hardware_names.L;
 
 %Disarm, so that the current settings will be picked up upon arming.
-lcaPut([pv_head_T, pv_names.tails.triggers.MEM.disarm], 1)
-lcaPut([pv_head_L, pv_names.tails.triggers.MEM.disarm], 1)
+set_variable([pv_head_T, pv_names.tails.triggers.MEM.disarm], 1)
+set_variable([pv_head_L, pv_names.tails.triggers.MEM.disarm], 1)
 
 
 %% Trigger the measurement on all three axes
 
 % Turn off the External triggering from the Event receiver.
-lcaPut(pv_names.Hardware_trigger, 0)
+set_variable(pv_names.Hardware_trigger, 0)
 
 % Arming the systems
 if strcmp([pv_head_T pv_names.tails.TRG.memory_status], 'Idle') == 1 &&...
@@ -43,7 +43,7 @@ end %if
 
 
 % Triggering the measurement. %%%% SHOULD TRIGGER ON THE NEXT EXTERNAL
-lcaPut(pv_names.Hardware_trigger, 1)
+set_variable(pv_names.Hardware_trigger, 1)
 
 % Triggering memory under a lock.
 bunch_motion_temp = mbf_read_mem(pv_names.hardware_names.T, turn_count,'offset', turn_offset, 'lock', 60);

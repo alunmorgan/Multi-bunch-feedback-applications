@@ -47,7 +47,7 @@ end %for
 % Set the trigger to one shot
 mbf_get_then_put([pv_head PVt.triggers.MEM.mode], 'One Shot');
 % Set the triggering to External only
-lcaPut([pv_head pv_head pv_names.triggers.MEM.('EXT').enable_status], 'Enable')
+set_variable([pv_head pv_head pv_names.triggers.MEM.('EXT').enable_status], 'Enable')
 
 %  set up the memory buffer to capture ADC data.
 mbf_get_then_put([pv_head, pv_head pv_names.MEM.channel_select], 'ADC0/ADC1')
@@ -63,12 +63,12 @@ end %if
 
 for k=1:repeat
     
-    lcaPut([ax2dev(ax) pv_names.tails.MEM_arm],1);
+    set_variable([ax2dev(ax) pv_names.tails.MEM_arm],1);
     if strcmpi(mbf_axis, 's')
-        lcaPut([pv_names.hardware_names.L, pv_names.tails.triggers.soft], 1)
+        set_variable([pv_names.hardware_names.L, pv_names.tails.triggers.soft], 1)
         raw_data = mbf_read_mem(pv_names.hardware_names.L, n_turns,'channel', chan, 'lock', 60);
     else
-        lcaPut([pv_names.hardware_names.T, pv_names.tails.triggers.soft], 1)
+        set_variable([pv_names.hardware_names.T, pv_names.tails.triggers.soft], 1)
         raw_data = mbf_read_mem(pv_names.hardware_names.T, n_turns,'channel', chan, 'lock', 60);
     end %if
     data_length=length(raw_data);

@@ -36,17 +36,17 @@ for bds = 1:length(p.Results.axes)
     ax_name = [temp_axis, '_tune'];
     for nfs = 1:n_trys
         try
-        tunes.(ax_name).tune = lcaGet([pv_names.hardware_names.(temp_axis), pv_names.tails.tune.centre]);
+        tunes.(ax_name).tune = get_variable([pv_names.hardware_names.(temp_axis), pv_names.tails.tune.centre]);
         catch
             tunes.(ax_name).tune = NaN;
         end %try
         try
-        tunes.(ax_name).lower_sideband = lcaGet([pv_names.hardware_names.(temp_axis), pv_names.tails.tune.left]);
+        tunes.(ax_name).lower_sideband = get_variable([pv_names.hardware_names.(temp_axis), pv_names.tails.tune.left]);
         catch
             tunes.(ax_name).lower_sideband = NaN;
         end %try
         try
-        tunes.(ax_name).upper_sideband = lcaGet([pv_names.hardware_names.(temp_axis), pv_names.tails.tune.right]);
+        tunes.(ax_name).upper_sideband = get_variable([pv_names.hardware_names.(temp_axis), pv_names.tails.tune.right]);
         catch
             tunes.(ax_name).upper_sideband = NaN;
         end %try

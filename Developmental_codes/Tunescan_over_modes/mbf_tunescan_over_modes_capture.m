@@ -29,7 +29,7 @@ tunescan.ax_label = mbf_axis;
 tunescan.base_name = ['tunescan_' tunescan.ax_label '_axis'];
 
 % start the multi-mode sweep
-lcaPut([pv_head pv_names.tails.triggers.arm], 1)
+set_variable([pv_head pv_names.tails.triggers.arm], 1)
 
 % download the data
 % (Eww.  Convert axis string into 0 or 1.)

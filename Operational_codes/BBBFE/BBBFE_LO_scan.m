@@ -14,19 +14,19 @@ function BBBFE_LO_scan(phase_centre, sweep_extent)
 root_string = root_string{1};
 
 data.phase_pv = 'SR23C-DI-BBFE-01:PHA';
-old_val = lcaGet(data.phase_pv);
+old_val = get_variable(data.phase_pv);
 data.n = phase_centre - sweep_extent:ceil(sweep_extent/20):phase_centre + sweep_extent;
 data.t1 = NaN(length(data.n),1);
 data.t2 = NaN(length(data.n),1);
 data.t3 = NaN(length(data.n),1);
 for jd = 1:length(data.n)
-    lcaPut(data.phase_pv, data.n(jd));
+    set_variable(data.phase_pv, data.n(jd));
     pause(2);
-    data.t1(jd) = max(lcaGet('SR23C-DI-TMBF-01:TUNE:POWER'));
-    data.t2(jd) = max(lcaGet('SR23C-DI-TMBF-02:TUNE:POWER'));
-    data.t3(jd) = max(lcaGet('SR23C-DI-TMBF-03:TUNE:POWER'));
+    data.t1(jd) = max(get_variable('SR23C-DI-TMBF-01:TUNE:POWER'));
+    data.t2(jd) = max(get_variable('SR23C-DI-TMBF-02:TUNE:POWER'));
+    data.t3(jd) = max(get_variable('SR23C-DI-TMBF-03:TUNE:POWER'));
 end
-lcaPut(data.phase_pv, old_val);
+set_variable(data.phase_pv, old_val);
 graph_handles(1) = figure;
 plot(data.n, data.t1 ./ max(data.t1), 'b',...
      data.n, data.t2 ./ max(data.t2), 'r',...

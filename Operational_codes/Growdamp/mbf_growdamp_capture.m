@@ -44,14 +44,14 @@ pv_head_mem = pv_names.hardware_names.mem.(mbf_axis);
 triggers = pv_names.tails.triggers;
 Sequencer = pv_names.tails.Sequencer;
 
-lcaPut([pv_head_mem, triggers.MEM.disarm], 1)
+set_variable([pv_head_mem, triggers.MEM.disarm], 1)
 pause(0.5) % Letting the hardware sort itself out.
 % Arm the memory so that it cycles. This means that all the status PV are
 % updated. Otherwise the code will say the memory is not ready as the status is
 % stale.
-lcaPut([pv_head_mem triggers.MEM.arm], 1)
+set_variable([pv_head_mem triggers.MEM.arm], 1)
 pause(2) % Letting the hardware sort itself out.
-temp1 = lcaGet([pv_head_mem pv_names.tails.TRG.memory_status]);
+temp1 = get_variable([pv_head_mem pv_names.tails.TRG.memory_status]);
 if ~strcmp(temp1, 'Idle') == 1
     mbf_get_then_put({[pv_head_mem triggers.MEM.arm]},1);
 else
@@ -69,19 +69,19 @@ else
 end %if
     
 %Disarm, so that the current settings will be picked up upon arming.
-lcaPut([pv_head, triggers.SEQ.disarm], 1)
+set_variable([pv_head, triggers.SEQ.disarm], 1)
 
 % Getting settings for growth, natural damping, and active damping.
 exp_state_names = {'spacer', 'act', 'nat', 'growth'};
 for n=1:4
     % Getting the number of turns
-    growdamp.([exp_state_names{n}, '_turns']) = lcaGet([pv_head,...
+    growdamp.([exp_state_names{n}, '_turns']) = get_variable([pv_head,...
         Sequencer.Base, ':', num2str(n), Sequencer.count]);
     % Getting the number of turns each point dwells at
-    growdamp.([exp_state_names{n}, '_dwell']) = lcaGet([pv_head,...
+    growdamp.([exp_state_names{n}, '_dwell']) = get_variable([pv_head,...
         Sequencer.Base, ':', num2str(n), Sequencer.dwell]);
     % Getting the gain
-    growdamp.([exp_state_names{n}, '_gain']) = lcaGet([pv_head,...
+    growdamp.([exp_state_names{n}, '_gain']) = get_variable([pv_head,...
         Sequencer.Base, ':', num2str(n), Sequencer.gain]);
 end %for
 
@@ -97,9 +97,9 @@ else
     mem_lock = 10;
 end %if
 %Arm
-lcaPut([pv_head, triggers.SEQ.arm], 1)
+set_variable([pv_head, triggers.SEQ.arm], 1)
 % Trigger
-lcaPut([pv_head_mem, triggers.soft], 1)
+set_variable([pv_head_mem, triggers.soft], 1)
 [growdamp.data, growdamp.data_freq, ~] = mbf_read_det(pv_head_mem,...
     'axis', chan, 'lock', mem_lock);
 

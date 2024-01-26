@@ -33,35 +33,35 @@ else
 end %if
 
 % setting up sequencer state 1 to be the tune sweep.
-lcaPut([base, pv_names.tails.Super_sequencer.count], 1);
-lcaPut([base, pv_names.tails.Sequencer.start_state] ,1);
+set_variable([base, pv_names.tails.Super_sequencer.count], 1);
+set_variable([base, pv_names.tails.Sequencer.start_state] ,1);
 
 tune_sequencer = pv_names.tails.Sequencer.seq1;
 
-lcaPut([base, tune_sequencer.start_frequency], sweep_start);
-lcaPut([base, tune_sequencer.end_frequency], sweep_end);
-lcaPut([base, tune_sequencer.gaindb], tune_gain);
-lcaPut([base, tune_sequencer.count], tune_count);
-lcaPut([base, tune_sequencer.dwell], tune_dwell);
+set_variable([base, tune_sequencer.start_frequency], sweep_start);
+set_variable([base, tune_sequencer.end_frequency], sweep_end);
+set_variable([base, tune_sequencer.gaindb], tune_gain);
+set_variable([base, tune_sequencer.count], tune_count);
+set_variable([base, tune_sequencer.dwell], tune_dwell);
 
-lcaPut([base, tune_sequencer.bank_select], {'Bank 1'});
-lcaPut([base, tune_sequencer.tune_pll_following], {'Ignore'});
-lcaPut([base, tune_sequencer.enable], 'On');
-lcaPut([base, tune_sequencer.holdoff_state], 0);
-lcaPut([base, tune_sequencer.holdoff], 0);
-lcaPut([base, tune_sequencer.blanking_state], {'Blanking'});
-lcaPut([base, tune_sequencer.windowing_state], {'Windowed'});
-lcaPut([base, tune_sequencer.capture_state], {'Capture'});
+set_variable([base, tune_sequencer.bank_select], {'Bank 1'});
+set_variable([base, tune_sequencer.tune_pll_following], {'Ignore'});
+set_variable([base, tune_sequencer.enable], 'On');
+set_variable([base, tune_sequencer.holdoff_state], 0);
+set_variable([base, tune_sequencer.holdoff], 0);
+set_variable([base, tune_sequencer.blanking_state], {'Blanking'});
+set_variable([base, tune_sequencer.windowing_state], {'Windowed'});
+set_variable([base, tune_sequencer.capture_state], {'Capture'});
 
 tune_bank = pv_names.tails.Bunch_bank.bank1;
 % Setting bank 1 to use both the FIR and the sequencer but nothing else.
-lcaPut([base, tune_bank.FIR.enablewf], ones(1,harmonic_number));
-lcaPut([base, tune_bank.NCO1.enablewf], zeros(1, harmonic_number));
-lcaPut([base, tune_bank.NCO2.enablewf], zeros(1, harmonic_number));
-lcaPut([base, tune_bank.SEQ.enablewf], ones(1, harmonic_number));
-lcaPut([base, pv_names.tails.Bunch_bank.bank1.PLL.enablewf], zeros(1, harmonic_number));
+set_variable([base, tune_bank.FIR.enablewf], ones(1,harmonic_number));
+set_variable([base, tune_bank.NCO1.enablewf], zeros(1, harmonic_number));
+set_variable([base, tune_bank.NCO2.enablewf], zeros(1, harmonic_number));
+set_variable([base, tune_bank.SEQ.enablewf], ones(1, harmonic_number));
+set_variable([base, pv_names.tails.Bunch_bank.bank1.PLL.enablewf], zeros(1, harmonic_number));
 
 % triggering
-lcaPut([base, pv_names.tails.triggers.mode], 'Rearm');
-lcaPut([base, pv_names.tails.triggers.EXT.enable_status], 'Enable');
-lcaPut([base, pv_names.tails.triggers.SEQ.arm], 1);
+set_variable([base, pv_names.tails.triggers.mode], 'Rearm');
+set_variable([base, pv_names.tails.triggers.EXT.enable_status], 'Enable');
+set_variable([base, pv_names.tails.triggers.SEQ.arm], 1);

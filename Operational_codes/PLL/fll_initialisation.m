@@ -41,7 +41,7 @@ name = pv_names.hardware_names.(mbf_axis);
 % feedback has brought the tune to the desired value...)
 if isnan(p.Results.tune_override)
     % Perform a TUNE sweep, record phase at tune peak and the tune value
-    tune_frequency_from_sweep = lcaGet([name, ':TUNE:TUNE']);
+    tune_frequency_from_sweep = get_variable([name, ':TUNE:TUNE']);
     if isnan(tune_frequency_from_sweep)
         error('pllInitialisation:invalidTuneFit', 'Tune fit invalid, cannot start PLL.')
     end %if
@@ -51,28 +51,28 @@ else
 end %if
 
 % Disable PLL and turn off the NCO
-lcaPut([name, ':PLL:CTRL:STOP_S.PROC'], 1);
-lcaPut([name ':PLL:NCO:ENABLE_S'],'Off');
+set_variable([name, ':PLL:CTRL:STOP_S.PROC'], 1);
+set_variable([name ':PLL:NCO:ENABLE_S'],'Off');
 
 % Set up the FLL feedback loop
-lcaPut([name ':PLL:CTRL:KI_S'],p.Results.fll_ki); 
-lcaPut([name ':PLL:CTRL:KP_S'],p.Results.fll_kp);
-lcaPut([name ':PLL:CTRL:MIN_MAG_S'],p.Results.fll_min_magnitude);
-lcaPut([name, ':PLL:CTRL:TARGET_S'], p.Results.fll_target_phase)
+set_variable([name ':PLL:CTRL:KI_S'],p.Results.fll_ki); 
+set_variable([name ':PLL:CTRL:KP_S'],p.Results.fll_kp);
+set_variable([name ':PLL:CTRL:MIN_MAG_S'],p.Results.fll_min_magnitude);
+set_variable([name, ':PLL:CTRL:TARGET_S'], p.Results.fll_target_phase)
 
 % Set up the NCO
-lcaPut([name ':PLL:NCO:GAIN_DB_S'],p.Results.fll_nco_gain);
-lcaPut([name, ':PLL:NCO:FREQ_S'], tune_frequency_from_sweep)
+set_variable([name ':PLL:NCO:GAIN_DB_S'],p.Results.fll_nco_gain);
+set_variable([name, ':PLL:NCO:FREQ_S'], tune_frequency_from_sweep)
 % Limit tune range of the NCO for initial peak finding.
-lcaPut([name, ':PLL:CTRL:MAX_OFFSET_S'], p.Results.fll_locking_max_offset)
+set_variable([name, ':PLL:CTRL:MAX_OFFSET_S'], p.Results.fll_locking_max_offset)
 
 % Enable the NCO and PLL
-lcaPut([name ':PLL:NCO:ENABLE_S'],'On');
-lcaPut([name, ':PLL:CTRL:START_S.PROC'], 1)
+set_variable([name ':PLL:NCO:ENABLE_S'],'On');
+set_variable([name, ':PLL:CTRL:START_S.PROC'], 1)
 
 % Wait until PLL has locked (set lower bound to phase error?)
 t1 = datetime("now");
-while abs(abs(lcaGet([name, ':PLL:FILT:PHASE'])) - ...
+while abs(abs(get_variable([name, ':PLL:FILT:PHASE'])) - ...
         abs( p.Results.fll_target_phase)) > 1 % within one degree of target.
     lock_time = datetime("now");
     if lock_time > t1 + seconds(10)
@@ -81,5 +81,5 @@ while abs(abs(lcaGet([name, ':PLL:FILT:PHASE'])) - ...
     end %if
 end %while
 % Once locked widen the NCO limits to max required for tracking
-lcaPut([name ':PLL:CTRL:MAX_OFFSET_S'],p.Results.fll_tracking_max_offset);
+set_variable([name ':PLL:CTRL:MAX_OFFSET_S'],p.Results.fll_tracking_max_offset);
 

@@ -73,13 +73,13 @@ if isnan(tune)
 end %if
 
 % state 1
-lcaPut([pv_head, Sequencer.Base, ':1', Sequencer.start_frequency], tune);
-lcaPut([pv_head, Sequencer.Base, ':1', Sequencer.step_frequency],1);
-lcaPut([pv_head, Sequencer.Base, ':1', Sequencer.count], harmonic_number -1);
-lcaPut([pv_head, Sequencer.Base, ':1', Sequencer.holdoff], 0);
-lcaPut([pv_head, Sequencer.Base, ':1', Sequencer.dwell], settings.dwell);
-lcaPut([pv_head, Sequencer.Base, ':1', Sequencer.bank_select], 'Bank 1');
-lcaPut([pv_head, Sequencer.Base, ':1', Sequencer.capture_state], 'Capture');
-lcaPut([pv_head, Sequencer.Base, ':1', Sequencer.windowing_state], 'Disabled');
-lcaPut([pv_head, Sequencer.Base, ':1',Sequencer.gaindb], -30);
-lcaPut([pv_head, Sequencer.Base, ':1', Sequencer.blanking_state], 'Off');
+set_variable([pv_head, Sequencer.Base, ':1', Sequencer.start_frequency], tune);
+set_variable([pv_head, Sequencer.Base, ':1', Sequencer.step_frequency],1);
+set_variable([pv_head, Sequencer.Base, ':1', Sequencer.count], harmonic_number -1);
+set_variable([pv_head, Sequencer.Base, ':1', Sequencer.holdoff], 0);
+set_variable([pv_head, Sequencer.Base, ':1', Sequencer.dwell], settings.dwell);
+set_variable([pv_head, Sequencer.Base, ':1', Sequencer.bank_select], 'Bank 1');
+set_variable([pv_head, Sequencer.Base, ':1', Sequencer.capture_state], 'Capture');
+set_variable([pv_head, Sequencer.Base, ':1', Sequencer.windowing_state], 'Disabled');
+set_variable([pv_head, Sequencer.Base, ':1',Sequencer.gaindb], -30);
+set_variable([pv_head, Sequencer.Base, ':1', Sequencer.blanking_state], 'Off');

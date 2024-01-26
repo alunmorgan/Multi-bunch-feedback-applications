@@ -24,22 +24,22 @@ end
 configure_tune_sweep(axis , drive_bunch, fb_on_off, 1, 1, 1, 1)
 
 % arm the TMBF as one-shot rather than continuous
-lcaPut(['SR23C-DI-TMBF-01:' axis ':TRG:SEQ:MODE_S'],'One Shot')
-lcaPut(['SR23C-DI-TMBF-01:' axis ':SEQ:RESET_S.PROC'],1)
+set_variable(['SR23C-DI-TMBF-01:' axis ':TRG:SEQ:MODE_S'],'One Shot')
+set_variable(['SR23C-DI-TMBF-01:' axis ':SEQ:RESET_S.PROC'],1)
 
 % set the super-sequencer to have the correct number of modes
-lcaPut(['SR23C-DI-TMBF-01:' axis ':SEQ:SUPER:RESET_S.PROC'],1)
-lcaPut(['SR23C-DI-TMBF-01:' axis ':SEQ:SUPER:COUNT_S'],936)
+set_variable(['SR23C-DI-TMBF-01:' axis ':SEQ:SUPER:RESET_S.PROC'],1)
+set_variable(['SR23C-DI-TMBF-01:' axis ':SEQ:SUPER:COUNT_S'],936)
 
 % change the number of captures to speed things up (normally 4096)
-lcaPut(['SR23C-DI-TMBF-01:' axis ':SEQ:1:COUNT_S'],ncap)
+set_variable(['SR23C-DI-TMBF-01:' axis ':SEQ:1:COUNT_S'],ncap)
 
 % select the tune sweep frequency / mode
-lcaPut(['SR23C-DI-TMBF-01:' axis ':SEQ:1:START_FREQ_S'],startmode + start_freq)
-lcaPut(['SR23C-DI-TMBF-01:' axis ':SEQ:1:END_FREQ_S'],  startmode + end_freq)
+set_variable(['SR23C-DI-TMBF-01:' axis ':SEQ:1:START_FREQ_S'],startmode + start_freq)
+set_variable(['SR23C-DI-TMBF-01:' axis ':SEQ:1:END_FREQ_S'],  startmode + end_freq)
 
 % start the multi-mode sweep
-lcaPut(['SR23C-DI-TMBF-01:' axis ':TRG:SEQ:ARM_S.PROC'], 1)
+set_variable(['SR23C-DI-TMBF-01:' axis ':TRG:SEQ:ARM_S.PROC'], 1)
 
 % download the data
 % (Eww.  Convert axis string into 0 or 1.)
@@ -48,8 +48,8 @@ det_axis = find('XY' == axis) - 1;
 
 % reset the sweep
 configure_tune_sweep(axis , 0:935, 1, 1, 0, 0, 0)
-lcaPut(['SR23C-DI-TMBF-01:' axis ':TRG:SEQ:MODE_S'],'Rearm')
-lcaPut(['SR23C-DI-TMBF-01:' axis ':SEQ:RESET_S.PROC'],1)
+set_variable(['SR23C-DI-TMBF-01:' axis ':TRG:SEQ:MODE_S'],'Rearm')
+set_variable(['SR23C-DI-TMBF-01:' axis ':SEQ:RESET_S.PROC'],1)
 
 % reshape the results
 fracttune = scale(1:ncap);
@@ -66,8 +66,8 @@ for n = 1:size(data,2)
 end
 
 % get the stored beam conditions
-fill_pattern = lcaGet('SR-DI-PICO-01:BUCKETS_180');
-current = lcaGet('SR-DI-DCCT-01:SIGNAL');
+fill_pattern = get_variable('SR-DI-PICO-01:BUCKETS_180');
+current = get_variable('SR-DI-DCCT-01:SIGNAL');
 
 % save the data
 save(savefile,'data','scale','axis','ncap','startmode','drive_bunch','fb_on_off','start_freq','end_freq','fill_pattern','current')

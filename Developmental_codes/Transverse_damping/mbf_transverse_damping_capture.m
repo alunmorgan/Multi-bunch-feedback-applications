@@ -23,7 +23,7 @@ addParameter(p, 'save_to_archive', 'yes', @(x) any(validatestring(x,binary_strin
 addParameter(p, 'additional_save_location', NaN, valid_string);
 parse(p, mbf_axis, varargin{:});
 
-pinhole_trig_orig = lcaGet('SR01C-DI-EVR-01:SET_HW.OT3D');
+pinhole_trig_orig = get_variable('SR01C-DI-EVR-01:SET_HW.OT3D');
 disp(['Original pinhole trigger ', pinhole_trig_orig])
 
 for n=1:25
@@ -34,10 +34,10 @@ for n=1:25
         mbf_growdamp_capture(mbf_axis,...
             'excitation_location', 'Sideband', 'save_to_archive', 'no');
     end %if
-    td.beam_size.pinhole1.x(n) = lcaGet('SR-DI-EMIT-01:P1:SIGMAX');
-    td.beam_size.pinhole1.y(n) = lcaGet('SR-DI-EMIT-01:P1:SIGMAY');
-    td.beam_size.pinhole2.x(n) = lcaGet('SR-DI-EMIT-01:P2:SIGMAX');
-    td.beam_size.pinhole2.y(n) = lcaGet('SR-DI-EMIT-01:P2:SIGMAY');
+    td.beam_size.pinhole1.x(n) = get_variable('SR-DI-EMIT-01:P1:SIGMAX');
+    td.beam_size.pinhole1.y(n) = get_variable('SR-DI-EMIT-01:P1:SIGMAY');
+    td.beam_size.pinhole2.x(n) = get_variable('SR-DI-EMIT-01:P2:SIGMAX');
+    td.beam_size.pinhole2.y(n) = get_variable('SR-DI-EMIT-01:P2:SIGMAY');
     td.ph1.image(n) = get_Pinhole_image('SR01C-DI-DCAM-04');
     td.ph2.image(n) = get_Pinhole_image('SR01C-DI-DCAM-05');
 end %for

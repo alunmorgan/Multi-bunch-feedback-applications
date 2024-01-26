@@ -40,12 +40,12 @@ end %if
 
 for k=p.Results.repeat:-1:1
     if strcmpi(mbf_axis, 's')
-             lcaPut([pv_names.hardware_names.L pv_names.tails.triggers.MEM.arm],1);
-        lcaPut([pv_names.hardware_names.L, pv_names.tails.triggers.soft], 1)
+             set_variable([pv_names.hardware_names.L pv_names.tails.triggers.MEM.arm],1);
+        set_variable([pv_names.hardware_names.L, pv_names.tails.triggers.soft], 1)
         spectrum.raw_data{k} = mbf_read_mem(pv_names.hardware_names.L, p.Results.n_turns,'channel', chan, 'lock', 60);
     else
-              lcaPut([pv_names.hardware_names.T pv_names.tails.triggers.MEM.arm],1);
-        lcaPut([pv_names.hardware_names.T, pv_names.tails.triggers.soft], 1)
+              set_variable([pv_names.hardware_names.T pv_names.tails.triggers.MEM.arm],1);
+        set_variable([pv_names.hardware_names.T, pv_names.tails.triggers.soft], 1)
         spectrum.raw_data{k} = mbf_read_mem(pv_names.hardware_names.T, p.Results.n_turns,'channel', chan, 'lock', 60);
     end %if
 end%for

@@ -39,7 +39,7 @@ addParameter(p, 'start_power_level', default_start_power_level, valid_number);
 parse(p, selected_axis, emittance_target, varargin{:});
 
 % start the NCO excitation.
-lcaPut(['SR23C-DI-TMBF-01:',p.Results.selected_axis,':NCO2:GAIN_SCALAR_S'], p.Results.start_power_level);
+set_variable(['SR23C-DI-TMBF-01:',p.Results.selected_axis,':NCO2:GAIN_SCALAR_S'], p.Results.start_power_level);
 
 output_lim = 1;
 while true
@@ -49,7 +49,7 @@ while true
     % The loop holds the existing settings if the current drops below 10mA
     % The loop holds the existing settings if it is unable to get an up to date
     % emittance reading.
-    if lcaGet('SR-CS-FILL-01:COUNTDOWN') ~= 0  && lcaGet('SR-DI-DCCT-01:SIGNAL') > 10 && strcmp(lcaGet('SR-DI-EMIT-01:STATUS'), 'Successful')
+    if get_variable('SR-CS-FILL-01:COUNTDOWN') ~= 0  && get_variable('SR-DI-DCCT-01:SIGNAL') > 10 && strcmp(get_variable('SR-DI-EMIT-01:STATUS'), 'Successful')
         %% heartbeat code
         if output_lim >100
             fprintf('.\n')
@@ -60,17 +60,17 @@ while true
         end %if
 
         %% Check the status of the frequency locked loop.
-        error_user = lcaGet(['SR23C-DI-TMBF-01:',p.Results.selected_axis,':PLL:CTRL:STOP:STOP']);
-        error_detector_overflow = lcaGet(['SR23C-DI-TMBF-01:',p.Results.selected_axis,':PLL:CTRL:STOP:DET_OVF']);
-        error_offset = lcaGet(['SR23C-DI-TMBF-01:',p.Results.selected_axis,':PLL:CTRL:STOP:OFFSET_OVF']);
-        error_magnitude = lcaGet(['SR23C-DI-TMBF-01:',p.Results.selected_axis,':PLL:CTRL:STOP:MAG_ERROR']);
+        error_user = get_variable(['SR23C-DI-TMBF-01:',p.Results.selected_axis,':PLL:CTRL:STOP:STOP']);
+        error_detector_overflow = get_variable(['SR23C-DI-TMBF-01:',p.Results.selected_axis,':PLL:CTRL:STOP:DET_OVF']);
+        error_offset = get_variable(['SR23C-DI-TMBF-01:',p.Results.selected_axis,':PLL:CTRL:STOP:OFFSET_OVF']);
+        error_magnitude = get_variable(['SR23C-DI-TMBF-01:',p.Results.selected_axis,':PLL:CTRL:STOP:MAG_ERROR']);
         if ~strcmp(error_detector_overflow{1}, 'Ok') ||...
                 ~strcmp(error_offset{1}, 'Ok') ||...
                 ~strcmp(error_magnitude{1}, 'Ok') ||...
                 ~strcmp(error_user{1}, 'Ok')
             error([p.Results.selected_axis,' frequency locked loop has stopped']);
         end %if
-        if ~strcmp(lcaGet(['SR23C-DI-TMBF-01:',p.Results.selected_axis,':NCO2:ENABLE_S']), 'On')
+        if ~strcmp(get_variable(['SR23C-DI-TMBF-01:',p.Results.selected_axis,':NCO2:ENABLE_S']), 'On')
             error('Excitation manually terminated')
         end %if
 
@@ -78,10 +78,10 @@ while true
         % This pause is to allow the hardware to update so we know we have fresh
         % data.
         pause(hardware_update_time)
-        tune = lcaGet(['SR23C-DI-TMBF-01:',p.Results.selected_axis,':TUNE:CENTRE:TUNE']);
-        emit = lcaGet(['SR-DI-EMIT-01:',em_axis,'EMIT']);
-        emit_mean = lcaGet(['SR-DI-EMIT-01:',em_axis,'EMIT_MEAN']);
-        power_input = lcaGet(['SR23C-DI-TMBF-01:',p.Results.selected_axis,':NCO2:GAIN_SCALAR_S']);
+        tune = get_variable(['SR23C-DI-TMBF-01:',p.Results.selected_axis,':TUNE:CENTRE:TUNE']);
+        emit = get_variable(['SR-DI-EMIT-01:',em_axis,'EMIT']);
+        emit_mean = get_variable(['SR-DI-EMIT-01:',em_axis,'EMIT_MEAN']);
+        power_input = get_variable(['SR23C-DI-TMBF-01:',p.Results.selected_axis,':NCO2:GAIN_SCALAR_S']);
         if isnan(tune)
             % pause if tune value is invalid.
             fprintf('\nTune value is invalid.')
@@ -110,7 +110,7 @@ while true
         power_new = power_input - power_error;
         % Apply power limits and apply
         if power_new > p.Results.low_power_limit && power_new < p.Results.high_power_limit
-            lcaPut(['SR23C-DI-TMBF-01:',p.Results.selected_axis,':NCO2:GAIN_SCALAR_S'], power_new);
+            set_variable(['SR23C-DI-TMBF-01:',p.Results.selected_axis,':NCO2:GAIN_SCALAR_S'], power_new);
         end %if
     else
         % The machine is not in a state for the loop to run so wait and try

@@ -29,25 +29,25 @@ parse(p,mbf_axis, varargin{:});
 
 mbf_name = mbf_axis_to_name(mbf_axis);
 %% Turning off the external trigger
-lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 0);
+set_variable('LI-TI-MTGEN-01:BS-DI-MODE', 0);
 
 %% Setting up the sequencer for single shot
-lcaPut([mbf_name, 'TRG:SEQ:MODE_S'], 'One Shot') 
+set_variable([mbf_name, 'TRG:SEQ:MODE_S'], 'One Shot') 
 
 %% Setting up the excitation
-lcaPut([mbf_name, 'SEQ:PC_S'], 2)
-lcaPut([mbf_name, 'SEQ:2:BANK_S'], 'Bank 1')
-lcaPut([mbf_name, 'SEQ:2:START_FREQ_S'], p.Results.harmonic + p.Results.excitation_frequency)
-lcaPut([mbf_name, 'SEQ:2:STEP_FREQ_S'], 0)
-lcaPut([mbf_name, 'SEQ:2:COUNT_S'], 1)
-lcaPut([mbf_name, 'SEQ:2:DWELL_S'], p.Results.delay)
-lcaPut([mbf_name, 'SEQ:2:ENABLE_S'], 'Off')
-lcaPut([mbf_name, 'SEQ:1:START_FREQ_S'], p.Results.harmonic + p.Results.excitation_frequency)
-lcaPut([mbf_name, 'SEQ:1:STEP_FREQ_S'], 0)
-lcaPut([mbf_name, 'SEQ:1:COUNT_S'], 1)
-lcaPut([mbf_name, 'SEQ:1:DWELL_S'], 1)
-lcaPut([mbf_name, 'SEQ:1:ENABLE_S'], 'On')
-lcaPut([mbf_name, 'SEQ:1:GAIN_DB_S'], p.Results.excitation_gain)
+set_variable([mbf_name, 'SEQ:PC_S'], 2)
+set_variable([mbf_name, 'SEQ:2:BANK_S'], 'Bank 1')
+set_variable([mbf_name, 'SEQ:2:START_FREQ_S'], p.Results.harmonic + p.Results.excitation_frequency)
+set_variable([mbf_name, 'SEQ:2:STEP_FREQ_S'], 0)
+set_variable([mbf_name, 'SEQ:2:COUNT_S'], 1)
+set_variable([mbf_name, 'SEQ:2:DWELL_S'], p.Results.delay)
+set_variable([mbf_name, 'SEQ:2:ENABLE_S'], 'Off')
+set_variable([mbf_name, 'SEQ:1:START_FREQ_S'], p.Results.harmonic + p.Results.excitation_frequency)
+set_variable([mbf_name, 'SEQ:1:STEP_FREQ_S'], 0)
+set_variable([mbf_name, 'SEQ:1:COUNT_S'], 1)
+set_variable([mbf_name, 'SEQ:1:DWELL_S'], 1)
+set_variable([mbf_name, 'SEQ:1:ENABLE_S'], 'On')
+set_variable([mbf_name, 'SEQ:1:GAIN_DB_S'], p.Results.excitation_gain)
 
 
 

@@ -24,39 +24,39 @@ detect_wf_3 = zeros(1,936);
 detect_wf_3(sort(mod(detect_bunch + 2,936)+1)) = 1;
 
 % write to the TMBF on which bunches to perform the sweep
-lcaPut([head, bank1.SEQ.enablewf], drive_wf);
+set_variable([head, bank1.SEQ.enablewf], drive_wf);
 
 % Configure FIR enable (whether feedback is on or off)
-lcaPut([head bank1.FIR.enablewf], fb_on_off * ones(1,936));
+set_variable([head bank1.FIR.enablewf], fb_on_off * ones(1,936));
 
 % Detector 0 grabs everything
 if d0flag
-    lcaPut([head, detectors.("det0").bunch_selection], ones(1,936));
-    lcaPut([head, detectors.("det0").enable], 'Enabled');
+    set_variable([head, detectors.("det0").bunch_selection], ones(1,936));
+    set_variable([head, detectors.("det0").enable], 'Enabled');
 else
-    lcaPut([head, detectors.("det0").enable], 'Disabled');
+    set_variable([head, detectors.("det0").enable], 'Disabled');
 end
 
 % Detector 1 only observes active bunches
 if d1flag
-    lcaPut([head, detectors.("det1").bunch_selection], detect_wf_1);
-    lcaPut([head, detectors.("det1").enable], 'Enabled');
+    set_variable([head, detectors.("det1").bunch_selection], detect_wf_1);
+    set_variable([head, detectors.("det1").enable], 'Enabled');
 else
-    lcaPut([head, detectors.("det1").enable], 'Disabled');
+    set_variable([head, detectors.("det1").enable], 'Disabled');
 end
 
 % Detector 2 only observes 1 bunch behind driven bunches
 if d2flag
-    lcaPut([head, detectors.("det2").bunch_selection], detect_wf_2);
-    lcaPut([head, detectors.("det2").enable], 'Enabled');
+    set_variable([head, detectors.("det2").bunch_selection], detect_wf_2);
+    set_variable([head, detectors.("det2").enable], 'Enabled');
 else
-    lcaPut([head, detectors.("det2").enable], 'Disabled');
+    set_variable([head, detectors.("det2").enable], 'Disabled');
 end
 
 % Detector 3 only observes 2 bunches behind driven bunches
 if d3flag
-    lcaPut([head, detectors.("det3").bunch_selection], detect_wf_3);
-    lcaPut([head, detectors.("det3").enable], 'Enabled');
+    set_variable([head, detectors.("det3").bunch_selection], detect_wf_3);
+    set_variable([head, detectors.("det3").enable], 'Enabled');
 else
-    lcaPut([head, detectors.("det3").enable], 'Disabled');
+    set_variable([head, detectors.("det3").enable], 'Disabled');
 end

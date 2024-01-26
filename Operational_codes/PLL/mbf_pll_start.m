@@ -29,34 +29,34 @@ end
 % Set up PLL bunches in banks 0 and 1 (those are used in typcal sweeps), 
 % and in PLL detector.
 
-lcaPut([name ':BUN:0:PLL:ENABLE_S'],double(pllpattern));
-lcaPut([name ':BUN:1:PLL:ENABLE_S'],double(pllpattern));
-lcaPut([name ':PLL:DET:BUNCHES_S'],double(pllpattern));
+set_variable([name ':BUN:0:PLL:ENABLE_S'],double(pllpattern));
+set_variable([name ':BUN:1:PLL:ENABLE_S'],double(pllpattern));
+set_variable([name ':PLL:DET:BUNCHES_S'],double(pllpattern));
 
 % Set sweep (SEQ) and its detector (#1) to NOT operate on these and
 % guard bunches around, ie only on guardpattern. This is maybe a little
 % keen, as there might be other things configured, which this will jjst
 % plow over. Maybe we should check or add to any previous config...
 
-lcaPut([name ':BUN:1:SEQ:ENABLE_S'],double(guardpattern));
-lcaPut([name ':DET:0:BUNCHES_S'],double(guardpattern));
+set_variable([name ':BUN:1:SEQ:ENABLE_S'],double(guardpattern));
+set_variable([name ':DET:0:BUNCHES_S'],double(guardpattern));
 
 % Now comes some setup with 'working values'. These ought to be read from a
 % config file or be additinal arguments in the future.
 
 
-lcaPut([name ':PLL:DET:SELECT_S'],'ADC no fill');
-lcaPut([name ':ADC:REJECT_COUNT_S'],'128 turns');
-lcaPut([name ':PLL:DET:SCALING_S'],'48dB');
-lcaPut([name ':PLL:DET:BLANKING_S'],'Blanking');
-lcaPut([name ':PLL:DET:DWELL_S'],128);
+set_variable([name ':PLL:DET:SELECT_S'],'ADC no fill');
+set_variable([name ':ADC:REJECT_COUNT_S'],'128 turns');
+set_variable([name ':PLL:DET:SCALING_S'],'48dB');
+set_variable([name ':PLL:DET:BLANKING_S'],'Blanking');
+set_variable([name ':PLL:DET:DWELL_S'],128);
 
 
-lcaPut([name ':PLL:CTRL:KI_S'],1000); %safe also for for low charge, sharp resonance
-lcaPut([name ':PLL:CTRL:KP_S'],0);
-lcaPut([name ':PLL:CTRL:MIN_MAG_S'],0);
-lcaPut([name ':PLL:CTRL:MAX_OFFSET_S'],0.02);
-lcaPut([name ':PLL:CTRL:TARGET_S'],-180);
+set_variable([name ':PLL:CTRL:KI_S'],1000); %safe also for for low charge, sharp resonance
+set_variable([name ':PLL:CTRL:KP_S'],0);
+set_variable([name ':PLL:CTRL:MIN_MAG_S'],0);
+set_variable([name ':PLL:CTRL:MAX_OFFSET_S'],0.02);
+set_variable([name ':PLL:CTRL:TARGET_S'],-180);
 
 
 
@@ -64,22 +64,22 @@ lcaPut([name ':PLL:CTRL:TARGET_S'],-180);
 % be configured from config file (but then it will only work if tune
 % feedback has brought the tune to the desired value...)
 
-tune=lcaGet([name ':TUNE:CENTRE:TUNE'],1,'double');
+tune=get_variable([name ':TUNE:CENTRE:TUNE'],1,'double');
 if isnan(tune)
     error('PLL:invalidTuneFit', 'Tune fit invalid, cannot start PLL.')
     %tune=37.45;
 end
 
-lcaPut([name ':PLL:NCO:GAIN_DB_S'],-30);
-lcaPut([name ':PLL:NCO:FREQ_S'],tune);
-lcaPut([name ':PLL:NCO:ENABLE_S'],'On');
+set_variable([name ':PLL:NCO:GAIN_DB_S'],-30);
+set_variable([name ':PLL:NCO:FREQ_S'],tune);
+set_variable([name ':PLL:NCO:ENABLE_S'],'On');
 
 % finally, lets start, and then check whether we're still running after 1
 % second
 
-lcaPut([name ':PLL:CTRL:START_S.PROC'],0);
+set_variable([name ':PLL:CTRL:START_S.PROC'],0);
 pause(1)
-status=lcaGet([name ':PLL:CTRL:STATUS']);
+status=get_variable([name ':PLL:CTRL:STATUS']);
 display(['PLL is: ' cell2mat(status)]);
 
 

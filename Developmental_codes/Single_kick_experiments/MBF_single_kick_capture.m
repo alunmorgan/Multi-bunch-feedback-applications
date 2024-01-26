@@ -59,7 +59,7 @@ single_kick.excitation_delay = p.Results.excitation_delay;
 
 %% Set up MBF excitation
 mbf_name = mbf_axis_to_name(mbf_axis);
-orig_seq = lcaGet([mbf_name, 'TRG:SEQ:MODE_S']);
+orig_seq = get_variable([mbf_name, 'TRG:SEQ:MODE_S']);
 
 %% Set up BPM capture
 % bpm_capture_length = 1024; %Turns
@@ -104,7 +104,7 @@ else
     single_kick.bpm_data{1} = single_kick_aquisition(mbf_axis, input_settings);
 end %if
 
-lcaPut([mbf_name, 'TRG:SEQ:MODE_S'], orig_seq);
+set_variable([mbf_name, 'TRG:SEQ:MODE_S'], orig_seq);
 
 %% saving the data to a file
 if strcmp(mbf_axis, 'x') || strcmp(mbf_axis, 'y')|| strcmp(mbf_axis, 's')

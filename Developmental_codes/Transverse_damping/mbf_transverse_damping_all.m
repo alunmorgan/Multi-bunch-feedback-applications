@@ -43,6 +43,6 @@ td = mbf_transverse_damping_capture(mbf_axis);
 % and set the feedback gain to 0dB.
 setup_operational_mode(mbf_axis, "Feedback")
 % FIXME - remove hard coded paths.
-lcaPut(['SR23C-DI-TMBF-01:',upper(mbf_axis),':FIR:GAIN_S', '0dB'])
+set_variable(['SR23C-DI-TMBF-01:',upper(mbf_axis),':FIR:GAIN_S', '0dB'])
 
 

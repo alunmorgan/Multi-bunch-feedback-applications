@@ -6,7 +6,7 @@ for n = 1:length(nbpms)
     bpm_label = regexprep(bpm_name, '-', '_');
     for tk = 1:10
         try
-            BPM_data_temp = lcaGet({[bpm_name, ':TT:WFX'];[bpm_name, ':TT:WFY'];});
+            BPM_data_temp = get_variable({[bpm_name, ':TT:WFX'];[bpm_name, ':TT:WFY'];});
             output.(bpm_label).X = BPM_data_temp(1, 1:capture_length);
             output.(bpm_label).Y = BPM_data_temp(2, 1:capture_length);
             break

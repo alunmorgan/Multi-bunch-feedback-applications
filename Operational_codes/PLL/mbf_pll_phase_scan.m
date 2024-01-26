@@ -39,29 +39,29 @@ pll_tails = pv_names.tails.pll;
 fll_phase_scan.scan_step = step;
 fll_phase_scan.scan_range = range;
 
-fll_phase_scan.mbf_fll.target_bunches = lcaGet([name, pll_tails.detector.target_bunches]);
-fll_phase_scan.mbf_fll.gain = lcaGet([name, pll_tails.nco.gain]);
-fll_phase_scan.mbf_fll.target_phase = lcaGet([name, pll_tails.target_phase]);
-fll_phase_scan.mbf_fll.KI = lcaGet([name, pll_tails.i]);
-fll_phase_scan.mbf_fll.KP = lcaGet([name, pll_tails.p]);
+fll_phase_scan.mbf_fll.target_bunches = get_variable([name, pll_tails.detector.target_bunches]);
+fll_phase_scan.mbf_fll.gain = get_variable([name, pll_tails.nco.gain]);
+fll_phase_scan.mbf_fll.target_phase = get_variable([name, pll_tails.target_phase]);
+fll_phase_scan.mbf_fll.KI = get_variable([name, pll_tails.i]);
+fll_phase_scan.mbf_fll.KP = get_variable([name, pll_tails.p]);
 
-start=lcaGet([name pll_tails.target_phase]);
+start=get_variable([name pll_tails.target_phase]);
 fll_phase_scan.phase=[start:step:(start + range) (start + range):-step:(start - range) (start - range):step:(start+ range) (start+ range):-step:start ];
 fll_phase_scan.mag = NaN(length(fll_phase_scan.phase),1);
 fll_phase_scan.iq = NaN(length(fll_phase_scan.phase),1);
 fll_phase_scan.f = NaN(length(fll_phase_scan.phase),1);
 for n=1:length(fll_phase_scan.phase)
-    status=lcaGet([name pll_tails.status]);
+    status=get_variable([name pll_tails.status]);
     if strcmp(status,'Running')
         %the funny mod is required to get into the right range of -180 to +179
-        lcaPut([name pll_tails.target_phase],mod(fll_phase_scan.phase(n)+180,360)-180)
+        set_variable([name pll_tails.target_phase],mod(fll_phase_scan.phase(n)+180,360)-180)
         pause(.2) %This will depend on the dwell time and PLL config, but works with the default
-        fll_phase_scan.mag(n)=lcaGet([name pll_tails.readback.magnitude]); %get magnitude
-        fll_phase_scan.phase(n)=lcaGet([name pll_tails.readback.phase]); %get phase readback
-        fll_phase_scan.iq(n)=[1 1i]*lcaGet({[name pll_tails.readback.i];[name pll_tails.readback.q]});
-        fll_phase_scan.f(n)=lcaGet([name pll_tails.nco.frequency]);
+        fll_phase_scan.mag(n)=get_variable([name pll_tails.readback.magnitude]); %get magnitude
+        fll_phase_scan.phase(n)=get_variable([name pll_tails.readback.phase]); %get phase readback
+        fll_phase_scan.iq(n)=[1 1i]*get_variable({[name pll_tails.readback.i];[name pll_tails.readback.q]});
+        fll_phase_scan.f(n)=get_variable([name pll_tails.nco.frequency]);
     else
-        lcaPut([name pll_tails.target_phase],start);
+        set_variable([name pll_tails.target_phase],start);
         break
     end %if
 end %for

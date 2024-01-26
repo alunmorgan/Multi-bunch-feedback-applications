@@ -44,17 +44,17 @@ pll_data.offsetwf = NaN(n_p, n_i, n_repeats);
 pll_data.i_values = NaN(n_p, n_i, n_repeats);
 pll_data.p_values = NaN(n_p, n_i, n_repeats);
 
-pll_data.dwell = lcaGet([pv_head, pll_tails.detector.dwell]);
+pll_data.dwell = get_variable([pv_head, pll_tails.detector.dwell]);
 for ser = 1:n_p
     for jfe = 1:n_i
         %initialise loop
-        lcaPut([pv_head, pll_tails.i], i_vals(jfe))
-        lcaPut([pv_head, pll_tails.p], p_vals(ser))
+        set_variable([pv_head, pll_tails.i], i_vals(jfe))
+        set_variable([pv_head, pll_tails.p], p_vals(ser))
         mbf_fll_start(mbf_axis, 'fllbunches',p.Results.fll_monitor_bunches,...
             'guardbunches',p.Results.guardbunches)
         for ewn = 1:n_repeats
             pause(1)
-            data = lcaGet({[pv_head,pll_tails.nco.offset_waveform];...
+            data = get_variable({[pv_head,pll_tails.nco.offset_waveform];...
                 [pv_head,pll_tails.nco.mean_offset];...
                 [pv_head,pll_tails.nco.std_offset];...
                 [pv_head,pll_tails.nco.tune];...

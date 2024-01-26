@@ -12,16 +12,16 @@ addRequired(p, 'channel');
 addParameter(p, 'gamma_correction', default_gamma_correction, valid_number);
 parse(p, channel, varargin{:});
 
-image.imagewidth = lcaGet([channel ':IMAGEWIDTH']);
-[image.image, image.timestamp] = lcaGet([channel ':PROXY:DATA'],0,'byte');
+image.imagewidth = get_variable([channel ':IMAGEWIDTH']);
+[image.image, image.timestamp] = get_variable([channel ':PROXY:DATA'],0,'byte');
 neg=find(image.image < 0);
 image.image(neg)=256 + image.image(neg);
-image.width = lcaGet([channel ':WIDTH']);
-image.height = lcaGet([channel ':HEIGHT']);
-image.xmax = lcaGet([channel ':XSCALEMAX']);
-image.xmin = lcaGet([channel ':XSCALEMIN']);
-image.ymax = lcaGet([channel ':YSCALEMAX']);
-image.ymin = lcaGet([channel ':YSCALEMIN']);
+image.width = get_variable([channel ':WIDTH']);
+image.height = get_variable([channel ':HEIGHT']);
+image.xmax = get_variable([channel ':XSCALEMAX']);
+image.xmin = get_variable([channel ':XSCALEMIN']);
+image.ymax = get_variable([channel ':YSCALEMAX']);
+image.ymin = get_variable([channel ':YSCALEMIN']);
 
 % The PV returns the full image regardless of settings. 
 % Remove zero padding

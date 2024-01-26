@@ -55,12 +55,12 @@ emittance_blowup.excitation_frequency = excitation_frequency;
 emittance_blowup.harmonic = p.Results.harmonic;
 
 % Tune sweeps (do we need all of these?)
-emittance_blowup.tune_x_sweep = lcaGet('SR23C-DI-TMBF-01:X:TUNE:DMAGNITUDE');
-emittance_blowup.tune_x_sweep_model = lcaGet('SR23C-DI-TMBF-01:X:TUNE:MMAGNITUDE');
-emittance_blowup.tune_x_scale = lcaGet('SR23C-DI-TMBF-01:X:TUNE:SCALE');
-emittance_blowup.tune_y_sweep = lcaGet('SR23C-DI-TMBF-01:Y:TUNE:DMAGNITUDE');
-emittance_blowup.tune_y_sweep_model = lcaGet('SR23C-DI-TMBF-01:Y:TUNE:MMAGNITUDE');
-emittance_blowup.tune_y_scale = lcaGet('SR23C-DI-TMBF-01:Y:TUNE:SCALE');
+emittance_blowup.tune_x_sweep = get_variable('SR23C-DI-TMBF-01:X:TUNE:DMAGNITUDE');
+emittance_blowup.tune_x_sweep_model = get_variable('SR23C-DI-TMBF-01:X:TUNE:MMAGNITUDE');
+emittance_blowup.tune_x_scale = get_variable('SR23C-DI-TMBF-01:X:TUNE:SCALE');
+emittance_blowup.tune_y_sweep = get_variable('SR23C-DI-TMBF-01:Y:TUNE:DMAGNITUDE');
+emittance_blowup.tune_y_sweep_model = get_variable('SR23C-DI-TMBF-01:Y:TUNE:MMAGNITUDE');
+emittance_blowup.tune_y_scale = get_variable('SR23C-DI-TMBF-01:Y:TUNE:SCALE');
 emittance_blowup.tunes = get_all_tunes('xys');
 
 %% Set up MBF excitation
@@ -70,25 +70,25 @@ mbf_emittance_setup(mbf_axis, 'excitation', excitation_gain(1),...
     'excitation_frequency',excitation_frequency(1), 'harmonic', p.Results.harmonic)
 
 %% Do measurement
-orig_gain = lcaGet([mbf_name, 'NCO2:GAIN_DB_S']);
-orig_freq = lcaGet([mbf_name, 'NCO2:FREQ_S']);
+orig_gain = get_variable([mbf_name, 'NCO2:GAIN_DB_S']);
+orig_freq = get_variable([mbf_name, 'NCO2:FREQ_S']);
 
 % gain scan
 if length(p.Results.excitation_gain) > 1
     for whd = 1:length(p.Results.excitation_gain)
         fprintf('Measurement %d\n',whd);
-        lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 0);
-        lcaPut([mbf_name, 'NCO2:GAIN_DB_S'],p.Results.harmonic + p.Results.excitation_gain(whd));
+        set_variable('LI-TI-MTGEN-01:BS-DI-MODE', 0);
+        set_variable([mbf_name, 'NCO2:GAIN_DB_S'],p.Results.harmonic + p.Results.excitation_gain(whd));
         arm_BPM_TbT_capture
         pause(1)
         %pause(5) % Wait for emittance to stablise
-        lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 1);
-        while ~strcmp('Fit Forced',lcaGet('SR-DI-EMIT-01:STATUS')) && ~strcmp('Successful',lcaGet('SR-DI-EMIT-01:STATUS'))
+        set_variable('LI-TI-MTGEN-01:BS-DI-MODE', 1);
+        while ~strcmp('Fit Forced',get_variable('SR-DI-EMIT-01:STATUS')) && ~strcmp('Successful',get_variable('SR-DI-EMIT-01:STATUS'))
             pause(0.2);
         end
         emittance_blowup.scan{whd}.bpm_data = get_BPM_TbT_data(n_bpms);
-        emittance_blowup.scan{whd}.mbf_data_x = lcaGet('SR23C-DI-TMBF-01:X:ADC:MMS:STD');
-        emittance_blowup.scan{whd}.mbf_data_y = lcaGet('SR23C-DI-TMBF-01:Y:ADC:MMS:STD');
+        emittance_blowup.scan{whd}.mbf_data_x = get_variable('SR23C-DI-TMBF-01:X:ADC:MMS:STD');
+        emittance_blowup.scan{whd}.mbf_data_y = get_variable('SR23C-DI-TMBF-01:Y:ADC:MMS:STD');
         emittance_blowup.scan{whd}.pinhole_settings = get_pinhole_settings;
         emittance_blowup.scan{whd}.pinhole1_image = get_pinhole_image('SR01C-DI-DCAM-04');
         emittance_blowup.scan{whd}.pinhole2_image = get_pinhole_image('SR01C-DI-DCAM-05');
@@ -100,18 +100,18 @@ if length(p.Results.excitation_gain) > 1
 elseif length(p.Results.excitation_frequency) > 1
     for nwa = 1:length(p.Results.excitation_frequency)
         fprintf('Measurement %d\n',nwa);
-        lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 0);
-        lcaPut([mbf_name, 'NCO2:FREQ_S'], p.Results.excitation_frequency(nwa));
+        set_variable('LI-TI-MTGEN-01:BS-DI-MODE', 0);
+        set_variable([mbf_name, 'NCO2:FREQ_S'], p.Results.excitation_frequency(nwa));
         arm_BPM_TbT_capture
         pause(1)
-        lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 1);
+        set_variable('LI-TI-MTGEN-01:BS-DI-MODE', 1);
         %pause(6) % Wait for emittance to stablise
-        while ~strcmp('Fit Forced',lcaGet('SR-DI-EMIT-01:STATUS')) && ~strcmp('Successful',lcaGet('SR-DI-EMIT-01:STATUS'))
+        while ~strcmp('Fit Forced',get_variable('SR-DI-EMIT-01:STATUS')) && ~strcmp('Successful',get_variable('SR-DI-EMIT-01:STATUS'))
             pause(0.2);
         end
         emittance_blowup.scan{nwa}.bpm_data = get_BPM_TbT_data(n_bpms);
-        emittance_blowup.scan{nwa}.mbf_data_x = lcaGet('SR23C-DI-TMBF-01:X:ADC:MMS:STD');
-        emittance_blowup.scan{nwa}.mbf_data_y = lcaGet('SR23C-DI-TMBF-01:Y:ADC:MMS:STD');
+        emittance_blowup.scan{nwa}.mbf_data_x = get_variable('SR23C-DI-TMBF-01:X:ADC:MMS:STD');
+        emittance_blowup.scan{nwa}.mbf_data_y = get_variable('SR23C-DI-TMBF-01:Y:ADC:MMS:STD');
         emittance_blowup.scan{nwa}.pinhole_settings = get_pinhole_settings;
         emittance_blowup.scan{nwa}.pinhole1_image = get_pinhole_image('SR01C-DI-DCAM-04');
         emittance_blowup.scan{nwa}.pinhole2_image = get_pinhole_image('SR01C-DI-DCAM-05');
@@ -119,17 +119,17 @@ elseif length(p.Results.excitation_frequency) > 1
         emittance_blowup.scan{nwa}.emittance = get_emittance;
     end %for
 else
-    lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 0);
+    set_variable('LI-TI-MTGEN-01:BS-DI-MODE', 0);
     arm_BPM_TbT_capture
     pause(1) % Wait for emittance to stablise
-    lcaPut('LI-TI-MTGEN-01:BS-DI-MODE', 1);
+    set_variable('LI-TI-MTGEN-01:BS-DI-MODE', 1);
     %pause(6) % Wait for emittance to stablise
-    while ~strcmp('Fit Forced',lcaGet('SR-DI-EMIT-01:STATUS')) && ~strcmp('Successful',lcaGet('SR-DI-EMIT-01:STATUS'))
+    while ~strcmp('Fit Forced',get_variable('SR-DI-EMIT-01:STATUS')) && ~strcmp('Successful',get_variable('SR-DI-EMIT-01:STATUS'))
         pause(0.2);
     end    
     emittance_blowup.scan{1}.bpm_data = get_BPM_TbT_data(n_bpms);
-    emittance_blowup.scan{1}.mbf_data_x = lcaGet('SR23C-DI-TMBF-01:X:ADC:MMS:STD');
-    emittance_blowup.scan{1}.mbf_data_y = lcaGet('SR23C-DI-TMBF-01:Y:ADC:MMS:STD');
+    emittance_blowup.scan{1}.mbf_data_x = get_variable('SR23C-DI-TMBF-01:X:ADC:MMS:STD');
+    emittance_blowup.scan{1}.mbf_data_y = get_variable('SR23C-DI-TMBF-01:Y:ADC:MMS:STD');
     emittance_blowup.scan{1}.pinhole_settings = get_pinhole_settings;
     emittance_blowup.scan{1}.pinhole1_image = get_pinhole_image('SR01C-DI-DCAM-04');
     emittance_blowup.scan{1}.pinhole2_image = get_pinhole_image('SR01C-DI-DCAM-05');
@@ -137,9 +137,9 @@ else
     emittance_blowup.scan{1}.emittance = get_emittance;
 end %if
 
-lcaPut([mbf_name, 'NCO2:GAIN_DB_S'], orig_gain)
-lcaPut([mbf_name, 'NCO2:FREQ_S'], orig_freq)
-lcaPut([mbf_name, 'NCO2:ENABLE_S'], 0)
+set_variable([mbf_name, 'NCO2:GAIN_DB_S'], orig_gain)
+set_variable([mbf_name, 'NCO2:FREQ_S'], orig_freq)
+set_variable([mbf_name, 'NCO2:ENABLE_S'], 0)
 %% saving the data to a file
 if strcmp(mbf_axis, 'x') || strcmp(mbf_axis, 'y')|| strcmp(mbf_axis, 's')
     %     only save if not on test system

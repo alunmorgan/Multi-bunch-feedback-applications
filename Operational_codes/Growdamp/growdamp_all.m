@@ -45,7 +45,7 @@ if strcmp(p.Results.auto_setup, 'yes')
     % and set the feedback gain to the operational value.
     setup_operational_mode(mbf_axis, "Feedback")
     % Setting the FIR gain to its original value.
-    lcaPut([pv_head, Bunch_bank.FIR_gains], orig_fir_gain)
+    set_variable([pv_head, Bunch_bank.FIR_gains], orig_fir_gain)
 end %if
 
 if strcmp(p.Results.plotting, 'yes')
