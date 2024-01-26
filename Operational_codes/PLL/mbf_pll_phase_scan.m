@@ -14,9 +14,9 @@ function fll_phase_scan = mbf_pll_phase_scan(mbf_axis, varargin)
 
 default_step = 1;
 if strcmp(mbf_axis, 'x')
-    default_range = 80;
+    default_range = 270;
 elseif strcmp(mbf_axis, 'y')
-    default_range = 60;
+    default_range = 270;
 end %if
 
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
@@ -51,25 +51,28 @@ fll_phase_scan.mag = NaN(length(fll_phase_scan.phase),1);
 fll_phase_scan.iq = NaN(length(fll_phase_scan.phase),1);
 fll_phase_scan.f = NaN(length(fll_phase_scan.phase),1);
 for n=1:length(fll_phase_scan.phase)
-    %the funny mod is required to get into the right range of -180 to +179
-    lcaPut([name pll_tails.target_phase],mod(fll_phase_scan.phase(n)+180,360)-180)
-    pause(.2) %This will depend on the dwell time and PLL config, but works with the default
-    fll_phase_scan.mag(n)=lcaGet([name pll_tails.readback.magnitude]); %get magnitude
-    fll_phase_scan.phase(n)=lcaGet([name pll_tails.readback.phase]); %get phase readback
-    fll_phase_scan.iq(n)=[1 1i]*lcaGet({[name pll_tails.readback.i];[name pll_tails.readback.q]});
-    fll_phase_scan.f(n)=lcaGet([name pll_tails.nco.frequency]);
-end
+    status=lcaGet([name pll_tails.status]);
+    if strcmp(status,'Running')
+        %the funny mod is required to get into the right range of -180 to +179
+        lcaPut([name pll_tails.target_phase],mod(fll_phase_scan.phase(n)+180,360)-180)
+        pause(.2) %This will depend on the dwell time and PLL config, but works with the default
+        fll_phase_scan.mag(n)=lcaGet([name pll_tails.readback.magnitude]); %get magnitude
+        fll_phase_scan.phase(n)=lcaGet([name pll_tails.readback.phase]); %get phase readback
+        fll_phase_scan.iq(n)=[1 1i]*lcaGet({[name pll_tails.readback.i];[name pll_tails.readback.q]});
+        fll_phase_scan.f(n)=lcaGet([name pll_tails.nco.frequency]);
+    else
+        lcaPut([name pll_tails.target_phase],start);
+        break
+    end %if
+end %for
 
 save_to_archive(root_path{1}, fll_phase_scan)
 disp(['Data saved to ', fullfile(root_path{1}, fll_phase_scan.base_name)])
 
 fll_phase_scan_plotting(fll_phase_scan);
 
-status=lcaGet([name pll_tails.status]);
-if strcmp(status,'Running')
-    lcaPut([name pll_tails.target_phase],start);
-else
-    error('PLL stopped during phase sweep, please restart using fll_start')
+if ~strcmp(status,'Running')
+    error('PLL:stoppedUnexpectedly', 'PLL stopped during phase sweep, please restart using fll_start')
 end
 
 
