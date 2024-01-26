@@ -34,7 +34,7 @@ parse(p, mbf_axis, varargin{:});
 
 if ~strcmpi(mbf_axis, 'x')&& ~strcmpi(mbf_axis, 'y') && ~strcmpi(mbf_axis, 's') &&...
         ~strcmpi(mbf_axis, 'tx')&& ~strcmpi(mbf_axis, 'ty')
-    error('mbf_growdamp_capture: Incorrect value axis given (should be x, y or s. OR tx, ty if testing)');
+    error('growdamp:invalidAxis', 'mbf_growdamp_capture: Incorrect value axis given (should be x, y or s. OR tx, ty if testing)');
 end %if
 [root_string, ~, pv_names, ~] = mbf_system_config;
 root_string = root_string{1};
@@ -55,7 +55,7 @@ temp1 = lcaGet([pv_head_mem pv_names.tails.TRG.memory_status]);
 if ~strcmp(temp1, 'Idle') == 1
     mbf_get_then_put({[pv_head_mem triggers.MEM.arm]},1);
 else
-    error('Memory is not ready please try again')
+    error('growdamp:memoryNotReady', 'Memory is not ready please try again')
 end %if
 % getting general environment data.
 growdamp = machine_environment('tunes', p.Results.tunes);

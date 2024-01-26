@@ -43,7 +43,7 @@ if isnan(p.Results.tune_override)
     % Perform a TUNE sweep, record phase at tune peak and the tune value
     tune_frequency_from_sweep = lcaGet([name, ':TUNE:TUNE']);
     if isnan(tune_frequency_from_sweep)
-        error('Tune fit invalid, cannot start PLL.')
+        error('pllInitialisation:invalidTuneFit', 'Tune fit invalid, cannot start PLL.')
     end %if
 else
     tune_frequency_from_sweep = p.Results.tune_override;

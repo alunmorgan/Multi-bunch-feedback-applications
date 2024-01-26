@@ -34,7 +34,7 @@ elseif strcmp(mbf_ax, 'S')
     mbf_pv = pv_names.hardware_names.s;
     fe_phase_pv = [pv_names.frontend.base pv_names.frontend.clock_phase.s];
 else
-    error('Please use input axes X, Y or S')
+    error('BBBFE:axiserror','Please use input axes X, Y or S')
 end %if
 
 original_setting = lcaGet(fe_phase_pv);

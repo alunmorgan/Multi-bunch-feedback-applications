@@ -26,7 +26,7 @@ if strcmp(mbf_axis, 'x')
 elseif strcmp(mbf_axis, 'y')
     target_phase = 180;
 else
-    error('Invalid axis selected. (expected x or y)')
+    error('PLL:invalidAxis', 'Invalid axis selected. (expected x or y)')
 end
 
 mbf_fll_bank_setup(pv_names.hardware_names.(mbf_axis), 'fllbunches', p.Results.fllbunches, 'guardbunches', p.Results.guardbunches)

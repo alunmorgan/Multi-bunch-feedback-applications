@@ -37,7 +37,7 @@ elseif strcmpi(mbf_axis, 's')
     default_tune_offset = 0;
     default_excitation_level = -18;
 else
-    error('Incorrect axis selected. Should be x, y, s, tx, ty')
+    error('growdamp:setup:invalidAxis', 'Incorrect axis selected. Should be x, y, s, tx, ty')
 end %if
 
 default_auto_setup = 'yes';

@@ -23,7 +23,7 @@ addParameter(p, 'n_repeats', 1, valid_number);
 
 parse(p, mbf_axis, varargin{:});
 if ~strcmpi(mbf_axis, 'x')&& ~strcmpi(mbf_axis, 'y') && ~strcmpi(mbf_axis, 's')
-    error('mbf_modescan_capture: Incorrect value axis given (should be x, y or s)');
+    error('modescan:invalidAxis', 'mbf_modescan_capture: Incorrect value axis given (should be x, y or s)');
 end %if
 
 % getting general environment data

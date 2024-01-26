@@ -80,7 +80,7 @@ end_of_passive = end_of_growth + exp_data.nat_turns; %in samples
 end_of_active = end_of_passive + exp_data.act_turns; %in samples
 
 if size(exp_data.data, 2) < end_of_active
-    warning(['No valid data for ', exp_data.filename])
+    warning('growdamp:analysis:noValidData', ['No valid data for ', exp_data.filename])
     return
 end %if
 data = exp_data.data;
