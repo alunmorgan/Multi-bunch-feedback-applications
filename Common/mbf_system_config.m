@@ -9,6 +9,12 @@ root_path = {'/dls/ops-data/Diagnostics/MBF/', ...
     '/dls/ops-data/Diagnostics/LMBF/'};
 harmonic_number = 936;
 
+%% Beam current
+pv_names.current = 'SR-DI-DCCT-01:SIGNAL';
+
+%% Topup countdown
+pv_names.topup.countdown = 'SR-CS-FILL-01:COUNTDOWN';
+
 %% DORIS PVs
 pv_names.doris.phase = 'SR23C-DI-DORIS-01:TARGET_S';
 
@@ -37,13 +43,21 @@ pv_names.hardware_names.mem.ty = pv_names.hardware_names.lab; % test system
 pv_names.hardware_names.tx = [pv_names.hardware_names.lab, ':X']; % test system
 pv_names.hardware_names.ty = [pv_names.hardware_names.lab, ':Y']; % test system
 
-% External trigger
+%% External trigger
 pv_names.Hardware_trigger = 'LI-TI-MTGEN-01:BS-DI-MODE';
 
-% Emittance measurement
-pv_names.emittance = 'SR-DI-EMIT-01:ESPREAD_MEAN';
+%% Emittance measurement
+pv_names.emittance.status = 'SR-DI-EMIT-01:STATUS';
+pv_names.emittance.x = 'SR-DI-EMIT-01:HEMIT';
+pv_names.emittance.x.mean = 'SR-DI-EMIT-01:HEMIT_MEAN';
+pv_names.energy_spread = 'SR-DI-EMIT-01:ESPREAD';
+pv_names.energy_spread.mean = 'SR-DI-EMIT-01:X:ESPREAD_MEAN';
+pv_names.emittance.y = 'SR-DI-EMIT-01:VEMIT';
+pv_names.emittance.y.mean = 'SR-DI-EMIT-01:VEMIT_MEAN';
+pv_names.coupling = 'SR-DI-EMIT-01:COUPLING';
+pv_names.coupling.mean = 'SR-DI-EMIT-01:COUPLING_MEAN';
 
-% Trigger settings
+%% Trigger settings
 pv_names.tails.triggers.mode = ':TRG:SEQ:MODE_S';
 pv_names.tails.triggers.arm = ':TRG:SEQ:ARM_S.PROC';
 trigger_inputs = {'SOFT', 'EXT', 'PM', 'ADC0', 'ADC1', 'SEQ0', 'SEQ1'};
@@ -219,6 +233,10 @@ pv_names.tails.NCO.gaindb = ':GAIN_DB_S';
 pv_names.tails.NCO.enable = ':ENABLE_S';
 pv_names.tails.NCO.PLL_follow = ':TUNE_PLL_S';
 
+% NCO2 settings
+pv_names.tails.NCO2.gain_scalar = ':NCO2:GAIN_SCALAR_S';
+pv_names.tails.NCO2.enable = ':NCO2:ENABLE_S';
+
 % FIR settings
 pv_names.tails.FIR.Base = ':FIR:';
 pv_names.tails.FIR.gain = 'GAIN_S';
@@ -251,5 +269,9 @@ pv_names.tails.pll.readback.magnitude = ':PLL:FILT:MAG';
 pv_names.tails.pll.readback.phase = ':PLL:FILT:PHASE';
 pv_names.tails.pll.readback.i = ':PLL:FILT:I';
 pv_names.tails.pll.readback.q = ':PLL:FILT:Q';
+pv_names.tails.pll.stop_reasons.stop = ':PLL:CTRL:STOP:STOP';
+pv_names.tails.pll.stop_reasons.detector_overflow = ':PLL:CTRL:STOP:DET_OVF';
+pv_names.tails.pll.stop_reasons.offset_overflow = ':PLL:CTRL:STOP:OFFSET_OVF';
+pv_names.tails.pll.stop_reasons.magnitude_error = ':PLL:CTRL:STOP:MAG_ERROR';
 
 
