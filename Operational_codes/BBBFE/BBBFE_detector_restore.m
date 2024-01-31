@@ -1,16 +1,13 @@
-function BBBFE_detector_restore(mbf_ax)
+function BBBFE_detector_restore(mbf_axis)
 
-    
+[~, ~, pv_names, ~] = mbf_system_config;
+mbf_names = pv_names.hardware_names;
+mbf_vars = pv_names.tails;  
 % set up the individual tune detectors to run on 1,2,3
-if strcmp(mbf_ax, 'X') || strcmp(mbf_ax, 'Y')
-pv_head = ['SR23C-DI-TMBF-01:', mbf_ax, ':'];
-elseif strcmp(mbf_ax, 'S')
-pv_head = ['SR23C-DI-LMBF-01:', 'IQ', ':'];
-end %if
 
-set_variable([pv_head, 'DET:1:ENABLE_S'], 0)
-set_variable([pv_head, 'DET:2:ENABLE_S'], 0)
-set_variable([pv_head, 'DET:3:ENABLE_S'], 0)
+set_variable([mbf_names.(mbf_ax), mbf_vars.Detector.det1.enable], 0)
+set_variable([mbf_names.(mbf_ax), mbf_vars.Detector.det2.enable], 0)
+set_variable([mbf_names.(mbf_ax), mbf_vars.Detector.det3.enable], 0)
 
 % press tune only
-setup_operational_mode(mbf_ax, "TuneOnly")
+setup_operational_mode(mbf_axis, "TuneOnly")

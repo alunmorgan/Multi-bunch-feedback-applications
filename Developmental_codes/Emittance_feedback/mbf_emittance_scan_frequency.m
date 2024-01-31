@@ -1,8 +1,8 @@
-function peakfreq = mbf_emittance_scan_frequency(axis, f_range)
+function peakfreq = mbf_emittance_scan_frequency(mbf_axis, f_range)
 % Scans the excitation across the requested frequency range, centred on the
 % inital frequency the system is set to.
 %   Args:
-%       axis(str): 'X' or 'Y'
+%       axis(str): 'x' or 'y'
 %       frange(float): the frequency range away from the centre value.
 %
 %   Returns:
@@ -10,22 +10,21 @@ function peakfreq = mbf_emittance_scan_frequency(axis, f_range)
 %
 % Example: peakfreq = mbf_emittance_scan_frequency(axis, f_range)
 
-switch axis
-    case 'X'
-        emitPV='HEMIT';
-    case 'Y'
-        emitPV='VEMIT';
-end
+mbf_axis = lower(mbf_axis);
 
-f_start = get_variable(['SR23C-DI-TMBF-01:', axis ':NCO2:FREQ_S']);
+[~, ~, pv_names, ~] = mbf_system_config;
+mbf_names = pv_names.hardware_names;
+mbf_vars = pv_names.tails;
+
+f_start = get_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.frequency]);
 f = linspace(f_start - f_range, f_start + f_range, 50);
 emit = NaN(length(f),1);
 for n = 1:length(f)
-    set_variable(['SR23C-DI-TMBF-01:', axis ':NCO2:FREQ_S'], f(n))
+    set_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.frequency], f(n))
     pause(.6)
-    emit(n) = get_variable(['SR-DI-EMIT-01:' emitPV]);
+    emit(n) = get_variable(pv_names.emittance.(mbf_axis));
 end
-set_variable(['SR23C-DI-TMBF-01:', axis ':NCO2:FREQ_S'], f_start)
+set_variable([mbf_names.(mbf_axis) mbf_vars.NCO2.frequency], f_start)
 
 [~, m_ind] = max(emit);
 peakfreq = f(m_ind);

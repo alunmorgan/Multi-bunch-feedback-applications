@@ -2,7 +2,8 @@ function varargout = mbf_emittance_setup(mbf_axis, varargin)
 % Sets up the Multibunch feedback system to run a frequency locked loop on a
 % single bunch in each plane. The use the tracked frequency to run an
 % oscillator on the sideband of the tune.
-%   Args: (All optional)
+%   Args: 
+%       mbf_axis(str): the axis to do the setup on (x, y, or s).
 %       excitation(float): The power of the oscillator in the selected axis (in dB).
 %       fll_monitor_bunches(vector of floats): The bunches to be used by the
 %                                                FLL for tune tracking.
@@ -42,33 +43,37 @@ addParameter(p, 'harmonic', default_harmonic, validScalarNum);
 addParameter(p, 'excitation_frequency', default_excitation_frequency, validScalarNum)
 parse(p,mbf_axis, varargin{:});
 
+mbf_axis = lower(mbf_axis);
+[~, ~, pv_names, ~] = mbf_system_config;
+mbf_names = pv_names.hardware_names;
+mbf_vars = pv_names.tails;
+
 if isnan(p.Results.excitation)
     excitation_frequency = default_excitation_frequency;
 else
     excitation_frequency = p.Results.excitation_frequency;
 end %if
-mbf_name = mbf_axis_to_name(mbf_axis);
 
 % initialise FLL on selected bunches.
 mbf_fll_start(mbf_axis, 'fllbunches',p.Results.fll_monitor_bunches,...
     'guardbunches',p.Results.guardbunches)
 
-set_variable([mbf_name, 'NCO2:FREQ_S'], p.Results.harmonic + excitation_frequency);
+set_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.frequency], p.Results.harmonic + excitation_frequency);
 
-%% Setting up the NCO gains and setting the tune sweep to follow the FLL.
-set_variable([mbf_name, 'NCO2:TUNE_PLL_S'],'Follow');
-set_variable([mbf_name, 'NCO2:GAIN_DB_S'],p.Results.excitation);
+%% Setting up the NCO gains and setting the tune sweep to follow the PLL.
+set_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.PLL_follow],'Follow');
+set_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.gain_db],p.Results.excitation);
 
 %% Extracting the bunches the feedback is operating on 
-fillx = get_variable([mbf_name, 'BUN:1:SEQ:ENABLE_S']);
+fillx = get_variable([mbf_names.(mbf_axis), pv_names.tails.Bunch_bank.bank1.SEQ.enablewf]);
 
 %% Applying the same mapping to the NCO and combining it with the user defined pattern
 pattern = and(fillx, p.Results.excitation_pattern'); 
-set_variable([mbf_name, 'BUN:0:NCO2:ENABLE_S'],double(pattern))
-set_variable([mbf_name, 'BUN:1:NCO2:ENABLE_S'],double(pattern))
+set_variable([mbf_names.(mbf_axis), mbf_vars.Bunch_bank.bank0.NCO2.enablewf], double(pattern))
+set_variable([mbf_names.(mbf_axis), mbf_vars.Bunch_bank.bank1.NCO2.enablewf], double(pattern))
 
 %% Switching on the excitation
-set_variable([mbf_name, 'NCO2:ENABLE_S'],'On');
+set_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.enable],'On');
 
 if nargout > 0 
     varargout{1} = pattern;

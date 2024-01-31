@@ -43,8 +43,10 @@ addParameter(p, 'repeat_datapoints', 20, validScalarNum);
 parse(p, mbf_axis, varargin{:});
 
 % Set up MBF environment
-[root_string, ~, ~, ~] = mbf_system_config;
+[root_string, ~, pv_names, ~] = mbf_system_config;
 root_string = root_string{1};
+mbf_names = pv_names.hardware_names;
+mbf_vars = pv_names.tails;
 
 %% Get environment data
 
@@ -63,17 +65,16 @@ PPRE.excitation_frequency = p.Results.excitation_frequency;
 PPRE.harmonic = p.Results.harmonic;
 
 % Tune sweeps (do we need all of these?)
-PPRE.tune_x_sweep = get_variable('SR23C-DI-TMBF-01:X:TUNE:DMAGNITUDE');
-PPRE.tune_x_sweep_model = get_variable('SR23C-DI-TMBF-01:X:TUNE:MMAGNITUDE');
-PPRE.tune_x_scale = get_variable('SR23C-DI-TMBF-01:X:TUNE:SCALE');
-PPRE.tune_y_sweep = get_variable('SR23C-DI-TMBF-01:Y:TUNE:DMAGNITUDE');
-PPRE.tune_y_sweep_model = get_variable('SR23C-DI-TMBF-01:Y:TUNE:MMAGNITUDE');
-PPRE.tune_y_scale = get_variable('SR23C-DI-TMBF-01:Y:TUNE:SCALE');
+PPRE.tune_x_sweep = get_variable([mbf_names.x, ':TUNE:DMAGNITUDE']);
+PPRE.tune_x_sweep_model = get_variable([mbf_names.x, ':TUNE:MMAGNITUDE']);
+PPRE.tune_x_scale = get_variable([mbf_names.x, ':TUNE:SCALE']);
+PPRE.tune_y_sweep = get_variable([mbf_names.y, ':TUNE:DMAGNITUDE']);
+PPRE.tune_y_sweep_model = get_variable([mbf_names.y, ':TUNE:MMAGNITUDE']);
+PPRE.tune_y_scale = get_variable([mbf_names.y, ':TUNE:SCALE']);
 PPRE.tunes = get_all_tunes('xys');
 
 %% Set up MBF excitation
 
-mbf_name = mbf_axis_to_name(mbf_axis);
 PPRE.excitation_pattern = mbf_emittance_setup(mbf_axis, ...
     'excitation', p.Results.excitation_gain(1),...
     'excitation_frequency',p.Results.excitation_frequency(1),...
@@ -87,8 +88,8 @@ set_variable('SR01C-DI-PINH-01:POS1', -2.5)
 set_variable('SR01C-DI-PINH-02:POS1', -2.5)
 
 %% Do measurement
-orig_gain = get_variable([mbf_name, 'NCO2:GAIN_DB_S']);
-orig_freq = get_variable([mbf_name, 'NCO2:FREQ_S']);
+orig_gain = get_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.gain_db]);
+orig_freq = get_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.frequency]);
 
 
 % gain scan
@@ -100,19 +101,19 @@ for whd = 1:length(p.Results.excitation_gain)
         % harmonic scan
         for kef = 1:length(p.Results.harmonic)
             fprintf('.');
-            set_variable('LI-TI-MTGEN-01:BS-DI-MODE', 0);
-            set_variable([mbf_name, 'NCO2:GAIN_DB_S'],p.Results.excitation_gain(whd));
-            set_variable([mbf_name, 'NCO2:FREQ_S'], p.Results.harmonic(1) + p.Results.excitation_frequency(nwa));
-            set_variable([mbf_name, 'NCO2:FREQ_S'], p.Results.harmonic(kef) + p.Results.excitation_frequency(1));
+            set_variable(pv_names.Hardware_trigger, 0);
+            set_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.gain_db],p.Results.excitation_gain(whd));
+            set_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.frequency], p.Results.harmonic(1) + p.Results.excitation_frequency(nwa));
+            set_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.frequency], p.Results.harmonic(kef) + p.Results.excitation_frequency(1));
             pause(1)
             PPRE.scan{whd, nwa, kef} = PPRE_aquisition(p.Results.repeat_datapoints);
         end %for
     end %for
 end %for
 
-set_variable([mbf_name, 'NCO2:GAIN_DB_S'], orig_gain)
-set_variable([mbf_name, 'NCO2:FREQ_S'], orig_freq)
-set_variable([mbf_name, 'NCO2:ENABLE_S'], 0)
+set_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.gain_db], orig_gain)
+set_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.frequency], orig_freq)
+set_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.enable], 0)
 %% saving the data to a file
 if strcmp(mbf_axis, 'x') || strcmp(mbf_axis, 'y')|| strcmp(mbf_axis, 's')
     %     only save if not on test system

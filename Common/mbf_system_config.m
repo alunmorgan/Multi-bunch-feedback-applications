@@ -46,16 +46,26 @@ pv_names.hardware_names.ty = [pv_names.hardware_names.lab, ':Y']; % test system
 %% External trigger
 pv_names.Hardware_trigger = 'LI-TI-MTGEN-01:BS-DI-MODE';
 
+%% Pinhole PVs
+pv_names.pinhole1 = 'SR01C-DI-DCAM-04';
+pv_names.pinhole2 = 'SR01C-DI-DCAM-05';
+
 %% Emittance measurement
 pv_names.emittance.status = 'SR-DI-EMIT-01:STATUS';
 pv_names.emittance.x = 'SR-DI-EMIT-01:HEMIT';
 pv_names.emittance.x.mean = 'SR-DI-EMIT-01:HEMIT_MEAN';
+pv_names.emittance.x.error = 'SR-DI-EMIT-01:HERROR';
 pv_names.energy_spread = 'SR-DI-EMIT-01:ESPREAD';
 pv_names.energy_spread.mean = 'SR-DI-EMIT-01:X:ESPREAD_MEAN';
 pv_names.emittance.y = 'SR-DI-EMIT-01:VEMIT';
 pv_names.emittance.y.mean = 'SR-DI-EMIT-01:VEMIT_MEAN';
+pv_names.emittance.y.error = 'SR-DI-EMIT-01:VERROR';
 pv_names.coupling = 'SR-DI-EMIT-01:COUPLING';
 pv_names.coupling.mean = 'SR-DI-EMIT-01:COUPLING_MEAN';
+pv_names.beam_size.pinhole1.sigmax = 'SR-DI-EMIT-01:P1:SIGMAX';
+pv_names.beam_size.pinhole1.sigmay = 'SR-DI-EMIT-01:P1:SIGMAY';
+pv_names.beam_size.pinhole2.sigmax = 'SR-DI-EMIT-01:P2:SIGMAX';
+pv_names.beam_size.pinhole2.sigmay = 'SR-DI-EMIT-01:P2:SIGMAY';
 
 %% Trigger settings
 pv_names.tails.triggers.mode = ':TRG:SEQ:MODE_S';
@@ -215,6 +225,9 @@ for n_det = 0:3
     pv_names.tails.Detector.(l_det).I = [':DET:',n_det_label,':I'];
     pv_names.tails.Detector.(l_det).Q = [':DET:',n_det_label,':Q'];
     pv_names.tails.Detector.(l_det).power = [':DET:',n_det_label,':POWER'];
+    pv_names.tails.Detector.(l_det).bunch_select = ['DET:',n_det_label,':BUNCH_SELECT_S'];
+    pv_names.tails.Detector.(l_det).reset_selection = ['DET:',n_det_label,':RESET_SELECT_S.PROC'];
+    pv_names.tails.Detector.(l_det).set_selection = ['DET:',n_det_label,':SET_SELECT_S.PROC'];
 end %for
 
 % Memory settings
@@ -235,7 +248,11 @@ pv_names.tails.NCO.PLL_follow = ':TUNE_PLL_S';
 
 % NCO2 settings
 pv_names.tails.NCO2.gain_scalar = ':NCO2:GAIN_SCALAR_S';
+pv_names.tails.NCO2.gain_db = ':NCO2:GAIN_DB_S';
 pv_names.tails.NCO2.enable = ':NCO2:ENABLE_S';
+pv_names.tails.NCO2.frequency = ':NCO2:FREQ_S';
+pv_names.tails.NCO2.enable = ':NCO2:ENABLE_S';
+pv_names.tails.NCO2.PLL_follow = ':NCO2:TUNE_PLL_S';
 
 % FIR settings
 pv_names.tails.FIR.Base = ':FIR:';
@@ -274,4 +291,16 @@ pv_names.tails.pll.stop_reasons.detector_overflow = ':PLL:CTRL:STOP:DET_OVF';
 pv_names.tails.pll.stop_reasons.offset_overflow = ':PLL:CTRL:STOP:OFFSET_OVF';
 pv_names.tails.pll.stop_reasons.magnitude_error = ':PLL:CTRL:STOP:MAG_ERROR';
 
+%% ADC buffers
+pv_names.tails.adc.delta = ':ADC:MMS:DELTA';
+pv_names.tails.adc.max = ':ADC:MMS:MAX';
+pv_names.tails.adc.mean = ':ADC:MMS:MEAN';
+pv_names.tails.adc.min = ':ADC:MMS:MIN';
+pv_names.tails.adc.std = ':ADC:MMS:STD';
 
+%% DAC buffers
+pv_names.tails.dac.delta = ':DAC:MMS:DELTA';
+pv_names.tails.dac.max = ':DAC:MMS:MAX';
+pv_names.tails.dac.mean = ':DAC:MMS:MEAN';
+pv_names.tails.dac.min = ':DAC:MMS:MIN';
+pv_names.tails.dac.std = ':DAC:MMS:STD';

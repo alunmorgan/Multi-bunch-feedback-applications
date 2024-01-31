@@ -6,6 +6,10 @@ function mbf_emittance_control(varargin)
 %
 % Example: mbf_emittance_control('hemit_target', 3, 'vemit_target', 9)
 
+[~, ~, pv_names, ~] = mbf_system_config;
+mbf_names = pv_names.hardware_names;
+mbf_vars = pv_names.tails;
+
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
 p = inputParser;
 addParameter(p, 'hemit_target', NaN, validScalarPosNum);
@@ -17,19 +21,19 @@ if isnan(p.Results.hemit_target) && isnan(p.Results.vemit_target)
     return
 end %if
 
-if get_variable('SR-DI-DCCT-01:SIGNAL') < 1 %mA
+if get_variable(pv_names.current) < 1 %mA
     disp('This needs to be run with beam. No changes have been made.')
     return
 end %if
 
 if ~isnan(p.Results.hemit_target)
-existing_excitation_x = get_variable('SR23C-DI-TMBF-01:X:NCO2:GAIN_DB_S');
+existing_excitation_x = get_variable([mbf_names.x, mbf_vars.NCO2.gain_db]);
 mbf_emittance_setup('x', 'excitation',existing_excitation_x, 'fll_monitor_bunches', 300)
 emittance_control_loop('X', p.Results.hemit_target)
 end %if
 
 if ~isnan(p.Results.vemit_target)
-existing_excitation_y = get_variable('SR23C-DI-TMBF-01:Y:NCO2:GAIN_DB_S');
+existing_excitation_y = get_variable([mbf_names.y, mbf_vars.NCO2.gain_db]);
 mbf_emittance_setup('y', 'excitation',existing_excitation_y, 'fll_monitor_bunches', 400)
 emittance_control_loop('Y', p.Results.vemit_target)
 end %if

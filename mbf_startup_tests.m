@@ -7,7 +7,7 @@ function mbf_startup_tests
 mbf_names = pv_names.hardware_names;
 mbf_vars = pv_names.tails;
 
-beam_current = get_variable('SR-DI-DCCT-01:SIGNAL');
+beam_current = get_variable(pv_names.current);
 if beam_current< 10
     disp('Beam current below 10mA... not running tests.')
     return
