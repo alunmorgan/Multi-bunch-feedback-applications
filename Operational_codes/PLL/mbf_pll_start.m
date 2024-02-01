@@ -28,7 +28,7 @@ addParameter(p, 'guardbunches', default_guardbunches, @(x) assert(isnumeric(x) &
 parse(p, mbf_axis, pllbunches, varargin{:});
 
 % initialise pll pattern
-pllpattern=false(1,936);
+pllpattern=false(1,harmonic_number);
 % Matlab counts idices from 1, but at DLS we count bunches from 0, thus we need to
 % add one.
 pllpattern(pllbunches+1)=true;
@@ -37,7 +37,7 @@ pllpattern(pllbunches+1)=true;
 % pll bunches. It's a little tricky with a general pattern, and the cirular
 % nature the pattern, so I use circshift in a loop
 
-guardpattern=true(1,936);
+guardpattern=true(1,harmonic_number);
 for n=-guardbunches:guardbunches
     guardpattern(circshift(pllpattern,n))=false;
 end

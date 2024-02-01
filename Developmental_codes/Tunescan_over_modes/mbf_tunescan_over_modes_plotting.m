@@ -7,7 +7,7 @@ function mbf_tunescan_over_modes_plotting(tunescan)
 % Example: mbf_tunescan_plotting(tunescan)
 
 if ~isfield(tunescan, 'harmonic_number')
-    tunescan.harmonic_number = 936;
+    [~, tunescan.harmonic_number, ~, ~] = mbf_system_config;
 end %if
 harmonic_number = tunescan.harmonic_number;
 

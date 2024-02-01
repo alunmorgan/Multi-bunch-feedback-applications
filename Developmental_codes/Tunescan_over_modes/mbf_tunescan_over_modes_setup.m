@@ -32,11 +32,11 @@ drive_wf = zeros(1, harmonic_number);
 drive_wf(exp_setup.drive_bunches + 1) = 1;
 
 % chose which bunches to monitor the response
-detect_wf_1 = zeros(1,936);
+detect_wf_1 = zeros(1,harmonic_number);
 detect_wf_1(sort(mod(detect_bunch + 0, harmonic_number)+1)) = 1;
-detect_wf_2 = zeros(1,936);
+detect_wf_2 = zeros(1,harmonic_number);
 detect_wf_2(sort(mod(detect_bunch + 1, harmonic_number)+1)) = 1;
-detect_wf_3 = zeros(1,936);
+detect_wf_3 = zeros(1,harmonic_number);
 detect_wf_3(sort(mod(detect_bunch + 2, harmonic_number)+1)) = 1;
 
 % write to the TMBF on which bunches to perform the sweep

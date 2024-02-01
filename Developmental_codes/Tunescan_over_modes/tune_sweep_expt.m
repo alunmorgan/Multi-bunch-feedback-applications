@@ -1,18 +1,20 @@
-function tune_sweep_expt
+function tune_sweep_expt(mbf_axis)
 
 % add the matlab paths for MBF tools
 mbf_tools;
+[~, harmonic_number, pv_names, ~] = mbf_system_config;
+mbf_names = pv_names.hardware_names;
+mbf_vars = pv_names.tails;
 
 % experiment parameters
 savefile    = appendtimestamp('tmbf_expt');
-axis        = 'X';
 ncap        = 1001; % 4096; % 1001 takes ~ 3 minutes
 startmode   = 0;
-drive_bunch = 0:935;
+drive_bunch = 0:harmonic_number-1;
 % drive_bunch = 100;
 fb_on_off   = 1;
 
-if strcmp(axis,'X')
+if strcmp(mbf_axis,'x')
     start_freq = 0.139;
     end_freq = 0.239;
 else
@@ -21,44 +23,47 @@ else
 end
 
 %%% configure the sweep 
-configure_tune_sweep(axis , drive_bunch, fb_on_off, 1, 1, 1, 1)
+configure_tune_sweep(mbf_axis , drive_bunch, fb_on_off, 1, 1, 1, 1)
 
 % arm the TMBF as one-shot rather than continuous
-set_variable(['SR23C-DI-TMBF-01:' axis ':TRG:SEQ:MODE_S'],'One Shot')
-set_variable(['SR23C-DI-TMBF-01:' axis ':SEQ:RESET_S.PROC'],1)
+set_variable([mbf_names.(mbf_axis), mbf_vars.triggers.mode],'One Shot')
+set_variable([mbf_names.(mbf_axis), mbf_vars.Sequencer.Base, pv_names.tails.Sequencer.reset],1)
 
 % set the super-sequencer to have the correct number of modes
-set_variable(['SR23C-DI-TMBF-01:' axis ':SEQ:SUPER:RESET_S.PROC'],1)
-set_variable(['SR23C-DI-TMBF-01:' axis ':SEQ:SUPER:COUNT_S'],936)
+set_variable([mbf_names.(mbf_axis), mbf_vars.Super_sequencer_reset],1)
+set_variable([mbf_names.(mbf_axis), mbf_vars.Super_sequencer_count],...
+    harmonic_number)
 
 % change the number of captures to speed things up (normally 4096)
-set_variable(['SR23C-DI-TMBF-01:' axis ':SEQ:1:COUNT_S'],ncap)
+set_variable([mbf_names.(mbf_axis), mbf_vars.Sequencer.seq1.count],ncap)
 
 % select the tune sweep frequency / mode
-set_variable(['SR23C-DI-TMBF-01:' axis ':SEQ:1:START_FREQ_S'],startmode + start_freq)
-set_variable(['SR23C-DI-TMBF-01:' axis ':SEQ:1:END_FREQ_S'],  startmode + end_freq)
+set_variable([mbf_names.(mbf_axis), mbf_vars.Sequencer.seq1.start_frequency],...
+    startmode + start_freq)
+set_variable([mbf_names.(mbf_axis), mbf_vars.Sequencer.seq1.end_frequency],...
+    startmode + end_freq)
 
 % start the multi-mode sweep
-set_variable(['SR23C-DI-TMBF-01:' axis ':TRG:SEQ:ARM_S.PROC'], 1)
+set_variable([mbf_names.(mbf_axis), mbf_vars.triggers.SEQ.arm], 1)
 
 % download the data
 % (Eww.  Convert axis string into 0 or 1.)
-det_axis = find('XY' == axis) - 1;
-[data, scale] = mbf_read_det('SR23C-DI-TMBF-01', 'axis', det_axis, 'lock', 1800 );
+det_axis = find('xy' == mbf_axis) - 1;
+[data, scale] = mbf_read_det(mbf_names.mem.(mbf_axis), 'axis', det_axis, 'lock', 1800 );
 
 % reset the sweep
-configure_tune_sweep(axis , 0:935, 1, 1, 0, 0, 0)
-set_variable(['SR23C-DI-TMBF-01:' axis ':TRG:SEQ:MODE_S'],'Rearm')
-set_variable(['SR23C-DI-TMBF-01:' axis ':SEQ:RESET_S.PROC'],1)
+configure_tune_sweep(mbf_axis , 0:harmonic_number-1, 1, 1, 0, 0, 0)
+set_variable([mbf_names.(mbf_axis), mbf_vars.triggers.SEQ.mode],'Rearm')
+set_variable([mbf_names.(mbf_axis), mbf_vars.Sequencer.Base, pv_names.tails.Sequencer.reset],1)
 
 % reshape the results
 fracttune = scale(1:ncap);
 for n = 1:size(data,2)
-    result = reshape(abs(data(:,n)), ncap, 936);
+    result = reshape(abs(data(:,n)), ncap, harmonic_number);
 
     % plot the results
     figure(n)
-    imagesc(1:936,fracttune,result)
+    imagesc(1:harmonic_number, fracttune, result)
     xlabel('mode number')
     ylabel('fractional tune')
     yy  = colorbar;
@@ -66,9 +71,9 @@ for n = 1:size(data,2)
 end
 
 % get the stored beam conditions
-fill_pattern = get_variable('SR-DI-PICO-01:BUCKETS_180');
-current = get_variable('SR-DI-DCCT-01:SIGNAL');
+fill_pattern = get_variable(pv_names.bunch_pattern);
+current = get_variable(pv_names.current);
 
 % save the data
-save(savefile,'data','scale','axis','ncap','startmode','drive_bunch','fb_on_off','start_freq','end_freq','fill_pattern','current')
+save(savefile,'data','scale','mbf_axis','ncap','startmode','drive_bunch','fb_on_off','start_freq','end_freq','fill_pattern','current')
 

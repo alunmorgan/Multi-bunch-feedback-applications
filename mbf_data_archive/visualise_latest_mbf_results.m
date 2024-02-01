@@ -1,13 +1,13 @@
 function visualise_latest_mbf_results(varargin)
 
-[root_path, ~, ~, ~] = mbf_system_config;
+[root_path, harmonic_number, ~, ~] = mbf_system_config;
 
 
 defaultOverrides = [NaN, NaN];
 defaultAnalysisSetting = 0;
 defaultLengthAveraging = 20;
 defaultDebug = 0;
-defaultDebugModes = 1:936;
+defaultDebugModes = 1:harmonic_number;
 defaultKeepDebugGraphs = 0;
 defaultGrowdamp_plotMode = 'neg';
 default_result_type = 'standard';

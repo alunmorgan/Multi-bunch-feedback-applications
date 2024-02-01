@@ -113,7 +113,7 @@ for hkw = 1:length(requested_data)
     plot(1:harmonic_number, requested_data{hkw}.fill_pattern, 'b')
 end %for
 ylim([0 inf])
-xlim([1 936])
+xlim([1 harmonic_number])
 set(axfp, 'XTick', [])
 title('Fill pattern variation')
 ylabel('Charge (nC)')

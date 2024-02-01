@@ -13,8 +13,8 @@ function mbf_growdamp_plot_summary(poly_data, frequency_shifts, metadata, vararg
 %       outputs (str): 'passive' 'active', or 'both' Determines which traces are
 %                      included in the graphs
 %       axis: 'x', 'y' or 's'
-%       plot_mode: 'pos' or 'neg'. Determines if plot modes 0:936 or
-%       -468:468
+%       plot_mode: 'pos' or 'neg'. Determines if plot modes 0:harmonic_number or
+%       -harmonic_number/2:harmonic_number/2
 %
 % Example: mbf_growdamp_plot_summary(poly_data, frequency_shifts, 'passive')
 
@@ -24,6 +24,7 @@ p.CaseSensitive = false;
 valid_string = @(x) ischar(x);
 addRequired(p, 'poly_data');
 addRequired(p, 'frequency_shifts');
+addRequired(p, 'metadata');
 addParameter(p, 'outputs', 'passive', valid_string);
 addParameter(p, 'plot_mode', 'pos', valid_string);
 parse(p, poly_data, frequency_shifts, varargin{:});

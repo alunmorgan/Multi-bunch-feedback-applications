@@ -21,8 +21,11 @@ function varargout = mbf_emittance_setup(mbf_axis, varargin)
 %
 % Example: mbf_emittance_setup('x')
 
+mbf_axis = lower(mbf_axis);
+[~, harmonic_number, pv_names, ~] = mbf_system_config;
+
 default_excitation = -60; %dB
-default_excitation_pattern = ones(936,1);
+default_excitation_pattern = ones(harmonic_number,1);
 default_fll_monitor_bunches=400;
 default_guardbunches = 10;
 default_harmonic = 10;
@@ -43,8 +46,7 @@ addParameter(p, 'harmonic', default_harmonic, validScalarNum);
 addParameter(p, 'excitation_frequency', default_excitation_frequency, validScalarNum)
 parse(p,mbf_axis, varargin{:});
 
-mbf_axis = lower(mbf_axis);
-[~, ~, pv_names, ~] = mbf_system_config;
+
 mbf_names = pv_names.hardware_names;
 mbf_vars = pv_names.tails;
 

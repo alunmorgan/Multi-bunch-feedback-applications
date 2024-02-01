@@ -198,5 +198,5 @@ for n_det = 0:3
 end %for
 set_variable([pv_head  Detector.('det0').enable], 'Enabled');
 % Set the bunch mode to all bunches on detector 0
-set_variable([pv_head  Detector.('det0').bunch_selection], ones(936,1)');
+set_variable([pv_head  Detector.('det0').bunch_selection], ones(harmonic_number,1)');
 

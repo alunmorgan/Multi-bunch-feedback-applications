@@ -33,8 +33,6 @@ function conditioned_data = mbf_spectra_archival_retrieval(ax, date_range, varar
 %
 % Example: mbf_modescan_archival_retrieval('x', [datetime(2023, 1, 1), datetime("now")])
 
-harmonicNumber = 936;
-
 p = inputParser;
 p.StructExpand = false;
 p.CaseSensitive = false;

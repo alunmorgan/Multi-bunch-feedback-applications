@@ -41,7 +41,7 @@ end %if
 
 if strcmp(p.Results.plotting, 'yes')
     if ~isfield(modescan, 'harmonic_number')
-        modescan.harmonic_number = 936;
+        [~, modescan.harmonic_number, ~, ~] = mbf_system_config;
     end %if
     [data_magnitude, data_phase] = mbf_modescan_analysis(modescan);
     mbf_modescan_plotting(data_magnitude, data_phase, modescan)

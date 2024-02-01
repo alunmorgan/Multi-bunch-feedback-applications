@@ -18,6 +18,8 @@ function varargout = mbf_PPRE_capture(mbf_axis, varargin)
 %
 % Example: data =  mbf_PPRE_capture('y','excitation_gain', -30, 'save_to_archive', 'no');
 
+[root_string, harmonic_number, pv_names, ~] = mbf_system_config;
+
 % Define input and default values
 binary_string = {'yes', 'no'};
 validScalarNum = @(x) isnumeric(x) && isscalar(x);
@@ -26,7 +28,7 @@ tunes = get_all_tunes(mbf_axis);
 leftSB = tunes.([mbf_axis, '_tune']).lower_sideband;
 default_excitation_frequency = leftSB;
 default_excitation_gain = -60; %dB
-default_excitation_pattern = ones(936,1);
+default_excitation_pattern = ones(harmonic_number,1);
 
 p = inputParser;
 p.StructExpand = false;
@@ -43,7 +45,7 @@ addParameter(p, 'repeat_datapoints', 20, validScalarNum);
 parse(p, mbf_axis, varargin{:});
 
 % Set up MBF environment
-[root_string, ~, pv_names, ~] = mbf_system_config;
+
 root_string = root_string{1};
 mbf_names = pv_names.hardware_names;
 mbf_vars = pv_names.tails;
