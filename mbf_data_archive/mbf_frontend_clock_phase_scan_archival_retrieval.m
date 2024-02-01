@@ -62,7 +62,7 @@ elseif  strcmpi(ax, 'y')
 elseif strcmpi(ax, 's')
     filter_name = 'clock_phase_scan_S_axis';
 else
-    error('mbf_archival_dataset_retrieval: No valid axis given (should be x, y or s)')
+    error('archivalDatasetRetrieval:InputError', 'No valid axis given (should be x, y or s)')
 end %if
 requested_data = mbf_archival_dataset_retrieval(filter_name, date_range,...
     'bypass_index' ,p.Results.bypass_index, 'metadata_only', p.Results.metadata_only);
@@ -81,7 +81,7 @@ else
             'sweep_parameter',p.Results.sweep_parameter,...
             'parameter_step', p.Results.parameter_step);
     else
-        error('Please select collate or sweep as the analysis type');
+        error('archivalDatasetRetrieval:InputError', 'Please select collate or sweep as the analysis type');
     end %if
     setup.axis = ax;
     mbf_frontend_clock_phase_scan_archival_plotting(conditioned_data, leading, excited, following, times, setup);

@@ -38,7 +38,7 @@ if strcmp([pv_head_T pv_names.tails.TRG.memory_status], 'Idle') == 1 &&...
     mbf_get_then_put({[pv_head_T pv_names.tails.triggers.MEM.arm];...
         [pv_head_L pv_names.tails.triggers.MEM.arm]},1);
 else
-    error('Memory is not ready please try again')
+    error('BunchMotionCapture:MemoryError', 'Memory is not ready please try again')
 end %if
 
 

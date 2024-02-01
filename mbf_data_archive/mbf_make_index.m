@@ -15,12 +15,12 @@ if ~strcmp(application_type, 'Growdamp') && ~strcmp(application_type, 'Bunch_mot
         && ~strcmp(application_type, 'LO_scan') && ~strcmp(application_type, 'system_phase_scan') ...
         && ~strcmp(application_type, 'clock_phase_scan')...
         && ~strcmp(application_type, 'fll_phase_scan')
-    error('mbf_make_index: No valid application given (Growdamp, Bunch_motion, Modescan, Spectrum, LO_scan, system_phase_scan, clock_phase_scan, fll_phase_scan)')
+    error('makeIndex:InputError', 'No valid application given (Growdamp, Bunch_motion, Modescan, Spectrum, LO_scan, system_phase_scan, clock_phase_scan, fll_phase_scan)')
 end %if
 if nargin < 2
     ax = '';
     if strcmp(application_type, 'Growdamp') || strcmp(application_type, 'Modescan') || strcmp(application_type, 'Spectrum')
-        error('An axis needs to be specified')
+        error('makeIndex:InputError', 'An axis needs to be specified')
     end %if
 end %if
 
@@ -40,7 +40,7 @@ else
         index_name = 's_axis_index';
         filter_name = [application_type, '_s_axis'];
     else
-        error('mbf_make_index: No valid axis given (should be x, y or s)')
+        error('makeIndex:InputError', 'No valid axis given (should be x, y or s)')
     end %if
 end %if
 tic

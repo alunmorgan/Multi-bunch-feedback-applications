@@ -5,9 +5,9 @@ function chromaticity_aquire_live(save_loc)
 %
 % Example chromaticity_aquire_live(save_loc)
 if nargin == 0
-    error('Please specify a save location')
+    error('ChromaticityAquireLive:OutputError', 'Please specify a save location')
 elseif nargin > 1
-    error('Wrong number of input arguments. Only the save location is needed')
+    error('ChromaticityAquireLive:InputError', 'Wrong number of input arguments. Only the save location is needed')
 end %if
 
 

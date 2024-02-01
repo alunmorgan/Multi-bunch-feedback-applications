@@ -8,7 +8,7 @@ function cleaned_data = remove_spikes_from_image(data, threshold)
 % example:  cleaned_data = remove_spikes_from_image(data, threshold, it)
 
 if nargin == 1
-    error('Need to put in a threshold level')
+    error('RemoveSpikesFromImage:IOError', 'Need to put in a threshold level')
 end
 cleaned_data = data;
 % for each point calculate the difference between it and the adjacent points

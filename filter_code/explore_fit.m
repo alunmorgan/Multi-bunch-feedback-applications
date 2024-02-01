@@ -3,16 +3,15 @@ function explore_fit
     fig = figure('MenuBar', 'none', 'Toolbar', 'figure', ...
         'Position', [0 0 900 600]);
 
-    global h_pos v_pos;
     h_pos = 10; v_pos = 20;
     h = {};
-    h.alpha = control('edit', [1e-5 1e-3], 100, 'Range of alpha');
-    h.beta = control('edit', 1e-3, 100, 'Beta');
-    h.tune = control('edit', 0.2, 120, 'Select tune');
-    h.delta = control('edit', 0.05, 60, 'Delta tune');
-    h.delay = control('edit', 1, 60, 'Filter delay at tune');
-    h.phase = control('edit', 0, 120, 'Phase offset');
-    h.N = control('edit', 10, 60, 'Points in filter');
+    h.alpha = control(h_pos, v_pos, 'edit', [1e-5 1e-3], 100, 'Range of alpha');
+    h.beta = control(h_pos, v_pos, 'edit', 1e-3, 100, 'Beta');
+    h.tune = control(h_pos, v_pos, 'edit', 0.2, 120, 'Select tune');
+    h.delta = control(h_pos, v_pos, 'edit', 0.05, 60, 'Delta tune');
+    h.delay = control(h_pos, v_pos, 'edit', 1, 60, 'Filter delay at tune');
+    h.phase = control(h_pos, v_pos, 'edit', 0, 120, 'Phase offset');
+    h.N = control(h_pos, v_pos, 'edit', 10, 60, 'Points in filter');
 
     guidata(fig, h);
     redraw(fig, 0);
@@ -20,8 +19,7 @@ end
 
 
 % Places control with specified style, value, width  and tooltip.
-function result = control(style, value, width, tooltip, varargin)
-    global h_pos v_pos;
+function result = control(h_pos, v_pos, style, value, width, tooltip, varargin)
     position = [h_pos v_pos width 20];
     h_pos = h_pos + width + 5;
     result = uicontrol( ...
@@ -30,7 +28,7 @@ function result = control(style, value, width, tooltip, varargin)
 end
 
 
-function redraw(fig, event)
+function redraw(fig)
     h = guidata(fig);
     alpha = get_value(h.alpha);
     beta = get_value(h.beta);

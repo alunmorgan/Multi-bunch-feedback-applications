@@ -9,7 +9,7 @@ function tunescan = mbf_tunescan_over_modes_capture(mbf_axis, tunes, exp_setup)
 % example data = mbf_tunescan_capture('x', 0.17)
 
 if ~strcmpi(mbf_axis, 'x')&& ~strcmpi(mbf_axis, 'y') && ~strcmpi(mbf_axis, 's')
-    error('mbf_tunescan_capture: Incorrect value axis given (should be x, y or s)');
+    error('TunescanOverModes:IOError', 'mbf_tunescan_capture: Incorrect value axis given (should be x, y or s)');
 end %if
 
 % getting general environment data

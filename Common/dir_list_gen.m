@@ -82,7 +82,7 @@ if nargout == 1
     names = strcat(repmat(directory_name,size(names,1),1), names);
 elseif nargout == 2
 else
-    error('Wrong number of outputs (should be 1 or 2)')
+    error('dirlistgen:IOError','Wrong number of outputs (should be 1 or 2)')
 end
 names = cellstr(names);
 
