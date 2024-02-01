@@ -1,7 +1,7 @@
-function mbf_fll_bank_setup(name, varargin)
+function mbf_fll_bank_setup(mbf_axis, varargin)
 % Sets up the banks for FLL operation.
 %
-%   name (str): <EPICS device>:<axis>
+%   mbf_axis(str): x, y, or s
 %   pllbunches (float or list of floats): bunches numbers to use for PLL (0-935)
 %                                         (defaults to 400)
 %   guardbunches (int): number of bunches around PLL to also take out
@@ -16,14 +16,18 @@ p = inputParser;
 p.StructExpand = false;
 p.CaseSensitive = false;
 valid_number = @(x) isnumeric(x) && isscalar(x);
-addRequired(p, 'name');
+addRequired(p, 'mbf_axis');
 addParameter(p, 'fllbunches', default_bunch);
 addParameter(p, 'guardbunches', default_guard, valid_number);
 
-parse(p, name, varargin{:});
+parse(p, mbf_axis, varargin{:});
 
 guardbunches = p.Results.guardbunches;
 fllbunches = mod(p.Results.fllbunches, 935);
+
+[~, ~, pv_names, ~] = mbf_system_config;
+mbf_names = pv_names.hardware_names;
+mbf_vars = pv_names.tails;
 
 % initialise pll pattern
 pllpattern=false(1,936);
@@ -43,15 +47,20 @@ end
 % Set up PLL bunches in banks 0 and 1 (those are used in typcal sweeps), 
 % and in PLL detector.
 
-set_variable([name ':BUN:0:PLL:ENABLE_S'], double(pllpattern));
-set_variable([name ':BUN:1:PLL:ENABLE_S'], double(pllpattern));
-set_variable([name ':PLL:DET:BUNCHES_S'], double(pllpattern));
+set_variable([mbf_names.(mbf_axis), mbf_vars.Bunch_bank.bank0.PLL.enablewf],...
+    double(pllpattern));
+set_variable([mbf_names.(mbf_axis), mbf_vars.Bunch_bank.bank1.PLL.enablewf],...
+    double(pllpattern));
+set_variable([mbf_names.(mbf_axis), mbf_vars.pll.detector.target_bunches],...
+    double(pllpattern));
 
 % Set sweep (SEQ) and its detector (#1) to NOT operate on these and
 % guard bunches around, ie only on guardpattern. 
 %check or add to any previous config and uses logical AND to insert the
 %guardpattern into the existing setup.
-sequencer =get_variable([name ':BUN:1:SEQ:ENABLE_S']);
-detector = get_variable([name ':DET:0:BUNCHES_S']);
-set_variable([name ':BUN:1:SEQ:ENABLE_S'],double(and(guardpattern, sequencer)));
-set_variable([name ':DET:0:BUNCHES_S'],double(and(guardpattern, detector)));
+sequencer =get_variable([mbf_names.(mbf_axis), mbf_vars.Bunch_bank.bank1.SEQ.enablewf]);
+detector = get_variable([mbf_names.(mbf_axis), mbf_vars.Detector.det0.bunch_selection]);
+set_variable([mbf_names.(mbf_axis), mbf_vars.Bunch_bank.bank1.SEQ.enablewf],...
+    double(and(guardpattern, sequencer)));
+set_variable([mbf_names.(mbf_axis), mbf_vars.Detector.det0.bunch_selection],...
+    double(and(guardpattern, detector)));

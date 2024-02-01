@@ -2,7 +2,7 @@ function fll_initialisation(mbf_axis, varargin)
 % This is to start the frequency locked loop (fll) [also called pll] from
 % scratch. Once the initial lock is found then the settings are changed to
 % improve tracking. if signal is lost this process can be run again.
-% base          <EPICS device>:<axis>
+% mbf_axis(str): x, y, or s
 
 default_fll_ki = 1000; %safe also for for low charge, sharp resonance 
 default_fll_kp = 0;
@@ -33,7 +33,8 @@ addParameter(p, 'tune_override', default_tune_override, validScalarNum);
 parse(p,mbf_axis,varargin{:});
 
 [~, ~, pv_names, ~] = mbf_system_config;
-name = pv_names.hardware_names.(mbf_axis);
+mbf_names = pv_names.hardware_names;
+mbf_vars = pv_names.tails;
 
 %% Checking tune
 % starting frequency is taken from swept tune measurement. Can also
@@ -41,7 +42,7 @@ name = pv_names.hardware_names.(mbf_axis);
 % feedback has brought the tune to the desired value...)
 if isnan(p.Results.tune_override)
     % Perform a TUNE sweep, record phase at tune peak and the tune value
-    tune_frequency_from_sweep = get_variable([name, ':TUNE:TUNE']);
+    tune_frequency_from_sweep = get_variable([mbf_names.(mbf_axis), mbf_vars.tune.centre]);
     if isnan(tune_frequency_from_sweep)
         error('pllInitialisation:invalidTuneFit', 'Tune fit invalid, cannot start PLL.')
     end %if
@@ -51,28 +52,33 @@ else
 end %if
 
 % Disable PLL and turn off the NCO
-set_variable([name, ':PLL:CTRL:STOP_S.PROC'], 1);
-set_variable([name ':PLL:NCO:ENABLE_S'],'Off');
+set_variable([mbf_names.(mbf_axis), mbf_vars.pll.stop], 1);
+set_variable([mbf_names.(mbf_axis), mbf_vars.pll.nco.enable],'Off');
 
 % Set up the FLL feedback loop
-set_variable([name ':PLL:CTRL:KI_S'],p.Results.fll_ki); 
-set_variable([name ':PLL:CTRL:KP_S'],p.Results.fll_kp);
-set_variable([name ':PLL:CTRL:MIN_MAG_S'],p.Results.fll_min_magnitude);
-set_variable([name, ':PLL:CTRL:TARGET_S'], p.Results.fll_target_phase)
+set_variable([mbf_names.(mbf_axis), mbf_vars.pll.i],p.Results.fll_ki); 
+set_variable([mbf_names.(mbf_axis), mbf_vars.pll.p],p.Results.fll_kp);
+set_variable([mbf_names.(mbf_axis), mbf_vars.pll.minumum_magnitude],...
+    p.Results.fll_min_magnitude);
+set_variable([mbf_names.(mbf_axis), mbf_vars.pll.target_phase],...
+    p.Results.fll_target_phase)
 
 % Set up the NCO
-set_variable([name ':PLL:NCO:GAIN_DB_S'],p.Results.fll_nco_gain);
-set_variable([name, ':PLL:NCO:FREQ_S'], tune_frequency_from_sweep)
+set_variable([mbf_names.(mbf_axis), mbf_vars.pll.nco.gain],...
+    p.Results.fll_nco_gain);
+set_variable([mbf_names.(mbf_axis), mbf_vars.pll.nco.set_frequency],...
+    tune_frequency_from_sweep)
 % Limit tune range of the NCO for initial peak finding.
-set_variable([name, ':PLL:CTRL:MAX_OFFSET_S'], p.Results.fll_locking_max_offset)
+set_variable([mbf_names.(mbf_axis), mbf_vars.pll.maximum_offset],...
+    p.Results.fll_locking_max_offset)
 
 % Enable the NCO and PLL
-set_variable([name ':PLL:NCO:ENABLE_S'],'On');
-set_variable([name, ':PLL:CTRL:START_S.PROC'], 1)
+set_variable([mbf_names.(mbf_axis), mbf_vars.pll.nco.enable],'On');
+set_variable([mbf_names.(mbf_axis), mbf_vars.pll.start], 1)
 
 % Wait until PLL has locked (set lower bound to phase error?)
 t1 = datetime("now");
-while abs(abs(get_variable([name, ':PLL:FILT:PHASE'])) - ...
+while abs(abs(get_variable([mbf_names.(mbf_axis), mbf_vars.pll.readback.phase])) - ...
         abs( p.Results.fll_target_phase)) > 1 % within one degree of target.
     lock_time = datetime("now");
     if lock_time > t1 + seconds(10)
@@ -81,5 +87,7 @@ while abs(abs(get_variable([name, ':PLL:FILT:PHASE'])) - ...
     end %if
 end %while
 % Once locked widen the NCO limits to max required for tracking
-set_variable([name ':PLL:CTRL:MAX_OFFSET_S'],p.Results.fll_tracking_max_offset);
+set_variable([mbf_names.(mbf_axis), mbf_vars.pll.maximum_offset],...
+    p.Results.fll_tracking_max_offset);
+
 

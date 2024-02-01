@@ -271,16 +271,26 @@ pv_names.tails.tune.right = ':TUNE:RIGHT:TUNE';
 %PLL settings
 pv_names.tails.pll.detector.dwell = ':PLL:DET:DWELL_S';
 pv_names.tails.pll.detector.target_bunches = ':PLL:DET:BUNCHES_S';
+pv_names.tails.pll.detector.mode = ':PLL:DET:SELECT_S';
+pv_names.tails.pll.detector.scaling = ':PLL:DET:SCALING_S';
+pv_names.tails.pll.detector.blanking = ':PLL:DET:BLANKING_S';
+pv_names.tails.pll.detector.dwell = ':PLL:DET:DWELL_S';
+pv_names.tails.pll.nco.enable = ':PLL:NCO:ENABLE_S';
 pv_names.tails.pll.nco.gain = ':PLL:NCO:GAIN_DB_S';
+pv_names.tails.pll.nco.set_frequency = ':PLL:NCO:FREQ_S';
 pv_names.tails.pll.nco.frequency = ':PLL:NCO:FREQ';
 pv_names.tails.pll.nco.offset_waveform = ':PLL:NCO:OFFSETWF';
 pv_names.tails.pll.nco.mean_offset = ':PLL:NCO:MEAN_OFFSET';
 pv_names.tails.pll.nco.std_offset = ':PLL:NCO:STD_OFFSET';
 pv_names.tails.pll.nco.offset = ':PLL:NCO:OFFSET';
 pv_names.tails.pll.nco.tune = ':PLL:NCO:TUNE';
+pv_names.tails.pll.start = ':PLL:CTRL:START_S.PROC';
+pv_names.tails.pll.stop = ':PLL:CTRL:STOP_S.PROC';
 pv_names.tails.pll.p = ':PLL:CTRL:KP_S';
 pv_names.tails.pll.i = ':PLL:CTRL:KI_S';
 pv_names.tails.pll.target_phase = ':PLL:CTRL:TARGET_S';
+pv_names.tails.pll.minumum_magnitude = ':PLL:CTRL:MIN_MAG_S';
+pv_names.tails.pll.maximum_offset = ':PLL:CTRL:MAX_OFFSET_S';
 pv_names.tails.pll.status = ':PLL:CTRL:STATUS';
 pv_names.tails.pll.readback.magnitude = ':PLL:FILT:MAG';
 pv_names.tails.pll.readback.phase = ':PLL:FILT:PHASE';
@@ -297,6 +307,7 @@ pv_names.tails.adc.max = ':ADC:MMS:MAX';
 pv_names.tails.adc.mean = ':ADC:MMS:MEAN';
 pv_names.tails.adc.min = ':ADC:MMS:MIN';
 pv_names.tails.adc.std = ':ADC:MMS:STD';
+pv_names.tails.adc.reject_count = ':ADC:REJECT_COUNT_S';
 
 %% DAC buffers
 pv_names.tails.dac.delta = ':DAC:MMS:DELTA';
