@@ -23,10 +23,10 @@ for nds = 1:number_of_repeats
     data_out.beam_sizes{nds}.P1_sigy = get_variable(pv_names.beam_size.pinhole1.sigmay);
     data_out.beam_sizes{nds}.P2_sigx = get_variable(pv_names.beam_size.pinhole2.sigmax);
     data_out.beam_sizes{nds}.P2_sigy = get_variable(pv_names.beam_size.pinhole2.sigmay);
-    data_out.emittances{nds}.coupling = get_variable(pv_names.coupling);
-    data_out.emittances{nds}.espread = get_variable(pv_names.energy_spread);
-    data_out.emittances{nds}.hemit = get_variable(pv_names.emittance.x);
-    data_out.emittances{nds}.veimt = get_variable(pv_names.emittance.y);
+    data_out.emittances{nds}.coupling = get_variable(pv_names.coupling.val);
+    data_out.emittances{nds}.espread = get_variable(pv_names.energy_spread.val);
+    data_out.emittances{nds}.hemit = get_variable(pv_names.emittance.x.val);
+    data_out.emittances{nds}.veimt = get_variable(pv_names.emittance.y.val);
     data_out.emittances{nds}.herror = get_variable(pv_names.emittance.x.error);
     data_out.emittances{nds}.verror = get_variable(pv_names.emittance.y.error);
     fprintf([num2str(nds),'. '])

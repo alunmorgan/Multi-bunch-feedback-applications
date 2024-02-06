@@ -55,15 +55,15 @@ pv_names.pinhole2 = 'SR01C-DI-DCAM-05';
 
 %% Emittance measurement
 pv_names.emittance.status = 'SR-DI-EMIT-01:STATUS';
-pv_names.emittance.x = 'SR-DI-EMIT-01:HEMIT';
+pv_names.emittance.x.val = 'SR-DI-EMIT-01:HEMIT';
 pv_names.emittance.x.mean = 'SR-DI-EMIT-01:HEMIT_MEAN';
 pv_names.emittance.x.error = 'SR-DI-EMIT-01:HERROR';
-pv_names.energy_spread = 'SR-DI-EMIT-01:ESPREAD';
+pv_names.energy_spread.val = 'SR-DI-EMIT-01:ESPREAD';
 pv_names.energy_spread.mean = 'SR-DI-EMIT-01:X:ESPREAD_MEAN';
-pv_names.emittance.y = 'SR-DI-EMIT-01:VEMIT';
+pv_names.emittance.y.val = 'SR-DI-EMIT-01:VEMIT';
 pv_names.emittance.y.mean = 'SR-DI-EMIT-01:VEMIT_MEAN';
 pv_names.emittance.y.error = 'SR-DI-EMIT-01:VERROR';
-pv_names.coupling = 'SR-DI-EMIT-01:COUPLING';
+pv_names.coupling.val = 'SR-DI-EMIT-01:COUPLING';
 pv_names.coupling.mean = 'SR-DI-EMIT-01:COUPLING_MEAN';
 pv_names.beam_size.pinhole1.sigmax = 'SR-DI-EMIT-01:P1:SIGMAX';
 pv_names.beam_size.pinhole1.sigmay = 'SR-DI-EMIT-01:P1:SIGMAY';

@@ -25,9 +25,9 @@ valid_string = @(x) ischar(x);
 addRequired(p, 'poly_data');
 addRequired(p, 'frequency_shifts');
 addRequired(p, 'metadata');
-addParameter(p, 'outputs', 'passive', valid_string);
+addParameter(p, 'outputs', 'both', valid_string);
 addParameter(p, 'plot_mode', 'pos', valid_string);
-parse(p, poly_data, frequency_shifts, varargin{:});
+parse(p, poly_data, frequency_shifts, metadata, varargin{:});
 
 % Getting the desired system setup parameters.
 harmonic_number = size(frequency_shifts, 1);
