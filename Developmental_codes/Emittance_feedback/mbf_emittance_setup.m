@@ -57,7 +57,7 @@ else
 end %if
 
 % initialise FLL on selected bunches.
-mbf_fll_start(mbf_axis, 'fllbunches',p.Results.fll_monitor_bunches,...
+mbf_pll_start(mbf_axis, 'fllbunches',p.Results.fll_monitor_bunches,...
     'guardbunches',p.Results.guardbunches)
 
 set_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.frequency], p.Results.harmonic + excitation_frequency);

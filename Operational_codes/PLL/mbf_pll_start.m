@@ -1,4 +1,4 @@
-function mbf_fll_start(mbf_axis, varargin)
+function mbf_pll_start(mbf_axis, varargin)
 % sets up the frequency locked loop of the MBF system.
 % and starts.
 %
@@ -16,13 +16,13 @@ p.CaseSensitive = false;
 axis_string = {'x', 'y', 's'};
 
 addRequired(p, 'mbf_axis', @(x) any(validatestring(x, axis_string)));
-addParameter(p, 'fllbunches', 400, @(x) isnumeric(x));
+addParameter(p, 'pllbunches', 400, @(x) isnumeric(x));
 addParameter(p, 'guardbunches', 2, @(x) isnumeric(x) && isscalar(x));
-addParameter(p, 'fll_nco_gain', -30, @(x) isnumeric(x) && isscalar(x));
+addParameter(p, 'pll_nco_gain', -30, @(x) isnumeric(x) && isscalar(x));
 addParameter(p, 'target_phase', 180, @(x) isnumeric(x) && isscalar(x));
 
 parse(p, mbf_axis, varargin{:});
 
-mbf_fll_bank_setup(mbf_axis, 'fllbunches', p.Results.fllbunches, 'guardbunches', p.Results.guardbunches)
-mbf_fll_detector_setup(mbf_axis)
-fll_initialisation(mbf_axis, 'fll_target_phase', p.Results.target_phase, 'fll_nco_gain', p.Results.fll_nco_gain)
+mbf_pll_bank_setup(mbf_axis, 'pllbunches', p.Results.pllbunches, 'guardbunches', p.Results.guardbunches)
+mbf_pll_detector_setup(mbf_axis)
+pll_initialisation(mbf_axis, 'pll_target_phase', p.Results.target_phase, 'pll_nco_gain', p.Results.pll_nco_gain)

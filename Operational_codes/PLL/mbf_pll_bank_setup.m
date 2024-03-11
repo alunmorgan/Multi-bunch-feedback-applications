@@ -1,4 +1,4 @@
-function mbf_fll_bank_setup(mbf_axis, varargin)
+function mbf_pll_bank_setup(mbf_axis, varargin)
 % Sets up the banks for FLL operation.
 %
 %   mbf_axis(str): x, y, or s
@@ -17,7 +17,7 @@ p.StructExpand = false;
 p.CaseSensitive = false;
 valid_number = @(x) isnumeric(x) && isscalar(x);
 addRequired(p, 'mbf_axis');
-addParameter(p, 'fllbunches', default_bunch);
+addParameter(p, 'pllbunches', default_bunch);
 addParameter(p, 'guardbunches', default_guard, valid_number);
 
 parse(p, mbf_axis, varargin{:});
@@ -27,7 +27,7 @@ mbf_names = pv_names.hardware_names;
 mbf_vars = pv_names.tails;
 
 guardbunches = p.Results.guardbunches;
-fllbunches = mod(p.Results.fllbunches, harmonic_number-1);
+pllbunches = mod(p.Results.pllbunches, harmonic_number-1);
 
 
 
@@ -35,7 +35,7 @@ fllbunches = mod(p.Results.fllbunches, harmonic_number-1);
 pllpattern=false(1,harmonic_number);
 % Matlab counts idices from 1, but at DLS we count bunches from 0, thus we need to
 % add one.
-pllpattern(fllbunches+1) = true;
+pllpattern(pllbunches+1) = true;
 
 % now we want to create a pattern with a little more room around the
 % pll bunches. It's a little tricky with a general pattern, and the cirular

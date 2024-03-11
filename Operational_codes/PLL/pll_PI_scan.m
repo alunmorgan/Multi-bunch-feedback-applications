@@ -1,7 +1,8 @@
-function varargout = fll_PI_scan(mbf_axis, p_vals, i_vals, varargin)
+function varargout = pll_PI_scan(mbf_axis, p_vals, i_vals, varargin)
+% This sets up the PLL loop for different P and I settings, then records various
+% statistics in order to assess which setting are most suitable.
 
-
-default_fll_monitor_bunches=400;
+default_pll_monitor_bunches=400;
 default_guardbunches = 10;
 
 binary_string = {'yes', 'no'};
@@ -18,7 +19,7 @@ addRequired(p, 'i_vals');
 addParameter(p, 'save_to_archive', 'yes', @(x) any(validatestring(x,binary_string)));
 addParameter(p, 'additional_save_location', NaN, valid_string);
 addParameter(p, 'guardbunches', default_guardbunches, validScalarNum);
-addParameter(p, 'fll_monitor_bunches', default_fll_monitor_bunches, validNum);
+addParameter(p, 'pll_monitor_bunches', default_pll_monitor_bunches, validNum);
 parse(p, mbf_axis, p_vals, i_vals, varargin{:});
 
 [root_string, ~, pv_names, ~] = mbf_system_config;
@@ -50,7 +51,7 @@ for ser = 1:n_p
         %initialise loop
         set_variable([pv_head, pll_tails.i], i_vals(jfe))
         set_variable([pv_head, pll_tails.p], p_vals(ser))
-        mbf_fll_start(mbf_axis, 'fllbunches',p.Results.fll_monitor_bunches,...
+        mbf_pll_start(mbf_axis, 'pllbunches',p.Results.pll_monitor_bunches,...
             'guardbunches',p.Results.guardbunches)
         for ewn = 1:n_repeats
             pause(1)

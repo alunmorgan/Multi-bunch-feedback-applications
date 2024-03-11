@@ -1,4 +1,4 @@
-function fll_inital_setup_values(mbf_axis)
+function pll_initial_setup_values(mbf_axis)
 
 % Some setup with 'working values'. These ought to be read from a
 % config file or be additional arguments in the future.

@@ -1,33 +1,33 @@
-function fll_initialisation(mbf_axis, varargin)
+function pll_initialisation(mbf_axis, varargin)
 % This is to start the frequency locked loop (fll) [also called pll] from
 % scratch. Once the initial lock is found then the settings are changed to
 % improve tracking. if signal is lost this process can be run again.
 % mbf_axis(str): x, y, or s
 
-default_fll_ki = 1000; %safe also for for low charge, sharp resonance 
-default_fll_kp = 0;
-default_fll_min_magnitude = 0;
-default_fll_locking_max_offset = 0.003;
-default_fll_tracking_max_offset = 0.02;
-default_fll_nco_gain = -30; % in dB
+default_pll_ki = 1000; %safe also for for low charge, sharp resonance 
+default_pll_kp = 0;
+default_pll_min_magnitude = 0;
+default_pll_locking_max_offset = 0.003;
+default_pll_tracking_max_offset = 0.02;
+default_pll_nco_gain = -30; % in dB
 default_tune_override = NaN;
-default_fll_target_phase = 160;
+default_pll_target_phase = 160;
 % For LMBF
-%  default_fll_ki =100; %safe also for for low charge, sharp resonance
-%     default_fll_kp = 0;
-%     default_fll_max_offset = 0.001;
+%  default_pll_ki =100; %safe also for for low charge, sharp resonance
+%     default_pll_kp = 0;
+%     default_pll_max_offset = 0.001;
 
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
 validScalarNum = @(x) isnumeric(x) && isscalar(x);
 p = inputParser;
 addRequired(p, 'name', @ischar);
-addParameter(p, 'fll_ki', default_fll_ki, validScalarPosNum);
-addParameter(p, 'fll_kp', default_fll_kp, validScalarNum);
-addParameter(p, 'fll_min_magnitude', default_fll_min_magnitude, validScalarNum);
-addParameter(p, 'fll_locking_max_offset', default_fll_locking_max_offset, validScalarPosNum);
-addParameter(p, 'fll_tracking_max_offset', default_fll_tracking_max_offset, validScalarPosNum);
-addParameter(p, 'fll_nco_gain', default_fll_nco_gain, validScalarNum);
-addParameter(p, 'fll_target_phase', default_fll_target_phase, validScalarNum);
+addParameter(p, 'pll_ki', default_pll_ki, validScalarPosNum);
+addParameter(p, 'pll_kp', default_pll_kp, validScalarNum);
+addParameter(p, 'pll_min_magnitude', default_pll_min_magnitude, validScalarNum);
+addParameter(p, 'pll_locking_max_offset', default_pll_locking_max_offset, validScalarPosNum);
+addParameter(p, 'pll_tracking_max_offset', default_pll_tracking_max_offset, validScalarPosNum);
+addParameter(p, 'pll_nco_gain', default_pll_nco_gain, validScalarNum);
+addParameter(p, 'pll_target_phase', default_pll_target_phase, validScalarNum);
 addParameter(p, 'tune_override', default_tune_override, validScalarNum);
 
 parse(p,mbf_axis,varargin{:});

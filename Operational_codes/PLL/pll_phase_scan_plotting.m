@@ -1,4 +1,4 @@
-function varargout = fll_phase_scan_plotting(fll_phase_scan)
+function varargout = pll_phase_scan_plotting(fll_phase_scan)
 % Plots the results of a FLL phase scan on the
 %multi binch feedback system
 %
@@ -19,11 +19,11 @@ hold on
 plot([peak peak],[min(fll_phase_scan.mag) max(fll_phase_scan.mag)], ':r')
 hold off
 xlabel('target phase')
-ylabel('FLL detected magnitude')
+ylabel('PLL detected magnitude')
 subplot(1,3,2)
 plot(fll_phase_scan.phase, fll_phase_scan.f, '*')
 xlabel('target phase')
-ylabel('FLL detected frequency')
+ylabel('PLL detected frequency')
 title({'Phase scan of frequency locked loop'; ...
     ['RF frequency = ', num2str(fll_phase_scan.RF)];...
     ['Current = ', num2str(fll_phase_scan.current)]})

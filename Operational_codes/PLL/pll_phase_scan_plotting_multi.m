@@ -1,4 +1,4 @@
-function fll_phase_scan_plotting_multi(requested_data, varargin)
+function pll_phase_scan_plotting_multi(requested_data, varargin)
 % Plots the results of a FLL phase scan on the
 %multi bunch feedback system
 %
