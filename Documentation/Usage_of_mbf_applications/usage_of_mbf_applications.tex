@@ -26,7 +26,7 @@
 \begin{document}
 \title{\docTitle}
 \author{Alun Morgan}
-\date{September 2023}
+\date{April 2024}
 
 \maketitle
 
@@ -34,7 +34,7 @@
 \clearpage
 \chapter{Conceptual descriptions}
 \section{Overview}
-The hardware for multi bunch feedback has many different possible configurations. Broadly speaking a feedback system has a frontend which takes in the signals from the pickups, and does the initial analogue signal conditioning. Thses signals are then fed into digital systems for each of the three planes (x,y,s). These digital systems calculate the feedback required and send signals to analogue drive electronics in order to excite the beam in the given plane. This is summarised in figure \ref{system_overview}
+The hardware for multi bunch feedback has many different possible configurations. Broadly speaking a feedback system has a frontend which takes in the signals from the pickups, and does the initial analogue signal conditioning. These signals are then fed into digital systems for each of the three planes (x,y,s). These digital systems calculate the feedback required and send signals to analogue drive electronics in order to excite the beam in the given plane. This is summarised in figure \ref{system_overview}
 
 \begin{figure}[hbt]
 \begin{center}
@@ -50,15 +50,15 @@ All these codes save the relevant data and graphs to a file structure based on t
 In addition to the system data from the multi bunch hardware, more general machine parameters are also captured for growdamp, modescan and bunch motion codes, in order to enable machine studies (e.g current dependence). This additional data is set in \verb|machine_environment.m|.
 
 \subsection{Frontend Optimisation}
-In order to work optimally the feedback systems need to be matched in timing/phase with the beam phase (not the RF phase). and be tuned so that the sampling point coincides with the maximum signal from each bunch.
+In order to work optimally the feedback systems need to be matched in timing/phase with the beam phase (not the RF phase) and be tuned so that the sampling point coincides with the maximum signal from each bunch.
 
 The first requirement is done by phase shifting the input signal. At its most basic this comprises of a single phase shifter for each channel which both allows each channel to be adjusted to follow changes in beam phase, and to allow the axis to be  tuned in order to account for differences in the phase delay of that channel.
 
 The practical implementation will depend on the details of your frontend hardware.
-However is often realised as a single LO phase shifter which is common to all axes and handles the beam phase adjustments. meanwhile each channel has an individual additional phase shifter to tune out the systemic differences in phase delay between the channels.Such a setup is shown in figure \ref{fig:phase_shifters}
+However is often realised as a single LO phase shifter which is common to all axes and handles the beam phase adjustments. meanwhile each channel has an individual additional phase shifter to tune out the systemic differences in phase delay between the channels. Such a setup is shown in figure \ref{fig:phase_shifters}
 Another variation is replacing the LO phase shifter with an automatic beam phase following system.
 
-The second requirement is done but adjusting the sampling clock until a maximum signal is obtained with a minimum signal leakage to adjacent RF buckets..
+The second requirement is done by adjusting the sampling clock until a maximum signal is obtained with a minimum signal leakage to adjacent RF buckets.
 \begin{figure}[hbt]
     \centering
         \includegraphics[width=0.6\textwidth]{phase_shifters_overview.png}
@@ -67,11 +67,11 @@ The second requirement is done but adjusting the sampling clock until a maximum 
 \end{figure}
 
 
-Note: The Libera bunch by bunch frontend seems to get into problems when scanning the LO phase shifter. It is probably best not to use \verb|BBBFE_LO_scan| if you have that frontend.
+Note: The Libera bunch by bunch frontend seems to get into problems when scanning the LO phase shifter. It is probably best not to scan the LO phase if you have that frontend.
 
 \subsection{Measurements}
 \subsubsection{Frontend scans}
-Scan the relevant phase shifter or clock delay while monitoring the measure signal amplitude. The resulting graphs will allow appropriate working points to be set. (see \ref{} for more information)
+Scan the relevant phase shifter or clock delay while monitoring the measure signal amplitude. The resulting graphs will allow appropriate working points to be set.
 
 \subsubsection{Mode scans}
 A mode scan is a sequential excitation of the harmonics of the tune frequency. This is mainly a system check in order to identify any performance limitations or degradation.
@@ -102,25 +102,18 @@ and add the resulting folder to your Matlab path.
 This and related documentation can be found in the \href{https://github.com/alunmorgan/Multi-bunch-feedback-applications/Documentation}{documentation folder in the repository}
 
  \section{MBF frontend operational setup}
-
-\subsection{Machine settings}
-\begin{itemize}
-    \item {Inject a single bunch into a selected RF bucket.}
-    \item{Run the “Zero Bucket” code to ensure MBF bucket numbers are in agreement with the fill pattern from the fill pattern monitor. }
-    \item{Correct tune values to nominal.}
-\end{itemize}
-
-\clearpage
 \subsection{DORIS phase}
 Upstream of the MBF frontend there is a DORIS unit which locks the MBF to a fixed relationship to beam phase (rather than RF phase) 
+DORIS will lock if there is more than 3~mA in the storage ring.
 
+Before running the code to scan the doris phase, inject 10~mA into a 900 bunch fill pattern.
 The following code will scan the phase of the DORIS unit to identify an optimum value. 
 \begin{minted}{matlab}
     >> single_bunch_location = 400
     >> DORIS_target_phase_scan(single_bunch_location) 
 \end{minted}
 Figure \ref{fig:DORIS_phase_scan} shows an example of the output.
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.8\linewidth]{DORIS_scan.png}
     \caption{In this case $75^\circ$ looks to be a reasonable working point.}
@@ -128,6 +121,13 @@ Figure \ref{fig:DORIS_phase_scan} shows an example of the output.
 \end{figure}
 
 \clearpage
+\subsection{Machine settings}
+\begin{itemize}
+    \item {Inject a single bunch into a selected RF bucket.}
+    \item{Run the “Zero Bucket” code to ensure MBF bucket numbers are in agreement with the fill pattern from the fill pattern monitor. }
+    \item{Correct tune values to nominal.}
+\end{itemize}
+
 \subsection{Frontend phases} 
 In the front end there are two phases (delays) we are interested in optimising. The system phase which determines how accurately our detectors are aligned with the target bunch, and the clock phase which determines how close to the peak of the signal we are sampling. 
 \subsubsection{System phase}
@@ -143,7 +143,7 @@ The following Matlab code will run a system phase scan on each axis sequentially
 
 Figure \ref{fig:frontend_system_phase_scan} shows an example of the output. You are looking for the phase value with the largest gap between the excited bunch and each of the other bunches. 
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.8\linewidth]{system_phase_sweep.png}
     \caption{In this case $-40^\circ$ looks to be a reasonable working point.}
@@ -162,7 +162,7 @@ The following Matlab code will run a clock phase scan on each axis sequentially.
 \end{minted}
 Figure \ref{fig:frontend_clock_phase_scan} shows an example of the output. You are looking for the phase value with the largest gap between the excited bunch and each of the other bunches. 
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.8\linewidth]{clock_sweep.png}
     \caption{In this case $-80^\circ$ looks to be a reasonable working point. }
@@ -193,7 +193,7 @@ The following Matlab code will run a scan across all the harmonics of the tune o
 
 Use the modescan results to assess whether the closed loop delay is good enough.
  
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.8\linewidth]{initial_modescan.png}
     \caption{In this case the phase is ranging from $-40^\circ$ to $40^\circ$ and there is almost no residual gradient along the modes, which is reasonable. Although any further increase in this range would be concerning and would warrant further investigation.}
@@ -232,7 +232,7 @@ The aim of this exercise is to get the extents of the phase trace comfortably fi
 
 \subsubsection{Tuning the DAC delay} 
 This allows additional phase (delay) to be added to the closed loop. However, it can only add in steps of 2ns.
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.5\linewidth]{DAC_delay.png}
     \caption{DAC delay control screen}
@@ -243,7 +243,7 @@ Use this setting first to get as close as possible to the target performance. An
 \clearpage
 \subsubsection{Tuning the cable length} 
 Modify the cable length until the extents of the phase trace comfortably fit within the limits.  
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.6\linewidth]{amp_front.png}
     \caption{Output amplifiers showing the RF cables to adjust}
@@ -287,7 +287,9 @@ The top level code to run a growdamp measurement for each axis is;
 \end{minted}
 
 The parameters for the length of excitation and  capture are set in \verb|mbf_growdamp_config.m|.
- The \verb|mbf_growdamp_setup| code sets up the hardware for the correct type of measurement. \verb|mbf_growdamp_capture| triggers the measurement, captures the data and stores it in the file structure defined in \verb|mbf_system_config|. 
+ The \verb|mbf_growdamp_setup| code sets up the hardware for the correct type of measurement. 
+ 
+ \verb|mbf_growdamp_capture| triggers the measurement, captures the data and stores it in the file structure defined in \verb|mbf_system_config|. 
 \subsubsection{Modescan}
 The top level code to run a modescan measurement for each axis is; 
 \begin{minted}{matlab}
@@ -312,7 +314,9 @@ The MBF system is also used as an instrument for investigating the accelerator b
 \subsection{Transverse damping}
 \subsection{Emittance control}
 \subsection{Bunch motion}
- \verb|mbf_bunch_motion_setup| sets up all three systems to use the appropriate triggers. \verb|mbf_bunch_motion_capture| arms the systems, and once triggered by an external trigger, will capture and store the data.
+ \verb|mbf_bunch_motion_setup| sets up all three systems to use the appropriate triggers. 
+ 
+ \verb|mbf_bunch_motion_capture| arms the systems, and once triggered by an external trigger, will capture and store the data.
 
 \chapter{MBF Archival retrieval}
 
@@ -336,7 +340,9 @@ Will put the output on a frequency scale rather than the usual mode scale
     >> visualise_latest_mbf_results('growdamp_plot_mode', 'pos') 
 \end{minted}
 Will reorganise the modes to be numbered 0:935 rather than –468:468 
-Below is an example of the output for Growdamp and Modescan measurements 
+
+Figure \ref{fig:growdamp_example} is an example of the output for Growdamp, figure \ref{fig:modescan_example} of Modescan measurements and figure \ref{fig:spectrum_example} of spectral measurements.
+
  \begin{figure}[hbt]
    \centering
     \begin{subfigure}[b]{0.45\textwidth}
@@ -467,12 +473,12 @@ You can set up the period of interest by using a modified version the following 
         'InputFormat','dd/MM/yyyy_HH:mm'); 
     >> date_range = [start_datenum, end_datenum]; 
 \end{minted}
-Starting with growdamp data, the following command will extract any measurements taken within the date range for the y axis and then plot them on top of one another. 
+Starting with growdamp data, the following command will extract any measurements taken within the date range for the y axis and then plot them on top of one another. An example of this is shown in figure \ref{fig:growdamp_collate}.
 \begin{minted}{matlab}
     >> conditioned_data = mbf_growdamp_archival_retrieval('y',...
         date_range); 
 \end{minted}
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=1\linewidth]{growdamp_collate.png}
     \caption{Collated growdamp results}
@@ -484,7 +490,7 @@ This allows easy identification of changes in behaviour
 
 As machine conditions can be different it is possible to filter on current range and RF frequency range 
 
-For example, by setting the \verb+current_range+ optional input we can select only measurements which were taken between 2mA and 40mA
+For example, by setting the \verb+current_range+ optional input we can select only measurements which were taken between 2mA and 40mA (figure \ref{fig:growdamp_collated_limit_current_range}).
 
 \begin{minted}{matlab}
     >> conditioned_data = mbf_growdamp_archival_retrieval('y',...
@@ -492,7 +498,7 @@ For example, by setting the \verb+current_range+ optional input we can select on
 \end{minted}
 
 This is often useful to ensure that any measurements used are below instability thresholds. 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=1\linewidth]{growdamp_collate_limit_current_range.png}
     \caption{Collated growdamp results only returning results which are within the specified current range.}
@@ -500,58 +506,57 @@ This is often useful to ensure that any measurements used are below instability 
 \end{figure}
 One common set of measurements beyond simple comparisons is plotting the measurements against a changing machine parameter (usually current) 
 
-Although it is possible to extract such relationships from the data just using the variation over time, it is more usual to have a dedicated measurement set for the purpose. In this case you would set the period to only contain data from that experiment. Then you would run the retrieval with the analysis type set to sweep and then set the appropriate parameter to sweep over (again it is usually current but any variable in the datasets can be used). 
+Although it is possible to extract such relationships from the data just using the variation over time, it is more usual to have a dedicated measurement set for the purpose. In this case you would set the period to only contain data from that experiment. Then you would run the retrieval with the analysis type set to sweep and then set the appropriate parameter to sweep over (again it is usually current but any variable in the datasets can be used). Figure \ref{fig:growdamp_parameter_sweep} shows an example of this.
 \begin{minted}{matlab}
     >> conditioned_data = mbf_growdamp_archival_retrieval('y', ...
         date_range, 'analysis_type', 'sweep',...
         'sweep_parameter', 'current'); 
 \end{minted}
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=1\linewidth]{growdamp_parameter_sweep.png}
-    \caption{Growdamp results against a swept parameter. In this case the beam current.}
+    \caption{Growdamp results against a swept parameter. In this case the beam current. Note: These are placeholder graphs.}
     \label{fig:growdamp_parameter_sweep}
 \end{figure}
-At this point further analysis is possible. In the case of a current sweep, it is possible to predict the current which individual modes will go unstable. 
-\begin{figure}[h]
+At this point further analysis is possible. In the case of a current sweep, it is possible to predict the current which individual modes will go unstable. (figure \ref{fig:growdamp_parameter_sweep_further_analysis}). 
+\begin{figure}[ht]
     \centering
     \includegraphics[width=1\linewidth]{growdamp_parameter_sweep_further_analysis.png}
-    \caption{Results from further analysis of the current dependent growdamp data.}
+    \caption{Results from further analysis of the current dependent growdamp data. Note: These are placeholder graphs.}
     \label{fig:growdamp_parameter_sweep_further_analysis}
 \end{figure}
-Note: These are placeholder graphs. 
 \clearpage
-Modescan data retrieval is much the same as the growdamp retrieval. Once the date range is set up the following code will extract and display all results from the y axis. 
+Modescan data retrieval is much the same as the growdamp retrieval. Once the date range is set up the following code will extract and display all results from the y axis (figure \ref{fig:modescan_collate}).  
 \begin{minted}{matlab}
     >> conditioned_data = mbf_modescan_archival_retrieval('y',...
         date_range); 
 \end{minted}
- \begin{figure}[h]
+ \begin{figure}[ht]
      \centering
      \includegraphics[width=1\linewidth]{modescan_collate.png}
      \caption{Collated modescan results}
      \label{fig:modescan_collate}
  \end{figure}
 
-As before you can filter on current range. 
+As before you can filter on current range(figure \ref{fig:modescan_collate_limited_range}).  
 \begin{minted}{matlab}
     >> conditioned_data = mbf_modescan_archival_retrieval('y',...
         date_range, 'current_range', [2 40]); 
 \end{minted}
- \begin{figure}[h]
+ \begin{figure}[ht]
      \centering
      \includegraphics[width=1\linewidth]{modescan_collate_limited_range.png}
      \caption{Collated modescan results restricted to the specified current range.}
      \label{fig:modescan_collate_limited_range}
  \end{figure}
 
-And can plot against a parameter sweep 
+And can plot against a parameter sweep  (figure \ref{fig:modescan_parameter_sweep}). 
 \begin{minted}{matlab}
     >> conditioned_data = mbf_modescan_archival_retrieval('y',...
         date_range, 'analysis_type', 'sweep',...
         'sweep_parameter', 'current'); 
 \end{minted}
- \begin{figure}[h]
+ \begin{figure}[ht]
      \centering
      \includegraphics[width=1\linewidth]{modescan_parameter_sweep.png}
      \caption{Growdamp results against a swept parameter. In this case the beam current.}
