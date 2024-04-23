@@ -49,6 +49,7 @@ for dbf = 1:length(data.phase)
     data.side1_x(dbf) = max(get_variable([data.mbf_pv_y, pv_names.tails.Detector.det1.power]));
     data.main_x(dbf) = max(get_variable([data.mbf_pv_y, pv_names.tails.Detector.det2.power]));
     data.side2_x(dbf) = max(get_variable([data.mbf_pv_y, pv_names.tails.Detector.det3.power]));
+    fprintf('.')
 end %for
 
 % move back to the original setting

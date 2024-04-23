@@ -228,9 +228,9 @@ for n_det = 0:3
     pv_names.tails.Detector.(l_det).I = [':DET:',n_det_label,':I'];
     pv_names.tails.Detector.(l_det).Q = [':DET:',n_det_label,':Q'];
     pv_names.tails.Detector.(l_det).power = [':DET:',n_det_label,':POWER'];
-    pv_names.tails.Detector.(l_det).bunch_select = ['DET:',n_det_label,':BUNCH_SELECT_S'];
-    pv_names.tails.Detector.(l_det).reset_selection = ['DET:',n_det_label,':RESET_SELECT_S.PROC'];
-    pv_names.tails.Detector.(l_det).set_selection = ['DET:',n_det_label,':SET_SELECT_S.PROC'];
+    pv_names.tails.Detector.(l_det).bunch_select = [':DET:',n_det_label,':BUNCH_SELECT_S'];
+    pv_names.tails.Detector.(l_det).reset_selection = [':DET:',n_det_label,':RESET_SELECT_S.PROC'];
+    pv_names.tails.Detector.(l_det).set_selection = [':DET:',n_det_label,':SET_SELECT_S.PROC'];
 end %for
 
 % Memory settings
