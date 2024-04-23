@@ -1,5 +1,6 @@
 function BBBFE_detector_restore(mbf_axis)
 
+mbf_axis = lower(mbf_axis);
 [~, ~, pv_names, ~] = mbf_system_config;
 mbf_names = pv_names.hardware_names;
 mbf_vars = pv_names.tails;  
