@@ -63,7 +63,7 @@ if isstruct(p.Results.tunes)
     tunes = p.Results.tunes;
 else
     % Get the tunes
-    tunes = get_all_tunes('xys');
+    tunes = get_all_tunes;
 end %if
 tune = tunes.([mbf_axis,'_tune']).tune;
 
