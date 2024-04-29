@@ -6,10 +6,10 @@ hold all
 semilogy(data.phase, data.main, 'DisplayName', 'Excited bunch')
 semilogy(data.phase, data.side1, 'DisplayName','Preceeding bunch')
 semilogy(data.phase, data.side2, 'DisplayName', 'Following bunch')
-legend
+legend('Location', 'Best')
 xlabel('phase (degrees)')
 ylabel('Signal')
-title(['Phase sweep for MBF ', mbf_ax, ' axis on', datestr(data.time)])
+title(['BBBFE system phase sweep ', mbf_ax, ' axis on ', datestr(data.time)])
 grid on
 hold off
 
@@ -17,7 +17,7 @@ ax2 = subplot(2,1,2);
 hold all
 semilogy(data.phase, data.main - data.side1, 'DisplayName', 'Excited bunch - Preceeding bunch')
 semilogy(data.phase, data.main - data.side2, 'DisplayName','Excited bunch - Following bunch')
-legend
+legend('Location', 'Best')
 xlabel('phase (degrees)')
 ylabel('Signal differences')
 grid on

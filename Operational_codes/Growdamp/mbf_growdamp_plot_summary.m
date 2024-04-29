@@ -70,7 +70,7 @@ end %if
 
 hold off
 xlim([x_plt_axis(1) x_plt_axis(end)])
-title({['MBF growdamp results (', metadata.ax_label,' ', datestr(metadata.time),')'];...
+title({['MBF growdamp results ', metadata.ax_label,' axis ', datestr(metadata.time)];...
     ['Current: ', num2str(round(metadata.current)), 'mA']})
 xlabel(labelX)
 ylabel('Damping rates (1/turns)')
