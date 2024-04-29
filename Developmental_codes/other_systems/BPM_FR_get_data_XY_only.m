@@ -1,4 +1,4 @@
-function output = get_BPM_FR_data_XY_only(nbpms)
+function output = BPM_FR_get_data_XY_only(nbpms)
 % Captures 2048 turns of data
 
 for n = 1:length(nbpms)

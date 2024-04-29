@@ -1,4 +1,4 @@
-function pinhole_settings = get_pinhole_settings
+function pinhole_settings = pinhole_get_settings
 
 pinhole_settings.P1_betax = get_variable('SR-DI-EMIT-01:P1:BETAX');
 pinhole_settings.P1_betay = get_variable('SR-DI-EMIT-01:P1:BETAY');

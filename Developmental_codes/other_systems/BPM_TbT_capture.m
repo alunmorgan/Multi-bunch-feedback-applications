@@ -5,6 +5,6 @@ function output = BPM_TbT_capture(bpm_list, capture_length)
 % use fa_id2name to pregenerate a list of BPM names.
 %
 % Example: output = BPM_TbT_capture({'SR01C-DI-EBPM-01', 'SR01C-DI-EBPM-02'}, 1000)
-setup_BPM_TbT_capture(bpm_list, capture_length)
-arm_BPM_TbT_capture(bpm_list)
-output = get_BPM_TbT_data(bpm_list, capture_length, 'capture_stats');
+BPM_TbT_capture_setup(bpm_list, capture_length)
+BPM_TbT_capture_arm(bpm_list)
+output = BPM_TbT_get_data(bpm_list, capture_length, 'capture_stats');

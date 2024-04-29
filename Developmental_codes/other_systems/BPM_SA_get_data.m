@@ -1,4 +1,4 @@
-function output = get_BPM_SA_data
+function output = BPM_SA_get_data
 
 n_samples = 30;
 n_bpms = 173;

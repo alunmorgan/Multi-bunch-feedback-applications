@@ -1,4 +1,4 @@
-function plot_pinhole_fit(beam_info)
+function pinhole_plot_fit(beam_info)
 % Create a figure for the plots.
 figure( 'Name', '2D gaussian fit' );
 

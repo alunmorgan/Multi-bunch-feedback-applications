@@ -1,4 +1,4 @@
-function arm_BPM_TbT_capture(bpm_list)
+function BPM_TbT_capture_arm(bpm_list)
 
 
 for n = length(bpm_list):-1:1

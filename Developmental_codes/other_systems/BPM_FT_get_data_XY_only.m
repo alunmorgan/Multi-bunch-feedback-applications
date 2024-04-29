@@ -1,4 +1,4 @@
-function output = get_BPM_FT_data_XY_only(nbpms)
+function output = BPM_FT_get_data_XY_only(nbpms)
 
 
 BPM_FT_data = NaN(length(nbpms), 2);

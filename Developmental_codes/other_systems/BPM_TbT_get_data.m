@@ -1,4 +1,4 @@
-function output = get_BPM_TbT_data(bpm_list, capture_length, varargin)
+function output = BPM_TbT_get_data(bpm_list, capture_length, varargin)
 % Defaults to X and Y waveforms, ABCD and procomputed statistics can be added
 % with the flags 'all_waveforms' and 'capture_stats'
 

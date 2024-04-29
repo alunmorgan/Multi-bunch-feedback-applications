@@ -1,4 +1,4 @@
-function image = get_pinhole_data_after_trigger(channel)
+function image = pinhole_get_data_after_trigger(channel)
 
 % The camera image PV always returns the maximum size regardless of
 % settings. So set the selection area to max so that all of the scale

@@ -1,4 +1,4 @@
-function beam_info = get_beamsize_from_image(image)
+function beam_info = beamsize_get_from_image(image)
 %takes the provided image structure and performs a 2D gaussian fit over the
 %image. Returns correctly scaled sigmas and centres.
 

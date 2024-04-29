@@ -1,4 +1,4 @@
-function emittance = get_emittance
+function emittance = emittance_get_data
 
 emittance.emit = get_variable('SR-DI-EMIT-01:EMITTANCE_MEAN');
 emittance.coupling = get_variable('SR-DI-EMIT-01:COUPLING_MEAN');

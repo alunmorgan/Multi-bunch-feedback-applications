@@ -1,4 +1,4 @@
-function output = get_BPM_FA_data(sample_time)
+function output = BPM_FA_get_data(sample_time)
 % Get FA data from all BPMS.
 %   Args:
 %       sample_time(float): length of time in seconds to return.
@@ -18,5 +18,5 @@ output.X = squeeze(output.data(1,:,:));
 output.Y = squeeze(output.data(2,:,:));
 if size(output.data,3)< 10000 * sample_time
     disp('Did not get a full set of data. Trying again...')
-    output = get_BPM_FA_data(sample_time);
+    output = BPM_FA_get_data(sample_time);
 end %if

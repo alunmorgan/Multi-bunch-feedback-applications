@@ -1,4 +1,4 @@
-function setup_BPM_TbT_capture(bpm_list, capture_length)
+function BPM_TbT_capture_setup(bpm_list, capture_length)
 
 
 for n = 1:length(nbpms)

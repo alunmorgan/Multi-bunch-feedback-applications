@@ -1,4 +1,4 @@
-function image = get_pinhole_image(channel, varargin)
+function image = pinhole_get_image(channel, varargin)
 % Returns the current image from the camera along with size, timestamp and
 % scaling values.
 default_gamma_correction = 0.097;

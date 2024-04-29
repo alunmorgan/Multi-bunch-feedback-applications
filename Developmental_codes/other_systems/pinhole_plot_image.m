@@ -1,4 +1,4 @@
-function plot_pinhole_image(image)
+function pinhole_plot_image(image)
 
 % setting up a new colormap
 jet1=jet;

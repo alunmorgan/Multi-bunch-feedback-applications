@@ -1,4 +1,4 @@
-function plot_BPM_FA_data(data)
+function BPM_FA_plot_data(data)
 % Plot the data returned from get_BPM_FA_data.
 
 timescale = (data.t - data.t(1)) * 24 * 3600;
