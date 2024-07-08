@@ -56,8 +56,9 @@ In order to work optimally the feedback systems need to be matched in timing/pha
 The first requirement is done by phase shifting the input signal. At its most basic this comprises of a single phase shifter for each channel which both allows each channel to be adjusted to follow changes in beam phase, and to allow the axis to be  tuned in order to account for differences in the phase delay of that channel.
 
 The practical implementation will depend on the details of your frontend hardware.
-However is often realised as a single LO phase shifter which is common to all axes and handles the beam phase adjustments. meanwhile each channel has an individual additional phase shifter to tune out the systemic differences in phase delay between the channels. Such a setup is shown in figure \ref{fig:phase_shifters}
-Another variation is replacing the LO phase shifter with an automatic beam phase following system.
+However is often realised as a single LO phase shifter which is common to all axes and handles the beam phase adjustments. meanwhile each channel has an individual additional phase shifter to tune out the systemic differences in phase delay between the channels. Such a setup is shown in figure \ref{fig:phase_shifters}.
+Another variation is replacing the LO phase shifter with an automatic beam phase following system such as a DORIS ((Delayed Orbit Reference Improvement Scheme) unit which locks the MBF to a fixed relationship to beam phase rather than the RF phase. 
+DORIS will lock if there is more than 3~mA in the storage ring.
 
 The second requirement is done by adjusting the sampling clock until a maximum signal is obtained with a minimum signal leakage to adjacent RF buckets. See figure \ref{fig:frontend_clock_phase_scan} for an example.
 \begin{figure}[hbt]
@@ -100,24 +101,30 @@ git clone https://github.com/alunmorgan/Multi-bunch-feedback-applications.git
 \end{verbatim}
 and add the resulting folder to your Matlab path. If you find odd behaviour check that you do not have any other code in the Matlab path as you could have name clashes.
 
+If you have already cloned the repository navigate to the folder and run 
+\begin{verbatim}
+git pull
+\end{verbatim}
+This will ensure you have the most up to date version of the code.
+
 This and related documentation can be found in the \href{https://github.com/alunmorgan/Multi-bunch-feedback-applications/Documentation}{documentation folder in the repository}
 
- \section{MBF frontend operational setup}
+\section{MBF frontend open loop setup}
  Insertion devices (IDs) need to be set to injection gaps.
 \subsection{DORIS phase}
-Upstream of the MBF frontend there is a DORIS unit which locks the MBF to a fixed relationship to beam phase (rather than RF phase) 
-DORIS will lock if there is more than 3~mA in the storage ring.
-
-Before running the code to scan the doris phase, inject 10~mA.
+\subsubsection{Machine settings}
+Inject a full fill 10~mA.
+\subsubsection{DORIS phase scan}
+Before running the code to scan the DORIS phase, select a single bunch to look at.
 Make sure the single bunch location has charge in it.
 \begin{minted}{matlab}
-    >> single_bunch_location = 400 % for example
+    >> single_bunch_location = 400 % for example. This will select a single bunch in bucket 400.
 \end{minted}
 The following code will scan the phase of the DORIS unit to identify an optimum value.
 \begin{minted}{matlab}
     >> DORIS_target_phase_scan(single_bunch_location) 
 \end{minted}
-If you want to check that the settings are changing as expected then look at the screen in figure \ref{fig:DORIS_settings}.
+If you want to check that the settings are changing as expected then look at the screen in figure \ref{fig:DORIS_settings} (Diagnostics $\rightarrow$ {\color{red}????}).
 \begin{figure}
     \centering
     \includegraphics[width=0.8\linewidth]{DORIS_settings.png}
@@ -135,30 +142,31 @@ Figure \ref{fig:DORIS_phase_scan} shows an example of the output.
 
 The optimum value is the phase where one gets the maximum signal of the excited bunch. Adjust the DORIS target phase to this phase value.
 \clearpage
-\subsection{Machine settings}
-\begin{itemize}
-    \item {Inject a single bunch into a selected RF bucket.}
-    \item{Compare the MBF ADC data and the fillpattern to the bunch number requested.}
-    \begin{itemize}
-        \item{adjust MBF and fillpattern until they agree with the requested bunch number}
-        \begin{figure}[h]
-            \centering
-            \includegraphics[width=0.6\linewidth]{MBF_delays.png}
-            \caption{MBF delay screen}
-            \label{fig:MBF_delays}
-        \end{figure}
-        \item{if no sync press sync else adjust bunch value}
-    \end{itemize}
-    \item{Correct tune values to nominal.}
-    \begin{itemize}
-        \item{\textit{scripts - tune feedback}}
-        \item{\textit{use single correction first and can temporarily close the loop in order to fully optimise the tune value.}}
-    \end{itemize}
-\end{itemize}
+
 
 \subsection{Frontend phases} 
 In the front end there are two phases (delays) we are interested in optimising. The system phase which determines how accurately our detectors are aligned with the target bunch, and the clock phase which determines how close to the peak of the signal we are sampling. 
-
+\subsubsection{Machine settings}
+\begin{itemize}
+    \item {Inject a single bunch into a selected RF bucket (~0.2nC).}
+     \item{if no sync press sync button as shown on figure \ref{fig:MBF_delays} (Diagnostics $\rightarrow$ {\color{red}????})}
+    \item{Compare the MBF ADC data and the fillpattern to the bunch number requested.}
+    \begin{itemize}
+        \item{Look at the Bunch motion standard deviation. - \color{red}{ADD SCREENSHOT}}
+        \item{Look at fill pattern (Diagnostics $\rightarrow$ Photon counting system $\rightarrow$ fill) - \color{red}{ADD SCREENSHOT}}
+    \end{itemize}
+    \item{adjust MBF and fillpattern until they agree with the requested bunch number as given by the timing system.}
+    \begin{itemize}
+    \item{adjust MBF bunch value as shown on figure \ref{fig:MBF_delays}}
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.6\linewidth]{MBF_delays.png}
+        \caption{MBF delay screen}
+        \label{fig:MBF_delays}
+    \end{figure}
+       
+    \end{itemize}
+\end{itemize}
 \begin{figure}
     \centering
     \includegraphics[width=0.6\linewidth]{BBBFE_settings.png}
@@ -168,7 +176,7 @@ In the front end there are two phases (delays) we are interested in optimising. 
 \clearpage
 
 
-\subsubsection{System phase}
+\subsubsection{System phase scan}
  
 The following Matlab code will run a system phase scan on each axis sequentially. The graphs will be displayed, and the data is automatically stored. 
 
@@ -178,31 +186,34 @@ The following Matlab code will run a system phase scan on each axis sequentially
     >> BBBFE_system_phase_scan('S', single_bunch_location)
 \end{minted}
 
-Figure \ref{fig:frontend_system_phase_scan} shows an example of the output. You are looking for the phase value with the largest gap between the excited bunch and each of the other bunches. 
+Figure \ref{fig:frontend_system_phase_scan} shows an example of the output. You are looking for the phase value with the largest gap between the excited bunch and each of the other bunches. But also fairly near the maximum excited bunch maximum amplitude.
 
 \begin{figure}[hbt]
    \centering
     \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\textwidth]{vlr_system_phase_scan_x.png}
-        \caption{Horizontal axis: $-60^\circ$ looks to be a reasonable working point.}
+        \caption{Horizontal axis: Anywhere between $-60^\circ$ and $0^\circ$ looks to be a reasonable working point as you are trading of better selectivity for better signal to noise.}
         \label{fig:frontend_system_phase_scan_x}
     \end{subfigure}
     \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\textwidth]{vlr_system_phase_scan_y.png}
-        \caption{Vertical axis: $50^\circ$ looks to be a reasonable working point.}
+        \caption{Vertical axis: Anywhere between $-30^\circ$ and $30^\circ$ looks to be a reasonable working point as you are near the maximum signal of the excited bunch and the selectivity for the preceding and following bunch's are trading off one another.}
         \label{fig:frontend_system_phase_scan_y}
     \end{subfigure}
     
     \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\textwidth]{vlr_system_phase_scan_s.png}
-        \caption{longitudinal axis: $-20^\circ$ looks to be a reasonable working point.}
+        \caption{longitudinal axis: $-20^\circ$ looks to be a reasonable working point as it has the best selectivity while being close to the maximum signal to noise.}
         \label{fig:frontend_system_phase_scan_z}
     \end{subfigure}
     \caption{Example system phase results}
     \label{fig:frontend_system_phase_scan}
 \end{figure}
+\textbf{Note: }If the graphs are significantly asymmetric re-run the phase scan to check.
 
-\subsubsection{Clock phase} 
+\textbf{Note:} If there are missing data points it can indicate that the DORIS system has unlocked. In this case you may need to inject a little more charge into the target bucket.
+
+\subsubsection{Clock phase scan} 
 The following Matlab code will run a clock phase scan on each axis sequentially. The graphs will be displayed, and the data is automatically stored. 
 
 \begin{minted}{matlab}
@@ -210,18 +221,20 @@ The following Matlab code will run a clock phase scan on each axis sequentially.
     >> BBBFE_clock_phase_scan('Y', single_bunch_location)
     >> BBBFE_clock_phase_scan('S', single_bunch_location)
 \end{minted}
-Figure \ref{fig:frontend_clock_phase_scan} shows an example of the output. You are looking for the phase value with the largest gap between the excited bunch and each of the other bunches. 
+Figure \ref{fig:frontend_clock_phase_scan} shows an example of the output. You use the same assessment as for the system phase scans.
+
+\textbf{Note:} X and Y share a clock so you have to optimise both axes together.
 
 \begin{figure}[hbt]
    \centering
-    \begin{subfigure}[b]{0.45\textwidth}
+    \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\textwidth]{vlr_clock_phase_scan_x.png}
-        \caption{Horizontal axis: $-20^\circ$ looks to be a reasonable working point.}
+        \caption{Horizontal axis: $-80^\circ$ looks to be a reasonable working point.}
         \label{fig:frontend_clock_phase_scan_x}
     \end{subfigure}
-    \begin{subfigure}[b]{0.45\textwidth}
+    \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\textwidth]{vlr_clock_phase_scan_y.png}
-        \caption{Vertical axis: $-20^\circ$ looks to be a reasonable working point.}
+        \caption{Vertical axis: $-80^\circ$ looks to be a reasonable working point.}
         \label{fig:frontend_clock_phase_scan_y}
     \end{subfigure}
     
@@ -233,7 +246,9 @@ Figure \ref{fig:frontend_clock_phase_scan} shows an example of the output. You a
     \caption{Example clock phase results}
     \label{fig:frontend_clock_phase_scan}
 \end{figure}
-  
+
+\textbf{Note:} Check the bunch standard deviation graphs to check that the motion is still only in a single bucket. If it is split over two then you may have to choose an alternative working phase.
+
 Once the system phase and clock phase are optimised then the tuning of the front end is complete.
 
 The next step is to close the feedback loop.
@@ -242,8 +257,20 @@ The next step is to close the feedback loop.
 
 \subsection{Machine settings}
 \begin{itemize}
-    \item {From an empty machine Inject to 30 - 50~mA into all bunches (below the instability threshold)}
+    \item {From an empty machine Inject to 30 - 50~mA into all bunches.}
+    \begin{itemize}
+    \item{this gives sufficient signal while staying below the instability threshold}
+    \end{itemize}
     \item{Correct tune values to nominal.}
+    \begin{itemize}
+        \item{If you are struggling to get a reliable tune value try}
+        \begin{itemize}
+            \item{increasing the excitation -{\color{red}ADD SCREENSHOT} (Diagnostics $\rightarrow$ {\color{red}????})}
+            \item{changing from fitted to maximum -{\color{red}ADD SCREENSHOT} (Diagnostics $\rightarrow$ {\color{red}????})}
+        \end{itemize}
+    \end{itemize}
+    \item{Turn tune feedback off once tunes are nominal}
+    \item{Correct orbit using fast orbit feedback (FOFB).}
 \end{itemize}
 
 \subsection{Initial measurement}
@@ -257,22 +284,28 @@ The following Matlab code will run a scan across all the harmonics of the tune o
 \subsection{Assessment} 
 
 Use the modescan results to assess whether the closed loop delay is good enough.
- 
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.8\linewidth]{initial_modescan.png}
-    \caption{In this case the phase is ranging from $-40^\circ$ to $40^\circ$ and there is almost no residual gradient along the modes, which is reasonable. Although any further increase in this range would be concerning and would warrant further investigation. X, Y and S should have similar behaviour}
-    \label{fig:example_modescan}
+ \begin{figure}[hbt]
+   \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{modescan_x.png}
+        \caption{In this case the phase is ranging from $-70^\circ$ to $50^\circ$ and there is almost no residual gradient along the modes. Although any further increase in this range would be concerning and would warrant further investigation.}
+        \label{fig:example_modescan_x}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{modescan_y.png}
+        \caption{The phase is ranging from $-50^\circ$ to $50^\circ$ and there is almost no residual gradient along the modes indicating that the loop delay is close to the required value.}
+        \label{fig:example_modescan_y}
+    \end{subfigure}
 \end{figure}
 
  
 The amplitude should be fairly symmetric in the modes axis. If there is a significant change in the lowest modes only then check you have filled all bunches. The fewer bunches you fill the larger the distortion of the lower mode response becomes. 
 
-The phase variation should be much less that $\pm90^\circ$ and the extents should be balanced between going above and below zero 
+The phase variation should be much less that $\pm90^\circ$ and the extents should be balanced between going above and below zero.
 
-A large phase variation even when the overall gradient is close to zero indicates that a component is failing – probably the output amplifier. So, a hardware change and a retuning of the frontend is required. (see documentation on tuning up the frontend)
+By taking a linear fit along the modes one can estimate the required electrical delay needing to be added or removed from the loop. Positive gradient means length must be added while negative gradient means length must be removed.
 
-A significant asymmetry in the distribution of the extents of the phase trace (a large gradient in the phase plot) indicates that the overall loop delay is not correct. This can be fixed in the following ways. 
+This error in the electrical length / delay / phase can be fixed in the following ways. 
 
 First see if a DAC delay can fix it (using the control panel shown in figure \ref{fig:DAC_delay_screen}). This is only available in 2ns steps.
 
@@ -280,30 +313,21 @@ Otherwise, we must change cable lengths. The easiest place to do this is at the 
 \clearpage
 \subsection{Tuning the loop delay} 
 
-Use the \verb+mbf_modescan_setup+ Matlab code to setup the measurement and look at the ‘tune’ screen. 
+Rerun the modescan code after each change.
 
-This gives a live modescan you can use for monitoring the impact of your changes. Alternatively you can just rerun the modescan code after each change.
+The aim of this exercise is to get the extents of the phase trace comfortably fit within the $\pm90^\circ$ limits (similar to the result show in figure \ref{fig:example_modescan_y}). 
 
-The following Matlab code will set up this visualisation for each axis 
-
-Note: You generally work on a single axis at a time 
-
-\begin{minted}{matlab}
-    >> mbf_modescan_setup('x') 
-    >> mbf_modescan_setup('y') 
-    >> mbf_modescan_setup('s') 
-\end{minted}
- 
-The aim of this exercise is to get the extents of the phase trace comfortably fit within the $\pm90^\circ$ limits (similar to the result show in figure \ref{fig:example_modescan}). 
+\textbf{Note:} The spec for the phase variation of the output amplifier alone is $\pm~20$.
 
 \subsubsection{Tuning the DAC delay} 
-This allows additional phase (delay) to be added to the closed loop. However, it can only add in steps of 2ns.
+This allows additional phase (delay) to be added to the closed loop.
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.5\linewidth]{DAC_delay.png}
     \caption{DAC delay control screen}
     \label{fig:DAC_delay_screen}
 \end{figure}
+\textbf{Note:} The DAC delay is shared between X and Y axes so it may be required to retune both.
 
 Use this setting first to get as close as possible to the target performance. Any remaining adjustment will have to be done with physical cable length changes. 
 \clearpage
@@ -315,9 +339,9 @@ Modify the cable length until the extents of the phase trace comfortably fit wit
     \caption{Output amplifiers showing the RF cables to adjust}
     \label{fig:output_amplifiers}
 \end{figure}
-
+A large phase variation even when the overall gradient is close to zero indicates that a component is failing – probably the output amplifier. So, a hardware change and a retuning of the frontend is required. (see documentation on tuning up the frontend)
 \subsubsection{Tuning the FIR phase}
-The overall phase of the feedback loop should be 180 degrees. So the last step is to change the FIR phase setting so the readback value is close to (+-20) 180.
+The overall phase of the feedback loop should be 180 degrees. So the last step is to change the FIR phase setting so the readback value is close to ($\pm~20$) 180.
 
 At this point the full loop delay should be optimised
 \clearpage
