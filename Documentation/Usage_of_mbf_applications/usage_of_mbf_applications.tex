@@ -8,6 +8,7 @@
 \usepackage{amsfonts}
 \usepackage{amsmath}
 \usepackage{subcaption}
+\usepackage{tcolorbox}
 \usepackage{color}
 \pagestyle{fancy}
 \newcommand{\docTitle}{Multi bunch feedback application software}
@@ -209,9 +210,11 @@ Figure \ref{fig:frontend_system_phase_scan} shows an example of the output. You 
     \caption{Example system phase results}
     \label{fig:frontend_system_phase_scan}
 \end{figure}
+\begin{tcolorbox}
 \textbf{Note: }If the graphs are significantly asymmetric re-run the phase scan to check.
 
 \textbf{Note:} If there are missing data points it can indicate that the DORIS system has unlocked. In this case you may need to inject a little more charge into the target bucket.
+\end{tcolorbox}
 
 \subsubsection{Clock phase scan} 
 The following Matlab code will run a clock phase scan on each axis sequentially. The graphs will be displayed, and the data is automatically stored. 
@@ -222,8 +225,9 @@ The following Matlab code will run a clock phase scan on each axis sequentially.
     >> BBBFE_clock_phase_scan('S', single_bunch_location)
 \end{minted}
 Figure \ref{fig:frontend_clock_phase_scan} shows an example of the output. You use the same assessment as for the system phase scans.
-
+\begin{tcolorbox}
 \textbf{Note:} X and Y share a clock so you have to optimise both axes together.
+\end{tcolorbox}
 
 \begin{figure}[hbt]
    \centering
@@ -247,7 +251,9 @@ Figure \ref{fig:frontend_clock_phase_scan} shows an example of the output. You u
     \label{fig:frontend_clock_phase_scan}
 \end{figure}
 
+\begin{tcolorbox}
 \textbf{Note:} Check the bunch standard deviation graphs to check that the motion is still only in a single bucket. If it is split over two then you may have to choose an alternative working phase.
+\end{tcolorbox}
 
 Once the system phase and clock phase are optimised then the tuning of the front end is complete.
 
@@ -317,7 +323,9 @@ Rerun the modescan code after each change.
 
 The aim of this exercise is to get the extents of the phase trace comfortably fit within the $\pm90^\circ$ limits (similar to the result show in figure \ref{fig:example_modescan_y}). 
 
+\begin{tcolorbox}
 \textbf{Note:} The spec for the phase variation of the output amplifier alone is $\pm~20$.
+\end{tcolorbox}
 
 \subsubsection{Tuning the DAC delay} 
 This allows additional phase (delay) to be added to the closed loop.
@@ -327,7 +335,9 @@ This allows additional phase (delay) to be added to the closed loop.
     \caption{DAC delay control screen}
     \label{fig:DAC_delay_screen}
 \end{figure}
+\begin{tcolorbox}
 \textbf{Note:} The DAC delay is shared between X and Y axes so it may be required to retune both.
+\end{tcolorbox}
 
 Use this setting first to get as close as possible to the target performance. Any remaining adjustment will have to be done with physical cable length changes. 
 \clearpage
