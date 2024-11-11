@@ -24,7 +24,7 @@ function varargout = mbf_PPRE_capture(mbf_axis, varargin)
 binary_string = {'yes', 'no'};
 validScalarNum = @(x) isnumeric(x) && isscalar(x);
 
-tunes = get_all_tunes('axes', mbf_axis);
+tunes = get_all_tunes(mbf_axis);
 leftSB = tunes.([mbf_axis, '_tune']).lower_sideband;
 default_excitation_frequency = leftSB;
 default_excitation_gain = -60; %dB
@@ -40,7 +40,7 @@ addParameter(p, 'excitation_frequency',default_excitation_frequency);
 addParameter(p, 'excitation_pattern', default_excitation_pattern);
 addParameter(p, 'save_to_archive', 'yes', @(x) any(validatestring(x,binary_string)));
 addParameter(p, 'additional_save_location', NaN, valid_string);
-addParameter(p, 'harmonic', 0);
+addParameter(p, 'harmonic', 0, validScalarNum);
 addParameter(p, 'repeat_datapoints', 20, validScalarNum);
 parse(p, mbf_axis, varargin{:});
 
@@ -73,7 +73,7 @@ PPRE.tune_x_scale = get_variable([mbf_names.x, ':TUNE:SCALE']);
 PPRE.tune_y_sweep = get_variable([mbf_names.y, ':TUNE:DMAGNITUDE']);
 PPRE.tune_y_sweep_model = get_variable([mbf_names.y, ':TUNE:MMAGNITUDE']);
 PPRE.tune_y_scale = get_variable([mbf_names.y, ':TUNE:SCALE']);
-PPRE.tunes = get_all_tunes('axes', 'xys');
+PPRE.tunes = get_all_tunes('xys');
 
 %% Set up MBF excitation
 
@@ -81,7 +81,7 @@ PPRE.excitation_pattern = mbf_emittance_setup(mbf_axis, ...
     'excitation', p.Results.excitation_gain(1),...
     'excitation_frequency',p.Results.excitation_frequency(1),...
     'excitation_pattern', p.Results.excitation_pattern, ...
-    'harmonic', p.Results.harmonic(1));
+    'harmonic', p.Results.harmonic);
 
 %% Setup cameras
 set_variable('SR01C-DI-DCAM-05:IMAGEWIDTH', 1024)
