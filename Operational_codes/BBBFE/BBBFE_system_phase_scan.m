@@ -29,38 +29,70 @@ data.side1 = NaN(length(data.phase), 1);
 data.main = NaN(length(data.phase), 1);
 data.side2 = NaN(length(data.phase), 1);
 
-if strcmpi(mbf_ax, 'X')
-    mbf_pv = pv_names.hardware_names.x;
-    fe_phase_pv = [pv_names.frontend.base pv_names.frontend.system_phase.x];
-elseif strcmpi(mbf_ax, 'Y')
-    mbf_pv = pv_names.hardware_names.y;
-    fe_phase_pv = [pv_names.frontend.base pv_names.frontend.system_phase.y];
+if strcmpi(mbf_ax, 'X') || strcmpi(mbf_ax, 'Y')
+    if strcmpi(mbf_ax, 'X')
+        mbf_pv = pv_names.hardware_names.x;
+        fe_phase_pv = [pv_names.frontend.base pv_names.frontend.system_phase.x];
+    elseif strcmpi(mbf_ax, 'Y')
+        mbf_pv = pv_names.hardware_names.y;
+        fe_phase_pv = [pv_names.frontend.base pv_names.frontend.system_phase.y];
+    end %if
+    data.original_setting=get_variable(fe_phase_pv);
+    % moving to starting point in scan
+    for pp=original_setting:-20:-180
+        set_variable(fe_phase_pv, pp)
+        pause(.5)
+    end
+    % measurement
+    for x = 1:length(data.phase)
+        set_variable(fe_phase_pv, data.phase(x))
+        pause(2)
+        data.side1(x) = max(get_variable([mbf_pv, pv_names.tails.Detector.det1.power]));
+        data.main(x) = max(get_variable([mbf_pv, pv_names.tails.Detector.det2.power]));
+        data.side2(x) = max(get_variable([mbf_pv, pv_names.tails.Detector.det3.power]));
+    end
+
+    % move back to the original setting
+    for pp=-180:20:data.original_setting
+        set_variable(fe_phase_pv, pp)
+        pause(.5)
+    end
 elseif strcmpi(mbf_ax, 'S')
     mbf_pv =pv_names.hardware_names.s;
-    fe_phase_pv = [pv_names.frontend.base pv_names.frontend.system_phase.s];
+    fe_phase_pvI = [pv_names.frontend.base pv_names.frontend.system_phase.sI];
+    fe_phase_pvQ = [pv_names.frontend.base pv_names.frontend.system_phase.sQ];
+    data.original_setting=get_variable(fe_phase_pvI);
+    data.original_settingQ=get_variable(fe_phase_pvQ);
+    % moving to starting point in scan
+    for pp=original_setting:-20:-180
+        set_variable(fe_phase_pvI, pp)
+        pause(.5)
+    end
+    % I and Q must be in quadrature
+    for pp=original_settingQ:-20:-90
+        set_variable(fe_phase_pvI, pp)
+        pause(.5)
+    end
+    % measurement
+    for x = 1:length(data.phase)
+        set_variable(fe_phase_pvI, data.phase(x))
+        set_variable(fe_phase_pvQ, data.phase(x) + 90)
+        pause(2)
+        data.side1(x) = max(get_variable([mbf_pv, pv_names.tails.Detector.det1.power]));
+        data.main(x) = max(get_variable([mbf_pv, pv_names.tails.Detector.det2.power]));
+        data.side2(x) = max(get_variable([mbf_pv, pv_names.tails.Detector.det3.power]));
+    end
+    % move back to the original setting
+    for pp=-180:20:data.original_setting
+        set_variable(fe_phase_pvI, pp)
+        pause(.5)
+    end
+    % move back to the original setting
+    for pp=-90:20:data.original_settingQ
+        set_variable(fe_phase_pvQ, pp)
+        pause(.5)
+    end
 end %if
-
-original_setting=get_variable(fe_phase_pv);
-% moving to starting point in scan
-for pp=original_setting:-20:-180
-    set_variable(fe_phase_pv, pp)
-    pause(.5)
-end
-
-% measurement
-for x = 1:length(data.phase)
-    set_variable(fe_phase_pv, data.phase(x))
-    pause(2)
-    data.side1(x) = max(get_variable([mbf_pv, pv_names.tails.Detector.det1.power]));
-    data.main(x) = max(get_variable([mbf_pv, pv_names.tails.Detector.det2.power]));
-    data.side2(x) = max(get_variable([mbf_pv, pv_names.tails.Detector.det3.power]));
-end
-
-% move back to the original setting
-for pp=-180:20:original_setting
-    set_variable(fe_phase_pv, pp)
-    pause(.5)
-end
 
 BBBFE_detector_restore(mbf_ax)
 
