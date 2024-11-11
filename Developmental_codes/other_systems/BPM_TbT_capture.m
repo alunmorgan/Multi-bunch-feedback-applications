@@ -7,4 +7,7 @@ function output = BPM_TbT_capture(bpm_list, capture_length)
 % Example: output = BPM_TbT_capture({'SR01C-DI-EBPM-01', 'SR01C-DI-EBPM-02'}, 1000)
 BPM_TbT_capture_setup(bpm_list, capture_length)
 BPM_TbT_capture_arm(bpm_list)
-output = BPM_TbT_get_data(bpm_list, capture_length, 'capture_stats');
+pause(0.2)
+output = BPM_TbT_get_data(bpm_list, capture_length,...
+    'capture_stats', 'yes', 'all_waveforms', 'yes');
+fprintf('\n')
