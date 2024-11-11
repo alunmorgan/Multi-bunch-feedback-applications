@@ -3,13 +3,27 @@ function [value, varargout] = get_variable(variable_names, varargin)
 % between EPICS and TANGO (and potentially others)
 
 if ~isempty(varargin)
-    system_type = varargin{1};
+    if strcmp(varargin{end}, 'EPICS')
+        system_type = varargin{end};
+    elseif strcmp(varargin{end}, 'TANGO')
+        system_type = varargin{end};
+    else
+        system_type = 'EPICS'; % Default value FIXME eventualy it should be in a settings file.
+    end %if
 else
     system_type = 'EPICS'; % Default value FIXME eventualy it should be in a settings file.
 end %if
 
 if strcmpi(system_type, 'EPICS')
-    [value, timestamp] = lcaGet(variable_names);
+    if ~isempty(varargin)
+        if ~ischar(varargin{1})
+            [value, timestamp] = lcaGet(variable_names, varargin{1}, varargin{2});
+        else
+            [value, timestamp] = lcaGet(variable_names);
+        end %if
+    else
+        [value, timestamp] = lcaGet(variable_names);
+    end %if
 elseif strcmpi(system_type, 'TANGO')
     error('getVariable:systemTypeError', 'Tango calls are not yet implemented')
 else
