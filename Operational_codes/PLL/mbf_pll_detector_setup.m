@@ -30,12 +30,12 @@ mbf_vars = pv_names.tails;
 
 % Set up the PLL detector
 set_variable([mbf_names.(mbf_axis), mbf_vars.pll.detector.mode],...
-    p.Results.fll_detector_select);
+    p.Results.pll_detector_select);
 set_variable([mbf_names.(mbf_axis), mbf_vars.adc.reject_count],...
     p.Results.adc_reject_count);
 set_variable([mbf_names.(mbf_axis), mbf_vars.pll.detector.scaling],...
-    p.Results.fll_detector_scaling);
+    p.Results.pll_detector_scaling);
 set_variable([mbf_names.(mbf_axis), mbf_vars.pll.detector.blanking],...
-    p.Results.fll_detector_blanking);
+    p.Results.pll_detector_blanking);
 set_variable([mbf_names.(mbf_axis), mbf_vars.pll.detector.dwell],...
-    p.Results.fll_detector_dwell);
+    p.Results.pll_detector_dwell);

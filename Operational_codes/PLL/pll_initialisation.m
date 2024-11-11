@@ -56,21 +56,21 @@ set_variable([mbf_names.(mbf_axis), mbf_vars.pll.stop], 1);
 set_variable([mbf_names.(mbf_axis), mbf_vars.pll.nco.enable],'Off');
 
 % Set up the FLL feedback loop
-set_variable([mbf_names.(mbf_axis), mbf_vars.pll.i],p.Results.fll_ki); 
-set_variable([mbf_names.(mbf_axis), mbf_vars.pll.p],p.Results.fll_kp);
+set_variable([mbf_names.(mbf_axis), mbf_vars.pll.i],p.Results.pll_ki); 
+set_variable([mbf_names.(mbf_axis), mbf_vars.pll.p],p.Results.pll_kp);
 set_variable([mbf_names.(mbf_axis), mbf_vars.pll.minumum_magnitude],...
-    p.Results.fll_min_magnitude);
+    p.Results.pll_min_magnitude);
 set_variable([mbf_names.(mbf_axis), mbf_vars.pll.target_phase],...
-    p.Results.fll_target_phase)
+    p.Results.pll_target_phase)
 
 % Set up the NCO
 set_variable([mbf_names.(mbf_axis), mbf_vars.pll.nco.gain],...
-    p.Results.fll_nco_gain);
+    p.Results.pll_nco_gain);
 set_variable([mbf_names.(mbf_axis), mbf_vars.pll.nco.set_frequency],...
     tune_frequency_from_sweep)
 % Limit tune range of the NCO for initial peak finding.
 set_variable([mbf_names.(mbf_axis), mbf_vars.pll.maximum_offset],...
-    p.Results.fll_locking_max_offset)
+    p.Results.pll_locking_max_offset)
 
 % Enable the NCO and PLL
 set_variable([mbf_names.(mbf_axis), mbf_vars.pll.nco.enable],'On');
@@ -79,7 +79,7 @@ set_variable([mbf_names.(mbf_axis), mbf_vars.pll.start], 1)
 % Wait until PLL has locked (set lower bound to phase error?)
 t1 = datetime("now");
 while abs(abs(get_variable([mbf_names.(mbf_axis), mbf_vars.pll.readback.phase])) - ...
-        abs( p.Results.fll_target_phase)) > 1 % within one degree of target.
+        abs( p.Results.pll_target_phase)) > 1 % within one degree of target.
     lock_time = datetime("now");
     if lock_time > t1 + seconds(10)
         disp('Unable to lock within 10 seconds')
@@ -88,6 +88,6 @@ while abs(abs(get_variable([mbf_names.(mbf_axis), mbf_vars.pll.readback.phase]))
 end %while
 % Once locked widen the NCO limits to max required for tracking
 set_variable([mbf_names.(mbf_axis), mbf_vars.pll.maximum_offset],...
-    p.Results.fll_tracking_max_offset);
+    p.Results.pll_tracking_max_offset);
 
 
