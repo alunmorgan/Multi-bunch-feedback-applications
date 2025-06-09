@@ -312,6 +312,7 @@ pv_names.tails.adc.mean = ':ADC:MMS:MEAN';
 pv_names.tails.adc.min = ':ADC:MMS:MIN';
 pv_names.tails.adc.std = ':ADC:MMS:STD';
 pv_names.tails.adc.reject_count = ':ADC:REJECT_COUNT_S';
+pv_names.tails.adc.phase.mean = ':ADC:PHASE_MEAN';
 
 %% DAC buffers
 pv_names.tails.dac.delta = ':DAC:MMS:DELTA';
