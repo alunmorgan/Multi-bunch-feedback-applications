@@ -24,7 +24,7 @@ function varargout = mbf_PPRE_capture(mbf_axis, varargin)
 binary_string = {'yes', 'no'};
 validScalarNum = @(x) isnumeric(x) && isscalar(x);
 
-tunes = get_all_tunes(mbf_axis);
+tunes = get_all_tunes;
 leftSB = tunes.([mbf_axis, '_tune']).lower_sideband;
 default_excitation_frequency = leftSB;
 default_excitation_gain = -60; %dB
@@ -73,7 +73,7 @@ PPRE.tune_x_scale = get_variable([mbf_names.x, ':TUNE:SCALE']);
 PPRE.tune_y_sweep = get_variable([mbf_names.y, ':TUNE:DMAGNITUDE']);
 PPRE.tune_y_sweep_model = get_variable([mbf_names.y, ':TUNE:MMAGNITUDE']);
 PPRE.tune_y_scale = get_variable([mbf_names.y, ':TUNE:SCALE']);
-PPRE.tunes = get_all_tunes('xys');
+PPRE.tunes = get_all_tunes;
 
 %% Set up MBF excitation
 
@@ -107,7 +107,7 @@ for whd = 1:length(p.Results.excitation_gain)
             set_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.gain_db],p.Results.excitation_gain(whd));
             set_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.frequency], p.Results.harmonic(1) + p.Results.excitation_frequency(nwa));
             set_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.frequency], p.Results.harmonic(kef) + p.Results.excitation_frequency(1));
-            pause(1)
+            pause(10)
             PPRE.scan{whd, nwa, kef} = PPRE_aquisition(p.Results.repeat_datapoints);
         end %for
     end %for

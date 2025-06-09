@@ -14,11 +14,11 @@ set_variable(pv_names.Hardware_trigger, 1);
  end
 data_out.mbf_data_x = get_variable([mbf_names.x, mbf_vars.adc.std]);
 data_out.mbf_data_y = get_variable([mbf_names.y, mbf_vars.adc.std]);
-data_out.pinhole_settings = get_pinhole_settings;
+data_out.pinhole_settings = pinhole_get_settings;
 
 for nds = 1:number_of_repeats
-    data_out.pinhole1_images{nds} = get_pinhole_image(pv_names.pinhole1);
-    data_out.pinhole2_images{nds} = get_pinhole_image(pv_names.pinhole2);
+    data_out.pinhole1_images{nds} = pinhole_get_image(pv_names.pinhole1);
+    data_out.pinhole2_images{nds} = pinhole_get_image(pv_names.pinhole2);
     data_out.beam_sizes{nds}.P1_sigx = get_variable(pv_names.beam_size.pinhole1.sigmax);
     data_out.beam_sizes{nds}.P1_sigy = get_variable(pv_names.beam_size.pinhole1.sigmay);
     data_out.beam_sizes{nds}.P2_sigx = get_variable(pv_names.beam_size.pinhole2.sigmax);
@@ -30,6 +30,6 @@ for nds = 1:number_of_repeats
     data_out.emittances{nds}.herror = get_variable(pv_names.emittance.x.error);
     data_out.emittances{nds}.verror = get_variable(pv_names.emittance.y.error);
     fprintf([num2str(nds),'. '])
-    pause(0.3) % wait for next camera image.
+    pause(0.4) % wait for next camera image.
 end %for
 fprintf('\n')
