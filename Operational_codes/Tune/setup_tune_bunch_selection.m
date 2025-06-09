@@ -20,10 +20,11 @@ parse(p, mbf_axis, tune_mode);
 selected_axis = upper(p.Results.mbf_axis);
 
 if strcmpi(p.Results.tune_mode, 'comb')
-    % setup tune using 10 bunches spaced 90 bucket apart.
+    % setup tune using 10 bunches spaced 90 bucket apart. Starting at
+    % bucket 40.
     det_enable_wfm = zeros(936,1);
     for js = 1:10
-        det_enable_wfm(js * 90) = 1;
+        det_enable_wfm(js * 90 - 50) = 1;
     end %for
     lcaPut([PV_base, selected_axis, detector0 ], det_enable_wfm')
     lcaPut([PV_base, selected_axis, sequencer1], det_enable_wfm')
@@ -34,6 +35,4 @@ elseif strcmpi(p.Results.tune_mode, 'all')
     lcaPut([PV_base, selected_axis, detector0], det_enable_wfm')
     lcaPut([PV_base, selected_axis, sequencer1], det_enable_wfm')
     lcaPut([PV_base, selected_axis, excitation], -54.19)
-else
-    warning('Please select all or comb')
 end %if
