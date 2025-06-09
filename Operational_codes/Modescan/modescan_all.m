@@ -1,4 +1,4 @@
-function modscan_all(mbf_axis, varargin)
+function modescan_all(mbf_axis, varargin)
 % top level function to run the modescan for all selected plane.
 % Args:
 %       mbf_axis (str): 'x', 'y', 's'. Defines which system you are requesting
