@@ -7,6 +7,7 @@ function mbf_modescan_plotting(data_magnitude, data_phase, modescan)
 %       modescan(structure): captured data
 %
 % Example: mbf_modescan_plotting(data_magnitude, data_phase, modescan)
+frev = 533E3; %TEMP PLEASE PULL IN THE ACTUAL REVOLUTION FREQUENCY
 
 figure("OuterPosition",[30, 400, 700, 900])
 subplot(2,1,1)
@@ -17,6 +18,7 @@ title({['MBF modescan results ', modescan.ax_label, ' axis ', datestr(modescan.t
 xlabel('Modes')
 xlim([1,modescan.harmonic_number])
 grid on
+
 subplot(2,1,2)
 modes = 1:modescan.harmonic_number;
 plot(data_phase(), 'DisplayName', 'data', 'LineWidth',2)
@@ -24,7 +26,7 @@ data_end = sum(data_phase(modes))./ modes(end);
 target_grad = data_end / modes(end);
 y = modes .* target_grad;
 hold on 
-plot(y, 'DisplayName', ['fit', num2str(round(target_grad*100)/100), ' degrees / mode'], 'LineWidth',2)
+plot(y, 'DisplayName', ['fit ', num2str(round(y(end)*100)/100), ' degrees total, delay = ', (y(end)* pi ./ 180)./(2 * pi * frev)], 'LineWidth',2)
 plot(1:modescan.harmonic_number, ones(modescan.harmonic_number,1)*-90, ':r', 'DisplayName','Limits', 'LineWidth',2)
 plot(1:modescan.harmonic_number, ones(modescan.harmonic_number,1)*90, ':r', 'LineWidth',2, 'HandleVisibility','off')
 hold off
