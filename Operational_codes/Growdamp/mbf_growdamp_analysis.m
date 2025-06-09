@@ -142,7 +142,7 @@ for nq = 1:n_modes %par if it behaving
     delta3_acum(nq) = delta3;
     p2_acum(nq) = p2(1);
     p3_acum(nq) = p3(1);
-end %parfor
+end %for
 % Output data structure.
 % axis 1 is mode, axis 2 is expermental state (excitation, natural
 % damping, active damping). axis 3 is damping time, offset and fractional error.

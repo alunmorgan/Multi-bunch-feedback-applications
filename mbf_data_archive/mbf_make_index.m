@@ -55,7 +55,7 @@ disp(['Creating lookup index for ',application_type, ' ' ax])
 if isempty(wanted_datasets_type)
     disp('No files to index')
 else
-    parfor kse = 1:length(wanted_datasets_type)
+    for kse = 1:length(wanted_datasets_type) %parfor chokes the server
         try % handelling corrupted input files
             temp = load(wanted_datasets_type{kse});
         catch me1
@@ -75,7 +75,7 @@ else
 %             disp(fieldnames(temp))
             ok(kse) = 0;
         end %if
-    end %parfor
+    end %for
     file_index = cat(1, file_name(ok==1), file_time(ok==1));
     toc
     save(fullfile(root_string{1}, [application_type, '_', index_name]), 'file_index')
