@@ -33,7 +33,10 @@ else
     error('growdamp:setup:invalidAxis', 'Incorrect axis selected. Should be x, y, s, tx, ty')
 end %if
 
+[~, harmonic_number, pv_names, trigger_inputs] = mbf_system_config;
+
 default_auto_setup = 'yes';
+default_bunch_monitor = ones(harmonic_number,1);
 
 p = inputParser;
 p.StructExpand = false;
@@ -51,6 +54,7 @@ addParameter(p, 'tune_offset', default_tune_offset, valid_number);
 addParameter(p, 'single_mode', NaN, valid_number);
 addParameter(p, 'auto_setup', default_auto_setup, @(x) any(validatestring(x, boolean_string)));
 addParameter(p, 'tunes', NaN);
+addParameter(p, 'bunch_monitor', default_bunch_monitor);
 
 parse(p, mbf_axis, varargin{:});
 
@@ -70,7 +74,7 @@ if isnan(tune)
     return
 end %if
 
-[~, harmonic_number, pv_names, trigger_inputs] = mbf_system_config;
+
 settings = p.Results;
 
 pv_head = pv_names.hardware_names.(settings.mbf_axis);
@@ -163,5 +167,4 @@ for n_det = 0:3
 end %for
 set_variable([pv_head  Detector.('det0').enable], 'Enabled');
 % Set the bunch mode to all bunches on detector 0
-set_variable([pv_head  Detector.('det0').bunch_selection], ones(harmonic_number,1)');
-
+set_variable([pv_head  Detector.('det0').bunch_selection], p.bunch_monitor');
