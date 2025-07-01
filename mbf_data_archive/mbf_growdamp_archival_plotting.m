@@ -46,6 +46,8 @@ annotation('textbox', [0 1-0.3 0.3 0.3], 'String', graph_text, 'FitBoxToText', '
 ax1 = axes('OuterPosition', [0.12 0.5 0.95 0.5]);
 hold on
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
+    dr_passive = squeeze(dr_passive);
+    dr_active = squeeze(dr_active);
     plot(x_plt_axis, dr_passive, 'LineWidth', 2)
     legend(graph_labels)
 else
