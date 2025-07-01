@@ -72,8 +72,8 @@ end %if
 set_variable([pv_head, triggers.SEQ.disarm], 1)
 
 % Getting settings for growth, natural damping, and active damping.
-exp_state_names = {'spacer', 'act', 'nat', 'growth'};
-for n=1:4
+exp_state_names = {'spacer2', 'act',  'growth2','spacer', 'nat','growth'};
+for n=1:6
     % Getting the number of turns
     growdamp.([exp_state_names{n}, '_turns']) = get_variable([pv_head,...
         Sequencer.Base, ':', num2str(n), Sequencer.count]);
