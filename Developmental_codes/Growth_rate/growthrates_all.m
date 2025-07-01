@@ -1,4 +1,4 @@
-function growthrates = growthrates_all(mbf_axis, varargin)
+function varargout = growthrates_all(mbf_axis, varargin)
 % Top level function to run the growth rates measurements on the
 % selected plane
 %   Args:
@@ -10,7 +10,8 @@ function growthrates = growthrates_all(mbf_axis, varargin)
 %       tunes (structure or NaN): Tune data from a previous measurement. 
 %                                 Defaults to Nan.
 %   Returns:
-%       growthrates(structure): The data captured from all the relevant systems.
+%       growthrates(structure): The data captured from all the relevant systems
+%                               (optional).
 %
 % Example: growthrates = growthrates_all('x')
 
@@ -51,3 +52,7 @@ if strcmp(p.Results.plotting, 'yes')
     mbf_growthrates_plot_summary(poly_data, frequency_shifts, growthrates, ...
         'outputs', 'both')
 end %if
+
+if nargout == 1
+    varargout{1} = growthrates;
+end
