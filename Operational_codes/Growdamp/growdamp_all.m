@@ -1,4 +1,4 @@
-function growdamp = growdamp_all(mbf_axis, varargin)
+function varargout = growdamp_all(mbf_axis, varargin)
 % Top level function to run the growdamp measurements on the
 % selected plane
 %   Args:
@@ -10,7 +10,7 @@ function growdamp = growdamp_all(mbf_axis, varargin)
 %       tunes (structure or NaN): Tune data from a previous measurement. 
 %                                 Defaults to Nan.
 %   Returns:
-%       growdamp(structure): The data captured from all the relevant systems.
+%       growdamp(structure): The data captured from all the relevant systems (optional).
 %
 % Example: growdamp = growdamp_all('x')
 
@@ -53,3 +53,7 @@ if strcmp(p.Results.plotting, 'yes')
     mbf_growdamp_plot_summary(poly_data, frequency_shifts, growdamp, ...
         'outputs', 'both')
 end %if
+
+if nargout == 1
+    varargout{1} = growdamp;
+end
