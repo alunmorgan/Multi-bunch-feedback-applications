@@ -37,6 +37,23 @@ index_name = [filter_name, '_index'];
 
 if strcmp(p.Results.bypass_index, 'no')
     load(fullfile(root_string, index_name), 'file_index')
+    % Some error in the file index construction this just removes the unwanted
+    % empty entries.
+    ck1 = 1;
+    ck2 = 1;
+    for jrs = 1:size(file_index, 2)
+        if ~isempty(file_index{1,jrs})
+            test{1,ck1} = file_index{1,jrs};
+            ck1 = ck1 +1;
+        end %if
+    end %for
+    for jrs = 1:size(file_index, 2)
+        if ~isempty(file_index{2,jrs})
+            test{2,ck2} = file_index{2,jrs};
+            ck2 = ck2 +1;
+        end %if
+    end %for
+    file_index = test;
     capture_times = cellfun(@datetime, file_index(2,:));
     a = find(capture_times > date_range(1));
     b = find(capture_times <= date_range(2));
