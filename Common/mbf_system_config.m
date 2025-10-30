@@ -259,8 +259,8 @@ pv_names.tails.NCO2.enable = ':NCO2:ENABLE_S';
 pv_names.tails.NCO2.PLL_follow = ':NCO2:TUNE_PLL_S';
 
 % FIR settings
-pv_names.tails.FIR.Base = ':FIR:';
-pv_names.tails.FIR.gain = 'GAIN_S';
+pv_names.tails.FIR.Base = ':FIR';
+pv_names.tails.FIR.gain = ':GAIN_S';
 pv_names.tails.FIR.method_of_construction = ':USEWF_S';
 
 % Tune settings
