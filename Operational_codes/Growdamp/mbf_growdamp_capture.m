@@ -9,7 +9,7 @@ function varargout = mbf_growdamp_capture(mbf_axis, varargin)
 %       additional_save_location (str): Full path to additional save location.
 %       capture_full_bunch_motion (str): yes or no. Determines if the full
 %       time series of bunch motion is captured and stored (large data).
-%       save_to_archive (str): yes or no. 
+%       save_to_archive (str): yes or no.
 %       excitation_location: Tune or Sideband.
 %   Returns:
 %       growdamp (struct): data structure containing the experimental
@@ -30,6 +30,7 @@ addParameter(p, 'save_to_archive', 'yes', @(x) any(validatestring(x,binary_strin
 addParameter(p, 'additional_save_location', NaN, valid_string);
 addParameter(p, 'capture_full_bunch_motion', 'no', @(x) any(validatestring(x,binary_string)));
 addParameter(p, 'excitation_location', 'Tune', @(x) any(validatestring(x,excitation_locations)));
+addParameter(p, 'excitation', 'yes', @(x) any(validatestring(x,binary_string)));
 parse(p, mbf_axis, varargin{:});
 
 if ~strcmpi(mbf_axis, 'x')&& ~strcmpi(mbf_axis, 'y') && ~strcmpi(mbf_axis, 's') &&...
@@ -43,7 +44,49 @@ pv_head = pv_names.hardware_names.(mbf_axis);
 pv_head_mem = pv_names.hardware_names.mem.(mbf_axis);
 triggers = pv_names.tails.triggers;
 Sequencer = pv_names.tails.Sequencer;
+FIR = pv_names.tails.FIR;
 
+%% Getting setup data
+% getting general environment data.
+growdamp = machine_environment('tunes', p.Results.tunes);
+% Add the axis label to the data structure.
+growdamp.ax_label = mbf_axis;
+% construct name and add it to the structure
+if strcmp(p.Results.excitation,'no')
+    growdamp.base_name = ['Growdamp_' growdamp.ax_label '_axis_no_excitation'];
+else
+    if strcmp(p.Results.excitation_location,'Sideband')
+        growdamp.base_name = ['Growdamp_' growdamp.ax_label '_axis_Sideband_excitation'];
+    else
+        growdamp.base_name = ['Growdamp_' growdamp.ax_label '_axis'];
+    end %if
+end %if
+
+% Getting feedback gain
+growdamp.FIR_gain = [pv_head, FIR.Base, FIR.gain];
+
+% ordering is important here. (reverse order of experiment)
+if strcmp(p.Results.excitation, 'no')
+    exp_state_names = {'active', 'growth'};
+else
+    % Getting settings for growth, natural damping, and active damping.
+    exp_state_names = {'spacer2', 'active',  'growth2','spacer', 'passive','growth'};
+end %if
+
+for n=1:length(exp_state_names)
+    % Getting the number of turns
+    growdamp.([exp_state_names{n}, '_turns']) = get_variable([pv_head,...
+        Sequencer.Base, ':', num2str(n), Sequencer.count]);
+    % Getting the number of turns each point dwells at
+    growdamp.([exp_state_names{n}, '_dwell']) = get_variable([pv_head,...
+        Sequencer.Base, ':', num2str(n), Sequencer.dwell]);
+    % Getting the gain
+    growdamp.([exp_state_names{n}, '_gain']) = get_variable([pv_head,...
+        Sequencer.Base, ':', num2str(n), Sequencer.gain]);
+end %for
+growdamp.exp_state_names = exp_state_names;
+
+%% Preparing system for data capture
 set_variable([pv_head_mem, triggers.MEM.disarm], 1)
 pause(0.5) % Letting the hardware sort itself out.
 % Arm the memory so that it cycles. This means that all the status PV are
@@ -57,35 +100,11 @@ if ~strcmp(temp1, 'Idle') == 1
 else
     error('growdamp:memoryNotReady', 'Memory is not ready please try again')
 end %if
-% getting general environment data.
-growdamp = machine_environment('tunes', p.Results.tunes);
-% Add the axis label to the data structure.
-growdamp.ax_label = mbf_axis;
-% construct name and add it to the structure
-if strcmp(p.Results.excitation_location,'Sideband')
-    growdamp.base_name = ['Growdamp_' growdamp.ax_label '_axis_Sideband_excitation'];
-else
-    growdamp.base_name = ['Growdamp_' growdamp.ax_label '_axis'];
-end %if
-    
+
 %Disarm, so that the current settings will be picked up upon arming.
 set_variable([pv_head, triggers.SEQ.disarm], 1)
 
-% Getting settings for growth, natural damping, and active damping.
-exp_state_names = {'spacer2', 'act',  'growth2','spacer', 'nat','growth'};
-for n=1:6
-    % Getting the number of turns
-    growdamp.([exp_state_names{n}, '_turns']) = get_variable([pv_head,...
-        Sequencer.Base, ':', num2str(n), Sequencer.count]);
-    % Getting the number of turns each point dwells at
-    growdamp.([exp_state_names{n}, '_dwell']) = get_variable([pv_head,...
-        Sequencer.Base, ':', num2str(n), Sequencer.dwell]);
-    % Getting the gain
-    growdamp.([exp_state_names{n}, '_gain']) = get_variable([pv_head,...
-        Sequencer.Base, ':', num2str(n), Sequencer.gain]);
-end %for
-
-% Trigger the measurement
+%% Trigger the measurement
 if strcmp(mbf_axis, 'x') || strcmp(mbf_axis, 's')|| strcmp(mbf_axis, 'tx')
     chan = 0;
 elseif strcmp(mbf_axis, 'y') || strcmp(mbf_axis, 'ty')
@@ -94,7 +113,7 @@ end %if
 if strcmpi(mbf_axis, 's')
     mem_lock = 180;
 else
-    mem_lock = 10;
+    mem_lock = 30;
 end %if
 %Arm
 set_variable([pv_head, triggers.SEQ.arm], 1)

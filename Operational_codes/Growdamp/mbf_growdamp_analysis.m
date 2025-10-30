@@ -1,12 +1,12 @@
-function [poly_data, frequency_shifts] = mbf_growdamp_analysis(exp_data, varargin)
+function output_data = mbf_growdamp_analysis(exp_data, varargin)
 % takes the data from mbf growdamp capture and fits it with a series of
 % linear fits to get the damping times for each mode.
 %
 %   Args:
 %       exp_data (structure): Contains the systems setup and the data
 %                             captured.
-%       overrides (list of ints): Two values setting the number of turns to
-%                                 analyse (passive, active)
+%       active_override (int|NaN): Sets the number of turns to analyse.
+%       passive_override (int|NaN): Sets the number of turns to analyse.
 %       advanced_fitting (bool): switches between simple (0)
 %                                and advanced fitting (1).
 %       length_averaging(int): Determines the strength of the filtering out
@@ -18,43 +18,38 @@ function [poly_data, frequency_shifts] = mbf_growdamp_analysis(exp_data, varargi
 %                                kept (1).
 %
 %   Returns:
-%       poly_data (3 by 3 matrix): axis 1 is coupling mode.
-%                                  axis 2 is expermental state,
-%                                  excitation, natural damping, active damping).
-%                                  axis 3 is damping time, offset and
-%                                  fractional error.
-%       frequency_shifts (list of floats): The frequency shift of each mode.
+%       output_data (struct): data is structured as [stage].[mesurement]
+%                               measurements are: damping time, offset, 
+%                               error relative to fit, frequency shift.
+%                               all measurements are a vector the length of the
+%                               number of modes.
 %
-% Example: [poly_data, frequency_shifts] = tmbf_growdamp_analysis(exp_data)
-
-defaultOverrides = [NaN, NaN];
-defaultAnalysisSetting = 0;
-defaultLengthAveraging = 20;
-defaultDebug = 0;
-defaultDebugModes = 1:size(exp_data.data,1);
-defaultKeepDebugGraphs = 0;
-
-p = inputParser;
-validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
-addRequired(p,'exp_data', @isstruct);
-addOptional(p,'overrides',defaultOverrides);
-addParameter(p,'advanced_fitting',defaultAnalysisSetting, @isnumeric);
-addParameter(p,'length_averaging',defaultLengthAveraging, validScalarPosNum);
-addParameter(p,'debug',defaultDebug, @isnumeric);
-addParameter(p,'debug_modes',defaultDebugModes);
-addParameter(p,'keep_debug_graphs',defaultKeepDebugGraphs, @isnumeric);
-parse(p,exp_data,varargin{:});
-
-passive_override = p.Results.overrides(1);
-active_override = p.Results.overrides(2);
-adv_fitting = p.Results.advanced_fitting;
-length_averaging = p.Results.length_averaging;
+% Example: output_data = tmbf_growdamp_analysis(exp_data)
 
 harmonic_number = length(exp_data.fill_pattern);
 
-% Preallocation
-poly_data = NaN(harmonic_number,3,3);
-frequency_shifts = NaN(harmonic_number, 1);
+defaultAnalysisSetting = 0;
+defaultLengthAveraging = 20;
+defaultDebug = 0;
+defaultDebugModes = 1:harmonic_number;
+defaultKeepDebugGraphs = 0;
+
+inputs = inputParser;
+validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
+addRequired(inputs,'exp_data', @isstruct);
+addOptional(inputs,'active_override',NaN);
+addOptional(inputs,'passive_override',NaN);
+addParameter(inputs,'advanced_fitting',defaultAnalysisSetting, @isnumeric);
+addParameter(inputs,'length_averaging',defaultLengthAveraging, validScalarPosNum);
+addParameter(inputs,'debug',defaultDebug, @isnumeric);
+addParameter(inputs,'debug_modes',defaultDebugModes);
+addParameter(inputs,'keep_debug_graphs',defaultKeepDebugGraphs, @isnumeric);
+parse(inputs,exp_data,varargin{:});
+
+passive_override = inputs.Results.passive_override;
+active_override = inputs.Results.active_override;
+adv_fitting = inputs.Results.advanced_fitting;
+length_averaging = inputs.Results.length_averaging;
 
 if ~isfield(exp_data, 'data') && isfield(exp_data, 'gddata')
     exp_data.data = exp_data.gddata;
@@ -70,125 +65,61 @@ exp_data.data = reshape(exp_data.data,[],harmonic_number)';
 n_modes = size(exp_data.data,1);
 
 % Find the idicies for the end of each period.
-try
-    end_of_growth = exp_data.growth_turns; %in samples
-catch
-    poly_data = NaN(1,3,3);
-    return
-end %try
-end_of_passive = end_of_growth + exp_data.nat_turns; %in samples
-end_of_active = end_of_passive + exp_data.act_turns; %in samples
+% change the ordering so that the first stage in time is at index 1.
+stage_names = flip(exp_data.exp_state_names);
+nstages = length(stage_names);
+for jjse = 1:nstages
+    length_of_stage(jse) = exp_data.([exp_data.exp_state_names{jjse}, '_turns']);
+    dwell_of_stage(jjse) = exp_data.([exp_data.exp_state_names{jjse}, '_dwell']);
+    if jjse == 1
+        end_of_stage(jjse) = length_of_stage(jjse);
+        samples_of_stage{jjse} = (1:end_of_stage(jjse));
+        turns_of_stage{jjse} = samples_of_stage{jjse} .* dwell_of_stage(jjse);
+    else
+        end_of_stage(jjse) = end_of_stage(jjse -1) + length_of_stage(jjse);
+        samples_of_stage{jjse} = (end_of_stage(jjse -1) + 1): end_of_stage(jjse);
+        turns_of_stage{jjse} = turns_of_stage{jjse -1} + (samples_of_stage{jjse}...
+            - samples_of_stage{jjse - 1}(end)) .* dwell_of_stage(jjse);
+    end %if
+end %for
 
-if size(exp_data.data, 2) < end_of_active
+if size(exp_data.data, 2) < end_of_stage(end)
     warning('growdamp:analysis:noValidData', ['No valid data for ', exp_data.base_name])
     return
 end %if
-data = exp_data.data;
-if isfield(exp_data, 'growth_dwell')
-    growth_dwell = exp_data.growth_dwell;
-else
-    growth_dwell = NaN;
-end %if
-if isfield(exp_data, 'growth_dwell')
-    nat_dwell =  exp_data.nat_dwell;
-else
-    nat_dwell = NaN;
-end %if
-if isfield(exp_data, 'growth_dwell')
-    act_dwell =  exp_data.act_dwell;
-else
-    act_dwell = NaN;
-end %if
 
-growth_samples = (1:end_of_growth);
-growth_turns = growth_samples * growth_dwell; %in turns
-passive_samples = (end_of_growth + 1):end_of_passive;
-passive_turns = growth_turns(end)+ (passive_samples - growth_samples(end)) * nat_dwell; %in turns
-active_samples = (end_of_passive + 1):end_of_active;
-active_turns = passive_turns(end) + (active_samples - passive_samples(end)) * act_dwell; %in turns
+for nq = 1:n_modes
+    for ksew = 1:nstages
+        stage_data = exp_data.data(nq,samples_of_stage{ksew});
+        stage_name = stage_names{ksew};
+        threshold_value = min(stage_data); % The 'noise' floor.
 
-s1_acum = NaN(n_modes,2);
-s2_acum = NaN(n_modes,2);
-s3_acum = NaN(n_modes,2);
-delta1_acum = NaN(n_modes,1);
-delta2_acum = NaN(n_modes,1);
-delta3_acum = NaN(n_modes,1);
-p2_acum = NaN(n_modes,1);
-p3_acum = NaN(n_modes,1);
+        if contains(stage_name, 'growth')
+            % growth
+            mag_fit = polyfit(turns_of_stage{ksew}, log(abs(stage_data)),1);
+            c1 = polyval(mag_fit, turns_of_stage{ksew});
+            delta = mean(abs(c1 - log(abs(stage_data)))./c1);
+            temp = unwrap(angle(stage_data)) / (2*pi);
+            phase_fit = polyfit(x_data,temp,1);
+        elseif contains(stage_name, 'active')
+            % passive damping
+            [mag_fit, delta, phase_fit] = get_damping(turns_of_stage{ksew}, ...
+                stage_data, passive_override, length_averaging, ...
+                adv_fitting,threshold_value);
+        elseif contains(stage_name, 'passive')
+            %active damping
+            [mag_fit, delta, phase_fit] = get_damping(turns_of_stage{ksew}, ...
+                stage_data, active_override, length_averaging, ...
+                adv_fitting,threshold_value);
+        end %if
+        output_data.(stage_name).damping_time(nq) = mag_fit(1);
+        output_data.(stage_name).offset(nq) = mag_fit(2);
+        output_data.(stage_name).error(nq) = delta;
+        output_data.(stage_name).frequency_shift(nq) = phase_fit(1);
 
-for nq = 1:n_modes %par if it behaving
-    %% split up the data into growth, passive damping and active damping.
-    data_mode = data(nq,:);
-
-    % growth
-    g_data = data_mode(growth_samples);
-    s1 = polyfit(growth_turns, log(abs(g_data)),1);
-    c1 = polyval(s1, growth_turns);
-    delta1 = mean(abs(c1 - log(abs(g_data)))./c1);
-    threshold_value = min(g_data); % The 'noise' floor.
-    % passive damping
-    pd_data = data_mode(passive_samples);
-    [s2, delta2, p2] = get_damping(passive_turns, pd_data, passive_override, length_averaging, adv_fitting,threshold_value);
-
-    %active damping
-    ad_data = data_mode(active_samples);
-    [s3, delta3, p3] = get_damping(active_turns, ad_data, active_override, length_averaging, adv_fitting,threshold_value);
-
-    s1_acum(nq,:) = s1;
-    s2_acum(nq,:) = s2;
-    s3_acum(nq,:) = s3;
-    delta1_acum(nq) = delta1;
-    delta2_acum(nq) = delta2;
-    delta3_acum(nq) = delta3;
-    p2_acum(nq) = p2(1);
-    p3_acum(nq) = p3(1);
-end %for
-% Output data structure.
-% axis 1 is mode, axis 2 is expermental state (excitation, natural
-% damping, active damping). axis 3 is damping time, offset and fractional error.
-poly_data(:,1,1:2) = s1_acum;
-poly_data(:,2,1:2) = s2_acum;
-poly_data(:,3,1:2) = s3_acum;
-poly_data(:,1,3) = delta1_acum;
-poly_data(:,2,3) = delta2_acum;
-poly_data(:,3,3) = delta3_acum;
-frequency_shifts(:,1) = p2_acum;
-frequency_shifts(:,2) = p3_acum;
-
-if p.Results.debug == 1
-    turns_axis = cat(2, growth_turns, passive_turns, active_turns);
-    h = gobjects(length(p.Results.debug_modes), 1);
-    for hs = 1:length(p.Results.debug_modes)
-        debug_data = abs(data(p.Results.debug_modes(hs),:));
-        h(hs) = figure('Position', [20, 40, 600, 600]);
-        hold on
-        debug_passive = debug_data(passive_samples);
-        [debug_passive_s_basic, ~, ~] = get_damping(passive_turns,debug_passive, NaN, 20, 0, threshold_value);
-        debug_fit_passive_basic = polyval(debug_passive_s_basic,passive_turns);
-        [debug_passive_s_advanced, ~, ~] = get_damping(passive_turns, debug_passive, NaN, 20, 1,threshold_value);
-        debug_fit_passive_advanced = polyval(debug_passive_s_advanced,passive_turns);
-
-        debug_active = debug_data(active_samples);
-        [debug_active_s_basic, ~, ~] = get_damping(active_turns, debug_active, NaN, 20, 0, threshold_value);
-        debug_fit_active_basic = polyval(debug_active_s_basic,active_turns);
-        [debug_active_s_advanced, ~, ~] = get_damping(active_turns, debug_active, NaN, 20, 1, threshold_value);
-        debug_fit_active_advanced = polyval(debug_active_s_advanced,active_turns);
-
-        data_range = [min(debug_data), max(debug_data)];
-        plot(turns_axis, debug_data, 'DisplayName', ['Index ', num2str(p.Results.debug_modes(hs))])
-        plot(passive_turns, exp(debug_fit_passive_basic), 'r', 'DisplayName', 'Passive fit (Basic)', 'LineWidth', 2)
-        plot(active_turns, exp(debug_fit_active_basic), 'k', 'DisplayName', 'Active fit (Basic)', 'LineWidth', 2)
-        plot(passive_turns, exp(debug_fit_passive_advanced), ':r', 'DisplayName', 'Passive fit (Advanced)', 'LineWidth', 2)
-        plot(active_turns, exp(debug_fit_active_advanced), ':k', 'DisplayName', 'Active fit (Advanced)', 'LineWidth', 2)
-        plot([growth_turns(end), growth_turns(end)], data_range, ':g','DisplayName', 'End of growth', 'LineWidth', 2)
-        plot([passive_turns(end), passive_turns(end)], data_range, ':m','DisplayName', 'End of passive', 'LineWidth', 2)
-        plot([active_turns(end), active_turns(end)], data_range, ':c','DisplayName', 'end of active', 'LineWidth', 2)
-        legend
-        xlabel('Turns')
-        hold off
-        if p.Results.keep_debug_graphs == 0
-            close(h(hs))
+        if inputs.Results.debug == 1
+            make_debug_graphs(nq, ksew, turns_of_stage{ksew}, stage_data, ...
+                exp_data.filename, inputs.Results.keep_debug_graphs)
         end %if
     end %for
-
-end %if
+end %for

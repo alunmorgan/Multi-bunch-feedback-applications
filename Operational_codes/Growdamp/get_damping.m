@@ -29,19 +29,10 @@ if length(y_data) < 3
     delta = NaN;
     p = NaN;
 else
-    if length(y_data)> length_averaging *8
-        y_data = movmean(y_data, length_averaging);
-    end %if
+   
     if adv_fitting == 0
-        [s, delta, p] = mbf_growdamp_basic_fitting(x_data, y_data);
+        [s, delta, p] = mbf_growdamp_basic_fitting(x_data, y_data, length_averaging, threshold_value);
     else
-    noise_floor_intercept_pd = find(abs(y_data) <=threshold_value, 1, 'first');
-    if ~isempty(noise_floor_intercept_pd)
-        y_data(noise_floor_intercept_pd:end) = [];
-        x_data(noise_floor_intercept_pd:end) = [];
-    end %if
-%         [x_data, y_data] = truncate_to_linear(x_data, y_data);
-        [s, delta, p] = mbf_growdamp_basic_fitting(x_data, y_data);
-        %         [s, delta, p] = mbf_growdamp_advanced_fitting(y_data, length_averaging);
+        [s, delta, p] = mbf_growdamp_advanced_fitting(x_data, y_data, length_averaging, threshold_value);
     end %if
 end %if

@@ -1,4 +1,4 @@
-function mbf_growdamp_plot_summary(poly_data, frequency_shifts, metadata, varargin)
+function mbf_growdamp_plot_summary(data,  metadata, varargin)
 % Plots the driven growth rates, and the active and pasive damping rates
 % across all modes.
 %
@@ -10,8 +10,6 @@ function mbf_growdamp_plot_summary(poly_data, frequency_shifts, metadata, vararg
 %                                  fractional error.
 %       frequency_shifts (list of floats): The frequency shift of each mode.
 %       metadata (structure): setup information.
-%       outputs (str): 'passive' 'active', or 'both' Determines which traces are
-%                      included in the graphs
 %       axis: 'x', 'y' or 's'
 %       plot_mode: 'pos' or 'neg'. Determines if plot modes 0:harmonic_number or
 %       -harmonic_number/2:harmonic_number/2
@@ -22,74 +20,165 @@ p = inputParser;
 p.StructExpand = false;
 p.CaseSensitive = false;
 valid_string = @(x) ischar(x);
-addRequired(p, 'poly_data');
-addRequired(p, 'frequency_shifts');
+addRequired(p, 'data');
 addRequired(p, 'metadata');
-addParameter(p, 'outputs', 'both', valid_string);
 addParameter(p, 'plot_mode', 'pos', valid_string);
-parse(p, poly_data, frequency_shifts, metadata, varargin{:});
+parse(p, data, metadata, varargin{:});
 
 % Getting the desired system setup parameters.
-harmonic_number = size(frequency_shifts, 1);
 
-passive_data = -squeeze(poly_data(:,2,1));
-active_data = -squeeze(poly_data(:,3,1));
 
+stages = fieldnames(data);
+harmonic_number = length(data.(stages{1}));
+
+%% Adjust the horizontal axis setup
 if strcmpi(p.Results.plot_mode, 'pos')
     x_plt_axis = 0:harmonic_number-1;
-    passive_frequency_shifts = frequency_shifts(:,1);
-    active_frequency_shifts = frequency_shifts(:,2);
     labelX = 'Mode';
 elseif strcmpi(p.Results.plot_mode, 'neg')
     x_plt_axis = (0:harmonic_number-1) - harmonic_number/2;
-    passive_data = circshift(passive_data, -harmonic_number/2, 1);
-    active_data = circshift(active_data, -harmonic_number/2, 1);
-    passive_frequency_shifts = circshift(frequency_shifts(:,1), -harmonic_number/2, 1);
-    active_frequency_shifts = circshift(frequency_shifts(:,2), -harmonic_number/2, 1);
     labelX = 'Mode';
+    for nse = 1:length(stages)
+        data.(stages{nse}) = circshift(data.(stages{nse}), -harmonic_number/2, 1);
+    end %for
 elseif strcmpi(p.Results.plot_mode, 'freq')
     x_plt_axis = (0:harmonic_number-1) - harmonic_number/2;
     x_plt_axis = x_plt_axis * metadata.RF / harmonic_number * 1E-6;
-    passive_data = circshift(passive_data, -harmonic_number/2, 1);
-    active_data = circshift(active_data, -harmonic_number/2, 1);
-    passive_frequency_shifts = circshift(frequency_shifts(:,1), -harmonic_number/2, 1);
-    active_frequency_shifts = circshift(frequency_shifts(:,2), -harmonic_number/2, 1);
-labelX = 'Frequency (MHz)';
-    
-end
-
-figure('Position', [20, 40, 600, 600])
-ax1 = subplot(3,1,1:2);
-hold on
-if strcmpi(p.Results.outputs, 'passive') || strcmpi(p.Results.outputs, 'both')
-    plot(x_plt_axis, passive_data, 'b', 'DisplayName', 'Passive')
-end %if
-if strcmpi(p.Results.outputs, 'active') || strcmpi(p.Results.outputs, 'both')
-    plot(x_plt_axis, active_data, 'g', 'DisplayName', 'Active')
+    labelX = 'Frequency (MHz)';
+    for nse = 1:length(stages)
+        data.(stages{nse}) = circshift(data.(stages{nse}), -harmonic_number/2, 1);
+    end %for
 end %if
 
-hold off
-xlim([x_plt_axis(1) x_plt_axis(end)])
-title({['MBF growdamp results ', metadata.ax_label,' axis ', datestr(metadata.time)];...
+%% Calculate the relative frequency shifts between stages.
+ck = 1;
+for wnf = 1:length(stages)
+    for ntd = 1:length(stages)
+        if wnf ~= ntd
+            freq_diffs(ck,:) = data.(stages{wnf}).frequency_shifts - ...
+                data.(stages{ntd}).frequency_shifts;
+            freq_diff_names{ck} = [stages{wnf}, ' - ', stages{ntd}];
+            ck = ck +1;
+        end %if
+    end %for
+end %for
+
+%% Plotting
+figure('Position', [20, 40, 800, 800])
+t = tiledlayout(3, 1);
+title(t, {['MBF growdamp results ', metadata.ax_label,' axis ', datestr(metadata.time)];...
     ['Current: ', num2str(round(metadata.current)), 'mA']})
-xlabel(labelX)
+xlabel(t, labelX)
+ax1 = nexttile;
+hold on
+for ns = 1:length(stages)
+    if ~contains(stages{ns}, 'growth')
+        plot(x_plt_axis, data.(stages{ns}).error, 'DisplayName', stages{ns})
+    end %if
+end %for
+hold off
+ylabel('Error')
+legend
+grid on
+xlim([x_plt_axis(1) x_plt_axis(end)])
+ax2 = nexttile([2,1]);
+hold on
+for ns = 1:length(stages)
+    if ~contains(stages{ns}, 'growth')
+        plot(x_plt_axis, data.(stages{ns}).damping_rate, 'DisplayName', stages{ns})
+    end %if
+end %for
+hold off
 ylabel('Damping rates (1/turns)')
 legend
 grid on
-
-ax2 = subplot(3,1,3);
-    hold on
-if strcmpi(p.Results.outputs, 'passive') || strcmpi(p.Results.outputs, 'both')
-    plot(x_plt_axis, passive_frequency_shifts, 'b', 'DisplayName', 'Passive')
-end %if
-if strcmpi(p.Results.outputs, 'active') || strcmpi(p.Results.outputs, 'both')
-    plot(x_plt_axis, active_frequency_shifts, 'g', 'DisplayName', 'Active')
-end %if
-    hold off
 xlim([x_plt_axis(1) x_plt_axis(end)])
-xlabel(labelX)
+linkaxes([ax1, ax2], 'x')
+
+figure('Position', [20, 40, 800, 800])
+t = tiledlayout(1, 1);
+title(t, {['MBF growdamp results ', metadata.ax_label,' axis ', datestr(metadata.time)];...
+    ['Current: ', num2str(round(metadata.current)), 'mA']})
+xlabel(t, labelX)
+nexttile;
+hold on
+for ns = 1:length(stages)
+    if ~contains(stages{ns}, 'growth')
+        plot(x_plt_axis, data.(stages{ns}).frequency_shift, 'DisplayName', stages{ns})
+    end %if
+end %for
+hold off
+xlim([x_plt_axis(1) x_plt_axis(end)])
 ylabel({'Difference from';'excitation tune'})
 legend
 grid on
+xlim([x_plt_axis(1) x_plt_axis(end)])
 
+figure('Position', [20, 40, 800, 800])
+t = tiledlayout(3, 1);
+title(t, {['MBF growdamp results ', metadata.ax_label,' axis ', datestr(metadata.time)];...
+    ['Current: ', num2str(round(metadata.current)), 'mA']})
+xlabel(t, labelX)
+ax1 = nexttile;
+hold on
+for ns = 1:length(stages)
+    if contains(stages{ns}, 'growth')
+        plot(x_plt_axis, data.(stages{ns}).error, 'DisplayName', stages{ns})
+    end %if
+end %for
+hold off
+ylabel('Error')
+legend
+grid on
+xlim([x_plt_axis(1) x_plt_axis(end)])
+ax2 = nexttile([2,1]);
+hold on
+for ns = 1:length(stages)
+    if contains(stages{ns}, 'growth')
+        plot(x_plt_axis, data.(stages{ns}).damping_rate, 'DisplayName', stages{ns})
+    end %if
+end %for
+hold off
+ylabel('Growth rates (1/turns)')
+legend
+grid on
+xlim([x_plt_axis(1) x_plt_axis(end)])
 linkaxes([ax1, ax2], 'x')
+
+figure('Position', [20, 40, 800, 800])
+t = tiledlayout(1, 1);
+title(t, {['MBF growdamp results ', metadata.ax_label,' axis ', datestr(metadata.time)];...
+    ['Current: ', num2str(round(metadata.current)), 'mA']})
+xlabel(t, labelX)
+nexttile;
+hold on
+for ns = 1:length(stages)
+    if contains(stages{ns}, 'growth')
+        plot(x_plt_axis, data.(stages{ns}).frequency_shift, 'DisplayName', stages{ns})
+    end %if
+end %for
+hold off
+xlim([x_plt_axis(1) x_plt_axis(end)])
+ylabel({'Difference from';'excitation tune'})
+legend
+grid on
+xlim([x_plt_axis(1) x_plt_axis(end)])
+
+figure('Position', [20, 40, 800, 800])
+t = tiledlayout(1, 1);
+title(t, {['MBF growdamp results ', metadata.ax_label,' axis ', datestr(metadata.time)];...
+    ['Current: ', num2str(round(metadata.current)), 'mA']})
+xlabel(t, labelX)
+nexttile;
+hold on
+for ns = 1:length(freq_diff_names)
+    plot(x_plt_axis, squeeze(freq_diffs(ns,:)), 'DisplayName', freq_diff_names{ns})
+end %for
+hold off
+xlim([x_plt_axis(1) x_plt_axis(end)])
+ylabel({'Difference between';'experiment stages'})
+legend
+grid on
+xlim([x_plt_axis(1) x_plt_axis(end)])
+
+

@@ -9,6 +9,9 @@ function varargout = growdamp_all(mbf_axis, varargin)
 %       is yes.
 %       tunes (structure or NaN): Tune data from a previous measurement. 
 %                                 Defaults to Nan.
+%       excitation(str): sets whether the measurement uses an excitation to
+%                        drive a resonance or if the measurement just uses the natural beam coupling.
+%                        Defaults to 'yes'                                                  
 %   Returns:
 %       growdamp(structure): The data captured from all the relevant systems (optional).
 %
@@ -27,6 +30,7 @@ addRequired(p, 'mbf_axis', @(x) any(validatestring(x, axis_string)));
 addParameter(p, 'plotting', default_plotting, @(x) any(validatestring(x, boolean_string)));
 addParameter(p, 'auto_setup', default_auto_setup, @(x) any(validatestring(x, boolean_string)));
 addParameter(p, 'tunes', NaN);
+addParameter(p, 'excitation', 'yes',  @(x) any(validatestring(x, boolean_string)));
 
 
 % parse(p, mbf_axis);
@@ -49,9 +53,8 @@ if strcmp(p.Results.auto_setup, 'yes')
 end %if
 
 if strcmp(p.Results.plotting, 'yes')
-    [poly_data, frequency_shifts] = mbf_growdamp_analysis(growdamp);
-    mbf_growdamp_plot_summary(poly_data, frequency_shifts, growdamp, ...
-        'outputs', 'both')
+    poly_data = mbf_growdamp_analysis(growdamp);
+    mbf_growdamp_plot_summary(poly_data, growdamp)
 end %if
 
 if nargout == 1
