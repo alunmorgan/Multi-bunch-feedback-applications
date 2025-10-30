@@ -29,6 +29,8 @@ leftSB = tunes.([mbf_axis, '_tune']).lower_sideband;
 default_excitation_frequency = leftSB;
 default_excitation_gain = -60; %dB
 default_excitation_pattern = ones(harmonic_number,1);
+default_harmonic = 0;
+default_repeat_datapoints = 20;
 
 p = inputParser;
 p.StructExpand = false;
@@ -40,8 +42,8 @@ addParameter(p, 'excitation_frequency',default_excitation_frequency);
 addParameter(p, 'excitation_pattern', default_excitation_pattern);
 addParameter(p, 'save_to_archive', 'yes', @(x) any(validatestring(x,binary_string)));
 addParameter(p, 'additional_save_location', NaN, valid_string);
-addParameter(p, 'harmonic', 0, validScalarNum);
-addParameter(p, 'repeat_datapoints', 20, validScalarNum);
+addParameter(p, 'harmonic', default_harmonic);
+addParameter(p, 'repeat_datapoints', default_repeat_datapoints, validScalarNum);
 parse(p, mbf_axis, varargin{:});
 
 % Set up MBF environment
@@ -81,7 +83,7 @@ PPRE.excitation_pattern = mbf_emittance_setup(mbf_axis, ...
     'excitation', p.Results.excitation_gain(1),...
     'excitation_frequency',p.Results.excitation_frequency(1),...
     'excitation_pattern', p.Results.excitation_pattern, ...
-    'harmonic', p.Results.harmonic);
+    'harmonic', p.Results.harmonic(1));
 
 %% Setup cameras
 set_variable('SR01C-DI-DCAM-05:IMAGEWIDTH', 1024)

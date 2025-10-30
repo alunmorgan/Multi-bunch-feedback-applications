@@ -8,15 +8,20 @@ mbf_names = pv_names.hardware_names;
 mbf_vars = pv_names.tails;
 
 set_variable(pv_names.Hardware_trigger, 1);
- while ~strcmp('Fit Forced',get_variable(pv_names.emittance.status)) ...
-         && ~strcmp('Successful',get_variable(pv_names.emittance.status))
-     pause(0.2);
- end
+while ~strcmp('Fit Forced',get_variable(pv_names.emittance.status)) ...
+        && ~strcmp('Successful',get_variable(pv_names.emittance.status))
+    if strcmp('Image too faint',get_variable(pv_names.emittance.status))
+        error('Excitation gain likely too high!')
+    end %if
+    pause(0.2);
+end
 data_out.mbf_data_x = get_variable([mbf_names.x, mbf_vars.adc.std]);
 data_out.mbf_data_y = get_variable([mbf_names.y, mbf_vars.adc.std]);
 data_out.pinhole_settings = pinhole_get_settings;
 
 for nds = 1:number_of_repeats
+    data_out.bunch_motion.x = get_variable([mbf_names.x, pv_names.tails.adc.std]);
+    data_out.bunch_motion.y = get_variable([mbf_names.y, pv_names.tails.adc.std]);
     data_out.pinhole1_images{nds} = pinhole_get_image(pv_names.pinhole1);
     data_out.pinhole2_images{nds} = pinhole_get_image(pv_names.pinhole2);
     data_out.beam_sizes{nds}.P1_sigx = get_variable(pv_names.beam_size.pinhole1.sigmax);
