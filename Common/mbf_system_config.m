@@ -9,6 +9,9 @@ root_path = {'/dls/ops-data/Diagnostics/MBF/', ...
     '/dls/ops-data/Diagnostics/LMBF/'};
 harmonic_number = 936;
 
+%% RF frequency
+pv_names.RF = 'SR-CS-RFFB-01:TARGET';
+
 %% Beam current
 pv_names.current = 'SR-DI-DCCT-01:SIGNAL';
 
@@ -239,6 +242,8 @@ pv_names.tails.MEM.status = ':MEM:BUSY';% NEED TO TAKE OFF THE X|Y BEFORE USE.
 pv_names.tails.MEM.channel_select = ':MEM:SELECT_S';% NEED TO TAKE OFF THE X|Y BEFORE USE.
 pv_names.tails.MEM.offset = ':MEM:OFFSET_S';% NEED TO TAKE OFF THE X|Y BEFORE USE.
 pv_names.tails.MEM.runout = ':MEM:RUNOUT_S'; % NEED TO TAKE OFF THE X|Y BEFORE USE.
+pv_names.tails.MEM.channel0_target = ':MEM:SEL0_S'; % NEED TO TAKE OFF THE X|Y BEFORE USE.
+pv_names.tails.MEM.channel1_target = ':MEM:SEL1_S'; % NEED TO TAKE OFF THE X|Y BEFORE USE.
 pv_names.tails.TRG.memory_status = ':TRG:MEM:STATUS';
 
 
@@ -313,6 +318,8 @@ pv_names.tails.adc.min = ':ADC:MMS:MIN';
 pv_names.tails.adc.std = ':ADC:MMS:STD';
 pv_names.tails.adc.reject_count = ':ADC:REJECT_COUNT_S';
 pv_names.tails.adc.phase.mean = ':ADC:PHASE_MEAN';
+pv_names.tails.adc.dram_source = ':ADC:DRAM_SOURCE_S';
+
 
 %% DAC buffers
 pv_names.tails.dac.delta = ':DAC:MMS:DELTA';
@@ -320,3 +327,4 @@ pv_names.tails.dac.max = ':DAC:MMS:MAX';
 pv_names.tails.dac.mean = ':DAC:MMS:MEAN';
 pv_names.tails.dac.min = ':DAC:MMS:MIN';
 pv_names.tails.dac.std = ':DAC:MMS:STD';
+pv_names.tails.dac.dram_source = ':DAC:DRAM_SOURCE_S';
