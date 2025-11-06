@@ -101,34 +101,36 @@ for trigger_ind = 1:length(trigger_inputs)
     pv_names.tails.triggers.MEM.(trigger).enable_status = [':TRG:MEM:',trigger,':EN_S'];
     pv_names.tails.triggers.MEM.(trigger).blanking_status = [':TRG:MEM:',trigger,':BL_S'];
 end
-% Super Sequencer settings
+%% Super Sequencer settings
 pv_names.tails.Super_sequencer_count = ':SEQ:SUPER:COUNT_S';
 pv_names.tails.Super_sequencer_reset = ':SEQ:SUPER:RESET_S.PROC';
 pv_names.tails.Super_sequencer.count = ':SEQ:SUPER:COUNT_S';
 pv_names.tails.Super_sequencer.reset = ':SEQ:SUPER:RESET_S.PROC';
 
-% Sequencer settings
+%% Sequencer settings
 % pv_names.tails.Sequencer.start_state = ':SEQ:PC_S';
 % pv_names.tails.Sequencer.steady_state_bank = ':SEQ:0:BANK_S';
-pv_names.tails.Sequencer.Base = ':SEQ';
-pv_names.tails.Sequencer.start_frequency = ':START_FREQ_S';
-pv_names.tails.Sequencer.end_frequency = ':END_FREQ_S';
-pv_names.tails.Sequencer.count = ':COUNT_S';
-pv_names.tails.Sequencer.dwell = ':DWELL_S';
-pv_names.tails.Sequencer.gain = ':GAIN_S';
-pv_names.tails.Sequencer.gaindb = ':GAIN_DB_S';
-pv_names.tails.Sequencer.enable = ':ENABLE_S';
-pv_names.tails.Sequencer.step_frequency = ':STEP_FREQ_S';
-pv_names.tails.Sequencer.holdoff = ':HOLDOFF_S';
-pv_names.tails.Sequencer.bank_select = ':BANK_S';
-pv_names.tails.Sequencer.capture_state = ':CAPTURE_S';
-pv_names.tails.Sequencer.windowing_state = ':ENWIN_S';
-pv_names.tails.Sequencer.blanking_state = ':BLANK_S';
-pv_names.tails.Sequencer.reset = ':RESET_S.PROC';
+% pv_names.tails.Sequencer.Base = ':SEQ';
+% pv_names.tails.Sequencer.start_frequency = ':START_FREQ_S';
+% pv_names.tails.Sequencer.end_frequency = ':END_FREQ_S';
+% pv_names.tails.Sequencer.count = ':COUNT_S';
+% pv_names.tails.Sequencer.dwell = ':DWELL_S';
+% pv_names.tails.Sequencer.gain = ':GAIN_S';
+% pv_names.tails.Sequencer.gaindb = ':GAIN_DB_S';
+% pv_names.tails.Sequencer.enable = ':ENABLE_S';
+% pv_names.tails.Sequencer.step_frequency = ':STEP_FREQ_S';
+% pv_names.tails.Sequencer.holdoff = ':HOLDOFF_S';
+% pv_names.tails.Sequencer.bank_select = ':BANK_S';
+% pv_names.tails.Sequencer.capture_state = ':CAPTURE_S';
+% pv_names.tails.Sequencer.windowing_state = ':ENWIN_S';
+% pv_names.tails.Sequencer.blanking_state = ':BLANK_S';
+% pv_names.tails.Sequencer.reset = ':RESET_S.PROC';
 
 % applies to all
 pv_names.tails.Sequencer.start_state = ':SEQ:PC_S';
 pv_names.tails.Sequencer.steady_state_bank = ':SEQ:0:BANK_S';
+pv_names.tails.Sequencer.reset = ':SEQ:RESET_S.PROC';
+
 for n_seq = 1:7
     l_seq = ['seq',num2str(n_seq)];
     n_seq_label = num2str(n_seq);
@@ -145,38 +147,37 @@ for n_seq = 1:7
     pv_names.tails.Sequencer.(l_seq).capture_state = [':SEQ:', n_seq_label, ':CAPTURE_S'];
     pv_names.tails.Sequencer.(l_seq).windowing_state = [':SEQ:', n_seq_label, ':ENWIN_S'];
     pv_names.tails.Sequencer.(l_seq).blanking_state = [':SEQ:', n_seq_label, ':BLANK_S'];
-    pv_names.tails.Sequencer.(l_seq).reset = [':SEQ:', n_seq_label, ':RESET_S.PROC'];
     pv_names.tails.Sequencer.(l_seq).holdoff_state = [':SEQ:', n_seq_label, ':STATE_HOLDOFF_S'];
     pv_names.tails.Sequencer.(l_seq).tune_pll_following = [':SEQ:', n_seq_label, ':TUNE_PLL_S'];
 
 end %for
 
 
-% Bank settings
-pv_names.tails.Bunch_bank.Base = ':BUN';
-pv_names.tails.Bunch_bank.Gains = ':GAINWF_S';
-pv_names.tails.Bunch_bank.Output_types = ':OUTWF_S';
-pv_names.tails.Bunch_bank.FIR_select = ':FIRWF_S';
-pv_names.tails.Bunch_bank.FIR_set_enable = ':FIR:SET_ENABLE_S.PROC';
-pv_names.tails.Bunch_bank.FIR_enable = ':FIR:ENABLE_S';
-pv_names.tails.Bunch_bank.NCO1_set_enable = ':NCO1:SET_ENABLE_S.PROC';
-pv_names.tails.Bunch_bank.NCO2_set_enable = ':NCO2:SET_ENABLE_S.PROC';
-pv_names.tails.Bunch_bank.NCO1_enable = ':NCO1:ENABLE_S';
-pv_names.tails.Bunch_bank.NCO2_enable = ':NCO2:ENABLE_S';
-pv_names.tails.Bunch_bank.SEQ_set_enable = ':SEQ:SET_ENABLE_S.PROC';
-pv_names.tails.Bunch_bank.SEQ_enable = ':SEQ:ENABLE_S';
-pv_names.tails.Bunch_bank.PLL_enable = ':PLL:SET_ENABLE_S';
-pv_names.tails.Bunch_bank.FIR_set_disable = ':FIR:SET_DISABLE_S.PROC';
-pv_names.tails.Bunch_bank.FIR_disable = ':FIR:DISABLE_S';
-pv_names.tails.Bunch_bank.NCO1_disable = ':NCO1:SET_DISABLE_S.PROC';
-pv_names.tails.Bunch_bank.NCO2_disable = ':NCO2:SET_DISABLE_S.PROC';
-pv_names.tails.Bunch_bank.SEQ_disable = ':SEQ:SET_DISABLE_S.PROC';
-pv_names.tails.Bunch_bank.PLL_disable = ':PLL:SET_DISABLE_S.PROC';
-pv_names.tails.Bunch_bank.FIR_gains = ':FIR:GAIN_S';
-pv_names.tails.Bunch_bank.NCO1_gains = ':NCO1:GAIN_S';
-pv_names.tails.Bunch_bank.NCO2_gains = ':NCO2:GAIN_S';
-pv_names.tails.Bunch_bank.SEQ_gains = ':SEQ:GAIN_S';
-pv_names.tails.Bunch_bank.PLL_gains = ':PLL:GAIN_S';
+%% Bank settings
+% pv_names.tails.Bunch_bank.Base = ':BUN';
+% pv_names.tails.Bunch_bank.Gains = ':GAINWF_S';
+% pv_names.tails.Bunch_bank.Output_types = ':OUTWF_S';
+% pv_names.tails.Bunch_bank.FIR_select = ':FIRWF_S';
+% pv_names.tails.Bunch_bank.FIR_set_enable = ':FIR:SET_ENABLE_S.PROC';
+% pv_names.tails.Bunch_bank.FIR_enable = ':FIR:ENABLE_S';
+% pv_names.tails.Bunch_bank.NCO1_set_enable = ':NCO1:SET_ENABLE_S.PROC';
+% pv_names.tails.Bunch_bank.NCO2_set_enable = ':NCO2:SET_ENABLE_S.PROC';
+% pv_names.tails.Bunch_bank.NCO1_enable = ':NCO1:ENABLE_S';
+% pv_names.tails.Bunch_bank.NCO2_enable = ':NCO2:ENABLE_S';
+% pv_names.tails.Bunch_bank.SEQ_set_enable = ':SEQ:SET_ENABLE_S.PROC';
+% pv_names.tails.Bunch_bank.SEQ_enable = ':SEQ:ENABLE_S';
+% pv_names.tails.Bunch_bank.PLL_enable = ':PLL:SET_ENABLE_S';
+% pv_names.tails.Bunch_bank.FIR_set_disable = ':FIR:SET_DISABLE_S.PROC';
+% pv_names.tails.Bunch_bank.FIR_disable = ':FIR:DISABLE_S';
+% pv_names.tails.Bunch_bank.NCO1_disable = ':NCO1:SET_DISABLE_S.PROC';
+% pv_names.tails.Bunch_bank.NCO2_disable = ':NCO2:SET_DISABLE_S.PROC';
+% pv_names.tails.Bunch_bank.SEQ_disable = ':SEQ:SET_DISABLE_S.PROC';
+% pv_names.tails.Bunch_bank.PLL_disable = ':PLL:SET_DISABLE_S.PROC';
+% pv_names.tails.Bunch_bank.FIR_gains = ':FIR:GAIN_S';
+% pv_names.tails.Bunch_bank.NCO1_gains = ':NCO1:GAIN_S';
+% pv_names.tails.Bunch_bank.NCO2_gains = ':NCO2:GAIN_S';
+% pv_names.tails.Bunch_bank.SEQ_gains = ':SEQ:GAIN_S';
+% pv_names.tails.Bunch_bank.PLL_gains = ':PLL:GAIN_S';
 
 for n_bank = 0:3
     l_bank = ['bank',num2str(n_bank)];
@@ -218,7 +219,7 @@ for n_bank = 0:3
     pv_names.tails.Bunch_bank.(l_bank).PLL.gainswfdb = [':BUN:', n_bank_label, ':PLL:GAIN_DB'];
 end %for
 
-% Detector settings
+%% Detector settings
 % applies to all
 pv_names.tails.Detector.source = ':DET:SELECT_S';
 pv_names.tails.Detector.fill_waveforms = ':DET:FILL_WAVEFORMS_S';
@@ -237,7 +238,7 @@ for n_det = 0:3
     pv_names.tails.Detector.(l_det).set_selection = [':DET:',n_det_label,':SET_SELECT_S.PROC'];
 end %for
 
-% Memory settings
+%% Memory settings
 pv_names.tails.MEM.status = ':MEM:BUSY';% NEED TO TAKE OFF THE X|Y BEFORE USE.
 pv_names.tails.MEM.channel_select = ':MEM:SELECT_S';% NEED TO TAKE OFF THE X|Y BEFORE USE.
 pv_names.tails.MEM.offset = ':MEM:OFFSET_S';% NEED TO TAKE OFF THE X|Y BEFORE USE.
@@ -247,15 +248,14 @@ pv_names.tails.MEM.channel1_target = ':MEM:SEL1_S'; % NEED TO TAKE OFF THE X|Y B
 pv_names.tails.TRG.memory_status = ':TRG:MEM:STATUS';
 
 
-% % NCO settings
-pv_names.tails.NCO.Base = ':NCO';
-pv_names.tails.NCO.frequency = ':FREQ_S';
-pv_names.tails.NCO.gain = ':GAIN_S';
-pv_names.tails.NCO.gaindb = ':GAIN_DB_S';
-pv_names.tails.NCO.enable = ':ENABLE_S';
-pv_names.tails.NCO.PLL_follow = ':TUNE_PLL_S';
+%% NCO1 settings
+pv_names.tails.NCO1.frequency = ':NCO1:FREQ_S';
+pv_names.tails.NCO1.gain = ':NCO1:GAIN_S';
+pv_names.tails.NCO1.gaindb = ':NCO1:GAIN_DB_S';
+pv_names.tails.NCO1.enable = ':NCO1:ENABLE_S';
+pv_names.tails.NCO1.PLL_follow = ':NCO1:TUNE_PLL_S';
 
-% NCO2 settings
+%% NCO2 settings
 pv_names.tails.NCO2.gain_scalar = ':NCO2:GAIN_SCALAR_S';
 pv_names.tails.NCO2.gain_db = ':NCO2:GAIN_DB_S';
 pv_names.tails.NCO2.enable = ':NCO2:ENABLE_S';
@@ -263,12 +263,12 @@ pv_names.tails.NCO2.frequency = ':NCO2:FREQ_S';
 pv_names.tails.NCO2.enable = ':NCO2:ENABLE_S';
 pv_names.tails.NCO2.PLL_follow = ':NCO2:TUNE_PLL_S';
 
-% FIR settings
-pv_names.tails.FIR.Base = ':FIR';
-pv_names.tails.FIR.gain = ':GAIN_S';
-pv_names.tails.FIR.method_of_construction = ':USEWF_S';
+%% FIR settings
+pv_names.tails.FIR.gain = ':FIR:GAIN_S';
+pv_names.tails.FIR.gaindb = ':FIR:GAIN_DB_S';
+pv_names.tails.FIR.method_of_construction = ':FIR:USEWF_S';
 
-% Tune settings
+%% Tune settings
 pv_names.tails.tune.peak.left_area = ':PEAK:LEFT:AREA';
 pv_names.tails.tune.peak.right_area = ':PEAK:RIGHT:AREA';
 pv_names.tails.tune.peak.centre_area = ':PEAK:CENTRE:AREA';
@@ -277,7 +277,7 @@ pv_names.tails.tune.centre = ':TUNE:CENTRE:TUNE';
 pv_names.tails.tune.left = ':TUNE:LEFT:TUNE';
 pv_names.tails.tune.right = ':TUNE:RIGHT:TUNE';
 
-%PLL settings
+%% PLL settings
 pv_names.tails.pll.detector.dwell = ':PLL:DET:DWELL_S';
 pv_names.tails.pll.detector.target_bunches = ':PLL:DET:BUNCHES_S';
 pv_names.tails.pll.detector.mode = ':PLL:DET:SELECT_S';
@@ -319,6 +319,7 @@ pv_names.tails.adc.std = ':ADC:MMS:STD';
 pv_names.tails.adc.reject_count = ':ADC:REJECT_COUNT_S';
 pv_names.tails.adc.phase.mean = ':ADC:PHASE_MEAN';
 pv_names.tails.adc.dram_source = ':ADC:DRAM_SOURCE_S';
+pv_names.tails.adc.loopback = ':ADC:LOOPBACK_S';
 
 
 %% DAC buffers
