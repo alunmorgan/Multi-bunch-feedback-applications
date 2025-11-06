@@ -15,18 +15,17 @@ function mbf_set_state(ax, state, tune, bank, gain, enable, duration, dwell, cap
 % Example: mbf_set_state(ax, state, tune, bank, gain, duration, dwell, capture)
 [~, ~, pv_names, ~] = mbf_system_config;
 
-Sequencer = pv_names.tails.Sequencer;
-% pv_head = [pv_names.hardware_names.(ax), Sequencer.Base, num2str(state)];
-pv_head = [pv_names.hardware_names.(ax), Sequencer.Base, ':', num2str(state)];
+system_axis = pv_names.hardware_names.(ax);
+seq = pv_names.tails.Sequencer.(['seq' num2str(state)]);
 
-mbf_get_then_put([pv_head, Sequencer.start_frequency], tune);
-mbf_get_then_put([pv_head, Sequencer.step_frequency],0);
-mbf_get_then_put([pv_head, Sequencer.count], duration);
-mbf_get_then_put([pv_head, Sequencer.holdoff], 0);
-mbf_get_then_put([pv_head, Sequencer.dwell], dwell);
-mbf_get_then_put([pv_head, Sequencer.bank_select], ['Bank ',num2str(bank)]);
-mbf_get_then_put([pv_head, Sequencer.capture_state], capture);
-mbf_get_then_put([pv_head, Sequencer.windowing_state], 'Disabled');
-mbf_get_then_put([pv_head, Sequencer.gain], gain);
-mbf_get_then_put([pv_head, Sequencer.blanking_state], 'Off');
-mbf_get_then_put([pv_head, Sequencer.enable], enable);
+mbf_get_then_put([system_axis, seq.start_frequency], tune);
+mbf_get_then_put([system_axis, seq.step_frequency],0);
+mbf_get_then_put([system_axis, seq.count], duration);
+mbf_get_then_put([system_axis, seq.holdoff], 0);
+mbf_get_then_put([system_axis, seq.dwell], dwell);
+mbf_get_then_put([system_axis, seq.bank_select], ['Bank ',num2str(bank)]);
+mbf_get_then_put([system_axis, seq.capture_state], capture);
+mbf_get_then_put([system_axis, seq.windowing_state], 'Disabled');
+mbf_get_then_put([system_axis, seq.gain], gain);
+mbf_get_then_put([system_axis, seq.blanking_state], 'Off');
+mbf_get_then_put([system_axis, seq.enable], enable);

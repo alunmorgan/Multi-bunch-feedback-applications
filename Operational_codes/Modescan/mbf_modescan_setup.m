@@ -42,16 +42,6 @@ addParameter(p, 'tunes', NaN);
 
 parse(p, mbf_axis, varargin{:});
 
-mbf_tools
-
-settings = p.Results;
-
-[~, harmonic_number, pv_names] = mbf_system_config;
-Sequencer = pv_names.tails.Sequencer;
-
-% Generate the base PV name.
-pv_head = pv_names.hardware_names.(mbf_axis);
-
 if strcmp(p.Results.auto_setup, 'yes')
     % Programatiaclly press the tune only button on each system
     % then get the tunes
@@ -59,7 +49,6 @@ if strcmp(p.Results.auto_setup, 'yes')
 end %if
 
 if isstruct(p.Results.tunes)
-
     tunes = p.Results.tunes;
 else
     % Get the tunes
@@ -72,14 +61,20 @@ if isnan(tune)
     return
 end %if
 
-% state 1
-set_variable([pv_head, Sequencer.Base, ':1', Sequencer.start_frequency], tune);
-set_variable([pv_head, Sequencer.Base, ':1', Sequencer.step_frequency],1);
-set_variable([pv_head, Sequencer.Base, ':1', Sequencer.count], harmonic_number -1);
-set_variable([pv_head, Sequencer.Base, ':1', Sequencer.holdoff], 0);
-set_variable([pv_head, Sequencer.Base, ':1', Sequencer.dwell], settings.dwell);
-set_variable([pv_head, Sequencer.Base, ':1', Sequencer.bank_select], 'Bank 1');
-set_variable([pv_head, Sequencer.Base, ':1', Sequencer.capture_state], 'Capture');
-set_variable([pv_head, Sequencer.Base, ':1', Sequencer.windowing_state], 'Disabled');
-set_variable([pv_head, Sequencer.Base, ':1',Sequencer.gaindb], -30);
-set_variable([pv_head, Sequencer.Base, ':1', Sequencer.blanking_state], 'Off');
+mbf_tools
+[~, harmonic_number, pv_names] = mbf_system_config;
+% Generate the base PV name.
+system_axis = pv_names.hardware_names.(mbf_axis);
+% state 1 of sequencer
+seq = pv_names.tails.Sequencer.seq1;
+
+set_variable([system_axis seq.start_frequency], tune);
+set_variable([system_axis seq.step_frequency],1);
+set_variable([system_axis seq.count], harmonic_number -1);
+set_variable([system_axis seq.holdoff], 0);
+set_variable([system_axis seq.dwell], p.Results.dwell);
+set_variable([system_axis seq.bank_select], 'Bank 1');
+set_variable([system_axis seq.capture_state], 'Capture');
+set_variable([system_axis seq.windowing_state], 'Disabled');
+set_variable([system_axis seq.gaindb], -30);
+set_variable([system_axis seq.blanking_state], 'Off');

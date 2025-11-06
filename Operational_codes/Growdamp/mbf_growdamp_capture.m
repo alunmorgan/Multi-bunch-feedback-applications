@@ -63,7 +63,7 @@ else
 end %if
 
 % Getting feedback gain
-growdamp.FIR_gain = [pv_head, FIR.Base, FIR.gain];
+growdamp.FIR_gain = [pv_head, FIR.gain];
 
 % ordering is important here. (reverse order of experiment)
 if strcmp(p.Results.excitation, 'no')
@@ -76,13 +76,13 @@ end %if
 for n=1:length(exp_state_names)
     % Getting the number of turns
     growdamp.([exp_state_names{n}, '_turns']) = get_variable([pv_head,...
-        Sequencer.Base, ':', num2str(n), Sequencer.count]);
+        Sequencer.(['seq' num2str(n)]).count]);
     % Getting the number of turns each point dwells at
     growdamp.([exp_state_names{n}, '_dwell']) = get_variable([pv_head,...
-        Sequencer.Base, ':', num2str(n), Sequencer.dwell]);
+        Sequencer.(['seq' num2str(n)]).dwell]);
     % Getting the gain
     growdamp.([exp_state_names{n}, '_gain']) = get_variable([pv_head,...
-        Sequencer.Base, ':', num2str(n), Sequencer.gain]);
+        Sequencer.(['seq' num2str(n)]).gain]);
 end %for
 growdamp.exp_state_names = exp_state_names;
 

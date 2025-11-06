@@ -102,7 +102,7 @@ memory = pv_names.tails.MEM;
 Sequencer = pv_names.tails.Sequencer;
 Detector = pv_names.tails.Detector;
 Bunch_bank = pv_names.tails.Bunch_bank;
-NCO = pv_names.tails.NCO;
+NCO2 = pv_names.tails.NCO2;
 
 % Get the current FIR gain
 orig_fir_gain = get_variable([pv_head, Bunch_bank.FIR_gains]);
@@ -218,12 +218,12 @@ end %if
 
 if strcmp(p.Results.fll_tracking, 'yes')
     mbf_fll_setup('x', p.Results.fll_bunches, p.Results.fll_guard_bunches)
-    set_variable([pv_head, NCO.Base,'2', NCO.PLL_follow], 'Follow');
-    set_variable([pv_head, NCO.Base,'2', NCO.gaindb],-30);
-    fillx=get_variable([pv_head, Bunch_bank.Base, ':1', Bunch_bank.SEQ_enable]);
-    set_variable([pv_head, Bunch_bank.Base,':0', Bunch_bank.NCO2_enable], fillx)
-    set_variable([pv_head, Bunch_bank.Base,':1', Bunch_bank.NCO2_enable], fillx)
-    set_variable([pv_head, NCO.Base,'2', NCO.enable],'On');
+    set_variable([pv_head, NCO2.PLL_follow], 'Follow');
+    set_variable([pv_head, NCO2.gaindb],-30);
+    fillx = get_variable([pv_head, Bunch_bank.bank1.SEQ_enablewf]);
+    set_variable([pv_head, Bunch_bank.bank0.NCO2_enablewf], fillx)
+    set_variable([pv_head, Bunch_bank.bank1.NCO2_enablewf], fillx)
+    set_variable([pv_head, NCO2.enable],'On');
 end %if
 
 %% Set up data capture
@@ -234,7 +234,7 @@ for n_det = 0:3
     l_det = ['det',num2str(n_det)];
     set_variable([pv_head  Detector.(l_det).enable], 'Disabled');
 end %for
-set_variable([pv_head  Detector.('det0').enable], 'Enabled');
+set_variable([pv_head  Detector.det0.enable], 'Enabled');
 % Set the bunch mode to all bunches on detector 0
-set_variable([pv_head  Detector.('det0').bunch_selection], settings.bunch_monitor');
+set_variable([pv_head  Detector.det0.bunch_selection], settings.bunch_monitor');
 
