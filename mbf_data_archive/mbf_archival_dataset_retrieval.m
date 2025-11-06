@@ -32,6 +32,8 @@ parse(p,filter_name, date_range, varargin{:});
 % Getting the desired system setup parameters.
 [root_string, ~, ~, ~] = mbf_system_config;
 root_string = root_string{1};
+%TEMP OVERRIDE
+root_string = '/home/afdm76/MBF_loopback_test_data/';
 
 index_name = [filter_name, '_index'];
 
