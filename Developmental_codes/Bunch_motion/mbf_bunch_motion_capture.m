@@ -33,13 +33,13 @@ set_variable([pv_head_L, pv_names.tails.triggers.MEM.disarm], 1)
 set_variable(pv_names.Hardware_trigger, 0)
 
 % Arming the systems
-if strcmp([pv_head_T pv_names.tails.TRG.memory_status], 'Idle') == 1 &&...
-        strcmp([pv_head_L pv_names.tails.TRG.memory_status], 'Idle') == 1
-    mbf_get_then_put({[pv_head_T pv_names.tails.triggers.MEM.arm];...
-        [pv_head_L pv_names.tails.triggers.MEM.arm]},1);
-else
-    error('BunchMotionCapture:MemoryError', 'Memory is not ready please try again')
-end %if
+% if strcmp([pv_head_T pv_names.tails.TRG.memory_status], 'Idle') == 1 &&...
+%         strcmp([pv_head_L pv_names.tails.TRG.memory_status], 'Idle') == 1
+%     mbf_get_then_put({[pv_head_T pv_names.tails.triggers.MEM.arm];...
+%         [pv_head_L pv_names.tails.triggers.MEM.arm]},1);
+% else
+%     error('BunchMotionCapture:MemoryError', 'Memory is not ready please try again')
+% end %if
 
 
 % Triggering the measurement. %%%% SHOULD TRIGGER ON THE NEXT EXTERNAL
