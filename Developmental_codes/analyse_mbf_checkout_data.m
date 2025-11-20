@@ -1,4 +1,5 @@
 function analyse_mbf_checkout_data(mbf_axis, display_units)
+% Dispaly units (bool): 0 = SI, 1 = Tune units
 
 conditioned_data = mbf_checkout_archival_retrieval(mbf_axis, [datetime(2025, 11, 06, 11, 55, 00), datetime("now")]);
 
@@ -65,57 +66,57 @@ fir_sweep_lb_on =intersect_all(tune_off, fir_on, nco1_on, nco2_off, loopback_on)
 
 graph_title = ['MBF data ', mbf_axis,' axis. Tune gain sweep (Loopback off)'];
 graph_data = conditioned_data(tune_sweep_lb_off);
-sweep_gains = tune_gains(tune_sweep_lb_off);
-if ~isempty(sweep_gains)
+sweep_gains = {tune_gains(tune_sweep_lb_off)};
+if ~isempty(sweep_gains{1})
     plot_sweep(graph_data, sweep_gains, graph_title, display_units)
 end %if
 
 graph_title = ['MBF data ', mbf_axis,' axis. NCO1 gain sweep (Loopback off)'];
 graph_data = conditioned_data(nco1_sweep_lb_off);
-sweep_gains = nco1_gains(nco1_sweep_lb_off);
-if ~isempty(sweep_gains)
+sweep_gains = {nco1_gains(nco1_sweep_lb_off)};
+if ~isempty(sweep_gains{1})
     plot_sweep(graph_data, sweep_gains, graph_title, display_units)
 end %if
 
 graph_title = ['MBF data ', mbf_axis,' axis. NCO2 gain sweep (Loopback off)'];
 graph_data = conditioned_data(nco2_sweep_lb_off);
-sweep_gains = nco2_gains(nco2_sweep_lb_off);
-if ~isempty(sweep_gains)
+sweep_gains = {nco2_gains(nco2_sweep_lb_off)};
+if ~isempty(sweep_gains{1})
     plot_sweep(graph_data, sweep_gains, graph_title, display_units)
 end %if
 
 graph_title = ['MBF data ', mbf_axis,' axis. FIR gain sweep (Loopback off)'];
 graph_data = conditioned_data(fir_sweep_lb_off);
-sweep_gains = fir_gains(fir_sweep_lb_off);
-if ~isempty(sweep_gains)
+sweep_gains = {fir_gains(fir_sweep_lb_off), nco1_gains(fir_sweep_lb_off)};
+if ~isempty(sweep_gains{1})
     plot_sweep(graph_data, sweep_gains, graph_title, display_units)
 end %if
 
 graph_title = ['MBF data ', mbf_axis,' axis. Tune gain sweep (Loopback on)'];
 graph_data = conditioned_data(tune_sweep_lb_on);
-sweep_gains = tune_gains(tune_sweep_lb_on);
-if ~isempty(sweep_gains)
+sweep_gains = {tune_gains(tune_sweep_lb_on)};
+if ~isempty(sweep_gains{1})
     plot_sweep(graph_data, sweep_gains, graph_title, display_units)
 end %if
 
 graph_title = ['MBF data ', mbf_axis,' axis. NCO1 gain sweep (Loopback on)'];
 graph_data = conditioned_data(nco1_sweep_lb_on);
-sweep_gains = nco1_gains(nco1_sweep_lb_on);
-if ~isempty(sweep_gains)
+sweep_gains = {nco1_gains(nco1_sweep_lb_on)};
+if ~isempty(sweep_gains{1})
     plot_sweep(graph_data, sweep_gains, graph_title, display_units)
 end %if
 
 graph_title = ['MBF data ', mbf_axis,' axis. NCO2 gain sweep (Loopback on)'];
 graph_data = conditioned_data(nco2_sweep_lb_on);
-sweep_gains = nco2_gains(nco2_sweep_lb_on);
-if ~isempty(sweep_gains)
+sweep_gains = {nco2_gains(nco2_sweep_lb_on)};
+if ~isempty(sweep_gains{1})
     plot_sweep(graph_data, sweep_gains, graph_title, display_units)
 end %if
 
 graph_title = ['MBF data ', mbf_axis,' axis. FIR gain sweep (Loopback on)'];
 graph_data = conditioned_data(fir_sweep_lb_on);
-sweep_gains = fir_gains(fir_sweep_lb_on);
-if ~isempty(sweep_gains)
+sweep_gains = {fir_gains(fir_sweep_lb_on), nco1_gains(fir_sweep_lb_on)};
+if ~isempty(sweep_gains{1})
     plot_sweep(graph_data, sweep_gains, graph_title, display_units)
 end %if
 
@@ -149,88 +150,233 @@ end %function
 
 function plot_sweep(conditioned_data, sweep_gains, graph_title, display_units)
 
-figure('Position', [20, 40, 1600, 800])
-t = tiledlayout(2, 2);
-title(t, graph_title)
-for jse = 1:length(sweep_gains)
-    adc_data = conditioned_data{jse}{1}.adc;
-    dac_data = conditioned_data{jse}{1}.dac;
-    adc_plot_data = fft_mbf_data(adc_data);
-    dac_plot_data = fft_mbf_data(dac_data);
-    if display_units == 0
-        adc_t_scale = adc_plot_data.t_scale_time * 1E6;
-        adc_f_scale = adc_plot_data.f_scale_hz * 1E-6;
-        dac_t_scale = dac_plot_data.t_scale_time * 1E6;
-        dac_f_scale = dac_plot_data.f_scale_hz * 1E-6;
-        t_x_lab = 'Time (us)';
-        f_x_lab = 'Frequency (MHz)';
-    else
-        adc_t_scale = adc_plot_data.t_scale_ticks;
-        adc_f_scale = adc_plot_data.f_scale_tune;
-        dac_t_scale = dac_plot_data.t_scale_ticks;
-        dac_f_scale = dac_plot_data.f_scale_tune;
-        t_x_lab = 'Ticks of 1/f_{rev} (~2ns)';
-        f_x_lab = 'Tune';
-    end %if
 
-    [main_adc_amp(jse), madci] = max(adc_plot_data.f_data);
-    main_adc_f(jse) = adc_f_scale(madci);
-    [main_dac_amp(jse), mdaci] = max(dac_plot_data.f_data);
-    main_dac_f(jse) = dac_f_scale(mdaci);
+
+for jse = 1:length(conditioned_data)
+    plot_scan_data.adc_data(jse) = conditioned_data{jse}{1}.adc;
+    plot_scan_data.dac_data(jse) = conditioned_data{jse}{1}.dac;
+    plot_scan_data.adc_plot_data(jse) = fft_mbf_data(plot_scan_data.adc_data(jse));
+    plot_scan_data.dac_plot_data(jse) = fft_mbf_data(plot_scan_data.dac_data(jse));
+
 
     if jse == 1
-    adc_x_limits = find_limits_around_peak(adc_plot_data.f_data, adc_f_scale, main_adc_amp(jse), madci)
-    dac_x_limits = find_limits_around_peak(dac_plot_data.f_data, dac_f_scale, main_dac_amp(jse), mdaci)
+        if display_units == 0
+            plot_scan_data.adc_t_scale = plot_scan_data.adc_plot_data(jse).t_scale_time * 1E6;
+            plot_scan_data.adc_f_scale = plot_scan_data.adc_plot_data(jse).f_scale_hz * 1E-6;
+            plot_scan_data.dac_t_scale = plot_scan_data.dac_plot_data(jse).t_scale_time * 1E6;
+            plot_scan_data.dac_f_scale = plot_scan_data.dac_plot_data(jse).f_scale_hz * 1E-6;
+            plot_scan_data.t_x_lab = 'Time (us)';
+            plot_scan_data.f_x_lab = 'Frequency (MHz)';
+        else
+            plot_scan_data.adc_t_scale = plot_scan_data.adc_plot_data(jse).t_scale_ticks;
+            plot_scan_data.adc_f_scale = plot_scan_data.adc_plot_data(jse).f_scale_tune;
+            plot_scan_data.dac_t_scale = plot_scan_data.dac_plot_data(jse).t_scale_ticks;
+            plot_scan_data.dac_f_scale = plot_scan_data.dac_plot_data(jse).f_scale_tune;
+            plot_scan_data.t_x_lab = 'Ticks of 1/f_{rev} (~2ns)';
+            plot_scan_data.f_x_lab = 'Tune';
+        end %if
     end %if
+
+    [plot_scan_data.main_adc_amp(jse), madci] = max(plot_scan_data.adc_plot_data(jse).f_data);
+    plot_scan_data.main_adc_f(jse) = plot_scan_data.adc_f_scale(madci);
+    [plot_scan_data.main_dac_amp(jse), mdaci] = max(plot_scan_data.dac_plot_data(jse).f_data);
+    plot_scan_data.main_dac_f(jse) = plot_scan_data.dac_f_scale(mdaci);
+
+    if jse == 1
+        plot_scan_data.adc_x_limits = find_limits_around_peak(...
+            plot_scan_data.adc_plot_data.f_data, plot_scan_data.adc_f_scale,...
+            plot_scan_data.main_adc_amp(jse), madci);
+        plot_scan_data.dac_x_limits = find_limits_around_peak(...
+            plot_scan_data.dac_plot_data.f_data, plot_scan_data.dac_f_scale,...
+            plot_scan_data.main_dac_amp(jse), mdaci);
+    end %if
+
+
+
+end %for
+if length(sweep_gains) > 1
+    plot_2D_scan(plot_scan_data, sweep_gains, {'FIR gain', 'NCO1 gain'}, graph_title)
+else
+    plot_1D_scan(plot_scan_data, sweep_gains{1}, graph_title)
+end %if
+end %function
+
+function plot_2D_scan(data, sweep_gains, sweep_names, graph_title)
+
+sweep1 = sweep_gains{1};
+sweep2 = sweep_gains{2};
+
+sweep1_values = unique(sweep1);
+col_cycle = [0, 1, 0.5, 0.25, 0.75];
+ck =1;
+loop_length = ceil(length(sweep1_values).^0.33);
+col_cycle = col_cycle(1:loop_length);
+for ns = 1:length(col_cycle)
+    for fsb = 1:length(col_cycle)
+        for jdf = 1:length(col_cycle)
+            cols(ck,1) = col_cycle(mod(ns-1,length(col_cycle))+1);
+            cols(ck,2) = col_cycle(mod(fsb-1,length(col_cycle))+1);
+            cols(ck,3) = col_cycle(mod(jdf-1,length(col_cycle))+1);
+            ck = ck +1;
+        end %for
+    end %for
+end %for
+cols = cols(1:length(sweep1_values),:);
+figure('Position', [20, 40, 1600, 800])
+t = tiledlayout(2, 4);
+title(t, graph_title)
+seen_inds = zeros(length(data.adc_data), 1);
+for jse = 1:length(data.adc_data)
+    sweep_ind = find(sweep1_values == sweep1(jse));
+    if ~isempty(find(seen_inds == sweep_ind, 1))
+        hv = 'off';
+    else
+        hv = 'on';
+    end %if
+    seen_inds(jse) = sweep_ind;
 
     nexttile(1);
     hold on
-    plot(adc_t_scale, adc_plot_data.t_data, 'DisplayName', num2str(sweep_gains(jse)))
+    plot3(ones(length(1:data.adc_data(jse).harmonic_number) , 1).* sweep2(jse),...
+        data.adc_t_scale(1:data.adc_data(jse).harmonic_number),...
+        data.adc_plot_data(jse).t_data(1:data.adc_data(jse).harmonic_number),...
+        'Color', cols(sweep_ind,:),...
+        'DisplayName', [sweep_names{1}, ' ' ,num2str(sweep1(jse))],...
+        'HandleVisibility',hv)
+
+    zlabel('ADC')
+    ylabel(data.t_x_lab)
+    xlabel(sweep_names{2})
+    title('Single turn')
+    lg = legend;
+    lg.Layout.Tile = 'west';
+    grid on
+    view([45, 45])
+
+    nexttile(2);
+    hold on
+    plot3(ones(length(data.adc_f_scale), 1) .* sweep2(jse), ...
+        data.adc_f_scale,...
+        data.adc_plot_data(jse).f_data,...
+        'Color', cols(sweep_ind,:),...
+        'DisplayName', [num2str(sweep1(jse)), ' ', num2str(sweep2(jse))])
+    xlabel(sweep_names{2})
+    zlabel(' ')
+    ylabel(data.f_x_lab)
+    ylim(data.adc_x_limits)
+    grid on
+    view([45, 45])
+
+    nexttile(5);
+    hold on
+    plot3(ones(length(1:data.dac_data(jse).harmonic_number) , 1).* sweep2(jse),...
+        data.dac_t_scale(1:data.dac_data(jse).harmonic_number), ...
+        data.dac_plot_data(jse).t_data(1:data.dac_data(jse).harmonic_number),...
+        'Color', cols(sweep_ind,:),...
+        'DisplayName', [num2str(sweep1(jse)), ' ', num2str(sweep2(jse))])
+    zlabel('DAC')
+    ylabel(data.t_x_lab)
+    xlabel(sweep_names{2})
+    title('Single turn')
+    grid on
+    view([45, 45])
+
+    nexttile(6);
+    hold on
+    plot3(ones(length(data.dac_f_scale) , 1).* sweep2(jse),...
+        data.dac_f_scale,...
+        data.dac_plot_data(jse).f_data,...
+        'Color', cols(sweep_ind,:),...
+        'DisplayName', [num2str(sweep1(jse)), ' ', num2str(sweep2(jse))])
+    zlabel(' ')
+    ylabel(data.f_x_lab)
+    xlabel(sweep_names{2})
+    ylim(data.dac_x_limits)
+    grid on
+    view([45, 45])
+
+end %for
+
+nexttile(3)
+scatter3(sweep1, sweep2, data.main_adc_f, '*')
+xlabel(sweep_names{1})
+ylabel(sweep_names{2})
+zlabel({'ADC';data.f_x_lab})
+nexttile(4)
+scatter3(sweep1, sweep2, data.main_adc_amp, '*')
+xlabel(sweep_names{1})
+ylabel(sweep_names{2})
+zlabel('Signal')
+nexttile(7)
+scatter3(sweep1, sweep2, data.main_dac_f, '*')
+xlabel(sweep_names{1})
+ylabel(sweep_names{2})
+zlabel(data.f_x_lab)
+nexttile(8)
+scatter3(sweep1, sweep2, data.main_dac_amp, '*')
+xlabel(sweep_names{1})
+ylabel(sweep_names{2})
+zlabel('Signal')
+end %function
+
+function plot_1D_scan(data, sweep_gains, graph_title)
+
+figure('Position', [20, 40, 1600, 800])
+t = tiledlayout(2, 4);
+title(t, graph_title)
+for jse = 1:length(data.adc_data)
+
+    nexttile(1);
+    hold on
+    plot(data.adc_t_scale(1:data.adc_data(jse).harmonic_number),...
+        data.adc_plot_data(jse).t_data(1:data.adc_data(jse).harmonic_number),...
+        'DisplayName', num2str(sweep_gains(jse)))
     ylabel('ADC')
-    xlabel(t_x_lab)
-    legend
+    xlabel(data.t_x_lab)
+    title('Single turn')
+    lg = legend;
+    lg.Layout.Tile = 'west';
     grid on
     nexttile(2);
     hold on
-    plot(adc_f_scale, adc_plot_data.f_data, 'DisplayName', num2str(sweep_gains(jse)))
+    plot(data.adc_f_scale, data.adc_plot_data(jse).f_data,...
+        'DisplayName', num2str(sweep_gains(jse)))
     ylabel(' ')
-    xlabel(f_x_lab)
-    legend
-    xlim(adc_x_limits)
+    xlabel(data.f_x_lab)
+    xlim(data.adc_x_limits)
     grid on
-    nexttile(3);
+    nexttile(5);
     hold on
-    plot(dac_t_scale, dac_plot_data.t_data, 'DisplayName', num2str(sweep_gains(jse)))
+    plot(data.dac_t_scale(1:data.dac_data(jse).harmonic_number), ...
+        data.dac_plot_data(jse).t_data(1:data.dac_data(jse).harmonic_number),...
+        'DisplayName', num2str(sweep_gains(jse)))
     ylabel('DAC')
-    xlabel(t_x_lab)
-    legend
+    xlabel(data.t_x_lab)
+    title('Single turn')
     grid on
-    nexttile(4);
+    nexttile(6);
     hold on
-    plot(dac_f_scale, dac_plot_data.f_data, 'DisplayName', num2str(sweep_gains(jse)))
+    plot(data.dac_f_scale, data.dac_plot_data(jse).f_data, 'DisplayName', num2str(sweep_gains(jse)))
     ylabel(' ')
-    xlabel(f_x_lab)
-    legend
-    xlim(dac_x_limits)
+    xlabel(data.f_x_lab)
+    xlim(data.dac_x_limits)
     grid on
 end %for
-figure('Position', [20, 40, 800, 800])
-t = tiledlayout(2, 2);
-title(t, graph_title)
-nexttile
-plot(sweep_gains, main_adc_f, '*')
+
+nexttile(3)
+plot(sweep_gains, data.main_adc_f, '*')
 xlabel('Sweep gain')
-ylabel({'ADC';f_x_lab})
-nexttile
-plot(sweep_gains, main_adc_amp, '*')
+ylabel({'ADC';data.f_x_lab})
+nexttile(4)
+plot(sweep_gains, data.main_adc_amp, '*')
 xlabel('Sweep gain')
 ylabel('Signal')
-nexttile
-plot(sweep_gains, main_dac_f, '*')
+nexttile(7)
+plot(sweep_gains, data.main_dac_f, '*')
 xlabel('Sweep gain')
-ylabel(f_x_lab)
-nexttile
-plot(sweep_gains, main_dac_amp, '*')
+ylabel(data.f_x_lab)
+nexttile(8)
+plot(sweep_gains, data.main_dac_amp, '*')
 xlabel('Sweep gain')
 ylabel('Signal')
 end %function
