@@ -8,14 +8,14 @@ timestep = timescale(2) - timescale(1);
 % f_scale = 1./timestep .* (-(n_bunches/2)+1:(n_bunches/2)) ./n_bunches; %Hz
 f_scale = 1./timestep .* (0:n_bunches-1) ./n_bunches; %Hz
 
-xf1 = abs(fft(data));
+xf1 = abs(fft(data.timedata));
 
 figure('Position', [20, 40, 800, 800])
 t = tiledlayout(2, 1);
-title(t, {['MBF data ', mbf_axis,' axis '];...
-    ['Memory location:', target_location, ' ', trgt_extra]})
+title(t, {['MBF data ', data.ax_label,' axis '];...
+    ['Memory location:', data.datasource]})
 nexttile;
-plot(timescale/timestep, data, 'DisplayName', 'Raw data')
+plot(timescale/timestep, data.timedata, 'DisplayName', 'Raw data')
 ylabel(' ')
 xlabel('Ticks of 2ns')
 legend
