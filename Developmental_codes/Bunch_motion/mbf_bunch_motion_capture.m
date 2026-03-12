@@ -32,15 +32,18 @@ set_variable([pv_head_L, pv_names.tails.triggers.MEM.disarm], 1)
 % Turn off the External triggering from the Event receiver.
 set_variable(pv_names.Hardware_trigger, 0)
 
-% Arming the systems
-% if strcmp([pv_head_T pv_names.tails.TRG.memory_status], 'Idle') == 1 &&...
-%         strcmp([pv_head_L pv_names.tails.TRG.memory_status], 'Idle') == 1
-%     mbf_get_then_put({[pv_head_T pv_names.tails.triggers.MEM.arm];...
-%         [pv_head_L pv_names.tails.triggers.MEM.arm]},1);
-% else
-%     error('BunchMotionCapture:MemoryError', 'Memory is not ready please try again')
-% end %if
+pause(0.5)
+% Check memory is ready
+mem_t = lcaGet([pv_head_T pv_names.tails.TRG.memory_status]);
+mem_s = lcaGet([pv_head_L pv_names.tails.TRG.memory_status]);
+if strcmp(mem_t{1}, 'Idle') ~= 1 ||...
+        strcmp(mem_s{1}, 'Idle') ~= 1
+    error('BunchMotionCapture:MemoryError', 'Memory is not ready please try again')
+end %if
 
+%Arming the systems
+mbf_get_then_put({[pv_head_T pv_names.tails.triggers.MEM.arm];...
+    [pv_head_L pv_names.tails.triggers.MEM.arm]},1);
 
 % Triggering the measurement. %%%% SHOULD TRIGGER ON THE NEXT EXTERNAL
 set_variable(pv_names.Hardware_trigger, 1)
