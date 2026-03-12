@@ -25,33 +25,38 @@ for n = 1:length(bpm_list)
     for tk = 1:n_trys
         try
             if strcmp(p.Results.xy_waveforms, 'yes')
-                BPM_data_tempx = get_variable([bpm_name, ':TT:WFX']);
-                BPM_data_tempy = get_variable([bpm_name, ':TT:WFY']);
-                output.(bpm_label).X = BPM_data_tempx(1:capture_length);
-                output.(bpm_label).Y = BPM_data_tempy(1:capture_length);
+                BPM_data_temp = get_variable({[bpm_name, ':TT:WFX']; [bpm_name, ':TT:WFY']});
+                output.(bpm_label).X = BPM_data_temp(1,1:capture_length);
+                output.(bpm_label).Y = BPM_data_temp(2,1:capture_length);
+                clear BPM_data_temp
             end %if
             if strcmp(p.Results.all_waveforms, 'yes')
-                bpm_data_temps = get_variable([bpm_name, ':TT:WFS']);...
-                    bpm_data_tempa = get_variable([bpm_name, ':TT:WFA']);
-                bpm_data_tempb = get_variable([bpm_name, ':TT:WFB']);
-                bpm_data_tempc = get_variable([bpm_name, ':TT:WFC']);
-                bpm_data_tempd = get_variable([bpm_name, ':TT:WFD']);
-                output.(bpm_label).intensity = bpm_data_temps(1:capture_length);
-                output.(bpm_label).A = bpm_data_tempa(1:capture_length);
-                output.(bpm_label).B = bpm_data_tempb(1:capture_length);
-                output.(bpm_label).C = bpm_data_tempc(1:capture_length);
-                output.(bpm_label).D = bpm_data_tempd(1:capture_length);
+                bpm_data_temp = get_variable({[bpm_name, ':TT:WFS'];...
+                    [bpm_name, ':TT:WFA']; [bpm_name, ':TT:WFB'];...
+                    [bpm_name, ':TT:WFC']; [bpm_name, ':TT:WFD']});...
+                output.(bpm_label).intensity = bpm_data_temp(1,1:capture_length);
+                output.(bpm_label).A = bpm_data_temp(2,1:capture_length);
+                output.(bpm_label).B = bpm_data_temp(3,1:capture_length);
+                output.(bpm_label).C = bpm_data_temp(4,1:capture_length);
+                output.(bpm_label).D = bpm_data_temp(5,1:capture_length);
+                clear bpm_data_temp
             end %if
             % Statistics of waveforms
             if strcmp(p.Results.capture_stats, 'yes')
-                output.(bpm_label).meanx = get_variable([bpm_name, ':TT:MEANX']);
-                output.(bpm_label).meany = get_variable([bpm_name, ':TT:MEANY']);
-                output.(bpm_label).stdx = get_variable([bpm_name, ':TT:STDX']);
-                output.(bpm_label).stdy = get_variable([bpm_name, ':TT:STDY']);
-                output.(bpm_label).minx = get_variable([bpm_name, ':TT:MINX']);
-                output.(bpm_label).miny = get_variable([bpm_name, ':TT:MINY']);
-                output.(bpm_label).maxx = get_variable([bpm_name, ':TT:MAXX']);
-                output.(bpm_label).maxy = get_variable([bpm_name, ':TT:MAXY']);
+                bpm_stats_temp = get_variable({[bpm_name, ':TT:MEANX'];...
+                    [bpm_name, ':TT:MEANY']; [bpm_name, ':TT:STDX'];...
+                    [bpm_name, ':TT:STDY']; [bpm_name, ':TT:MINX'];...
+                    [bpm_name, ':TT:MINY']; [bpm_name, ':TT:MAXX'];...
+                    [bpm_name, ':TT:MAXY']});
+                output.(bpm_label).meanx = bpm_stats_temp(1,:);
+                output.(bpm_label).meany = bpm_stats_temp(2,:);
+                output.(bpm_label).stdx = bpm_stats_temp(3,:);
+                output.(bpm_label).stdy = bpm_stats_temp(4,:);
+                output.(bpm_label).minx = bpm_stats_temp(5,:);
+                output.(bpm_label).miny = bpm_stats_temp(6,:);
+                output.(bpm_label).maxx = bpm_stats_temp(7,:);
+                output.(bpm_label).maxy = bpm_stats_temp(8,:);
+                clear bpm_stats_temp
             end %if
             fprintf('.')
             update_tick = update_tick + 1;

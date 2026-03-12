@@ -27,46 +27,46 @@ function [poly_data, frequency_shifts] = mbf_growthrates_analysis(exp_data, vara
 %
 % Example: [poly_data, frequency_shifts] = tmbf_growdamp_analysis(exp_data)
 
-defaultOverrides = NaN;
-defaultAnalysisSetting = 0;
-defaultLengthAveraging = 20;
-defaultDebug = 0;
-defaultDebugModes = 1:size(exp_data.data,1);
-defaultKeepDebugGraphs = 0;
+% defaultOverrides = NaN;
+% defaultAnalysisSetting = 0;
+% defaultLengthAveraging = 20;
+% defaultDebug = 0;
+% defaultDebugModes = 1:size(exp_data.data,1);
+% defaultKeepDebugGraphs = 0;
+% 
+% p = inputParser;
+% validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
+% addRequired(p,'exp_data', @isstruct);
+% addOptional(p,'overrides',defaultOverrides);
+% addParameter(p,'advanced_fitting',defaultAnalysisSetting, @isnumeric);
+% addParameter(p,'length_averaging',defaultLengthAveraging, validScalarPosNum);
+% addParameter(p,'debug',defaultDebug, @isnumeric);
+% addParameter(p,'debug_modes',defaultDebugModes);
+% addParameter(p,'keep_debug_graphs',defaultKeepDebugGraphs, @isnumeric);
+% parse(p,exp_data,varargin{:});
+% 
+% active_override = p.Results.overrides;
+% adv_fitting = p.Results.advanced_fitting;
+% length_averaging = p.Results.length_averaging;
+% 
+% harmonic_number = length(exp_data.fill_pattern);
 
-p = inputParser;
-validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
-addRequired(p,'exp_data', @isstruct);
-addOptional(p,'overrides',defaultOverrides);
-addParameter(p,'advanced_fitting',defaultAnalysisSetting, @isnumeric);
-addParameter(p,'length_averaging',defaultLengthAveraging, validScalarPosNum);
-addParameter(p,'debug',defaultDebug, @isnumeric);
-addParameter(p,'debug_modes',defaultDebugModes);
-addParameter(p,'keep_debug_graphs',defaultKeepDebugGraphs, @isnumeric);
-parse(p,exp_data,varargin{:});
-
-active_override = p.Results.overrides;
-adv_fitting = p.Results.advanced_fitting;
-length_averaging = p.Results.length_averaging;
-
-harmonic_number = length(exp_data.fill_pattern);
-
-% Preallocation
-poly_data = NaN(harmonic_number,3,3);
-frequency_shifts = NaN(harmonic_number, 1);
-
-if ~isfield(exp_data, 'data') && isfield(exp_data, 'gddata')
-    exp_data.data = exp_data.gddata;
-end %if
-if ~isfield(exp_data, 'data')
-    return
-end %if
-% Sometimes there is a problem with data transfer. By truncating the data
-% length to a multiple of the harmonic number the analysis can proceed.
-exp_data.data = exp_data.data(1:end - rem(length(exp_data.data), harmonic_number));
-exp_data.data = exp_data.data(1:end - rem(length(exp_data.data), harmonic_number));
-exp_data.data = reshape(exp_data.data,[],harmonic_number)';
-n_modes = size(exp_data.data,1);
+% % Preallocation
+% poly_data = NaN(harmonic_number,3,3);
+% frequency_shifts = NaN(harmonic_number, 1);
+% 
+% if ~isfield(exp_data, 'data') && isfield(exp_data, 'gddata')
+%     exp_data.data = exp_data.gddata;
+% end %if
+% if ~isfield(exp_data, 'data')
+%     return
+% end %if
+% % Sometimes there is a problem with data transfer. By truncating the data
+% % length to a multiple of the harmonic number the analysis can proceed.
+% exp_data.data = exp_data.data(1:end - rem(length(exp_data.data), harmonic_number));
+% exp_data.data = exp_data.data(1:end - rem(length(exp_data.data), harmonic_number));
+% exp_data.data = reshape(exp_data.data,[],harmonic_number)';
+% n_modes = size(exp_data.data,1);
 
 % Find the idicies for the end of each period.
 try
