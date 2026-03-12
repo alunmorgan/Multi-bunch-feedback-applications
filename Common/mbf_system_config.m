@@ -17,6 +17,7 @@ pv_names.current = 'SR-DI-DCCT-01:SIGNAL';
 
 %% Bunch pattern
 pv_names.bunch_pattern = 'SR-DI-PICO-01:BUCKETS_180';
+pv_names.bunch_pattern2 = 'SR-DI-PICO-02:BUCKETS_180';
 
 %% Topup countdown
 pv_names.topup.countdown = 'SR-CS-FILL-01:COUNTDOWN';

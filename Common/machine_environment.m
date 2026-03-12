@@ -32,7 +32,9 @@ exp_data.ringmode = get_variable('SR-CS-RING-01:MODE');
 exp_data.current =get_variable('SR-DI-DCCT-01:SIGNAL');
 % Fill pattern
 exp_data.fill_pattern =get_variable('SR-DI-PICO-01:BUCKETS');
-
+exp_data.fill_pattern2 =get_variable('SR-DI-PICO-02:BUCKETS');
+exp_data.fill_pattern_180 =get_variable('SR-DI-PICO-01:BUCKETS_180');
+exp_data.fill_pattern2_180 =get_variable('SR-DI-PICO-02:BUCKETS_180');
 % RF frequency
 exp_data.RF = get_variable('LI-RF-MOSC-01:FREQ');
 % Cavity voltages
