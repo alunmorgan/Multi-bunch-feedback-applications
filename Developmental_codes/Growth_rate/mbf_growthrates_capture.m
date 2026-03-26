@@ -47,7 +47,7 @@ parse(p, mbf_axis, varargin{:});
 % pause(2) % Letting the hardware sort itself out.
 % temp1 = get_variable([pv_head_mem pv_names.tails.TRG.memory_status]);
 % if ~strcmp(temp1, 'Idle') == 1
-%     mbf_get_then_put({[pv_head_mem triggers.MEM.arm]},1);
+%     set_variable({[pv_head_mem triggers.MEM.arm]},1);
 % else
 %     error('growthrates:memoryNotReady', 'Memory is not ready please try again')
 % end %if

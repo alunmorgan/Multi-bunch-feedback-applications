@@ -28,11 +28,11 @@ parse(p, varargin{:});
 [root_string, harmonic_number, pv_names, ~] = mbf_system_config;
 root_string = root_string{1};
 spectrum = machine_environment;
-spectrum.n_turns = n_turns;
+spectrum.n_turns = p.Results.n_turns;
 spectrum.time = datevec(datetime("now"));
-spectrum.repeat = repeat;
+spectrum.repeat = p.Results.repeat;
 spectrum.harmonic_number = harmonic_number;
-spectrum.base_name = ['Spectrum_', mbf_axis, '_axis'];
+spectrum.base_name = ['Spectrum_'];
 
 x_return_state = get_operational_mode('x');
 y_return_state = get_operational_mode('y');
@@ -73,10 +73,9 @@ if nargout == 1
 end %if
 
 if strcmp(p.Results.plotting, 'yes')
-    fold = 1;
-    analysed.x_axis = mbf_spectrum_analysis(spectrum.raw_data.x_data, fold);
-    analysed.y_axis = mbf_spectrum_analysis(spectrum.raw_data.y_data, fold);
-    analysed.s_axis = mbf_spectrum_analysis(spectrum.raw_data.s_data, fold);
+    analysed.x_axis = mbf_spectrum_analysis(spectrum.raw_data.x_data, spectrum.n_turns, spectrum.repeat, spectrum.harmonic_number, spectrum.RF);
+    analysed.y_axis = mbf_spectrum_analysis(spectrum.raw_data.y_data, spectrum.n_turns, spectrum.repeat, spectrum.harmonic_number, spectrum.RF);
+    analysed.s_axis = mbf_spectrum_analysis(spectrum.raw_data.s_data, spectrum.n_turns, spectrum.repeat, spectrum.harmonic_number, spectrum.RF);
 
     mbf_spectrum_plotting(analysed, spectrum.current, spectrum.time)
 end %if

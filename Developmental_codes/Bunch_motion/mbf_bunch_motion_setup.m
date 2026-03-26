@@ -17,5 +17,5 @@ for hse = 1:2
         set_variable([pv_head PVt.triggers.MEM.('ADC1').blanking_status], 'Blanking')
     
     %  set up the memory buffer to capture ADC data.
-    mbf_get_then_put([pv_head, PVt.MEM.channel_select], 'ADC0/ADC1')
+    set_variable([pv_head, PVt.MEM.channel_select], 'ADC0/ADC1')
 end %for

@@ -1,21 +1,9 @@
-function exp_data = machine_environment(varargin)
+function exp_data = machine_environment(tunes)
 % captures the environmental variables of the machine
 %
-% exp_data is a structure containing experimental data. The state of the
-% machine is added to the structure and then returned.
-%
-% tunes are the previous captured tune measurements. As depending on the
-% experimental setup it may not be possible to capture them before each capture.
-%
-% Example: exp_data = machine_environment(exp_data)
+% Example: exp_data = machine_environment(NaN)
 
-p = inputParser;
-p.StructExpand = false;
-p.CaseSensitive = false;
-addParameter(p, 'exp_data', struct('RF', []));
-addParameter(p, 'tunes', NaN);
 
-parse(p, varargin{:});
 exp_data = p.Results.exp_data;
 % timestamp
 exp_data.time = datevec(datetime("now"));
@@ -23,7 +11,7 @@ exp_data.time = datevec(datetime("now"));
 lcaSetSeverityWarnLevel(4)
 %% General machine parameters
 % Tunes
-if ~isstruct(p.Results.tunes)
+if ~isstruct(tunes)
     exp_data.tunes = get_all_tunes;
 end %if
 % Ring mode
@@ -183,26 +171,26 @@ exp_data.orbit_y = get_variable('SR-DI-EBPM-01:SA:Y');
 mbf_systems = {'SR23C-DI-TMBF-01:X', 'SR23C-DI-TMBF-01:Y','SR23C-DI-LMBF-01:IQ'};
 mbf_axes = {'x', 'y', 's'};
 for sjkh = 1:length(mbf_systems)
-exp_data.mbf.(mbf_axes{sjkh}).fll.target_bunches = get_variable([mbf_systems{sjkh}, ':PLL:DET:BUNCHES_S']);
-exp_data.mbf.(mbf_axes{sjkh}).fll.nco.gain = get_variable([mbf_systems{sjkh}, ':PLL:NCO:GAIN_DB_S']);
-exp_data.mbf.(mbf_axes{sjkh}).fll.nco.freq = get_variable([mbf_systems{sjkh}, ':PLL:NCO:FREQ_S']);
-exp_data.mbf.(mbf_axes{sjkh}).fll.nco.enable = get_variable([mbf_systems{sjkh}, ':PLL:NCO:ENABLE_S']);
-exp_data.mbf.(mbf_axes{sjkh}).fll.integral = get_variable([mbf_systems{sjkh}, ':PLL:CTRL:KI_S']);
-exp_data.mbf.(mbf_axes{sjkh}).fll.proportional = get_variable([mbf_systems{sjkh}, ':PLL:CTRL:KP_S']);
-exp_data.mbf.(mbf_axes{sjkh}).fll.maglim = get_variable([mbf_systems{sjkh}, ':PLL:CTRL:MIN_MAG_S']);
-exp_data.mbf.(mbf_axes{sjkh}).fll.offsetlim = get_variable([mbf_systems{sjkh}, ':PLL:CTRL:MAX_OFFSET_S']);
-exp_data.mbf.(mbf_axes{sjkh}).fll.target_phase = get_variable([mbf_systems{sjkh}, ':PLL:CTRL:TARGET_S']);
-exp_data.mbf.(mbf_axes{sjkh}).fll.detector.source = get_variable([mbf_systems{sjkh}, ':PLL:DET:SELECT_S']);
-exp_data.mbf.(mbf_axes{sjkh}).fll.detector.gain = get_variable([mbf_systems{sjkh}, ':PLL:DET:SCALING_S']);
-exp_data.mbf.(mbf_axes{sjkh}).fll.detector.dwell = get_variable([mbf_systems{sjkh}, ':PLL:DET:DWELL_S']);
-exp_data.mbf.(mbf_axes{sjkh}).fll.detector.blanking = get_variable([mbf_systems{sjkh}, ':PLL:DET:BLANKING_S']);
-exp_data.mbf.(mbf_axes{sjkh}).fll.status.state = get_variable([mbf_systems{sjkh}, ':PLL:CTRL:STATUS']);
-exp_data.mbf.(mbf_axes{sjkh}).fll.status.stopped_by_user = get_variable([mbf_systems{sjkh}, ':PLL:CTRL:STOP:STOP']);
-exp_data.mbf.(mbf_axes{sjkh}).fll.status.detector_overflow = get_variable([mbf_systems{sjkh}, ':PLL:STA:DET_OVF']);
-exp_data.mbf.(mbf_axes{sjkh}).fll.status.magnitude_error = get_variable([mbf_systems{sjkh}, ':PLL:STA:MAG_ERROR']);
-exp_data.mbf.(mbf_axes{sjkh}).fll.status.offset_overflow = get_variable([mbf_systems{sjkh}, ':PLL:STA:OFFSET_OVF']);
-exp_data.mbf.(mbf_axes{sjkh}).fll.readbacks.magnitude = get_variable([mbf_systems{sjkh}, ':PLL:FILT:MAG']);
-exp_data.mbf.(mbf_axes{sjkh}).fll.readbacks.magnitudedb = get_variable([mbf_systems{sjkh}, ':PLL:FILT:MAG_DB']);
-exp_data.mbf.(mbf_axes{sjkh}).fll.readbacks.phase = get_variable([mbf_systems{sjkh}, ':PLL:FILT:PHASE']);
+exp_data.mbf.(mbf_axes{sjkh}).pll.target_bunches = get_variable([mbf_systems{sjkh}, ':PLL:DET:BUNCHES_S']);
+exp_data.mbf.(mbf_axes{sjkh}).pll.nco.gain = get_variable([mbf_systems{sjkh}, ':PLL:NCO:GAIN_DB_S']);
+exp_data.mbf.(mbf_axes{sjkh}).pll.nco.freq = get_variable([mbf_systems{sjkh}, ':PLL:NCO:FREQ_S']);
+exp_data.mbf.(mbf_axes{sjkh}).pll.nco.enable = get_variable([mbf_systems{sjkh}, ':PLL:NCO:ENABLE_S']);
+exp_data.mbf.(mbf_axes{sjkh}).pll.integral = get_variable([mbf_systems{sjkh}, ':PLL:CTRL:KI_S']);
+exp_data.mbf.(mbf_axes{sjkh}).pll.proportional = get_variable([mbf_systems{sjkh}, ':PLL:CTRL:KP_S']);
+exp_data.mbf.(mbf_axes{sjkh}).pll.maglim = get_variable([mbf_systems{sjkh}, ':PLL:CTRL:MIN_MAG_S']);
+exp_data.mbf.(mbf_axes{sjkh}).pll.offsetlim = get_variable([mbf_systems{sjkh}, ':PLL:CTRL:MAX_OFFSET_S']);
+exp_data.mbf.(mbf_axes{sjkh}).pll.target_phase = get_variable([mbf_systems{sjkh}, ':PLL:CTRL:TARGET_S']);
+exp_data.mbf.(mbf_axes{sjkh}).pll.detector.source = get_variable([mbf_systems{sjkh}, ':PLL:DET:SELECT_S']);
+exp_data.mbf.(mbf_axes{sjkh}).pll.detector.gain = get_variable([mbf_systems{sjkh}, ':PLL:DET:SCALING_S']);
+exp_data.mbf.(mbf_axes{sjkh}).pll.detector.dwell = get_variable([mbf_systems{sjkh}, ':PLL:DET:DWELL_S']);
+exp_data.mbf.(mbf_axes{sjkh}).pll.detector.blanking = get_variable([mbf_systems{sjkh}, ':PLL:DET:BLANKING_S']);
+exp_data.mbf.(mbf_axes{sjkh}).pll.status.state = get_variable([mbf_systems{sjkh}, ':PLL:CTRL:STATUS']);
+exp_data.mbf.(mbf_axes{sjkh}).pll.status.stopped_by_user = get_variable([mbf_systems{sjkh}, ':PLL:CTRL:STOP:STOP']);
+exp_data.mbf.(mbf_axes{sjkh}).pll.status.detector_overflow = get_variable([mbf_systems{sjkh}, ':PLL:STA:DET_OVF']);
+exp_data.mbf.(mbf_axes{sjkh}).pll.status.magnitude_error = get_variable([mbf_systems{sjkh}, ':PLL:STA:MAG_ERROR']);
+exp_data.mbf.(mbf_axes{sjkh}).pll.status.offset_overflow = get_variable([mbf_systems{sjkh}, ':PLL:STA:OFFSET_OVF']);
+exp_data.mbf.(mbf_axes{sjkh}).pll.readbacks.magnitude = get_variable([mbf_systems{sjkh}, ':PLL:FILT:MAG']);
+exp_data.mbf.(mbf_axes{sjkh}).pll.readbacks.magnitudedb = get_variable([mbf_systems{sjkh}, ':PLL:FILT:MAG_DB']);
+exp_data.mbf.(mbf_axes{sjkh}).pll.readbacks.phase = get_variable([mbf_systems{sjkh}, ':PLL:FILT:PHASE']);
 end %for
 lcaSetSeverityWarnLevel(3)

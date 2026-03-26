@@ -29,7 +29,7 @@ parse(p, data, metadata, varargin{:});
 
 
 stages = fieldnames(data);
-harmonic_number = length(data.(stages{1}));
+harmonic_number = length(data.(stages{1}).damping_rate);
 
 %% Adjust the horizontal axis setup
 if strcmpi(p.Results.plot_mode, 'pos')
@@ -55,8 +55,8 @@ ck = 1;
 for wnf = 1:length(stages)
     for ntd = 1:length(stages)
         if wnf ~= ntd
-            freq_diffs(ck,:) = data.(stages{wnf}).frequency_shifts - ...
-                data.(stages{ntd}).frequency_shifts;
+            freq_diffs(ck,:) = data.(stages{wnf}).frequency_shift - ...
+                data.(stages{ntd}).frequency_shift;
             freq_diff_names{ck} = [stages{wnf}, ' - ', stages{ntd}];
             ck = ck +1;
         end %if
@@ -73,7 +73,7 @@ ax1 = nexttile;
 hold on
 for ns = 1:length(stages)
     if ~contains(stages{ns}, 'growth')
-        plot(x_plt_axis, data.(stages{ns}).error, 'DisplayName', stages{ns})
+        plot(x_plt_axis, data.(stages{ns}).error(:), 'DisplayName', stages{ns})
     end %if
 end %for
 hold off
@@ -85,7 +85,7 @@ ax2 = nexttile([2,1]);
 hold on
 for ns = 1:length(stages)
     if ~contains(stages{ns}, 'growth')
-        plot(x_plt_axis, data.(stages{ns}).damping_rate, 'DisplayName', stages{ns})
+        plot(x_plt_axis, data.(stages{ns}).damping_rate(:), 'DisplayName', stages{ns})
     end %if
 end %for
 hold off
@@ -104,7 +104,7 @@ nexttile;
 hold on
 for ns = 1:length(stages)
     if ~contains(stages{ns}, 'growth')
-        plot(x_plt_axis, data.(stages{ns}).frequency_shift, 'DisplayName', stages{ns})
+        plot(x_plt_axis, data.(stages{ns}).frequency_shift(:), 'DisplayName', stages{ns})
     end %if
 end %for
 hold off
@@ -123,7 +123,7 @@ ax1 = nexttile;
 hold on
 for ns = 1:length(stages)
     if contains(stages{ns}, 'growth')
-        plot(x_plt_axis, data.(stages{ns}).error, 'DisplayName', stages{ns})
+        plot(x_plt_axis, data.(stages{ns}).error(:), 'DisplayName', stages{ns})
     end %if
 end %for
 hold off
@@ -135,7 +135,7 @@ ax2 = nexttile([2,1]);
 hold on
 for ns = 1:length(stages)
     if contains(stages{ns}, 'growth')
-        plot(x_plt_axis, data.(stages{ns}).damping_rate, 'DisplayName', stages{ns})
+        plot(x_plt_axis, data.(stages{ns}).damping_rate(:), 'DisplayName', stages{ns})
     end %if
 end %for
 hold off
@@ -154,7 +154,7 @@ nexttile;
 hold on
 for ns = 1:length(stages)
     if contains(stages{ns}, 'growth')
-        plot(x_plt_axis, data.(stages{ns}).frequency_shift, 'DisplayName', stages{ns})
+        plot(x_plt_axis, data.(stages{ns}).frequency_shift(:), 'DisplayName', stages{ns})
     end %if
 end %for
 hold off

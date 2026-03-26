@@ -6,7 +6,7 @@ PVt = pv_names.tails;
 mbf_axes = {'x', 'y', 's'};
 % Disarm all the sequencers
 for ekf = 1:length(mbf_axes)
-    mbf_get_then_put([pv_names.hardware_names.(mbf_axes{ekf}) pv_names.tails.triggers.SEQ.disarm], 1)
+    set_variable([pv_names.hardware_names.(mbf_axes{ekf}) pv_names.tails.triggers.SEQ.disarm], 1)
 end %for
 
 mbf_systems = {'T', 'L'};
@@ -18,11 +18,11 @@ for hse = 1:2
     % we'll do is loose the beam as we change things.
     for trigger_ind = 1:length(trigger_inputs)
         trigger = trigger_inputs{trigger_ind};
-        mbf_get_then_put([pv_head PVt.triggers.MEM.(trigger).enable_status], 'Ignore');
-        mbf_get_then_put([pv_head PVt.triggers.MEM.(trigger).blanking_status], 'All');
+        set_variable([pv_head PVt.triggers.MEM.(trigger).enable_status], 'Ignore');
+        set_variable([pv_head PVt.triggers.MEM.(trigger).blanking_status], 'All');
     end %for
     % Set the trigger to one shot
-    mbf_get_then_put([pv_head PVt.triggers.MEM.mode], 'One Shot');
+    set_variable([pv_head PVt.triggers.MEM.mode], 'One Shot');
     % Set the triggering to External only
     set_variable([pv_head PVt.triggers.MEM.('EXT').enable_status], 'Enable')
 end %for

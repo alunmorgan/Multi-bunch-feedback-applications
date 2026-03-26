@@ -1,4 +1,4 @@
-function output_data = mbf_growdamp_analysis(exp_data, varargin)
+function [output_data, output_state] = mbf_growdamp_analysis(exp_data, varargin)
 % takes the data from mbf growdamp capture and fits it with a series of
 % linear fits to get the damping times for each mode.
 %
@@ -19,7 +19,7 @@ function output_data = mbf_growdamp_analysis(exp_data, varargin)
 %
 %   Returns:
 %       output_data (struct): data is structured as [stage].[mesurement]
-%                               measurements are: damping time, offset, 
+%                               measurements are: damping time, offset,
 %                               error relative to fit, frequency shift.
 %                               all measurements are a vector the length of the
 %                               number of modes.
@@ -46,10 +46,7 @@ addParameter(inputs,'debug_modes',defaultDebugModes);
 addParameter(inputs,'keep_debug_graphs',defaultKeepDebugGraphs, @isnumeric);
 parse(inputs,exp_data,varargin{:});
 
-passive_override = inputs.Results.passive_override;
-active_override = inputs.Results.active_override;
-adv_fitting = inputs.Results.advanced_fitting;
-length_averaging = inputs.Results.length_averaging;
+output_state = 1;
 
 if ~isfield(exp_data, 'data') && isfield(exp_data, 'gddata')
     exp_data.data = exp_data.gddata;
@@ -66,32 +63,74 @@ n_modes = size(exp_data.data,1);
 
 % Find the idicies for the end of each period.
 % change the ordering so that the first stage in time is at index 1.
-stage_names = flip(exp_data.exp_state_names);
-nstages = length(stage_names);
-for jjse = 1:nstages
-    length_of_stage(jse) = exp_data.([exp_data.exp_state_names{jjse}, '_turns']);
-    dwell_of_stage(jjse) = exp_data.([exp_data.exp_state_names{jjse}, '_dwell']);
-    if jjse == 1
-        end_of_stage(jjse) = length_of_stage(jjse);
-        samples_of_stage{jjse} = (1:end_of_stage(jjse));
-        turns_of_stage{jjse} = samples_of_stage{jjse} .* dwell_of_stage(jjse);
-    else
-        end_of_stage(jjse) = end_of_stage(jjse -1) + length_of_stage(jjse);
-        samples_of_stage{jjse} = (end_of_stage(jjse -1) + 1): end_of_stage(jjse);
-        turns_of_stage{jjse} = turns_of_stage{jjse -1} + (samples_of_stage{jjse}...
-            - samples_of_stage{jjse - 1}(end)) .* dwell_of_stage(jjse);
+if isfield(exp_data, 'exp_state_names')
+    stage_names = flip(exp_data.exp_state_names);
+elseif isfield(exp_data, ['seq1', '_capture_state'])
+    for n = 1:exp_data.start_state
+        if contains(exp_data.(['seq' num2str(n), '_capture_state']), 'Discard')
+            exp_data.exp_state_names{n} = 'spacer';
+        else
+            if contains(exp_data.(['seq' num2str(n), '_enable']), 'On')
+                exp_data.exp_state_names{n} = 'growth';
+            else
+                if contains(exp_data.(['seq' num2str(n), '_bank_select']), 'Bank 2')
+                    exp_data.exp_state_names{n} = 'active';
+                else
+                    exp_data.exp_state_names{n} = 'passive';
+                end %if
+            end %if
+        end %if
+    end %for
+else
+    % Old dataset use implict order in structure to order stages.
+    test = fieldnames(exp_data);
+    names = test(contains(test, '_turns'));
+    names = names(~contains(names, 'spacer'));
+    expected_length = 0;
+    for nrs = 1:length(names)
+        expected_length = expected_length + exp_data.(names{nrs});
+    end %for
+    if expected_length > size(exp_data.data, 2)
+        names = names(~contains(names, 'growth2'));
+    end %if
+    expected_length = 0;
+    for nrs = 1:length(names)
+        expected_length = expected_length + exp_data.(names{nrs});
+    end %for
+    if expected_length > size(exp_data.data, 2)
+        output_state = 0;
+        output_data = NaN;
+        return
+    end %if
+    for hs = 1:length(names)
+        stage_names{hs} = regexprep(names{hs}, '_turns', '');
+    end
+
+    stage_names = flip(stage_names);
+end %if
+ck = 1;
+for jjse = 1:length(stage_names)
+    if ~contains(stage_names{jjse}, 'spacer')
+        recorded_stage_name{ck} = stage_names{jjse};
+        length_of_stage = exp_data.([stage_names{jjse}, '_turns']);
+        dwell_of_stage = exp_data.([stage_names{jjse}, '_dwell']);
+        if ck == 1
+            end_of_stage(ck) = length_of_stage;
+            samples_of_stage{ck} = (1:end_of_stage(ck));
+            turns_of_stage{ck} = samples_of_stage{ck} .* dwell_of_stage;
+        else
+            end_of_stage(ck) = end_of_stage(ck -1) + length_of_stage;
+            samples_of_stage{ck} = (end_of_stage(ck -1) + 1): end_of_stage(ck);
+            turns_of_stage{ck} = samples_of_stage{ck}.* dwell_of_stage;
+        end %if
+        ck = ck +1;
     end %if
 end %for
 
-if size(exp_data.data, 2) < end_of_stage(end)
-    warning('growdamp:analysis:noValidData', ['No valid data for ', exp_data.base_name])
-    return
-end %if
-
 for nq = 1:n_modes
-    for ksew = 1:nstages
+    for ksew = 1:length(recorded_stage_name)
         stage_data = exp_data.data(nq,samples_of_stage{ksew});
-        stage_name = stage_names{ksew};
+        stage_name = recorded_stage_name{ksew};
         threshold_value = min(stage_data); % The 'noise' floor.
 
         if contains(stage_name, 'growth')
@@ -100,19 +139,25 @@ for nq = 1:n_modes
             c1 = polyval(mag_fit, turns_of_stage{ksew});
             delta = mean(abs(c1 - log(abs(stage_data)))./c1);
             temp = unwrap(angle(stage_data)) / (2*pi);
-            phase_fit = polyfit(x_data,temp,1);
-        elseif contains(stage_name, 'active')
+            phase_fit = polyfit(turns_of_stage{ksew},temp,1);
+        elseif contains(stage_name, 'active') || contains(stage_name, 'act')
+            stage_name = regexprep(stage_name, 'active', 'WWW');
+            stage_name = regexprep(stage_name, 'act', 'WWW');
+            stage_name = regexprep(stage_name, 'WWW', 'active');
             % passive damping
             [mag_fit, delta, phase_fit] = get_damping(turns_of_stage{ksew}, ...
-                stage_data, passive_override, length_averaging, ...
-                adv_fitting,threshold_value);
-        elseif contains(stage_name, 'passive')
+                stage_data, inputs.Results.active_override,...
+                inputs.Results.length_averaging, ...
+                inputs.Results.advanced_fitting,threshold_value);
+        elseif contains(stage_name, 'passive') || contains(stage_name, 'nat')
+            stage_name = regexprep(stage_name, 'nat', 'passive');
             %active damping
             [mag_fit, delta, phase_fit] = get_damping(turns_of_stage{ksew}, ...
-                stage_data, active_override, length_averaging, ...
-                adv_fitting,threshold_value);
+                stage_data, inputs.Results.passive_override,...
+                inputs.Results.length_averaging, ...
+                inputs.Results.advanced_fitting,threshold_value);
         end %if
-        output_data.(stage_name).damping_time(nq) = mag_fit(1);
+        output_data.(stage_name).damping_rate(nq) = mag_fit(1);
         output_data.(stage_name).offset(nq) = mag_fit(2);
         output_data.(stage_name).error(nq) = delta;
         output_data.(stage_name).frequency_shift(nq) = phase_fit(1);
