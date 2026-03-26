@@ -1,6 +1,7 @@
-function mbf_growdamp_archival_plotting(requested_data, dr_passive, dr_active, error_passive, error_active, times, experimental_setup)
+function mbf_growdamp_archival_plotting(requested_data, dataset, times, experimental_setup)
 % Plots the data processed by mbf_growdamp_archival_analysis.
 % Args:
+%       dataset (struct): containing
 %      dr_passive (numeric matrix): Passive damping rate.
 %                                   (bunches vs datasets)
 %      dr_active (numeric matrix): Passive damping rate.
@@ -20,7 +21,10 @@ function mbf_growdamp_archival_plotting(requested_data, dr_passive, dr_active, e
 if isempty(times)
     return
 end %if
-
+dr_passive = dataset.passive.damping_rate;
+dr_active = dataset.active.damping_rate;
+error_passive = dataset.passive.error;
+error_active = dataset.active.error;
 [~, harmonic_number, ~, ~] = mbf_system_config;
 x_plt_axis = (0:harmonic_number-1) - harmonic_number/2;
 this_year = year(datetime("now"));
@@ -64,7 +68,7 @@ if ymin > 0
 end %if
 ymax = max(max(dr_passive,[],2));
 ymax = ymax + ymax /10;
-ylim([ymin ymax]);
+ylim([ymin 0]);
 grid on
 hold off
 
@@ -86,7 +90,7 @@ if ymin > 0
 end %if
 ymax = max(max(dr_active,[],2));
 ymax = ymax + ymax /10;
-ylim([ymin ymax]);
+ylim([ymin 0]);
 grid on
 hold off
 ck = 1;

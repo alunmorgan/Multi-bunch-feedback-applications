@@ -42,7 +42,7 @@ if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     end %for
     legend(graph_labels)
 else
-    populate_archive_graph(spec_data.tune_data, years_input, times, x_plt_axis)
+    populate_archive_graph(squeeze(spec_data.bunch_f), years_input, times, squeeze(spec_data.bunch_tune_scale(1,:, :)))
 end %if
 title(graph_title)
 xlabel('Tune')
@@ -62,7 +62,7 @@ if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     legend(graph_labels)
 
 else
-    populate_archive_graph(spec_data.tune_data, years_input, times, x_plt_axis)
+    populate_archive_graph(squeeze(spec_data.bunch_f), years_input, times, squeeze(spec_data.bunch_f_scale(1,:, :)))
 end %if
 xlabel('Frequency (kHz)')
 ylabel('Magnitude (Power)')
@@ -77,10 +77,10 @@ if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     plot_data_2d = squeeze(sum(spec_data.bunch_f_data(1,:,:),1));
     imagesc(squeeze(spec_data.bunch_f_scale(1,scale_length/2+1:end)) * 1E-3, 1:bunches, plot_data_2d(:,scale_length/2+1:end)) % TEMP FIXME
 else
-    populate_archive_graph(spec_data.bunch_data, years_input, times, x_plt_axis)
+    populate_archive_graph(squeeze(spec_data.bunch_f_bunches), years_input, times, x_plt_axis)
 end %if
-xlabel('Frequency (kHz)')
-ylabel('Bunch')
+ylabel('TBD')
+xlabel('Bunch')
+grid on
 axis tight
 
-linkaxes([ax2, ax3],'x')

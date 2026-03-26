@@ -1,4 +1,4 @@
-function exp_data = machine_environment(tunes)
+function exp_data = machine_environment
 % captures the environmental variables of the machine
 %
 % Example: exp_data = machine_environment(NaN)
@@ -11,9 +11,7 @@ exp_data.time = datevec(datetime("now"));
 lcaSetSeverityWarnLevel(4)
 %% General machine parameters
 % Tunes
-if ~isstruct(tunes)
-    exp_data.tunes = get_all_tunes;
-end %if
+exp_data.tunes = get_all_tunes;
 % Ring mode
 exp_data.ringmode = get_variable('SR-CS-RING-01:MODE');
 % Machine current

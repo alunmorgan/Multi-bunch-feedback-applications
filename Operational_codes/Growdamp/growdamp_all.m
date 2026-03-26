@@ -7,8 +7,6 @@ function growdamp_all(mbf_axis, varargin)
 %       system into a particular state. Default is yes.
 %       plotting(str): set whether the data is plotted as well as saved. Default
 %       is yes.
-%       tunes (structure or NaN): Tune data from a previous measurement.
-%                                 Defaults to Nan.
 %       excitation(str): sets whether the measurement uses an excitation to
 %                        drive a resonance or if the measurement just uses the natural beam coupling.
 %                        Defaults to 'yes'
@@ -28,10 +26,10 @@ excitation_locations = {'tune', 'lower_sideband', 'upper_sideband', 'manual'};
 valid_number = @(x) isnumeric(x) && isscalar(x) && (x >= 0);
 
 addRequired(p, 'mbf_axis', @(x) any(validatestring(x, axis_string)));
+addParameter(p, 'auto_setup', 'yes', @(x) any(validatestring(x, boolean_string)));
 addParameter(p, 'pll_tracking', 'no', @(x) any(validatestring(x,boolean_string)));
 addParameter(p, 'pll_bunches', 400, valid_number);
 addParameter(p, 'pll_guard_bunches', 10, valid_number);
-addParameter(p, 'auto_setup', 'yes', @(x) any(validatestring(x, boolean_string)));
 addParameter(p, 'bunch_monitor', ones(harmonic_number,1));
 addParameter(p, 'capture_full_bunch_motion', 'no', @(x) any(validatestring(x,boolean_string)));
 addParameter(p, 'excitation', 'yes',  @(x) any(validatestring(x, boolean_string)));
@@ -138,7 +136,7 @@ elseif strcmpi(mbf_axis, 's')
 end %if
 
 % getting general environment data.
-growdamp = machine_environment(p.Results.tunes);
+growdamp = machine_environment;
 
 %% Setting up the growdamp experiments.
 if strcmp(p.Results.excitation, 'no')
