@@ -24,8 +24,8 @@ this_year = year(datetime("now"));
 years_input = {this_year-5, 'r'; this_year-4, 'b'; this_year-3, 'k'; this_year-2, 'g'; this_year-1, 'c'; this_year, 'm'};
 
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
-    graph_title = {[graph_title, ' as a function of ', experimental_setup.sweep_parameter];...
-        ['Using a step size of ', num2str(experimental_setup.parameter_step_size), ' in the ', experimental_setup.axis, ' axis']};
+    graph_title = {[experimental_setup.axis, ' axis ', graph_title, ' as a function of ', experimental_setup.sweep_parameter];...
+        ['Using a step size of ', num2str(experimental_setup.parameter_step_size)]};
     graph_labels = cell(1, length(experimental_setup.param));
     for hw = 1:length(experimental_setup.param)
         graph_labels{hw}=num2str(experimental_setup.param(hw));
@@ -74,13 +74,29 @@ axis tight
 ax3 =axes('OuterPosition', [0.12 0 0.95 0.4]);
 bunches = size(spec_data.bunch_f_data,2);
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
-    plot_data_2d = squeeze(sum(spec_data.bunch_f_data(1,:,:),1));
-    imagesc(squeeze(spec_data.bunch_f_scale(1,scale_length/2+1:end)) * 1E-3, 1:bunches, plot_data_2d(:,scale_length/2+1:end)) % TEMP FIXME
+    plot_data_2d = squeeze(sum(spec_data.bunch_f_data(:,:,:),1));
+    imagesc(squeeze(spec_data.bunch_f_scale(1,scale_length/2+1:end)) .* 1E-3,...
+        1:bunches, plot_data_2d(:,scale_length/2+1:end)) % TEMP FIXME
+    ylabel('Bunches')
+    xlabel('Frequency (kHz)')
 else
     populate_archive_graph(squeeze(spec_data.bunch_f_bunches), years_input, times, x_plt_axis)
-end %if
-ylabel('TBD')
+    ylabel('Average position deviation from the mean')
 xlabel('Bunch')
+end %if
 grid on
 axis tight
 
+figure('Position',[50, 50, 1400, 800])
+t = tiledlayout('flow');
+title(t, 'Spectra of all measurements')
+xlabel(t, 'Tune')
+for jw = 1:size(spec_data.bunch_f_data, 1)
+    nexttile
+    plot_data = (abs(squeeze(spec_data.bunch_f_data(jw, :, :))));
+    imagesc(squeeze(spec_data.bunch_tune_scale(jw, :, :)), ...
+        x_plt_axis, ...
+        plot_data)
+    colorbar
+    title(datestr(requested_data{jw}.time))
+end %for

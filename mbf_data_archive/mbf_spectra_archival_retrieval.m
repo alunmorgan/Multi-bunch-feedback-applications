@@ -1,4 +1,4 @@
-function conditioned_data = mbf_spectra_archival_retrieval(ax, date_range, varargin)
+function mbf_spectra_archival_retrieval(ax, date_range, varargin)
 % Extracts requested data from the data archive between
 % the requested times(date_range), and of the correct type (ax).
 % also filters out datasets with machine settings outside the specified
@@ -26,11 +26,6 @@ function conditioned_data = mbf_spectra_archival_retrieval(ax, date_range, varar
 %       debug(int): if 1 then outputs graphs of individual modes to allow
 %                                    selection nof appropriate overrides.
 %
-%
-% Returns:
-%       conditioned_data (cell of structures): The group of requested data
-%                                            structures.
-%
 % Example: mbf_modescan_archival_retrieval('x', [datetime(2023, 1, 1), datetime("now")])
 
 p = inputParser;
@@ -40,52 +35,66 @@ axis_string = {'x', 'y', 's'};
 boolean_string = {'yes', 'no'};
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
 
-default_sweep_parameter = 'current';
-default_parameter_step_size = 0.1;
-defaultCurrentRange = [2 150];
-
 addRequired(p, 'ax', @(x) any(validatestring(x, axis_string)));
 addRequired(p, 'date_range');
 addParameter(p, 'bypass_index', 'no', @(x) any(validatestring(x, boolean_string)));
 addParameter(p, 'metadata_only', 'no', @(x) any(validatestring(x, boolean_string)));
 addParameter(p, 'analysis_type', 'collate', @ischar)
-addParameter(p, 'sweep_parameter', default_sweep_parameter, @ischar);
-addParameter(p, 'parameter_step', default_parameter_step_size, validScalarPosNum);
-addParameter(p,'current_range',defaultCurrentRange);
+addParameter(p, 'sweep_parameter', 'current', @ischar);
+addParameter(p, 'parameter_step', 0.1, validScalarPosNum);
+addParameter(p,'current_range',[2 300]);
 
 parse(p, ax, date_range, varargin{:});
 
-if strcmpi(ax, 'x')
-    filter_name = 'Spectrum_x_axis';
-elseif  strcmpi(ax, 'y')
-    filter_name = 'Spectrum_y_axis';
-elseif strcmpi(ax, 's')
-    filter_name = 'Spectrum_s_axis';
-else
-    error('MBF:Archive:Spectra:InputError', 'mbf_archival_dataset_retrieval: No valid axis given (should be x, y or s)')
-end %if
-requested_data = mbf_archival_dataset_retrieval(filter_name, date_range,...
-    'bypass_index' ,p.Results.bypass_index, 'metadata_only', p.Results.metadata_only);
+selection_names = {'Spectrum_', ['Spectrum_',ax,'_axis']};
+filter_conditions = {...
+    'current', [0 350];
+    'fill_pattern', [0 1000];
+    {'tune', ['tune_', ax, '_axis']}, [0 0.5];
+    'cavity1_voltage', [0 2];
+    'cavity3_voltage', [0 2];
+    'wiggler_field_I12', [0 4.5];
+    'wiggler_field_I15', [0 4.5];
+    };
+requested_data = {};
+for jsw = 1:length(selection_names)
+    temp_data = mbf_archival_dataset_retrieval(selection_names{jsw}, date_range,...
+        'bypass_index' ,p.Results.bypass_index, 'metadata_only', p.Results.metadata_only);
+    for issd = 1:length(temp_data)
+        if isstruct(temp_data{issd}.raw_data)
+            temp_data{issd}.raw_data = temp_data{issd}.raw_data.([ax,'_data']);
+            temp_data{issd}.base_name = [temp_data{issd}.base_name, ax, '_axis'];
+        end %if
+    end %for
+    requested_data = vertcat(requested_data, temp_data);
+end %for
+% only one dataset then plot the single measurement graphs.
 if length(requested_data) == 1
     [spec_data, ~, ~] = ...
-        mbf_spectra_archival_analysis(requested_data, 'analysis_type', 'collate');
+        mbf_spectra_archival_analysis(requested_data,...
+        'analysis_type', 'collate');
     mbf_spectrum_plotting(requested_data{1}, spec_data)
+    % Plot the trend graphs.
 else
-    conditioned_data = mbf_archival_conditional_filtering(requested_data, 'current_range', p.Results.current_range);
+    conditioned_data = mbf_archival_conditional_filtering(requested_data,...
+        filter_conditions);
 
     if isempty(conditioned_data)
         disp('No data meeting the requirements')
     else
         if strcmp(p.Results.analysis_type, 'collate')
             [spec_data,  times, setup] = ...
-                mbf_spectra_archival_analysis(conditioned_data, 'analysis_type','collate');
+                mbf_spectra_archival_analysis(conditioned_data,...
+                'analysis_type','collate');
         elseif strcmp(p.Results.analysis_type, 'sweep')
             [spec_data,  times, setup] = ...
-                mbf_spectra_archival_analysis(conditioned_data, 'analysis_type','parameter_sweep', ...
+                mbf_spectra_archival_analysis(conditioned_data,...
+                'analysis_type','parameter_sweep', ...
                 'sweep_parameter',p.Results.sweep_parameter,...
                 'parameter_step', p.Results.parameter_step);
         else
-            error('MBF:Archive:Spectra:InputError', 'Please select collate or sweep as the analysis type');
+            error('MBF:Archive:Spectra:InputError',...
+                'Please select collate or sweep as the analysis type');
         end %if
         setup.axis = ax;
         mbf_spectra_archival_plotting(conditioned_data, spec_data, times, setup);

@@ -4,8 +4,7 @@ function unpacked_data = mbf_archival_dataset_retrieval(filter_name, date_range,
 % the requested times(date_range), and of the correct type (ax).
 %
 % Args:
-%       filter_name(str): Name of the file to select for
-%                         Growdamp_x_axis, Growdamp_y_axis, Growdamp_s_axis
+%       filter_name(str): Name of the file to select for.
 %
 %       date_range (pair of timestamps): The range of time to extract.
 %       bypass_index (str) : 'no' for use the pregnerated index (much faster)
@@ -33,7 +32,7 @@ parse(p,filter_name, date_range, varargin{:});
 [root_string, ~, ~, ~] = mbf_system_config;
 root_string = root_string{1};
 %TEMP OVERRIDE
-root_string = '/home/afdm76/MBF_loopback_test_data/';
+% root_string = '/scihome/afdm76/MBF_loopback_test_data/';
 
 index_name = [filter_name, '_index'];
 

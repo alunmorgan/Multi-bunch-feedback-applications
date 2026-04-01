@@ -27,18 +27,19 @@ for k=1:input_data.repeat
     xx = xx-repmat(mean(xx,2), 1, input_data.n_turns);
 
     motion_only = reshape(xx, 1, []); %stretch out again
-    motion_only_windowed = hannwin(motion_only);
+    hanning_filter = hanning(length(motion_only));
+    motion_only_windowed = motion_only .* hanning_filter';
     motion_only_windowed_padded = padarray(motion_only_windowed, ...
         [0,(input_data.harmonic_number * input_data.n_turns) - ...
         length(motion_only_windowed)] , 0, 'post');
     motion_only_windowed_padded = reshape(motion_only_windowed_padded', ...
         input_data.harmonic_number, []);
-    % find the overall spectrum of the motion for each individual bunch 
+    % find the overall spectrum of the motion 
     % with the static position offsets removed.
     xf1 = abs(fft(motion_only_windowed_padded, [], 2))./input_data.n_turns;
 
     if k==1
-        bunch_motion = motion_only_windowed_padded;
+        bunch_motion = xx;
         bunch_motion_spectrum = xf1;
     else
         bunch_motion_spectrum = bunch_motion_spectrum + xf1; % accumulating
