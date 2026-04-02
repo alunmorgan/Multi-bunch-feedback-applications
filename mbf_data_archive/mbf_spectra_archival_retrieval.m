@@ -1,4 +1,5 @@
-function mbf_spectra_archival_retrieval(ax, date_range, varargin)
+function mbf_spectra_archival_retrieval(ax, date_range, filter_conditions, ...
+    varargin)
 % Extracts requested data from the data archive between
 % the requested times(date_range), and of the correct type (ax).
 % also filters out datasets with machine settings outside the specified
@@ -47,15 +48,7 @@ addParameter(p,'current_range',[2 300]);
 parse(p, ax, date_range, varargin{:});
 
 selection_names = {'Spectrum_', ['Spectrum_',ax,'_axis']};
-filter_conditions = {...
-    'current', [0 350];
-    'fill_pattern', [0 1000];
-    {'tune', ['tune_', ax, '_axis']}, [0 0.5];
-    'cavity1_voltage', [0 2];
-    'cavity3_voltage', [0 2];
-    'wiggler_field_I12', [0 4.5];
-    'wiggler_field_I15', [0 4.5];
-    };
+
 requested_data = {};
 for jsw = 1:length(selection_names)
     temp_data = mbf_archival_dataset_retrieval(selection_names{jsw}, date_range,...

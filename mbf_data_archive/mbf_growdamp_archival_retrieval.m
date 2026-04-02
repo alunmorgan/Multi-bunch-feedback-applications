@@ -1,4 +1,5 @@
-function mbf_growdamp_archival_retrieval(ax, date_range, varargin)
+function mbf_growdamp_archival_retrieval(ax, date_range, filter_conditions, ...
+    varargin)
 % Extracts requested data from the data archive between
 % the requested times(date_range), and of the correct type (ax).
 % also filters out datasets with machine settings outside the specified
@@ -40,6 +41,7 @@ validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
 
 addRequired(p, 'ax', @(x) any(validatestring(x, axis_string)));
 addRequired(p, 'date_range');
+addRequired(p, 'filter_conditions');
 addParameter(p, 'bypass_index', 'no', @(x) any(validatestring(x, boolean_string)));
 addParameter(p, 'metadata_only', 'no', @(x) any(validatestring(x, boolean_string)));
 addParameter(p, 'analysis_type', 'collate', @ischar)
@@ -51,18 +53,9 @@ addParameter(p,'advanced_fitting',0, @isnumeric);
 addParameter(p,'current_range', [2 305]);
 addParameter(p, 'debug', 0);
 
-parse(p, ax, date_range, varargin{:});
+parse(p, ax, date_range, filter_conditions, varargin{:});
 
 selection_name = ['Growdamp_',ax,'_axis'];
-filter_conditions = {...
-    'current', [0 350];
-    'fill_pattern', [0 1000];
-    'tune', [0 0.5];
-    'cavity1_voltage', [0.1 2];
-    'cavity3_voltage', [0.1 2];
-    'wiggler_field_I12', [0 4.5];
-    'wiggler_field_I15', [0 4.5];
-    };
 
 requested_data = mbf_archival_dataset_retrieval(selection_name, date_range,...
     'bypass_index' ,p.Results.bypass_index, 'metadata_only', p.Results.metadata_only);

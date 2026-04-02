@@ -62,6 +62,10 @@ if strcmp(experimental_setup.anal_type, 'parameter_sweep')
 else
     populate_archive_graph(data_phase', years_input, times, x_plt_axis)
 end %if
+hold on 
+    plot(x_plt_axis, ones(length(x_plt_axis), 1) .* 90, ':r', 'DisplayName','Limits', 'LineWidth',2)
+    plot(x_plt_axis, ones(length(x_plt_axis), 1) .* -90, ':r', 'LineWidth',2, 'HandleVisibility','off')
+    hold off
 title(graph_title)
 xlabel('Mode')
 ylabel('Phase')

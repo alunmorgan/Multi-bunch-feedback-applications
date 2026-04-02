@@ -1,4 +1,5 @@
-function conditioned_data = mbf_modescan_archival_retrieval(ax, date_range, varargin)
+function mbf_modescan_archival_retrieval(ax, date_range, filter_conditions,...
+    varargin)
 % Extracts requested data from the data archive between
 % the requested times(date_range), and of the correct type (ax).
 % also filters out datasets with machine settings outside the specified
@@ -21,15 +22,6 @@ function conditioned_data = mbf_modescan_archival_retrieval(ax, date_range, vara
 %                                    Multiple data sets which are on the same
 %                                    step will be averaged. (only needed if
 %                                    anal_type set to 'parameter sweep')
-%       overrides (list of ints): Two values setting the number of turns to
-%                                    analyse (passive, active)
-%       debug(int): if 1 then outputs graphs of individual modes to allow
-%                                    selection nof appropriate overrides.
-%
-%
-% Returns:
-%       conditioned_data (cell of structures): The group of requested data
-%                                            structures.
 %
 % Example: mbf_modescan_archival_retrieval('x', [datetime(2023, 1, 1), datetime("now")])
 
@@ -40,49 +32,48 @@ axis_string = {'x', 'y', 's'};
 boolean_string = {'yes', 'no'};
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
 
-default_sweep_parameter = 'current';
-default_parameter_step_size = 0.1;
-defaultCurrentRange = [2 300];
-
 addRequired(p, 'ax', @(x) any(validatestring(x, axis_string)));
 addRequired(p, 'date_range');
+addRequired(p, 'filter_conditions');
 addParameter(p, 'bypass_index', 'no', @(x) any(validatestring(x, boolean_string)));
 addParameter(p, 'metadata_only', 'no', @(x) any(validatestring(x, boolean_string)));
 addParameter(p, 'analysis_type', 'collate', @ischar)
-addParameter(p, 'sweep_parameter', default_sweep_parameter, @ischar);
-addParameter(p, 'parameter_step', default_parameter_step_size, validScalarPosNum);
-addParameter(p,'current_range',defaultCurrentRange);
+addParameter(p, 'sweep_parameter', 'current', @ischar);
+addParameter(p, 'parameter_step', 0.1, validScalarPosNum);
+addParameter(p,'current_range',[2 305]);
 
-parse(p, ax, date_range, varargin{:});
+parse(p, ax, date_range, filter_conditions, varargin{:});
 
-if strcmpi(ax, 'x')
-    filter_name = 'Modescan_x_axis';
-elseif  strcmpi(ax, 'y')
-    filter_name = 'Modescan_y_axis';
-elseif strcmpi(ax, 's')
-    filter_name = 'Modescan_s_axis';
-else
-    error('modescanArchivalRetrieval:InputError', 'mbf_archival_dataset_retrieval: No valid axis given (should be x, y or s)')
-end %if
-requested_data = mbf_archival_dataset_retrieval(filter_name, date_range,...
+selection_name = ['Modescan_',ax,'_axis'];
+
+requested_data = mbf_archival_dataset_retrieval(selection_name, date_range,...
     'bypass_index' ,p.Results.bypass_index, 'metadata_only', p.Results.metadata_only);
 
-conditioned_data = mbf_archival_conditional_filtering(requested_data,'current_range', p.Results.current_range);
-
-if isempty(conditioned_data)
-    disp('No data meeting the requirements')
+if length(requested_data) == 1
+    [data_magnitude, data_phase, ~, ~] = ...
+        mbf_modescan_archival_analysis(requested_data, 'analysis_type','collate');
+    mbf_modescan_plotting(data_magnitude, data_phase, requested_data{1})
 else
-    if strcmp(p.Results.analysis_type, 'collate')
-        [data_magnitude, data_phase, times, setup] = ...
-            mbf_modescan_archival_analysis(conditioned_data, 'analysis_type','collate');
-    elseif strcmp(p.Results.analysis_type, 'sweep')
-        [data_magnitude, data_phase, times, setup] = ...
-            mbf_modescan_archival_analysis(conditioned_data, 'analysis_type','parameter_sweep', ...
-            'sweep_parameter',p.Results.sweep_parameter,...
-            'parameter_step', p.Results.parameter_step);
+    % Only keeping datasets that satify the requested machine conditions.
+    conditioned_data = mbf_archival_conditional_filtering(requested_data,...
+        filter_conditions);
+    if isempty(conditioned_data)
+        disp('No data meeting the requirements')
     else
-        error('modescanArchivalRetrieval:InputError', 'Please select collate or sweep as the analysis type');
+        if strcmp(p.Results.analysis_type, 'collate')
+            [data_magnitude, data_phase, times, setup] = ...
+                mbf_modescan_archival_analysis(conditioned_data,...
+                'analysis_type','collate');
+        elseif strcmp(p.Results.analysis_type, 'sweep')
+            [data_magnitude, data_phase, times, setup] = ...
+                mbf_modescan_archival_analysis(conditioned_data,...
+                'analysis_type','parameter_sweep', ...
+                'sweep_parameter',p.Results.sweep_parameter,...
+                'parameter_step', p.Results.parameter_step);
+        else
+            error('modescanArchivalRetrieval:InputError', 'Please select collate or sweep as the analysis type');
+        end %if
+        setup.axis = ax;
+        mbf_modescan_archival_plotting(conditioned_data, data_magnitude, data_phase, times, setup);
     end %if
-    setup.axis = ax;
-    mbf_modescan_archival_plotting(conditioned_data, data_magnitude, data_phase, times, setup);
 end %if

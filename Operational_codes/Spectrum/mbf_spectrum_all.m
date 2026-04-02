@@ -1,4 +1,4 @@
-function varargout = mbf_spectrum_all(mbf_axis, varargin)
+function mbf_spectrum_all(mbf_axis, varargin)
 % Top level function to run all spectral measurements on selected plane.
 % Args:
 %       auto_setup(str): sets whether the setup scripts will be used to put the
@@ -18,12 +18,15 @@ valid_number = @(x) isnumeric(x) && isscalar(x) && (x >= 0);
 
 addRequired(p, 'mbf_axis', @(x) any(validatestring(x, axis_string)));
 addParameter(p, 'auto_setup', 'yes', @(x) any(validatestring(x, boolean_string)));
-addParameter(p, 'n_turns', 1000, valid_number);
-addParameter(p, 'repeat', 1, valid_number);
 addParameter(p, 'plotting', 'yes', @(x) any(validatestring(x, boolean_string)));
 addParameter(p, 'additional_save_location', NaN);
+addParameter(p, 'n_turns', 1000, valid_number);
+addParameter(p, 'repeat', 1, valid_number);
+
 
 parse(p, mbf_axis, varargin{:});
+
+filter_conditions = {};
 
 [root_string, harmonic_number, pv_names, ~] = mbf_system_config;
 root_string = root_string{1};
@@ -63,10 +66,6 @@ if ~isnan(p.Results.additional_save_location)
 end %if
 
 if strcmp(p.Results.plotting, 'yes')
-    conditioned_data = mbf_spectra_archival_retrieval(mbf_axis, [spectrum.time spectrum.time])
-    analysed.x_axis = mbf_spectrum_analysis(spectrum.raw_data.x_data, spectrum.n_turns, spectrum.repeat, spectrum.harmonic_number, spectrum.RF);
-    analysed.y_axis = mbf_spectrum_analysis(spectrum.raw_data.y_data, spectrum.n_turns, spectrum.repeat, spectrum.harmonic_number, spectrum.RF);
-    analysed.s_axis = mbf_spectrum_analysis(spectrum.raw_data.s_data, spectrum.n_turns, spectrum.repeat, spectrum.harmonic_number, spectrum.RF);
-
-    mbf_spectrum_plotting(analysed, spectrum.current, spectrum.time)
+    mbf_spectra_archival_retrieval(mbf_axis, [spectrum.time spectrum.time],...
+        filter_conditions)
 end %if

@@ -17,6 +17,9 @@ function growdamp_all(mbf_axis, varargin)
 %                                  bunches for which feedback is switched off.
 % Example: growdamp_all('x')
 
+[root_string, harmonic_number, pv_names, ~] = mbf_system_config;
+root_string = root_string{1};
+
 p = inputParser;
 p.StructExpand = false;
 p.CaseSensitive = false;
@@ -27,6 +30,8 @@ valid_number = @(x) isnumeric(x) && isscalar(x) && (x >= 0);
 
 addRequired(p, 'mbf_axis', @(x) any(validatestring(x, axis_string)));
 addParameter(p, 'auto_setup', 'yes', @(x) any(validatestring(x, boolean_string)));
+addParameter(p, 'plotting', 'yes', @(x) any(validatestring(x, boolean_string)));
+addParameter(p, 'additional_save_location', NaN);
 addParameter(p, 'pll_tracking', 'no', @(x) any(validatestring(x,boolean_string)));
 addParameter(p, 'pll_bunches', 400, valid_number);
 addParameter(p, 'pll_guard_bunches', 10, valid_number);
@@ -35,13 +40,20 @@ addParameter(p, 'capture_full_bunch_motion', 'no', @(x) any(validatestring(x,boo
 addParameter(p, 'excitation', 'yes',  @(x) any(validatestring(x, boolean_string)));
 addParameter(p, 'excitation_location', 'tune', @(x) any(validatestring(x,excitation_locations)));
 addParameter(p, 'excitation_manual', 0, valid_number);
-addParameter(p, 'plotting', 'yes', @(x) any(validatestring(x, boolean_string)));
-addParameter(p, 'additional_save_location', NaN);
+
 
 parse(p, mbf_axis, varargin{:});
 
-[root_string, ~, pv_names, ~] = mbf_system_config;
-root_string = root_string{1};
+filter_conditions = {...
+    'current', [0 350];
+    'fill_pattern', [0 1000];
+    'tune', [0 0.5];
+    'cavity1_voltage', [0.1 2];
+    'cavity3_voltage', [0.1 2];
+    'wiggler_field_I12', [0 4.5];
+    'wiggler_field_I15', [0 4.5];
+    };
+
 pv_head = pv_names.hardware_names.(mbf_axis);
 Bunch_bank = pv_names.tails.Bunch_bank;
 
@@ -163,6 +175,16 @@ else
     end %if
 end %if
 
+% Add the extra data to the data structure.
+growdamp.ax_label = mbf_axis;
+growdamp.base_name = ['Growdamp_' mbf_axis '_axis'];
+growdamp.harmonic_number = harmonic_number;
+growdamp.excitation_location = p.Results.excitation_location;
+growdamp.excitation_tune = excitation_tune;
+growdamp.excitation_setting = p.Results.excitation;
+growdamp.states = states;
+growdamp.bunches_monitored = p.Results.bunch_monitor;
+
 if strcmp(p.Results.auto_setup, 'yes')
     % Get the current FIR gain
     orig_fir_gain = get_variable([pv_head, Bunch_bank.FIR_gains]);
@@ -171,15 +193,6 @@ if strcmp(p.Results.auto_setup, 'yes')
     % Setting the FIR gain to its original value.
     set_variable([pv_head, Bunch_bank.FIR_gains], orig_fir_gain)
 end %if
-
-% Add the extra data to the data structure.
-growdamp.ax_label = mbf_axis;
-growdamp.base_name = ['Growdamp_' mbf_axis '_axis'];
-growdamp.excitation_location = p.Results.excitation_location;
-growdamp.excitation_tune = excitation_tune;
-growdamp.excitation_setting = p.Results.excitation;
-growdamp.states = states;
-growdamp.bunches_monitored = p.Results.bunch_monitor;
 
 % Setup the MBF ready for the measurement.
 mbf_growdamp_setup(mbf_axis, states, excitation_tune, pll_setup,...
@@ -206,6 +219,8 @@ if ~isnan(p.Results.additional_save_location)
     save(additional_save_location, growdamp)
 end %if
 
+%% Plotting data
 if strcmp(p.Results.plotting, 'yes')
-    mbf_growdamp_archival_retrieval(mbf_axis, [growdamp.time growdamp.time])
+    mbf_growdamp_archival_retrieval(mbf_axis, [growdamp.time growdamp.time],...
+        filter_conditions)
 end %if
