@@ -1,4 +1,4 @@
-function growdamp = mbf_growdamp_capture(mbf_axis, capture_full_bunch_motion)
+function growdamp = mbf_growdamp_capture(mbf_axis, pv_names, capture_full_bunch_motion)
 % Gathers data on the machine environment.
 % Runs a growdamp experiment on an already setup system.
 % Saves the resultant data.
@@ -9,8 +9,6 @@ function growdamp = mbf_growdamp_capture(mbf_axis, capture_full_bunch_motion)
 %           time series of bunch motion is captured and stored (large data).
 %
 % example mbf_growdamp_capture('x', 'no')
-
-[~, ~, pv_names, ~] = mbf_system_config;
 
 pv_head = pv_names.hardware_names.(mbf_axis);
 pv_head_mem = pv_names.hardware_names.mem.(mbf_axis);

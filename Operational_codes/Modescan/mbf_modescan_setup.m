@@ -1,4 +1,4 @@
-function mbf_modescan_setup(mbf_axis, dwell, tune, gain)
+function mbf_modescan_setup(mbf_axis, pv_names, harmonic_number, dwell, tune, gain)
 % Sets up the MBF system to be ready for a modescan measurement.
 %
 %   Args:
@@ -8,7 +8,6 @@ function mbf_modescan_setup(mbf_axis, dwell, tune, gain)
 % example: mbf_modescan_setup('x', 1, 0.18, -30)
 
 mbf_tools
-[~, harmonic_number, pv_names] = mbf_system_config;
 % Generate the base PV name.
 system_axis = pv_names.hardware_names.(mbf_axis);
 % state 1 of sequencer

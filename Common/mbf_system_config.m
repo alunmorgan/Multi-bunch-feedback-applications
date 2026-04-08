@@ -4,9 +4,7 @@ function [root_path, harmonic_number, pv_names, trigger_inputs] = mbf_system_con
 
 % The first entry in root_path is the currently used location for capture.
 % Additional locations are for alternative archival locations only.
-root_path = {'/dls/ops-data/Diagnostics/MBF/', ...
-    '/dls/ops-data/Diagnostics/TMBF/', ...
-    '/dls/ops-data/Diagnostics/LMBF/'};
+root_path = '/dls/ops-data/Diagnostics/MBF/';
 harmonic_number = 936;
 
 %% RF frequency
