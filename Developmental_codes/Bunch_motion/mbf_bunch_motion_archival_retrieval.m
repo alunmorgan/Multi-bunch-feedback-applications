@@ -1,4 +1,5 @@
-function requested_data = mbf_bunch_motion_archival_retrieval(date_range, varargin)
+function mbf_bunch_motion_archival_retrieval(date_range, filter_conditions,...
+    varargin)
 % Extracts requested data from the data archive between
 % the requested times(date_range)
 %
@@ -10,9 +11,6 @@ function requested_data = mbf_bunch_motion_archival_retrieval(date_range, vararg
 %       metadata_only(str): 'no' return all data
 %                            'yes' remove the sample data from the output structure.
 %                            the default is 'no'.
-% Returns:
-%       conditioned_data (cell of structures): The group of requested data
-%                                            structures.
 %
 % Example: mbf_bunch_motion_archival_retrieval([now-5, now])
 
@@ -21,14 +19,50 @@ p = inputParser;
 p.StructExpand = false;
 p.CaseSensitive = false;
 boolean_string = {'yes', 'no'};
+validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
 
 addRequired(p, 'date_range');
+addRequired(p, 'filter_conditions');
 addParameter(p, 'bypass_index', 'no', @(x) any(validatestring(x, boolean_string)));
 addParameter(p, 'metadata_only', 'no', @(x) any(validatestring(x, boolean_string)));
+addParameter(p, 'analysis_type', 'collate', @ischar)
+addParameter(p, 'sweep_parameter', 'current', @ischar);
+addParameter(p, 'parameter_step', 0.1, validScalarPosNum);
+addParameter(p, 'selected_bunches', [150:160]);
+addParameter(p, 'selected_turns', [600:650]);
 
-parse(p, date_range, varargin{:});
+parse(p, date_range, filter_conditions, varargin{:});
 
-filter_name = 'Bunch_motion';
+selection_name = 'Bunch_motion';
 
-requested_data = mbf_archival_dataset_retrieval(filter_name, date_range,...
+requested_data = mbf_archival_dataset_retrieval(selection_name, date_range,...
     'bypass_index' ,p.Results.bypass_index, 'metadata_only', p.Results.metadata_only);
+
+if length(requested_data) == 1
+    [dataset, ~, ~] = ...
+        mbf_bunch_motion_archival_analysis(requested_data, 'analysis_type','collate');
+    mbf_bunch_motion_plotting(dataset, requested_data{1},...
+        p.Results.selected_bunches, p.Results.selected_turns)
+else
+    % Only keeping datasets that satify the requested machine conditions.
+    conditioned_data = mbf_archival_conditional_filtering(requested_data,...
+        filter_conditions);
+    if isempty(conditioned_data)
+        disp('No data meeting the requirements')
+    else
+        if strcmp(p.Results.analysis_type, 'collate')
+            [dataset, times, setup] = ...
+                mbf_bunch_motion_archival_analysis(conditioned_data,...
+                'analysis_type','collate');
+        elseif strcmp(p.Results.analysis_type, 'sweep')
+            [dataset, times, setup] = ...
+                mbf_bunch_motion_archival_analysis(conditioned_data,...
+                'analysis_type','parameter_sweep', ...
+                'sweep_parameter',p.Results.sweep_parameter,...
+                'parameter_step', p.Results.parameter_step);
+        else
+            error('bunch_motionArchivalRetrieval:InputError', 'Please select collate or sweep as the analysis type');
+        end %if
+        mbf_bunch_motion_archival_plotting(conditioned_data, dataset, times, setup);
+    end %if
+end %if

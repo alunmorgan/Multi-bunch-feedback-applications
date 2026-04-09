@@ -109,7 +109,9 @@ if strcmp(p.Results.analysis_type, 'parameter_sweep')
         disp('No data left. Try changing analysis settings.')
         return
     else
-        [dataset, experimental_setup.param] = mbf_analysis_reorganise_for_parameter_sweep(dataset, param, p.Results.parameter_step);
+        [dataset, experimental_setup.param] = ...
+            mbf_analysis_reorganise_for_parameter_sweep(dataset, param, ...
+            p.Results.parameter_step);
 %         [dr_active, ~] = mbf_analysis_reorganise_for_parameter_sweep(dr_active, param, p.Results.parameter_step);
 %         [error_passive, ~] = mbf_analysis_reorganise_for_parameter_sweep(error_passive, param, p.Results.parameter_step);
 %         [error_active, ~] = mbf_analysis_reorganise_for_parameter_sweep(error_active, param, p.Results.parameter_step);

@@ -7,10 +7,10 @@ function modescan_all(mbf_axis, varargin)
 %       plotting(str): set whether the data is plotted as well as saved. Default
 %                      is yes.
 %       additional_save_location(str): fully defined filename to save the
-%                                      captured data to in addition to the 
+%                                      captured data to in addition to the
 %                                      main archive.
 %       n_repeats(int): How many times to repeat each measurement point.
-%       dwell (int): How many turns to stay at each measurement point. 
+%       dwell (int): How many turns to stay at each measurement point.
 %       excitation_gain(float): level of the excitation.
 %
 % Example  modscan_all('x')
@@ -53,6 +53,8 @@ modescan.dwell = p.Results.dwell;
 modescan.excitation_gain = p.Results.excitation_gain;
 
 if strcmp(p.Results.auto_setup, 'yes')
+    % Get the current FIR gain
+    orig_fir_gain = get_variable([pv_head, Bunch_bank.FIR_gains]);
     % Programatically press the tune only button on each system.
     setup_operational_mode(mbf_axis, "TuneOnly")
 end %if

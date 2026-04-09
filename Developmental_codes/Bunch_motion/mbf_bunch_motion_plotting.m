@@ -1,4 +1,4 @@
-function mbf_bunch_motion_plotting(data, selected_bunches, selected_turns)
+function mbf_bunch_motion_plotting(data, metadata, selected_bunches, selected_turns)
 
 x = reshape(data.x, data.num_buckets, []);
 y = reshape(data.y, data.num_buckets, []);

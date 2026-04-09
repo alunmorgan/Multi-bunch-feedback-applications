@@ -1,12 +1,11 @@
-function mbf_bunch_motion_setup
+function mbf_bunch_motion_setup(pv_names, trigger_inputs)
 % Sets up all three axis so that they will take a single set of data each
 % when armed and triggered
 %
 % Example: mbf_bunch_motion_setup
 
-mbf_setup_wait_for_hw_trigger
+mbf_setup_wait_for_hw_trigger(pv_names, trigger_inputs)
 
-[~, ~, pv_names, ~] = mbf_system_config;
 PVt = pv_names.tails;
 mbf_systems = {'T', 'L'};
 for hse = 1:2

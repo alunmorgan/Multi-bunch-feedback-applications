@@ -1,6 +1,5 @@
-function mbf_setup_wait_for_hw_trigger
+function mbf_setup_wait_for_hw_trigger(pv_names, trigger_inputs)
 
-[~, ~, pv_names, trigger_inputs] = mbf_system_config;
 PVt = pv_names.tails;
 
 mbf_axes = {'x', 'y', 's'};
