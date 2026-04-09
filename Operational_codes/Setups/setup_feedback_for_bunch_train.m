@@ -1,57 +1,47 @@
-function setup_feedback_for_bunch_train(mbf_axis, train_length, tune_mode)
+function setup_feedback_for_bunch_train(mbf_axis, train_length, varargin)
 % This allows the setup of the MBF to be adjusted to be suitable for the
-% different bunch train lengths. The system will ignore anything not in the
+% different bunch train lengths. The feedback will ignore anything not in the
 % bunch train
 % Inputs:
 %        mbf_axis (str): axis to apply the settings to. ('x' or 'y')
 %        train_length (int): length of train to apply tune measurement and
-%                            feedback to. Starts from first bunch as per the 
+%                            feedback to. Starts from first bunch as per the
 %                            master timing generator.
-%        tune_mode (str): type of tune setup to use ('all, 'comb'). These
-%                         patterns will only be applied for the length of 
-%                         the train.
+%        clear_previous(str): if yes removes existing enable patterns.
+%                            Defaults to yes.
 %
-% Example: setup_for_bunch_train('x', 686, 'comb')
+% Example: setup_for_bunch_train('x', 686)
 
-PV_base = 'SR23C-DI-TMBF-01:';
-detector0 =  ':DET:0:BUNCHES_S';
-sequencer1 = ':BUN:1:SEQ:ENABLE_S';
-excitation = ':SEQ:1:GAIN_DB_S';
-feedback0 = ':BUN:0:FIR:ENABLE_S';
-feedback1 = ':BUN:1:FIR:ENABLE_S';
+[~, harmonic_number, pv_names, ~] = mbf_system_config;
+pv_head = pv_names.hardware_names.(mbf_axis);
+% feedback during quiecent mode
+feedback0 = pv_names.tails.Bunch_bank.bank0.FIR.enablewf;
+% feedback during tune measurement
+feedback1 = pv_names.tails.Bunch_bank.bank1.FIR.enablewf';
 
-expectedAxes = {'x','X', 'y', 'Y'};
-expectedTuneModes = {'all', 'comb'};
+expectedAxes = @(x) any(validatestring(x,{'x', 'y'}));
+boolean_str = @(x) any(validatestring(x,{'yes', 'no'}));
+valid_positive_number = @(x) isnumeric(x) && isscalar(x) && (x >= 0);
 
 p = inputParser;
-addRequired(p,'mbf_axis',@(x) any(validatestring(x,expectedAxes)));
-addRequired(p,'train_length', @isnumeric);
-addRequired(p,'tune_mode',@(x) any(validatestring(x,expectedTuneModes)));
+addRequired(p,'mbf_axis',expectedAxes);
+addRequired(p,'train_length', valid_positive_number);
+addParameter(p,'clear_previous', 'yes', boolean_str);
 
-parse(p, mbf_axis, train_length, tune_mode);
+parse(p, mbf_axis, train_length, varargin{:});
 
-selected_axis = upper(p.Results.mbf_axis);
-
-enable_wfm = zeros(936,1);
-tune_enable_wfm = zeros(936,1);
-for js = 1:686
-    enable_wfm(js) = 1;
-    if strcmpi(p.Results.tune_mode, 'comb') && rem(js +50, 90) == 0
-        tune_enable_wfm(js) = 1;
-    elseif strcmpi(p.Results.tune_mode, 'all')
-        tune_enable_wfm(js) = 1;
-    end %if
+if strcmpi('yes', p.Results.clear_previous)
+    enable_feedback0 = zeros(harmonic_number,1);
+    enable_feedback1 = zeros(harmonic_number,1);
+else
+    enable_feedback0 = get_variable([pv_head, feedback0]);
+    enable_feedback1 = get_variable([pv_head, feedback1]);
+end %if
+for js = 1:train_length
+    enable_feedback0(js) = 1;
+    enable_feedback1(js) = 1;
 end %for
 
-% Set up tune measurement
-lcaPut([PV_base, selected_axis, detector0], tune_enable_wfm')
-lcaPut([PV_base, selected_axis, sequencer1], tune_enable_wfm')
-if strcmpi(p.Results.tune_mode, 'comb')
-    lcaPut([PV_base, selected_axis, excitation], -36.12)
-elseif strcmpi(p.Results.tune_mode, 'all')
-    lcaPut([PV_base, selected_axis, excitation], -54.19)
- end %if
-
-%Set up feedback
-lcaPut([PV_base, selected_axis, feedback0], enable_wfm')
-lcaPut([PV_base, selected_axis, feedback1], enable_wfm')
+% Apply changes
+set_variable([pv_head, feedback0], enable_feedback0')
+set_variable([pv_head, feedback1], enable_feedback1')
