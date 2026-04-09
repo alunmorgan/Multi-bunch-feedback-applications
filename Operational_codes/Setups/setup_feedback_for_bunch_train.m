@@ -1,4 +1,4 @@
-function setup_for_bunch_train(mbf_axis, train_length, tune_mode)
+function setup_feedback_for_bunch_train(mbf_axis, train_length, tune_mode)
 % This allows the setup of the MBF to be adjusted to be suitable for the
 % different bunch train lengths. The system will ignore anything not in the
 % bunch train
