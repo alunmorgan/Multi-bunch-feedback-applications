@@ -15,7 +15,7 @@ seq = pv_names.tails.Sequencer.seq1;
 
 set_variable([system_axis seq.start_frequency], tune);
 set_variable([system_axis seq.step_frequency],1);
-set_variable([system_axis seq.count], harmonic_number -1);
+set_variable([system_axis seq.turns], harmonic_number -1);
 set_variable([system_axis seq.holdoff], 0);
 set_variable([system_axis seq.dwell], dwell);
 set_variable([system_axis seq.bank_select], 'Bank 1');

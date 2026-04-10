@@ -72,13 +72,10 @@ set_variable([pv_head Sequencer.start_state], length(states));
 % steady state bank
 set_variable([pv_head Sequencer.steady_state_bank], 'Bank 0');
 
-% set the super sequencer to scan all modes.
-if isnan(p.Results.single_mode)
-    set_variable([pv_head pv_names.tails.Super_sequencer_count], harmonic_number);
-else
-    set_variable([pv_head pv_names.tails.Super_sequencer_count], 1);
-end %if
+%% set the super sequencer to scan all modes.
+set_variable([pv_head pv_names.tails.Super_sequencer_count], harmonic_number);
 
+%% set up PLL
 if strcmp(pll_setup.pll_tracking, 'yes')
     mbf_fll_setup('x', pll_setup.pll_bunches, pll_setup.pll_guard_bunches)
     set_variable([pv_head, NCO2.PLL_follow], 'Follow');

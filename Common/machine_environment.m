@@ -3,10 +3,8 @@ function exp_data = machine_environment
 %
 % Example: exp_data = machine_environment(NaN)
 
-
-exp_data = p.Results.exp_data;
 % timestamp
-exp_data.time = datevec(datetime("now"));
+exp_data.time = datetime("now");
 
 lcaSetSeverityWarnLevel(4)
 %% General machine parameters

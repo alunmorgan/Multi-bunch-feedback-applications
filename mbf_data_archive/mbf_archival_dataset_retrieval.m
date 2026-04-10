@@ -53,7 +53,7 @@ if strcmp(p.Results.bypass_index, 'no')
     end %for
     file_index = test;
     capture_times = cellfun(@datetime, file_index(2,:));
-    a = find(capture_times > date_range(1));
+    a = find(capture_times >= date_range(1));
     b = find(capture_times <= date_range(2));
     wanted_datasets = file_index(1,(intersect(a,b)));
     disp('')

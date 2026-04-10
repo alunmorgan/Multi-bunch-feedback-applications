@@ -26,7 +26,7 @@ for n=start_state:-1:1
     entries = fieldnames(Sequencer.(['seq' num2str(n)]));
     for en = 1:length(entries)
     growdamp.(['seq' num2str(n), '_', entries{en}]) = get_variable([pv_head,...
-        Sequencer.(['seq' num2str(n)]).entries{en}]);
+        Sequencer.(['seq' num2str(n)]).(entries{en})]);
     end %for  
 end %for
 growdamp.exp_state_names = exp_state_names;

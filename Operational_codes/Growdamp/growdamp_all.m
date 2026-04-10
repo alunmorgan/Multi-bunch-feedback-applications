@@ -162,6 +162,8 @@ growdamp = machine_environment;
 if strcmp(p.Results.excitation, 'no')
     states{2} = growth;
     states{1} = active;
+    state_names{2} = 'growth';
+    state_names{1} = 'active';
 else
     states{6} = excitation;
     states{5} = passive;
@@ -169,6 +171,12 @@ else
     states{3} = excitation;
     states{2} = active;
     states{1} = spacer;
+    state_names{6} = 'excitation';
+    state_names{5} = 'passive';
+    state_names{4} = 'spacer';
+    state_names{3} = 'excitation';
+    state_names{2} = 'active';
+    state_names{1} = 'spacer';
     if strcmp(p.Results.excitation_location,'lower_sideband')
         excitation_tune = growdamp.tunes.([mbf_axis, '_tune']).lower_sideband...
             + tune_offset;
@@ -191,19 +199,22 @@ growdamp.excitation_location = p.Results.excitation_location;
 growdamp.excitation_tune = excitation_tune;
 growdamp.excitation_setting = p.Results.excitation;
 growdamp.states = states;
+growdamp.state_names = state_names;
 growdamp.bunches_monitored = p.Results.bunch_monitor;
 
 if strcmp(p.Results.auto_setup, 'yes')
     % Get the current FIR gain
-    orig_fir_gain = get_variable([pv_head, Bunch_bank.FIR_gains]);
+    orig_fir_gain = get_variable([pv_head, Bunch_bank.bank1.FIR.gainwf]);
     % putting the system into a known state.
     setup_operational_mode(mbf_axis, "Feedback")
     % Setting the FIR gain to its original value.
-    set_variable([pv_head, Bunch_bank.FIR_gains], orig_fir_gain)
+    set_variable([pv_head, Bunch_bank.bank1.FIR.gainwf], orig_fir_gain)
 end %if
 
 growdamp.mbf_state = get_operational_mode(mbf_axis);
-
+pll_setup.pll_tracking = p.Results.pll_tracking;
+pll_setup.pll_bunches = p.Results.pll_bunches;
+pll_setup.pll_guard_bunches = p.Results.pll_guard_bunches;
 % Setup the MBF ready for the measurement.
 mbf_growdamp_setup(mbf_axis, pv_names, trigger_inputs, harmonic_number...
     , states, excitation_tune, pll_setup,...
@@ -221,7 +232,7 @@ end %for
 if strcmp(p.Results.auto_setup, 'yes')
     setup_operational_mode(mbf_axis, "Feedback")
     % Setting the FIR gain to its original value.
-    set_variable([pv_head, Bunch_bank.FIR_gains], orig_fir_gain)
+    set_variable([pv_head, Bunch_bank.bank1.FIR.gainwf], orig_fir_gain)
 end %if
 
 %% saving the data to a file

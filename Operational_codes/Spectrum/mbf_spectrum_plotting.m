@@ -15,7 +15,7 @@ graph_handle.Position(3:4) = [1500, 1600];
 t = tiledlayout(2,2);
 t.TileSpacing = 'compact';
 t.Padding = 'compact';
-title(t, {['MBF spectrum results ',requested_data.axis, ' axis ', datestr(requested_data.time)];...
+title(t, {['MBF spectrum results ',requested_data.ax_label, ' axis ', datestr(requested_data.time)];...
     ['Current: ', num2str(round(requested_data.current)), 'mA']})
 ck = 0;
 
@@ -60,8 +60,13 @@ ylim([0 max(frequency_all_bunches)])
 ck = ck +1;
 ax(ck) = nexttile;
 plot(squeeze(analysed_data.bunch_tune_scale) ,frequency_all_bunches);
-plot([requested_data.tunes.x_tune_tune requested_data.tunes.x_tune_tune], ':r')
+lims = ylim;
+hold on
+plot([requested_data.tune.x_tune.tune requested_data.tune.x_tune.tune],[0 lims(2)] ,':r')
+plot([requested_data.tune.y_tune.tune requested_data.tune.y_tune.tune],[0 lims(2)]  ,':c')
+plot([requested_data.tune.s_tune.tune requested_data.tune.s_tune.tune],[0 lims(2)]  ,':g')
 xlabel('Tune')
+hold off
 grid on
 
 linkaxes([ax(1), ax(3)], 'x')

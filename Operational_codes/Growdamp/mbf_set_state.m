@@ -21,7 +21,7 @@ seq = pv_names.tails.Sequencer.(['seq' num2str(state)]);
 
 set_variable([system_axis, seq.start_frequency], tune);
 set_variable([system_axis, seq.step_frequency],0);
-set_variable([system_axis, seq.count], setup_data.duration);
+set_variable([system_axis, seq.turns], setup_data.duration);
 set_variable([system_axis, seq.holdoff], 0);
 set_variable([system_axis, seq.dwell], setup_data.dwell);
 set_variable([system_axis, seq.bank_select], ['Bank ',num2str(setup_data.bank)]);

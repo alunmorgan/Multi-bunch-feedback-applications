@@ -48,12 +48,10 @@ spectrum.base_name = ['Spectrum_',mbf_axis '_axis'];
 spectrum.harmonic_number = harmonic_number;
 spectrum.n_turns = p.Results.n_turns;
 spectrum.repeat = p.Results.repeat;
-spectrum.time = datevec(datetime("now"));
-
 
 if  strcmp(p.Results.auto_setup, 'yes')
             % Get the current FIR gain
-    orig_fir_gain = get_variable([pv_head, Bunch_bank.FIR_gains]);
+    orig_fir_gain = get_variable([pv_head, Bunch_bank.bank1.FIR.gainwf]);
     % Programatically press the tune only button on each system.
     setup_operational_mode(mbf_axis, "TuneOnly")
 end %if
@@ -68,7 +66,7 @@ spectrum.raw_data  = mbf_spectrum_capture(mbf_axis, pv_names, p.Results.n_turns,
 if strcmp(p.Results.auto_setup, 'yes')
     setup_operational_mode(mbf_axis, "Feedback")
     % Setting the FIR gain to its original value.
-    set_variable([pv_head, Bunch_bank.FIR_gains], orig_fir_gain)
+    set_variable([pv_head, Bunch_bank.bank1.FIR.gainwf], orig_fir_gain)
 end %if
 
 %% saving the data to a file

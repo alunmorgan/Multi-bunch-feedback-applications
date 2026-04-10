@@ -63,20 +63,20 @@ n_modes = size(exp_data.data,1);
 
 % Find the idicies for the end of each period.
 % change the ordering so that the first stage in time is at index 1.
-if isfield(exp_data, 'exp_state_names')
-    stage_names = flip(exp_data.exp_state_names);
+if isfield(exp_data, 'state_names')
+    stage_names = exp_data.state_names;
 elseif isfield(exp_data, ['seq1', '_capture_state'])
     for n = 1:exp_data.start_state
         if contains(exp_data.(['seq' num2str(n), '_capture_state']), 'Discard')
-            exp_data.exp_state_names{n} = 'spacer';
+            exp_data.state_names{n} = 'spacer';
         else
             if contains(exp_data.(['seq' num2str(n), '_enable']), 'On')
-                exp_data.exp_state_names{n} = 'growth';
+                exp_data.state_names{n} = 'growth';
             else
                 if contains(exp_data.(['seq' num2str(n), '_bank_select']), 'Bank 2')
-                    exp_data.exp_state_names{n} = 'active';
+                    exp_data.state_names{n} = 'active';
                 else
-                    exp_data.exp_state_names{n} = 'passive';
+                    exp_data.state_names{n} = 'passive';
                 end %if
             end %if
         end %if
@@ -112,8 +112,8 @@ ck = 1;
 for jjse = 1:length(stage_names)
     if ~contains(stage_names{jjse}, 'spacer')
         recorded_stage_name{ck} = stage_names{jjse};
-        length_of_stage = exp_data.([stage_names{jjse}, '_turns']);
-        dwell_of_stage = exp_data.([stage_names{jjse}, '_dwell']);
+        length_of_stage = exp_data.states{jjse}.duration;
+        dwell_of_stage = exp_data.states{jjse}.dwell;
         if ck == 1
             end_of_stage(ck) = length_of_stage;
             samples_of_stage{ck} = (1:end_of_stage(ck));
@@ -129,11 +129,11 @@ end %for
 
 for nq = 1:n_modes
     for ksew = 1:length(recorded_stage_name)
-        stage_data = exp_data.data(nq,samples_of_stage{ksew});
+        stage_data = exp_data.data(nq, samples_of_stage{ksew});
         stage_name = recorded_stage_name{ksew};
         threshold_value = min(stage_data); % The 'noise' floor.
 
-        if contains(stage_name, 'growth')
+        if contains(stage_name, 'excitation')
             % growth
             mag_fit = polyfit(turns_of_stage{ksew}, log(abs(stage_data)),1);
             c1 = polyval(mag_fit, turns_of_stage{ksew});
