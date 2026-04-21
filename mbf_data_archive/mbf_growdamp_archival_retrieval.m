@@ -37,6 +37,7 @@ p.StructExpand = false;
 p.CaseSensitive = false;
 axis_string = {'x', 'y', 's'};
 boolean_string = {'yes', 'no'};
+analysis_type_string = {'collate', 'sweep'};
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
 
 addRequired(p, 'ax', @(x) any(validatestring(x, axis_string)));
@@ -44,7 +45,7 @@ addRequired(p, 'date_range');
 addRequired(p, 'filter_conditions');
 addParameter(p, 'bypass_index', 'no', @(x) any(validatestring(x, boolean_string)));
 addParameter(p, 'metadata_only', 'no', @(x) any(validatestring(x, boolean_string)));
-addParameter(p, 'analysis_type', 'collate', @ischar)
+addParameter(p, 'analysis_type', 'collate', @(x) any(validatestring(x, analysis_type_string)))
 addParameter(p, 'sweep_parameter', 'current', @ischar);
 addParameter(p, 'parameter_step', 0.1, validScalarPosNum);
 addParameter(p, 'active_override', NaN);
@@ -93,8 +94,6 @@ else
                 'passive_override', p.Results.passive_override, ...
                 'advanced_fitting', p.Results.advanced_fitting,...
                 'debug', p.Results.debug);
-        else
-            error('MBF:Archive:InputError', 'Please select collate or sweep as the analysis type');
         end %if
         setup.axis = ax;
         mbf_growdamp_archival_plotting(conditioned_data, dataset, times, setup);

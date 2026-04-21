@@ -61,107 +61,55 @@ exp_data.data = exp_data.data(1:end - rem(length(exp_data.data), harmonic_number
 exp_data.data = reshape(exp_data.data,[],harmonic_number)';
 n_modes = size(exp_data.data,1);
 
-% Find the idicies for the end of each period.
-% change the ordering so that the first stage in time is at index 1.
-if isfield(exp_data, 'state_names')
-    stage_names = exp_data.state_names;
-elseif isfield(exp_data, ['seq1', '_capture_state'])
-    for n = 1:exp_data.start_state
-        if contains(exp_data.(['seq' num2str(n), '_capture_state']), 'Discard')
-            exp_data.state_names{n} = 'spacer';
-        else
-            if contains(exp_data.(['seq' num2str(n), '_enable']), 'On')
-                exp_data.state_names{n} = 'growth';
-            else
-                if contains(exp_data.(['seq' num2str(n), '_bank_select']), 'Bank 2')
-                    exp_data.state_names{n} = 'active';
-                else
-                    exp_data.state_names{n} = 'passive';
-                end %if
-            end %if
-        end %if
-    end %for
-else
-    % Old dataset use implict order in structure to order stages.
-    test = fieldnames(exp_data);
-    names = test(contains(test, '_turns'));
-    names = names(~contains(names, 'spacer'));
-    expected_length = 0;
-    for nrs = 1:length(names)
-        expected_length = expected_length + exp_data.(names{nrs});
-    end %for
-    if expected_length > size(exp_data.data, 2)
-        names = names(~contains(names, 'growth2'));
-    end %if
-    expected_length = 0;
-    for nrs = 1:length(names)
-        expected_length = expected_length + exp_data.(names{nrs});
-    end %for
-    if expected_length > size(exp_data.data, 2)
-        output_state = 0;
-        output_data = NaN;
-        return
-    end %if
-    for hs = 1:length(names)
-        stage_names{hs} = regexprep(names{hs}, '_turns', '');
-    end
+% Find the name of each stage.
+[recorded_stage_names, samples_of_stage, turns_of_stage] = get_stage_details(exp_data);
 
-    stage_names = flip(stage_names);
-end %if
-ck = 1;
-for jjse = 1:length(stage_names)
-    if ~contains(stage_names{jjse}, 'spacer')
-        recorded_stage_name{ck} = stage_names{jjse};
-        length_of_stage = exp_data.states{jjse}.duration;
-        dwell_of_stage = exp_data.states{jjse}.dwell;
-        if ck == 1
-            end_of_stage(ck) = length_of_stage;
-            samples_of_stage{ck} = (1:end_of_stage(ck));
-            turns_of_stage{ck} = samples_of_stage{ck} .* dwell_of_stage;
-        else
-            end_of_stage(ck) = end_of_stage(ck -1) + length_of_stage;
-            samples_of_stage{ck} = (end_of_stage(ck -1) + 1): end_of_stage(ck);
-            turns_of_stage{ck} = samples_of_stage{ck}.* dwell_of_stage;
-        end %if
-        ck = ck +1;
-    end %if
-end %for
-
+output_data.('growth').damping_rate = NaN(n_modes, 1);
+output_data.('growth').offset = NaN(n_modes, 1);
+output_data.('growth').error = NaN(n_modes, 1);
+output_data.('growth').frequency_shift = NaN(n_modes, 1);
+output_data.('active').damping_rate = NaN(n_modes, 1);
+output_data.('active').offset = NaN(n_modes, 1);
+output_data.('active').error = NaN(n_modes, 1);
+output_data.('active').frequency_shift = NaN(n_modes, 1);
+output_data.('passive').damping_rate = NaN(n_modes, 1);
+output_data.('passive').offset = NaN(n_modes, 1);
+output_data.('passive').error = NaN(n_modes, 1);
+output_data.('passive').frequency_shift = NaN(n_modes, 1);
+fprintf('\n')
 for nq = 1:n_modes
-    for ksew = 1:length(recorded_stage_name)
+    for ksew = 1:length(recorded_stage_names)
         stage_data = exp_data.data(nq, samples_of_stage{ksew});
-        stage_name = recorded_stage_name{ksew};
+        stage_label = recorded_stage_names{ksew};
         threshold_value = min(stage_data); % The 'noise' floor.
-
-        if contains(stage_name, 'excitation')
+        % FIXME make it possible to have multiple of each stage.
+        if contains(stage_label, 'excitation') || contains(stage_label, 'growth')
+            stage_label = 'growth';
             % growth
-            mag_fit = polyfit(turns_of_stage{ksew}, log(abs(stage_data)),1);
-            c1 = polyval(mag_fit, turns_of_stage{ksew});
+            mag_fit = polyfit(1:turns_of_stage(ksew), log(abs(stage_data)),1);
+            c1 = polyval(mag_fit, 1:turns_of_stage(ksew));
             delta = mean(abs(c1 - log(abs(stage_data)))./c1);
             temp = unwrap(angle(stage_data)) / (2*pi);
-            phase_fit = polyfit(turns_of_stage{ksew},temp,1);
-        elseif contains(stage_name, 'active') || contains(stage_name, 'act')
-            stage_name = regexprep(stage_name, 'active', 'WWW');
-            stage_name = regexprep(stage_name, 'act', 'WWW');
-            stage_name = regexprep(stage_name, 'WWW', 'active');
-            % passive damping
-            [mag_fit, delta, phase_fit] = get_damping(turns_of_stage{ksew}, ...
+            phase_fit = polyfit(1:turns_of_stage(ksew),temp,1);
+        elseif contains(stage_label, 'active') || contains(stage_label, 'act')
+            stage_label = 'active';
+            %active damping
+            [mag_fit, delta, phase_fit] = get_damping(1:turns_of_stage(ksew), ...
                 stage_data, inputs.Results.active_override,...
                 inputs.Results.length_averaging, ...
                 inputs.Results.advanced_fitting,threshold_value);
-        elseif contains(stage_name, 'passive') || contains(stage_name, 'nat')
-            stage_name = regexprep(stage_name, 'nat', 'passive');
-            %active damping
-            [mag_fit, delta, phase_fit] = get_damping(turns_of_stage{ksew}, ...
+        elseif contains(stage_label, 'passive') || contains(stage_label, 'nat')
+            stage_label = 'passive';
+            % passive damping
+            [mag_fit, delta, phase_fit] = get_damping(1:turns_of_stage(ksew), ...
                 stage_data, inputs.Results.passive_override,...
                 inputs.Results.length_averaging, ...
                 inputs.Results.advanced_fitting,threshold_value);
         end %if
-        output_data.(stage_name).damping_rate(nq) = mag_fit(1);
-        output_data.(stage_name).offset(nq) = mag_fit(2);
-        output_data.(stage_name).error(nq) = delta;
-        output_data.(stage_name).frequency_shift(nq) = phase_fit(1);
-
+        output_data.(stage_label).damping_rate(nq) = mag_fit(1);
+        output_data.(stage_label).offset(nq) = mag_fit(2);
+        output_data.(stage_label).error(nq) = delta;
+        output_data.(stage_label).frequency_shift(nq) = phase_fit(1);
         if inputs.Results.debug == 1
             make_debug_graphs(nq, ksew, turns_of_stage{ksew}, stage_data, ...
                 exp_data.filename, inputs.Results.keep_debug_graphs)

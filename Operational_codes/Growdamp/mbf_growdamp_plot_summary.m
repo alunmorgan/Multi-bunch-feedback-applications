@@ -65,11 +65,11 @@ end %for
 
 %% Plotting
 figure('Position', [20, 40, 800, 800])
-t = tiledlayout(3, 1);
+t = tiledlayout(4, 2,'TileSpacing','compact', 'Padding', 'tight');
 title(t, {['MBF growdamp results ', metadata.ax_label,' axis ', datestr(metadata.time)];...
     ['Current: ', num2str(round(metadata.current)), 'mA']})
 xlabel(t, labelX)
-ax1 = nexttile;
+ax1 = nexttile(5);
 hold on
 for ns = 1:length(stages)
     if ~contains(stages{ns}, 'growth')
@@ -81,7 +81,7 @@ ylabel('Error')
 legend
 grid on
 xlim([x_plt_axis(1) x_plt_axis(end)])
-ax2 = nexttile([2,1]);
+ax2 = nexttile(1, [2,1]);
 hold on
 for ns = 1:length(stages)
     if ~contains(stages{ns}, 'growth')
@@ -95,12 +95,7 @@ grid on
 xlim([x_plt_axis(1) x_plt_axis(end)])
 linkaxes([ax1, ax2], 'x')
 
-figure('Position', [20, 40, 800, 800])
-t = tiledlayout(1, 1);
-title(t, {['MBF growdamp results ', metadata.ax_label,' axis ', datestr(metadata.time)];...
-    ['Current: ', num2str(round(metadata.current)), 'mA']})
-xlabel(t, labelX)
-nexttile;
+ax3 =nexttile(7);
 hold on
 for ns = 1:length(stages)
     if ~contains(stages{ns}, 'growth')
@@ -114,12 +109,7 @@ legend
 grid on
 xlim([x_plt_axis(1) x_plt_axis(end)])
 
-figure('Position', [20, 40, 800, 800])
-t = tiledlayout(3, 1);
-title(t, {['MBF growdamp results ', metadata.ax_label,' axis ', datestr(metadata.time)];...
-    ['Current: ', num2str(round(metadata.current)), 'mA']})
-xlabel(t, labelX)
-ax1 = nexttile;
+ax4 = nexttile(6);
 hold on
 for ns = 1:length(stages)
     if contains(stages{ns}, 'growth')
@@ -131,7 +121,7 @@ ylabel('Error')
 legend
 grid on
 xlim([x_plt_axis(1) x_plt_axis(end)])
-ax2 = nexttile([2,1]);
+ax5 = nexttile(2, [2,1]);
 hold on
 for ns = 1:length(stages)
     if contains(stages{ns}, 'growth')
@@ -143,14 +133,8 @@ ylabel('Growth rates (1/turns)')
 legend
 grid on
 xlim([x_plt_axis(1) x_plt_axis(end)])
-linkaxes([ax1, ax2], 'x')
 
-figure('Position', [20, 40, 800, 800])
-t = tiledlayout(1, 1);
-title(t, {['MBF growdamp results ', metadata.ax_label,' axis ', datestr(metadata.time)];...
-    ['Current: ', num2str(round(metadata.current)), 'mA']})
-xlabel(t, labelX)
-nexttile;
+ax6 = nexttile(8);
 hold on
 for ns = 1:length(stages)
     if contains(stages{ns}, 'growth')
@@ -164,6 +148,9 @@ legend
 grid on
 xlim([x_plt_axis(1) x_plt_axis(end)])
 
+linkaxes([ax1, ax2, ax3], 'x')
+linkaxes([ax4, ax5, ax6], 'x')
+
 figure('Position', [20, 40, 800, 800])
 t = tiledlayout(1, 1);
 title(t, {['MBF growdamp results ', metadata.ax_label,' axis ', datestr(metadata.time)];...
@@ -176,7 +163,7 @@ for ns = 1:length(freq_diff_names)
 end %for
 hold off
 xlim([x_plt_axis(1) x_plt_axis(end)])
-ylabel({'Difference between';'experiment stages'})
+ylabel({'Frequency differences between';'experiment stages'})
 legend
 grid on
 xlim([x_plt_axis(1) x_plt_axis(end)])

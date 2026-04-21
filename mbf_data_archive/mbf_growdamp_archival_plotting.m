@@ -4,7 +4,7 @@ function mbf_growdamp_archival_plotting(requested_data, dataset, times, experime
 %       dataset (struct): containing
 %      dr_passive (numeric matrix): Passive damping rate.
 %                                   (bunches vs datasets)
-%      dr_active (numeric matrix): Passive damping rate.
+%      dr_active (numeric matrix): Active damping rate.
 %                                   (bunches vs datasets)
 %      error_passive (numeric matrix): Error of the fit for the passive
 %                                      damping rate.
