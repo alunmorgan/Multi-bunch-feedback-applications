@@ -54,7 +54,7 @@ modescan.excitation_gain = p.Results.excitation_gain;
 
 if strcmp(p.Results.auto_setup, 'yes')
     % Get the current FIR gain
-    orig_fir_gain = get_variable([pv_head, Bunch_bank.bank1.FIR.gainwf]);
+    orig_fir_gain = get_variable([pv_head, ':FIR:GAIN_S']);
     % Programatically press the tune only button on each system.
     setup_operational_mode(mbf_axis, "TuneOnly")
 end %if
@@ -78,7 +78,7 @@ end %for
 if strcmp(p.Results.auto_setup, 'yes')
     setup_operational_mode(mbf_axis, "Feedback")
     % Setting the FIR gain to its original value.
-    set_variable([pv_head, Bunch_bank.bank1.FIR.gainwf], orig_fir_gain)
+    set_variable([pv_head, ':FIR:GAIN_S'], orig_fir_gain)
 end %if
 
 %% saving the data to a file
