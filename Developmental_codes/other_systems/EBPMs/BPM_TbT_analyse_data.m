@@ -1,6 +1,6 @@
 function summary = BPM_TbT_analyse_data(data_path)
 
-load(data_path)
+load(data_path, 'output')
 disp('')
 
 bpms = fields(output);

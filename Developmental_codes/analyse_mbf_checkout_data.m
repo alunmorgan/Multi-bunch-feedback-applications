@@ -2,36 +2,34 @@ function analyse_mbf_checkout_data(mbf_axis, display_units)
 % Dispaly units (bool): 0 = SI, 1 = Tune units
 
 conditioned_data = mbf_checkout_archival_retrieval(mbf_axis, [datetime(2025, 11, 06, 11, 55, 00), datetime("now")]);
+tune_gains = zeros(length(conditioned_data), 1);
+nco1_gains = zeros(length(conditioned_data), 1);
+nco2_gains = zeros(length(conditioned_data), 1);
+fir_gains = zeros(length(conditioned_data), 1);
+loopback = zeros(length(conditioned_data), 1);
+
+tune_status = nan(length(conditioned_data), 1);
+nco1_status = nan(length(conditioned_data), 1);
+nco2_status = nan(length(conditioned_data), 1);
+fir_status = nan(length(conditioned_data), 1);
 
 for jwsc = 1:length(conditioned_data)
     if isfield(conditioned_data{jwsc}{1}, 'tune_gain')
         tune_gains(jwsc) = str2double(regexprep(conditioned_data{jwsc}{1}.tune_gain, 'dB', ''));
-    else
-        tune_gains(jwsc) = 0;
     end %if
     if isfield(conditioned_data{jwsc}{1}, 'nco1_gain')
         nco1_gains(jwsc) = str2double(regexprep(conditioned_data{jwsc}{1}.nco1_gain, 'dB', ''));
-    else
-        nco1_gains(jwsc) = 0;
     end %if
     if isfield(conditioned_data{jwsc}{1}, 'nco2_gain')
         nco2_gains(jwsc) = str2double(regexprep(conditioned_data{jwsc}{1}.nco2_gain, 'dB', ''));
-    else
-        nco2_gains(jwsc) = 0;
     end %if
     if isfield(conditioned_data{jwsc}{1}, 'fir_gain')
         fir_gains(jwsc) = str2double(regexprep(conditioned_data{jwsc}{1}.fir_gain, 'dB', ''));
-    else
-        fir_gains(jwsc)  = 0;
     end %if
     if isfield(conditioned_data{jwsc}{1}, 'loopback')
-        if contains(conditioned_data{jwsc}{1}.loopback, '_no_loopback')
-            loopback(jwsc) = 0;
-        elseif contains(conditioned_data{jwsc}{1}.loopback, '_with_loopback')
+        if contains(conditioned_data{jwsc}{1}.loopback, '_with_loopback')
             loopback(jwsc) = 1;
         end %if;
-    else
-        loopback(jwsc) = 0;
     end %if
     tune_status(jwsc) = conditioned_data{jwsc}{1}.tune;
     nco1_status(jwsc) = conditioned_data{jwsc}{1}.nco1;
@@ -150,8 +148,6 @@ end %function
 
 function plot_sweep(conditioned_data, sweep_gains, graph_title, display_units)
 
-
-
 for jse = 1:length(conditioned_data)
     plot_scan_data.adc_data(jse) = conditioned_data{jse}{1}.adc;
     plot_scan_data.dac_data(jse) = conditioned_data{jse}{1}.dac;
@@ -208,6 +204,7 @@ sweep2 = sweep_gains{2};
 
 sweep1_values = unique(sweep1);
 col_cycle = [0, 1, 0.5, 0.25, 0.75];
+cols = zeros(length(col_cycle)^3, 3);
 ck =1;
 loop_length = ceil(length(sweep1_values).^0.33);
 col_cycle = col_cycle(1:loop_length);

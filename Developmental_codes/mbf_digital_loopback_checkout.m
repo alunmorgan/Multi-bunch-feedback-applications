@@ -9,8 +9,6 @@ function mbf_digital_loopback_checkout(mbf_axis)
 [root_string, ~, ~, ~] = mbf_system_config;
 base_name = ['DL_checkout_' mbf_axis];
 exp_time = datevec(datetime("now"));
-%TEMP OVERRIDE
-root_string = '/scihome/afdm76/MBF_loopback_test_data/';
 % Number of turns to capture.
 n_turns = 1000;
 %% FIXME HARDCOADED PVS S axis is not fully implemented.

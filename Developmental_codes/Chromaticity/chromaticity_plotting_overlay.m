@@ -50,6 +50,11 @@ chro_ind = find_position_in_cell_lst(strfind(mc_chro_files, fullfile('Chromatici
 mc_chro_files = mc_chro_files(chro_ind);
 
 % generate a list of times generated from the filenames
+file_dates = nan(length(mc_chro_files), 1);
+mc_chro_x = nan(length(mc_chro_files), 1);
+mc_chro_y = nan(length(mc_chro_files), 1);
+mc_chro_time = nan(length(mc_chro_files), 1);
+
 for wh = 1:length(mc_chro_files)
     [~, temp_name, ~] = fileparts(mc_chro_files{wh});
     file_dates(wh) = datenum(temp_name(6:end), 'yyyy-mm-dd_HH-MM-SS');
