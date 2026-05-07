@@ -8,7 +8,7 @@ function growdamp = mbf_growdamp_capture(mbf_axis, pv_names, capture_full_bunch_
 %       capture_full_bunch_motion (str): yes or no. Determines if the full
 %           time series of bunch motion is captured and stored (large data).
 %
-% example mbf_growdamp_capture('x', 'no')
+% example data = mbf_growdamp_capture('x', pv_names, 'no')
 
 pv_head = pv_names.hardware_names.(mbf_axis);
 pv_head_mem = pv_names.hardware_names.mem.(mbf_axis);
@@ -71,6 +71,7 @@ end %if
 set_variable([pv_head, triggers.SEQ.arm], 1)
 % Trigger
 set_variable([pv_head_mem, triggers.soft], 1)
+% download the data
 [growdamp.data, growdamp.data_freq, ~] = mbf_read_det(pv_head_mem,...
     'axis', chan, 'lock', mem_lock);
 
