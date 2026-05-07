@@ -21,10 +21,6 @@ Bunch_bank1 = pv_names.tails.Bunch_bank.bank1;
 % Generate the base PV name.
 system_axis = pv_names.hardware_names.(mbf_axis);
 
-% Programatiaclly press the tune only button on each system
-% then get the tunes
-setup_operational_mode(mbf_axis, "TuneOnly")
-
 detect_bunch = exp_setup.drive_bunches;
 
 % Only sweep selected bunch

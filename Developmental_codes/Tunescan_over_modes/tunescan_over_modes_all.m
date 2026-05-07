@@ -3,62 +3,71 @@ function tunescan_over_modes_all(mbf_axis, varargin)
 p = inputParser;
 p.StructExpand = false;
 p.CaseSensitive = false;
-axis_string = {'x', 'y', 's'};
-boolean_string = {'yes', 'no'};
+valid_axis_string = @(x) any(validatestring(x, {'x', 'y', 's'}));
+valid_boolean_string = @(x) any(validatestring(x, {'yes', 'no'}));
 
-defaultPlotting = 'yes';
-% experiment parameters
-defaultNcap = 1001; % 4096; % 1001 takes ~ 3 minutes
-defaultStartmode = 0;
-defaultDriveBunches = 0:935;% 100
-defaultFeedbackState = 'on';
-if strcmpi(mbf_axis,'X')
-    defaultStartFreq = 0.139;
-    defaultEndFreq = 0.239;
-elseif strcmpi(mbf_axis,'Y')
-    defaultStartFreq = 0.227;
-    defaultEndFreq = 0.327;
-else
-    disp('This currently only works for X and Y axes.')
-    return
-end
-
-addRequired(p, 'mbf_axis', @(x) any(validatestring(x, axis_string)));
-addParameter(p, 'plotting', defaultPlotting, @(x) any(validatestring(x, boolean_string)));
-addParameter(p, 'n_captures', defaultNcap);
-addParameter(p, 'start_mode', defaultStartmode);
-addParameter(p, 'drive_bunches', defaultDriveBunches);
-addParameter(p, 'feedback_state', defaultFeedbackState, @(x) any(validatestring(x, boolean_string)));
-addParameter(p, 'start_frequency', defaultStartFreq);
-addParameter(p, 'end_frequency', defaultEndFreq);
+addRequired(p, 'mbf_axis', valid_axis_string);
+addParameter(p, 'auto_setup', 'yes', @(x) any(validatestring(x, boolean_string)));
+addParameter(p, 'plotting', 'yes', valid_boolean_string );
+addParameter(p, 'additional_save_location', NaN);
+addParameter(p, 'n_captures', 1001); % 1001 takes ~ 3 minutes
+addParameter(p, 'start_mode', 0);
+addParameter(p, 'drive_bunches', 0:935);
+addParameter(p, 'feedback_state', 'on', valid_boolean_string );
+addParameter(p, 'start_frequency', 0);
+addParameter(p, 'end_frequency', 0.5);
 
 parse(p, mbf_axis, varargin{:});
 
-% Programatiaclly press the tune only button on each system
+[root_string, harmonic_number, pv_names] = mbf_system_config;
+
+if strcmp(p.Results.auto_setup, 'yes')
+% Programatically press the tune only button on each system
 setup_operational_mode(mbf_axis, "TuneOnly")
- tunes = get_all_tunes;
- 
-exp_setup.n_captures = p.Results.n_captures;
-exp_setup.start_mode = p.Results.start_mode;
-exp_setup.drive_bunches = p.Results.drive_bunches;
-exp_setup.feedback_state = p.Results.feedback_state;
-exp_setup.start_frequency = p.Results.start_frequency;
-exp_setup.end_frequency = p.Results.end_frequency;
+end %if
+
+% getting general environment data
+tunescan = machine_environment;
+
+% Add the extra data to the data structure.
+tunescan.ax_label = mbf_axis;
+tunescan.base_name = ['tunescan_' tunescan.ax_label '_axis'];
+tunescan.harmonic_number = harmonic_number;
+tunescan.n_captures = p.Results.n_captures;
+tunescan.start_mode = p.Results.start_mode;
+tunescan.drive_bunches = p.Results.drive_bunches;
+tunescan.feedback_state = p.Results.feedback_state;
+tunescan.start_frequency = p.Results.start_frequency;
+tunescan.end_frequency = p.Results.end_frequency;
 
 mbf_tunescan_over_modes_setup(mbf_axis, exp_setup);
 pause(2)
-tunescan = mbf_tunescan_over_modes_capture(mbf_axis, tunes, exp_setup);
+captured_data = mbf_tunescan_over_modes_capture(mbf_axis, pv_names);
+% adding to output data structure.
+data_fields = fieldnames(captured_data);
+for je = 1:length(data_fields)
+    tunescan.(data_fields{je}) = captured_data.(data_fields{je});
+end %for
 % reset the sweep
 %%%%Is this section needed or does the TuneOnly script take care of things?
-configure_tune_sweep(mbf_axis , 0:935, 1, 1, 0, 0, 0)
+configure_tune_sweep(mbf_axis , 0:harmonic_number -1, 1, 1, 0, 0, 0)
 set_variable([pv_head pv_names.tails.triggers.mode],'Rearm')
 set_variable([pv_head Sequencer.reset],1)
 %%%%%%%
 
-% Programatiaclly press the tune only button on each system
+if strcmp(p.Results.auto_setup, 'yes')
+% Programatically press the tune only button on each system
 setup_operational_mode(mbf_axis, "TuneOnly")
+end %if
+
+%% saving the data to a file
+save_to_archive(root_string, tunescan)
+if ~isnan(p.Results.additional_save_location)
+    save(additional_save_location, tunescan)
+end %if
 
 if strcmp(p.Results.plotting, 'yes')
     mbf_tunescan_over_modes_plotting(tunescan)
+    % TODO CHANGE THIS TO USE ACHIVAL RETREVAL
 end %if
 
