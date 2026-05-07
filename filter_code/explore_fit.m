@@ -14,14 +14,13 @@ function explore_fit
     h.N = control(h_pos, v_pos, 'edit', 10, 60, 'Points in filter');
 
     guidata(fig, h);
-    redraw(fig, 0);
+    redraw(fig);
 end
 
 
 % Places control with specified style, value, width  and tooltip.
 function result = control(h_pos, v_pos, style, value, width, tooltip, varargin)
     position = [h_pos v_pos width 20];
-    h_pos = h_pos + width + 5;
     result = uicontrol( ...
         'Style', style, 'String', num2str(value), 'Position', position, ...
         'TooltipString', tooltip, 'Callback', @redraw, varargin{:});

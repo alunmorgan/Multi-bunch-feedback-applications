@@ -51,6 +51,7 @@ end %if
 ymax = max(max(data_magnitude, [],2));
 ymax = ymax + ymax /10;
 ylim([ymin ymax]);
+xlim([x_plt_axis(1) x_plt_axis(end)])
 grid on
 hold off
 
@@ -69,10 +70,11 @@ hold on
 title(graph_title)
 xlabel('Mode')
 ylabel('Phase')
-ymin = min(min(data_phase,[],2));
-ymax = max(max(data_phase,[],2));
+ymin = min([min(min(data_phase,[],2)), -90]);
+ymax = max([max(max(data_phase,[],2)), 90]);
 ymax = ymax + ymax /10;
 ylim([ymin ymax]);
+xlim([x_plt_axis(1) x_plt_axis(end)])
 grid on
 hold off
 

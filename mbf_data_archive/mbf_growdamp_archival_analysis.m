@@ -56,7 +56,7 @@ parse(p,data_requested, varargin{:});
 %     data_requested{nd} = growdamp_archive_data_conditioning(data_requested{nd});
 % end
 ck = 1;
-for nd = length(data_requested):-1:1
+for nd = 1:length(data_requested)
      if isfield(data_requested{nd}, 'I_dcct5')
         data_requested{nd}.current = data_requested{nd}.I_dcct5;
     end %if
@@ -84,7 +84,6 @@ for nd = length(data_requested):-1:1
     fprintf('.')
     ck = ck +1;
 end %for
-fprintf('\n')
 
 % % Removing datasets whose mean error is < error_threshold for the passive section.
 % error_av_p = mean(dataset.passive.error,2,'omitnan');
@@ -105,16 +104,13 @@ experimental_setup.anal_type = p.Results.analysis_type;
 if strcmp(p.Results.analysis_type, 'parameter_sweep')
     experimental_setup.sweep_parameter = p.Results.sweep_parameter;
     experimental_setup.parameter_step_size = p.Results.parameter_step;
-    if isempty(dataset.passive.damping_time)
+    if isempty(dataset.passive.damping_rate)
         disp('No data left. Try changing analysis settings.')
         return
     else
         [dataset, experimental_setup.param] = ...
             mbf_analysis_reorganise_for_parameter_sweep(dataset, param, ...
             p.Results.parameter_step);
-%         [dr_active, ~] = mbf_analysis_reorganise_for_parameter_sweep(dr_active, param, p.Results.parameter_step);
-%         [error_passive, ~] = mbf_analysis_reorganise_for_parameter_sweep(error_passive, param, p.Results.parameter_step);
-%         [error_active, ~] = mbf_analysis_reorganise_for_parameter_sweep(error_active, param, p.Results.parameter_step);
     end %if
 elseif strcmp(p.Results.analysis_type, 'average')
     warning('Archive:Growdamp:setting','Ignoring the last two parameters as "average" is set')

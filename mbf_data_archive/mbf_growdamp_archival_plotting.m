@@ -15,18 +15,22 @@ function mbf_growdamp_archival_plotting(requested_data, dataset, times, experime
 %                                      analysis.
 %      plot_error_graphs (anything): if present the code will plot the results of the fit errors.
 %
-% Example: mbf_growdamp_archival_plotting(dr_passive, dr_active, error_passive, error_active, times, setup, selections, extents)
+% Example: mbf_growdamp_archival_plotting(requested_data, dataset, error_active, times, setup, selections, extents)
 
 % Only do something if there is data to do something with.
 if isempty(times)
     return
 end %if
+
+[~, harmonic_number, ~, ~] = mbf_system_config;
+x_plt_axis = (0:harmonic_number-1);
+% dataset =sort_data_in_stucture(dataset, [936:-1:469, 1:468], 2);
+
 dr_passive = dataset.passive.damping_rate;
 dr_active = dataset.active.damping_rate;
 error_passive = dataset.passive.error;
 error_active = dataset.active.error;
-[~, harmonic_number, ~, ~] = mbf_system_config;
-x_plt_axis = (0:harmonic_number-1) - harmonic_number/2;
+
 this_year = year(datetime("now"));
 ranges_to_display = {'RF', 'time','current'};
 
@@ -35,6 +39,12 @@ years_input = {this_year-5, 'r'; this_year-4, 'b'; this_year-3, 'k'; this_year-2
 graph_text{1} = ['Analysis type: ', experimental_setup.anal_type];
 graph_title = 'Damping rates for different modes';
 
+figure('Position',[50, 50, 1400, 800])
+annotation('textbox', [0 1-0.3 0.3 0.3], 'String', graph_text, 'FitBoxToText', 'on', 'Interpreter', 'none');
+
+ax1 = axes('OuterPosition', [0.14 0.67 0.93 0.32]);
+hold on
+
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     graph_title = {['Damping rates for different modes as a function of ', experimental_setup.sweep_parameter];...
         ['Using a step size of ', num2str(experimental_setup.parameter_step_size), ' in the ', experimental_setup.axis, ' axis']};
@@ -42,14 +52,6 @@ if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     for hw = 1:length(experimental_setup.param)
         graph_labels{hw}=num2str(experimental_setup.param(hw));
     end % if
-end %if
-
-figure('Position',[50, 50, 1400, 800])
-annotation('textbox', [0 1-0.3 0.3 0.3], 'String', graph_text, 'FitBoxToText', 'on', 'Interpreter', 'none');
-
-ax1 = axes('OuterPosition', [0.12 0.5 0.95 0.5]);
-hold on
-if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     dr_passive = squeeze(dr_passive);
     dr_active = squeeze(dr_active);
     plot(x_plt_axis, dr_passive, 'LineWidth', 2)
@@ -62,6 +64,7 @@ title(graph_title)
 xlabel('Mode')
 ylabel('Passive damping rates (1/turns)')
 legend show
+legend('Location','eastoutside')
 ymin = min(min(dr_passive,[],2));
 if ymin > 0
     ymin = 0;
@@ -69,17 +72,19 @@ end %if
 ymax = max(max(dr_passive,[],2));
 ymax = ymax + ymax /10;
 ylim([ymin 0]);
+xlim([min(x_plt_axis), max(x_plt_axis)])
 grid on
 hold off
 
-ax2 =axes('OuterPosition', [0.12 0 0.95 0.5]);
+ax2 = axes('OuterPosition', [0.14 0.34 0.8 0.32]);
 hold on
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     plot(x_plt_axis, dr_active, 'LineWidth', 2)
-    legend(graph_labels)
+%     legend(graph_labels)
 else
     populate_graph(dr_active, years_input, times, x_plt_axis)
 end %if
+legend('off')
 plot([x_plt_axis(1), x_plt_axis(end)], [0,0], 'r:', 'HandleVisibility', 'off')
 % title(graph_title)
 xlabel('Mode')
@@ -91,8 +96,37 @@ end %if
 ymax = max(max(dr_active,[],2));
 ymax = ymax + ymax /10;
 ylim([ymin 0]);
+xlim([min(x_plt_axis), max(x_plt_axis)])
 grid on
 hold off
+
+ax3 =axes('OuterPosition', [0.14 0 0.8 0.32]);
+hold on
+effectiveness = dr_active - dr_passive;
+if strcmp(experimental_setup.anal_type, 'parameter_sweep')
+    plot(x_plt_axis, effectiveness, 'LineWidth', 2)
+%     legend(graph_labels)
+else
+    populate_graph(effectiveness, years_input, times, x_plt_axis)
+end %if
+legend('off')
+plot([x_plt_axis(1), x_plt_axis(end)], [0,0], 'r:', 'HandleVisibility', 'off')
+% title(graph_title)
+xlabel('Mode')
+ylabel('System effectiveness (1/turns)')
+ymin = min(min(effectiveness,[],2));
+if ymin > 0
+    ymin = 0;
+end %if
+ymax = max(max(effectiveness,[],2));
+ymax = ymax + ymax /10;
+ylim([ymin ymax]);
+xlim([min(x_plt_axis), max(x_plt_axis)])
+grid on
+hold off
+
+linkaxes([ax1, ax2, ax3],'x')
+
 ck = 1;
 for hrd = 1:length(ranges_to_display)
     if strcmp(ranges_to_display{hrd}, 'time')
@@ -113,6 +147,8 @@ for hrd = 1:length(ranges_to_display)
     end %if
 end %for
 
+
+
 axfp = axes('OuterPosition', [0.01 0 0.2 0.3]);
     hold on
 for hkw = 1:length(requested_data)
@@ -130,14 +166,13 @@ if nargin == 4 && strcmp(experimental_setup.anal_type, 'parameter_sweep')
         labels{tb} = num2str(experimental_setup.param(tb));
     end %for
     legend(labels)
+    legend('Location','eastoutside')
 end %if
-
-linkaxes([ax1,ax2],'x')
 
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     figure('Position',[50, 50, 1400, 800])
     if strcmp(experimental_setup.sweep_parameter, 'current')
-        axes('OuterPosition', [0 0 0.48 0.5]);
+        axes('OuterPosition', [0 0 0.32 0.5]);
     else
         axes('OuterPosition', [0 0 1 0.5]);
     end
@@ -150,7 +185,7 @@ if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     
     hold off
     if strcmp(experimental_setup.sweep_parameter, 'current')
-        axes('OuterPosition', [0 0.5 0.48 0.5]);
+        axes('OuterPosition', [0 0.5 0.32 0.5]);
     else
         axes('OuterPosition', [0 0.5 1 0.5]);
     end
@@ -166,10 +201,11 @@ if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     
     if strcmp(experimental_setup.sweep_parameter, 'current')
         x1 = 0:1:300;
-        axes('OuterPosition', [0.52 0 0.48 0.5]);
+        axes('OuterPosition', [0.33 0 0.32 0.5]);
         hold on;
         for ks = 1:length(dr_passive)
             P = polyfit(experimental_setup.param',dr_passive(:,ks),1);
+            passive_mode_rate(ks) = P(1);
             P_start = find(x1 < min(experimental_setup.param), 1, 'last');
             P_points = polyval(P,x1);
             % Find the first time after the lowest current that the extrapolation goes negative. 
@@ -182,15 +218,27 @@ if strcmp(experimental_setup.anal_type, 'parameter_sweep')
         xlabel(experimental_setup.sweep_parameter)
         ylabel('Passive damping rates (1/turns)')
         title('Extrapolated data')
-        legend('Location', 'eastoutside')
+%         legend('Location', 'eastoutside')
+        legend('off')
         grid on
         plot([x1(1), x1(end)], [0,0], 'r:', 'HandleVisibility', 'off')
         hold off
+
+        axes('OuterPosition', [0.67 0 0.32 0.5]);
+        hold on
+        plot(x_plt_axis, passive_mode_rate)
+                plot([x_plt_axis(1), x_plt_axis(end)], [0,0], 'r:', 'HandleVisibility', 'off')
+        xlabel('Modes')
+        ylabel({'Passive damping' ;'rates change with current (1/turns/current)'})
+        xlim([min(x_plt_axis), max(x_plt_axis)])
+        hold off
+        grid on
         
-        axes('OuterPosition', [0.52 0.5 0.48 0.5]);
+        axes('OuterPosition', [0.33 0.5 0.32 0.5]);
         hold on;
         for ks = 1:length(dr_active)
             P = polyfit(experimental_setup.param',dr_active(:,ks),1);
+            active_mode_rate(ks) = P(1);
             P_start = find(x1 < min(experimental_setup.param), 1, 'last');
              P_points = polyval(P,x1);
             P_loc = find(sign(P_points(P_start:end))==-1,1, 'first');
@@ -202,10 +250,21 @@ if strcmp(experimental_setup.anal_type, 'parameter_sweep')
         xlabel(experimental_setup.sweep_parameter)
         ylabel('Active damping rates (1/turns)')
         title('Extrapolated data')
-        legend('Location', 'eastoutside')
+%         legend('Location', 'eastoutside')
+        legend('off')
         grid on
         plot([x1(1), x1(end)], [0,0], 'r:', 'HandleVisibility', 'off')
         hold off
+
+                axes('OuterPosition', [0.67 0.5 0.32 0.5]);
+        hold on
+        plot(x_plt_axis, active_mode_rate)
+        plot([x_plt_axis(1), x_plt_axis(end)], [0,0], 'r:', 'HandleVisibility', 'off')
+        xlabel('Modes')
+        ylabel({'Active damping'; 'rates change with current (1/turns/current)'})
+        xlim([min(x_plt_axis), max(x_plt_axis)])
+        hold off
+        grid on
     end %if
     
 end %if

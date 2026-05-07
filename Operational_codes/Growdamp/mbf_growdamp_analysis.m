@@ -76,43 +76,60 @@ output_data.('passive').damping_rate = NaN(n_modes, 1);
 output_data.('passive').offset = NaN(n_modes, 1);
 output_data.('passive').error = NaN(n_modes, 1);
 output_data.('passive').frequency_shift = NaN(n_modes, 1);
-fprintf('\n')
-for nq = 1:n_modes
-    for ksew = 1:length(recorded_stage_names)
-        stage_data = exp_data.data(nq, samples_of_stage{ksew});
-        stage_label = recorded_stage_names{ksew};
-        threshold_value = min(stage_data); % The 'noise' floor.
-        % FIXME make it possible to have multiple of each stage.
-        if contains(stage_label, 'excitation') || contains(stage_label, 'growth')
-            stage_label = 'growth';
-            % growth
-            mag_fit = polyfit(1:turns_of_stage(ksew), log(abs(stage_data)),1);
-            c1 = polyval(mag_fit, 1:turns_of_stage(ksew));
-            delta = mean(abs(c1 - log(abs(stage_data)))./c1);
-            temp = unwrap(angle(stage_data)) / (2*pi);
-            phase_fit = polyfit(1:turns_of_stage(ksew),temp,1);
-        elseif contains(stage_label, 'active') || contains(stage_label, 'act')
-            stage_label = 'active';
-            %active damping
-            [mag_fit, delta, phase_fit] = get_damping(1:turns_of_stage(ksew), ...
-                stage_data, inputs.Results.active_override,...
-                inputs.Results.length_averaging, ...
-                inputs.Results.advanced_fitting,threshold_value);
-        elseif contains(stage_label, 'passive') || contains(stage_label, 'nat')
-            stage_label = 'passive';
-            % passive damping
-            [mag_fit, delta, phase_fit] = get_damping(1:turns_of_stage(ksew), ...
-                stage_data, inputs.Results.passive_override,...
-                inputs.Results.length_averaging, ...
-                inputs.Results.advanced_fitting,threshold_value);
-        end %if
-        output_data.(stage_label).damping_rate(nq) = mag_fit(1);
-        output_data.(stage_label).offset(nq) = mag_fit(2);
-        output_data.(stage_label).error(nq) = delta;
-        output_data.(stage_label).frequency_shift(nq) = phase_fit(1);
-        if inputs.Results.debug == 1
-            make_debug_graphs(nq, ksew, turns_of_stage{ksew}, stage_data, ...
-                exp_data.filename, inputs.Results.keep_debug_graphs)
-        end %if
-    end %for
+% FIXME make it possible to have multiple of each stage.
+for ksew = 1:length(recorded_stage_names)
+    if contains(recorded_stage_names{ksew}, 'excitation') ||...
+            contains(recorded_stage_names{ksew}, 'growth')
+        growth_samples = samples_of_stage{ksew};
+        growth_turns = turns_of_stage(ksew);
+        growth = exp_data.data(:, growth_samples);
+    elseif contains(recorded_stage_names{ksew}, 'active') ||...
+            contains(recorded_stage_names{ksew}, 'act')
+        active_samples = samples_of_stage{ksew};
+        active_turns = turns_of_stage(ksew);
+        active = exp_data.data(:, active_samples);
+    elseif contains(recorded_stage_names{ksew}, 'passive') ||...
+            contains(recorded_stage_names{ksew}, 'nat')
+        passive_samples = samples_of_stage{ksew};
+        passive_turns = turns_of_stage(ksew);
+        passive = exp_data.data(:, passive_samples);
+    end %if
 end %for
+
+% if inputs.Results.debug == 1
+%     make_debug_graphs(nq, ksew, turns_of_stage{ksew}, stage_data, ...
+%         exp_data.filename, inputs.Results.keep_debug_graphs)
+% end %if
+
+active_override = inputs.Results.active_override;
+passive_override = inputs.Results.passive_override;
+length_averaging = inputs.Results.length_averaging;
+advanced_fitting = inputs.Results.advanced_fitting;
+for nq = 1:n_modes
+    threshold_value = min([min(growth(nq,:)), min(active(nq,:)), min(passive(nq,:))]); % The 'noise' floor.
+    % Growth
+    growth_mag_fit(nq,:) = polyfit(1:growth_turns, log(abs(growth(nq,:))),1);
+    c1 = polyval(growth_mag_fit(nq,:), 1:growth_turns);
+    growth_delta(nq) = mean(abs(c1 - log(abs(growth(nq,:))))./c1);
+    temp = unwrap(angle(growth(nq,:))) / (2*pi);
+    growth_phase_fit(nq,:) = polyfit(1:growth_turns,temp,1);
+    % Active damping
+    [active_mag_fit(nq,:), active_delta(nq), active_phase_fit(nq,:)] = get_damping(1:active_turns, ...
+        active(nq,:), active_override, length_averaging, advanced_fitting, threshold_value);
+    % Passive damping
+    [passive_mag_fit(nq,:), passive_delta(nq), passive_phase_fit(nq,:)] = get_damping(1:passive_turns, ...
+        passive(nq,:), passive_override, length_averaging, advanced_fitting, threshold_value);
+end %for
+
+output_data.growth.damping_rate = growth_mag_fit(:,1);
+output_data.growth.offset = growth_mag_fit(:,2);
+output_data.growth.error = growth_delta;
+output_data.growth.frequency_shift = growth_phase_fit(:,1);
+output_data.active.damping_rate = active_mag_fit(:,1);
+output_data.active.offset = active_mag_fit(:,2);
+output_data.active.error = active_delta;
+output_data.active.frequency_shift = active_phase_fit(:,1);
+output_data.passive.damping_rate = passive_mag_fit(:,1);
+output_data.passive.offset = passive_mag_fit(:,2);
+output_data.passive.error = passive_delta;
+output_data.passive.frequency_shift = passive_phase_fit(:,1);
