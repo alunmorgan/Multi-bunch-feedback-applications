@@ -33,7 +33,6 @@ function growdamp_all(mbf_axis, varargin)
 
 [root_string, harmonic_number, pv_names, trigger_inputs] = mbf_system_config;
 pv_head = pv_names.hardware_names.(mbf_axis);
-Bunch_bank = pv_names.tails.Bunch_bank;
 
 % for archival investigations this allows filtering by machine state.
 % but for capture this is not needed so it set to empty.

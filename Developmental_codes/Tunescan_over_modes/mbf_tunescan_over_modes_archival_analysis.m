@@ -1,5 +1,5 @@
 function [dataset, times, experimental_setup] = ...
-    mbf_growdamp_archival_analysis(data_requested, varargin)
+    mbf_tunescan_over_modes_archival_analysis(data_requested, varargin)
 % Takes the data extracted by mbf_growdamp_archival_retreval and operates
 % across all datasets. Then plots the results.
 %
@@ -34,7 +34,7 @@ function [dataset, times, experimental_setup] = ...
 %         experimental_setup (structure): The setup parameters for the
 %                                         analysis.
 %
-% Example:[dr_passive, dr_active, error_passive, error_active, times, experimental_setup, extents] = mbf_growdamp_archival_analysis(data_requested, 'average')
+% Example:[dr_passive, dr_active, error_passive, error_active, times, experimental_setup, extents] = mbf_tunescan_over_modes_archival_analysis(data_requested, 'average')
 
 p = inputParser;
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
@@ -56,14 +56,12 @@ parse(p,data_requested, varargin{:});
 %     data_requested{nd} = growdamp_archive_data_conditioning(data_requested{nd});
 % end
 ck = 1;
-times = NaT(length(data_requested), 1);
-param_vals = zeros(length(data_requested), 1);
 for nd = 1:length(data_requested)
      if isfield(data_requested{nd}, 'I_dcct5')
         data_requested{nd}.current = data_requested{nd}.I_dcct5;
     end %if
     
-    [data, data_state] = mbf_growdamp_analysis(data_requested{nd},...
+    [data, data_state] = mbf_tunescan_over_modes_analysis(data_requested{nd},...
         'active_override', p.Results.active_override,...
                 'passive_override', p.Results.passive_override,...
         'advanced_fitting',p.Results.advanced_fitting, ...
@@ -73,8 +71,8 @@ for nd = 1:length(data_requested)
     end %if
 
     times(ck) = datetime(data_requested{nd}.time);
-    if strcmp(p.Results.analysis_type, 'parameter_sweep') && nargin >2
-        param_vals(ck) = data_requested{nd}.(p.Results.sweep_parameter);
+    if strcmp(p.Results.analysis_type, 'parameter_sweep')
+        param(ck) = data_requested{nd}.(p.Results.sweep_parameter);
     end %if
     states = fieldnames(data);
     for st = 1:length(states)
@@ -111,7 +109,7 @@ if strcmp(p.Results.analysis_type, 'parameter_sweep')
         return
     else
         [dataset, experimental_setup.param] = ...
-            mbf_analysis_reorganise_for_parameter_sweep(dataset, param_vals, ...
+            mbf_analysis_reorganise_for_parameter_sweep(dataset, param, ...
             p.Results.parameter_step);
     end %if
 elseif strcmp(p.Results.analysis_type, 'average')

@@ -105,19 +105,28 @@ active_override = inputs.Results.active_override;
 passive_override = inputs.Results.passive_override;
 length_averaging = inputs.Results.length_averaging;
 advanced_fitting = inputs.Results.advanced_fitting;
+growth_mag_fit = zeros(n_modes, 2);
+growth_delta = zeros(n_modes, 1);
+growth_phase_fit = zeros(n_modes, 2);
+active_mag_fit = zeros(n_modes, 2);
+active_delta = zeros(n_modes, 1);
+active_phase_fit = zeros(n_modes, 2);
+passive_mag_fit = zeros(n_modes, 2);
+passive_delta = zeros(n_modes, 1);
+passive_phase_fit = zeros(n_modes, 2);
 for nq = 1:n_modes
     threshold_value = min([min(growth(nq,:)), min(active(nq,:)), min(passive(nq,:))]); % The 'noise' floor.
     % Growth
     growth_mag_fit(nq,:) = polyfit(1:growth_turns, log(abs(growth(nq,:))),1);
     c1 = polyval(growth_mag_fit(nq,:), 1:growth_turns);
-    growth_delta(nq) = mean(abs(c1 - log(abs(growth(nq,:))))./c1);
+    growth_delta(nq, 1) = mean(abs(c1 - log(abs(growth(nq,:))))./c1);
     temp = unwrap(angle(growth(nq,:))) / (2*pi);
     growth_phase_fit(nq,:) = polyfit(1:growth_turns,temp,1);
     % Active damping
-    [active_mag_fit(nq,:), active_delta(nq), active_phase_fit(nq,:)] = get_damping(1:active_turns, ...
+    [active_mag_fit(nq,:), active_delta(nq, 1), active_phase_fit(nq,:)] = get_damping(1:active_turns, ...
         active(nq,:), active_override, length_averaging, advanced_fitting, threshold_value);
     % Passive damping
-    [passive_mag_fit(nq,:), passive_delta(nq), passive_phase_fit(nq,:)] = get_damping(1:passive_turns, ...
+    [passive_mag_fit(nq,:), passive_delta(nq, 1), passive_phase_fit(nq,:)] = get_damping(1:passive_turns, ...
         passive(nq,:), passive_override, length_averaging, advanced_fitting, threshold_value);
 end %for
 

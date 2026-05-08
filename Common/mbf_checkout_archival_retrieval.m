@@ -50,13 +50,12 @@ addParameter(p,'current_range',defaultCurrentRange);
 
 parse(p, ax, date_range, varargin{:});
 [root_string, ~, ~, ~] = mbf_system_config;
-%TEMP OVERRIDE
-root_string = '/scihome/afdm76/MBF_loopback_test_data/';
 
 [filter_names, ~] = dir_list_gen(root_string, '', 1);
 filter_names = filter_names(contains(filter_names, ['DL_checkout_' ax]));
 filter_names = regexprep(filter_names, '_index.mat', '');
 
+requested_data = cell(length(filter_names), 1);
 for nfe = 1:length(filter_names)
 requested_data{nfe} = mbf_archival_dataset_retrieval(filter_names{nfe}, date_range,...
     'bypass_index' ,p.Results.bypass_index, 'metadata_only', p.Results.metadata_only);

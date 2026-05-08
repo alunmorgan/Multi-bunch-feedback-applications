@@ -63,7 +63,7 @@ disp(['Bucket of main disturbance in y is ' num2str(bucket_of_peak_y)])
 disp(['Tune of main disturbance in z is ' num2str(f_of_peak_z)])
 disp(['Bucket of main disturbance in z is ' num2str(bucket_of_peak_z)])
 
-f1 = figure('OuterPosition',[20, 20, 1800 1000]);
+figure('OuterPosition',[20, 20, 1800 1000]);
 t = tiledlayout(3,1);
 title(t, data.filename, 'Interpreter', 'None')
 ylabel(t, 'Bunches')
@@ -79,7 +79,7 @@ imagesc(f_scale, bucket_numbers, z)
 title('Longitudinal motion')
 linkaxes([ax2, ax3, ax4],'xy')
 
-f2 = figure('OuterPosition',[20, 20, 1800 1000]);
+figure('OuterPosition',[20, 20, 1800 1000]);
 t = tiledlayout(3,1);
 title(t, data.filename, 'Interpreter', 'None')
 ylabel(t, 'Bunches')

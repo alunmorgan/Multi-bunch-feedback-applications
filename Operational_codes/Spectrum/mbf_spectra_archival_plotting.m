@@ -32,7 +32,7 @@ if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     end % if
 end %if
 
-ax1 = axes('OuterPosition', [0.12 0.7 0.95 0.3]);
+axes('OuterPosition', [0.12 0.7 0.95 0.3]);
 hold on
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     scale_length = size(spec_data.bunch_tune_scale,2);
@@ -52,7 +52,7 @@ grid on
 hold off
 axis tight
 
-ax2 = axes('OuterPosition', [0.12 0.4 0.95 0.3]);
+axes('OuterPosition', [0.12 0.4 0.95 0.3]);
 hold on
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     for nfd = 1:size(spec_data.bunch_f_scale,1)
@@ -71,7 +71,7 @@ grid on
 hold off
 axis tight
 
-ax3 =axes('OuterPosition', [0.12 0 0.95 0.4]);
+axes('OuterPosition', [0.12 0 0.95 0.4]);
 bunches = size(spec_data.bunch_f_data,2);
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     plot_data_2d = squeeze(sum(spec_data.bunch_f_data(:,:,:),1));

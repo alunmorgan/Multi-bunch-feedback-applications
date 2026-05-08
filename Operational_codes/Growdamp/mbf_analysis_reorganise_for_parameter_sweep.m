@@ -4,7 +4,7 @@ function [out_dr, out_param] = mbf_analysis_reorganise_for_parameter_sweep(dr, p
 % and averages those data sets which are closer that the parameter step,
 % as defined by parameter_step_size
 %
-% example: [out_dr, out_param] = mbf_analysis_reorganise_for_parameter_sweep(dr, 'current', 20)
+% example: [out_dr, out_param] = mbf_analysis_reorganise_for_parameter_sweep(dr, [5,6,7], 20)
 
 % ensure the ordering
 [param, I] = sort(param);
@@ -20,6 +20,7 @@ for ns = param(1):parameter_step_size:param(end)
     acc = acc +1;
 end %for
 
+out_param = zeros(acc -1, 1);
 for ess = 1:acc -1
     out_param(ess) = round((median(param(section_indicies==ess)))./parameter_step_size) .* parameter_step_size;
 end %for

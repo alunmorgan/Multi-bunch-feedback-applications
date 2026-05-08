@@ -33,19 +33,13 @@ function [data_analysed, times, experimental_setup] = ...
 %
 % Example:[dr_passive, dr_active, error_passive, error_active, times, experimental_setup, extents] = mbf_growdamp_archival_analysis(data_requested, 'average')
 
-default_sweep_parameter = 'excitation_gain';
-default_parameter_step_size = 0.1;
-defaultOverrides = [NaN, NaN];
-defaultAnalysisSetting = 0;
-
-
 p = inputParser;
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
 addRequired(p, 'data_requested',@iscell);
 addParameter(p, 'analysis_type', 'collate', @ischar)
-addParameter(p, 'sweep_parameter', default_sweep_parameter, @ischar);
-addParameter(p, 'parameter_step', default_parameter_step_size, validScalarPosNum);
-addParameter(p, 'overrides', defaultOverrides);
+addParameter(p, 'sweep_parameter', 'excitation_gain', @ischar);
+addParameter(p, 'parameter_step', 0.1, validScalarPosNum);
+addParameter(p, 'overrides', [NaN, NaN]);
 addParameter(p, 'debug', 0);
 p.PartialMatching = false;
 
@@ -54,8 +48,6 @@ parse(p,data_requested, varargin{:});
 anal_type = p.Results.analysis_type;
 sweep_parameter = p.Results.sweep_parameter;
 parameter_step_size = p.Results.parameter_step;
-overrides = p.Results.overrides;
-debug = p.Results.debug;
 
 for nd = length(data_requested):-1:1
     data_out = mbf_PPRE_postprocessing(data_requested{nd});

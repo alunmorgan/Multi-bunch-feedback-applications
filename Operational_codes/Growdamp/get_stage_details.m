@@ -1,6 +1,7 @@
 function [recorded_stage_names, samples_of_stage, turns_of_stage] = get_stage_details(exp_data)
 
 if isfield(exp_data, ['seq1', '_capture_state'])
+    stage_names = cell(length(exp_data.states), 1);
     for n = 1:length(exp_data.states)
         if contains(exp_data.(['seq' num2str(n), '_capture_state']), 'Discard')
             stage_names{n} = 'spacer';
@@ -41,6 +42,9 @@ else
     test = fieldnames(exp_data);
     names = test(contains(test, '_turns'));
     names = names(~contains(names, 'spacer'));
+    turns_of_stage = zeros(length(names), 1);
+    samples_of_stage = cell(length(names), 1);
+    recorded_stage_names = cell(length(names), 1);
     for nrs = 1:length(names)
         turns_of_stage(nrs) = exp_data.(names{nrs});
     end %for

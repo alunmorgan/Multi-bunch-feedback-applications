@@ -1,4 +1,4 @@
-function mbf_growdamp_archival_plotting(requested_data, dataset, times, experimental_setup)
+function mbf_tunescan_over_modes_archival_plotting(requested_data, dataset, times, experimental_setup)
 % Plots the data processed by mbf_growdamp_archival_analysis.
 % Args:
 %       dataset (struct): containing
@@ -71,9 +71,6 @@ if ymin > 0
 end %if
 ymax = max(max(dr_passive,[],2));
 ymax = ymax + ymax /10;
-if ymax < 0
-    ymax = 0;
-end %if
 ylim([ymin ymax]);
 xlim([min(x_plt_axis), max(x_plt_axis)])
 grid on
@@ -98,9 +95,6 @@ if ymin > 0
 end %if
 ymax = max(max(dr_active,[],2));
 ymax = ymax + ymax /10;
-if ymax < 0
-    ymax = 0;
-end %if
 ylim([ymin ymax]);
 xlim([min(x_plt_axis), max(x_plt_axis)])
 grid on
@@ -126,9 +120,6 @@ if ymin > 0
 end %if
 ymax = max(max(effectiveness,[],2));
 ymax = ymax + ymax /10;
-if ymax < 0
-    ymax = 0;
-end %if
 ylim([ymin ymax]);
 xlim([min(x_plt_axis), max(x_plt_axis)])
 grid on
@@ -212,7 +203,6 @@ if strcmp(experimental_setup.anal_type, 'parameter_sweep')
         x1 = 0:1:300;
         axes('OuterPosition', [0.33 0 0.32 0.5]);
         hold on;
-        passive_mode_rate = zeros(length(dr_passive), 1);
         for ks = 1:length(dr_passive)
             P = polyfit(experimental_setup.param',dr_passive(:,ks),1);
             passive_mode_rate(ks) = P(1);
@@ -246,7 +236,6 @@ if strcmp(experimental_setup.anal_type, 'parameter_sweep')
         
         axes('OuterPosition', [0.33 0.5 0.32 0.5]);
         hold on;
-        active_mode_rate = zeros(length(dr_active), 1);
         for ks = 1:length(dr_active)
             P = polyfit(experimental_setup.param',dr_active(:,ks),1);
             active_mode_rate(ks) = P(1);

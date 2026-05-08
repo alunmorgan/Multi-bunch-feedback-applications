@@ -67,7 +67,9 @@ if ~isnan(p.Results.additional_save_location)
 end %if
 
 if strcmp(p.Results.plotting, 'yes')
-    mbf_tunescan_over_modes_plotting(tunescan)
+    mbf_tunescan_over_modes_archival_retrieval(mbf_axis, [growdamp.time growdamp.time],...
+        filter_conditions)
+%     mbf_tunescan_over_modes_plotting(tunescan)
     % TODO CHANGE THIS TO USE ACHIVAL RETREVAL
 end %if
 

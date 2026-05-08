@@ -13,11 +13,10 @@ function modescan_all(mbf_axis, varargin)
 %       dwell (int): How many turns to stay at each measurement point.
 %       excitation_gain(float): level of the excitation.
 %
-% Example  modscan_all('x')
+% Example  modescan_all('x')
 
 [root_string, harmonic_number, pv_names, ~] = mbf_system_config;
 pv_head = pv_names.hardware_names.(mbf_axis);
-Bunch_bank = pv_names.tails.Bunch_bank;
 
 % for archival investigations this allows filtering by machine state.
 % but for capture this is not needed so it set to empty.
