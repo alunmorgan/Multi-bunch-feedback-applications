@@ -151,21 +151,21 @@ xlim([x_plt_axis(1) x_plt_axis(end)])
 linkaxes([ax1, ax2, ax3], 'x')
 linkaxes([ax4, ax5, ax6], 'x')
 
-figure('Position', [20, 40, 800, 800])
-t = tiledlayout(1, 1);
-title(t, {['MBF growdamp results ', metadata.ax_label,' axis ', datestr(metadata.time)];...
-    ['Current: ', num2str(round(metadata.current)), 'mA']})
-xlabel(t, labelX)
-nexttile;
-hold on
-for ns = 1:length(freq_diff_names)
-    plot(x_plt_axis, squeeze(freq_diffs(ns,:)), 'DisplayName', freq_diff_names{ns})
-end %for
-hold off
-xlim([x_plt_axis(1) x_plt_axis(end)])
-ylabel({'Frequency differences between';'experiment stages'})
-legend
-grid on
-xlim([x_plt_axis(1) x_plt_axis(end)])
-
-
+% figure('Position', [20, 40, 800, 800])
+% t = tiledlayout(1, 1);
+% title(t, {['MBF growdamp results ', metadata.ax_label,' axis ', datestr(metadata.time)];...
+%     ['Current: ', num2str(round(metadata.current)), 'mA']})
+% xlabel(t, labelX)
+% nexttile;
+% hold on
+% for ns = 1:length(freq_diff_names)
+%     plot(x_plt_axis, squeeze(freq_diffs(ns,:)), 'DisplayName', freq_diff_names{ns})
+% end %for
+% hold off
+% xlim([x_plt_axis(1) x_plt_axis(end)])
+% ylabel({'Frequency differences between';'experiment stages'})
+% legend
+% grid on
+% xlim([x_plt_axis(1) x_plt_axis(end)])
+% 
+% 
