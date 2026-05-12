@@ -93,12 +93,19 @@ if inputs.Results.debug == 1
         end %if
     end %for
 end %for
+% Extracting inputs into separate variables as it really kills code performance
+% to keep indexing into the structures.
+passive_override = inputs.Results.passive_override;
+active_override = inputs.Results.active_override;
+length_averaging = inputs.Results.length_averaging;
+advanced_fitting = inputs.Results.advanced_fitting;
 
 for nq = 1:n_modes
     growth_ck = 1;
     active_ck = 1;
     passive_ck = 1;
     for ksew = 1:length(recorded_stage_names)
+
         single_data = exp_data.data(nq, samples_of_stage{ksew});
         if contains(recorded_stage_names{ksew}, 'growth')
             % Growth
@@ -113,8 +120,8 @@ for nq = 1:n_modes
             % Active damping
             [active_mag_fit, active_delta, active_phase_fit] =...
                 get_damping(1:turns_of_stage(ksew), single_data,...
-                inputs.Results.active_override, inputs.Results.length_averaging,...
-                inputs.Results.advanced_fitting, threshold_value(nq));
+                active_override, length_averaging,...
+                advanced_fitting, threshold_value(nq));
             output_data.([recorded_stage_names{ksew}, num2str(active_ck)]).damping_rate(nq) = active_mag_fit(1);
             output_data.([recorded_stage_names{ksew}, num2str(active_ck)]).offset(nq) = active_mag_fit(2);
             output_data.([recorded_stage_names{ksew}, num2str(active_ck)]).error(nq) = active_delta;
@@ -124,8 +131,8 @@ for nq = 1:n_modes
             % Passive damping
             [passive_mag_fit, passive_delta, passive_phase_fit] =...
                 get_damping(1:turns_of_stage(ksew), single_data,...
-                inputs.Results.passive_override, inputs.Results.length_averaging,...
-                inputs.Results.advanced_fitting, threshold_value(nq));
+                passive_override, length_averaging,...
+                advanced_fitting, threshold_value(nq));
             output_data.([recorded_stage_names{ksew}, num2str(passive_ck)]).damping_rate(nq) = passive_mag_fit(1);
             output_data.([recorded_stage_names{ksew}, num2str(passive_ck)]).offset(nq) = passive_mag_fit(2);
             output_data.([recorded_stage_names{ksew}, num2str(passive_ck)]).error(nq) = passive_delta;
