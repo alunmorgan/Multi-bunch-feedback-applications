@@ -20,9 +20,9 @@ if strcmp(root_dir(end), filesep) == 1 & strcmp(root_dir(end-1),':')==0
 end %if
 
 % returns a list of files of the requested type in the current directory.
-full_names = dir_list_gen(root_dir,type, quiet);
+full_names = dir_list_gen(root_dir, type, 'quiet_flag', quiet);
 % retruns a list of directories in the current directory.
-[sub_dir,~] = dir_list_gen(root_dir, 'dirs', quiet);
+[sub_dir,~] = dir_list_gen(root_dir, 'dirs', 'quiet_flag', quiet);
 
 
 if isempty(full_names) == 1 && isempty(sub_dir) == 1

@@ -1,4 +1,4 @@
-function [names,directory_name]=dir_list_gen(directory_name,file_type,quiet_flag)
+function [names,directory_name]=dir_list_gen(directory_name, file_type, varargin)
 %takes in a directory name and outputs the list of files
 %as a cell array of strings filtered by file type.
 % if a file type of 'dirs' is input it will output a list of directories.
@@ -9,23 +9,19 @@ function [names,directory_name]=dir_list_gen(directory_name,file_type,quiet_flag
 % directory and a list of filenames.
 % example
 % [names,directory_name]=dir_list_gen('U:\','mat',1)
+
 %% Input conditioning
-if nargin ==1
-    file_type = directory_name;
-    directory_name = uigetdir ;
-    quiet_flag = 0;
-elseif nargin == 2
-    if ischar(file_type) ~= 1
-        % no directory name is given so all inputs shifted by one
-        quiet_flag = file_type;
-        file_type = directory_name;
-        directory_name = uigetdir;
-    else
-        % no flag given assume noisy
-        quiet_flag = 0;
-    end
-    
-end
+p = inputParser;
+p.StructExpand = false;
+p.CaseSensitive = false;
+valid_boolean = @(x) isboolean(x);
+valid_string = @(x) ischar(x);
+addRequired(p, 'directory_name', valid_string);
+addRequired(p, 'file_type', valid_string);
+addParameter(p, 'quiet_flag', 0);
+
+parse(p, directory_name, file_type, varargin{:});
+
 %removes leading . of file_type if present
 if isempty(file_type) ==0 && strcmp(file_type(1), '.') == 1
     file_type = file_type(2:end);
@@ -43,23 +39,6 @@ else
     end
 end
 
-%% Getting intial list and adjusting for different OSes
-% If run on linux ls gives a different output (different line feeds etc)
-% This if loop changes the format to match the windows case.
-% if ispc == 0
-%     % Getting the list
-%     a = dir(directory_name);
-%     for wnf = 1:size(a,1)
-%         a_temp{wnf} = a(wnf).name;
-%     end
-%     x = strmatch('.', a_temp);
-%     a_temp(x) = [];
-%     a = a_temp';
-%     clear a_temp
-% else
-%     % Getting the list
-%     a = ls(directory_name);
-% end
 a = dir(directory_name);
 if isempty(a)
     disp('Directory does not exist')
@@ -109,12 +88,12 @@ if strcmp(file_type,'dirs')
     end %if
     if isempty(dirs)
         names = [];
-        if quiet_flag ~= 1
+        if p.Results.quiet_flag ~= 1
             disp('No directories found');
         end
     else
         names = dirs;
-        if quiet_flag ~= 1
+        if p.Results.quiet_flag ~= 1
             disp([num2str(size(names,1)) ' directories found']);
         end
     end
@@ -135,13 +114,13 @@ else
     ind2(fk:end) = [];
     
     if fk == 1
-        if quiet_flag ~= 1
+        if p.Results.quiet_flag ~= 1
             disp(['No files with extension ' file_type ' found']);
         end
         names = [];
     else
         names = names(ind2);
-        if quiet_flag ~= 1
+        if p.Results.quiet_flag ~= 1
             disp([num2str(size(names,1)) ' files with extension ' file_type ' found']);
         end
     end
