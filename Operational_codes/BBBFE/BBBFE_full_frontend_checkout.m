@@ -11,4 +11,3 @@ BBBFE_clock_phase_scan('X', single_bunch_location)
 BBBFE_clock_phase_scan('Y', single_bunch_location)
 BBBFE_clock_phase_scan('S', single_bunch_location)
 
-
