@@ -21,280 +21,117 @@ function mbf_growdamp_archival_plotting(requested_data, dataset, times, experime
 if isempty(times)
     return
 end %if
-
-[~, harmonic_number, ~, ~] = mbf_system_config;
-x_plt_axis = (0:harmonic_number-1);
-% dataset =sort_data_in_stucture(dataset, [936:-1:469, 1:468], 2);
-
-dr_passive = dataset.passive.damping_rate;
-dr_active = dataset.active.damping_rate;
-error_passive = dataset.passive.error;
-error_active = dataset.active.error;
-
-this_year = year(datetime("now"));
-ranges_to_display = {'RF', 'time','current'};
-
-years_input = {this_year-5, 'r'; this_year-4, 'b'; this_year-3, 'k'; this_year-2, 'g'; this_year-1, 'c'; this_year, 'm'};
-
-graph_text{1} = ['Analysis type: ', experimental_setup.anal_type];
-graph_title = 'Damping rates for different modes';
-
-figure('Position',[50, 50, 1400, 800])
-annotation('textbox', [0 1-0.3 0.3 0.3], 'String', graph_text, 'FitBoxToText', 'on', 'Interpreter', 'none');
-
-ax1 = axes('OuterPosition', [0.14 0.67 0.93 0.32]);
-hold on
-
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     graph_title = {['Damping rates for different modes as a function of ', experimental_setup.sweep_parameter];...
         ['Using a step size of ', num2str(experimental_setup.parameter_step_size), ' in the ', experimental_setup.axis, ' axis']};
-    graph_labels = cell(1, length(experimental_setup.param));
-    for hw = 1:length(experimental_setup.param)
-        graph_labels{hw}=num2str(experimental_setup.param(hw));
-    end % if
-    dr_passive = squeeze(dr_passive);
-    dr_active = squeeze(dr_active);
-    plot(x_plt_axis, dr_passive, 'LineWidth', 2)
-    legend(graph_labels)
 else
-    populate_graph(dr_passive, years_input, times, x_plt_axis)
+    graph_title = 'Damping rates for different modes';
 end %if
-plot([x_plt_axis(1), x_plt_axis(end)], [0,0], 'r:', 'HandleVisibility', 'off')
-title(graph_title)
-xlabel('Mode')
-ylabel('Passive damping rates (1/turns)')
-legend show
-legend('Location','eastoutside')
-ymin = min(min(dr_passive,[],2));
-if ymin > 0
-    ymin = 0;
-end %if
-ymax = max(max(dr_passive,[],2));
-ymax = ymax + ymax /10;
-if ymax < 0
-    ymax = 0;
-end %if
-ylim([ymin ymax]);
-xlim([min(x_plt_axis), max(x_plt_axis)])
-grid on
-hold off
+p = mbf_archival_plotting_setup(requested_data, times, experimental_setup);
 
-ax2 = axes('OuterPosition', [0.14 0.34 0.8 0.32]);
-hold on
-if strcmp(experimental_setup.anal_type, 'parameter_sweep')
-    plot(x_plt_axis, dr_active, 'LineWidth', 2)
-%     legend(graph_labels)
-else
-    populate_graph(dr_active, years_input, times, x_plt_axis)
-end %if
-legend('off')
-plot([x_plt_axis(1), x_plt_axis(end)], [0,0], 'r:', 'HandleVisibility', 'off')
-% title(graph_title)
-xlabel('Mode')
-ylabel('Active damping rates (1/turns)')
-ymin = min(min(dr_active,[],2));
-if ymin > 0
-    ymin = 0;
-end %if
-ymax = max(max(dr_active,[],2));
-ymax = ymax + ymax /10;
-if ymax < 0
-    ymax = 0;
-end %if
-ylim([ymin ymax]);
-xlim([min(x_plt_axis), max(x_plt_axis)])
-grid on
-hold off
+[~, harmonic_number, ~, ~] = mbf_system_config;
+x_plt_axis = (0:harmonic_number-1);
+this_year = year(datetime("now"));
 
-ax3 =axes('OuterPosition', [0.14 0 0.8 0.32]);
-hold on
-effectiveness = dr_active - dr_passive;
-if strcmp(experimental_setup.anal_type, 'parameter_sweep')
-    plot(x_plt_axis, effectiveness, 'LineWidth', 2)
-%     legend(graph_labels)
-else
-    populate_graph(effectiveness, years_input, times, x_plt_axis)
-end %if
-legend('off')
-plot([x_plt_axis(1), x_plt_axis(end)], [0,0], 'r:', 'HandleVisibility', 'off')
-% title(graph_title)
-xlabel('Mode')
-ylabel('System effectiveness (1/turns)')
-ymin = min(min(effectiveness,[],2));
-if ymin > 0
-    ymin = 0;
-end %if
-ymax = max(max(effectiveness,[],2));
-ymax = ymax + ymax /10;
-if ymax < 0
-    ymax = 0;
-end %if
-ylim([ymin ymax]);
-xlim([min(x_plt_axis), max(x_plt_axis)])
-grid on
-hold off
+years_input = {this_year-5, 'r'; this_year-4, 'b'; this_year-3, 'k'; this_year-2, 'g'; this_year-1, 'c'; this_year, 'm'};
 
-linkaxes([ax1, ax2, ax3],'x')
-
-ck = 1;
-for hrd = 1:length(ranges_to_display)
-    if strcmp(ranges_to_display{hrd}, 'time')
-        continue
-    else    
-        axes('OuterPosition', [0.01 ck/3 0.2 0.3]);
-    xlabel('Time')
-    title(ranges_to_display{hrd})
-        data_temp = NaN(length(times),1);
-        for hse = 1:length(times)
-            data_temp(hse) = requested_data{hse}.(ranges_to_display{hrd});
-        end %for
-        plot(times, data_temp, 'o:')
-        datetick
-        ylabel(ranges_to_display{hrd})
-        clear data_temp
-        ck = ck +1;
-    end %if
-end %for
-
-
-
-axfp = axes('OuterPosition', [0.01 0 0.2 0.3]);
+t1 = tiledlayout(p, 2, 2,'TileSpacing','compact', 'Padding', 'tight');
+title(t1, graph_title)
+xlabel(t1, 'Mode')
+f_names = fieldnames(dataset);
+for jse = 1:length(f_names)
+    ax(jse) = nexttile(t1);
     hold on
-for hkw = 1:length(requested_data)
-    plot(1:harmonic_number, requested_data{hkw}.fill_pattern, 'b')
+
+    if strcmp(experimental_setup.anal_type, 'parameter_sweep')
+        graph_labels = cell(1, length(experimental_setup.param));
+        for hw = 1:length(experimental_setup.param)
+            graph_labels{hw}=num2str(experimental_setup.param(hw));
+        end % if
+        plot(x_plt_axis, squeeze(dataset.(f_names{jse}).damping_rate), 'LineWidth', 2)
+        legend(graph_labels)
+    else
+        populate_graph(dataset.(f_names{jse}).damping_rate, years_input, times, x_plt_axis)
+    end %if
+    plot([x_plt_axis(1), x_plt_axis(end)], [0,0], 'r:', 'HandleVisibility', 'off')
+    ylabel([f_names{jse},' rates (1/turns)'])
+    if jse == 2
+        leg = legend('show');
+        leg.Layout.Tile = 'east';
+    else
+        legend('off')
+    end %if
+    ymin = min(min(dataset.(f_names{jse}).damping_rate,[],2));
+    if ymin > 0
+        ymin = 0;
+    end %if
+    ymax = max(max(dataset.(f_names{jse}).damping_rate,[],2));
+    ymax = ymax + ymax /10;
+    if ymax < 0
+        ymax = 0;
+    end %if
+    ylim([ymin ymax]);
+    xlim([min(x_plt_axis), max(x_plt_axis)])
+    grid on
+    hold off
 end %for
-ylim([0 inf])
-xlim([1 harmonic_number])
-set(axfp, 'XTick', [])
-title('Fill pattern variation')
-ylabel('Charge (nC)')
 
 % add labels if it is a parameter sweep.
-if nargin == 4 && strcmp(experimental_setup.anal_type, 'parameter_sweep')
+if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     for tb = length(experimental_setup.param):-1:1
         labels{tb} = num2str(experimental_setup.param(tb));
     end %for
     legend(labels)
-    legend('Location','eastoutside')
 end %if
 
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
-    figure('Position',[50, 50, 1400, 800])
+    f2 = figure('Position',[50, 50, 1400, 800]);
+    t2 = tiledlayout(f2, 2, 2,'TileSpacing','compact', 'Padding', 'tight');
+    title(t2, ['Damping rates vs ', experimental_setup.sweep_parameter, ' in the ', experimental_setup.axis, ' axis'])
+    xlabel(t2, experimental_setup.sweep_parameter)
+    for jse = 1:length(f_names)
+        nexttile(t2)
+        hold on
+        plot(experimental_setup.param, dataset.(f_names{jse}).damping_rate')
+        ylabel([f_names{jse},' rates (1/turns)'])
+        grid on
+        plot([experimental_setup.param(1), experimental_setup.param(end)], [0,0], 'r:', 'HandleVisibility', 'off')
+
+        hold off
+    end %for
+
     if strcmp(experimental_setup.sweep_parameter, 'current')
-        axes('OuterPosition', [0 0 0.32 0.5]);
-    else
-        axes('OuterPosition', [0 0 1 0.5]);
-    end
-    hold on
-    plot(experimental_setup.param, dr_passive')
-    xlabel(experimental_setup.sweep_parameter)
-    ylabel('Passive damping rates (1/turns)')
-    grid on
-    plot([experimental_setup.param(1), experimental_setup.param(end)], [0,0], 'r:', 'HandleVisibility', 'off')
-    
-    hold off
-    if strcmp(experimental_setup.sweep_parameter, 'current')
-        axes('OuterPosition', [0 0.5 0.32 0.5]);
-    else
-        axes('OuterPosition', [0 0.5 1 0.5]);
-    end
-    hold on
-    plot(experimental_setup.param, dr_active')
-    xlabel(experimental_setup.sweep_parameter)
-    ylabel('Active damping rates (1/turns)')
-    title(['Damping rates vs ', experimental_setup.sweep_parameter, ' in the ', experimental_setup.axis, ' axis'])
-    grid on
-    plot([experimental_setup.param(1), experimental_setup.param(end)], [0,0], 'r:', 'HandleVisibility', 'off')
-    hold off
-    
-    
-    if strcmp(experimental_setup.sweep_parameter, 'current')
+        f3 = figure('Position',[50, 50, 1400, 800]);
+        t3 = tiledlayout(f3, 2, 2,'TileSpacing','compact', 'Padding', 'tight');
+        title(t3, 'Extrapolated data')
+        xlabel(t3, experimental_setup.sweep_parameter)
         x1 = 0:1:300;
-        axes('OuterPosition', [0.33 0 0.32 0.5]);
-        hold on;
-        passive_mode_rate = zeros(length(dr_passive), 1);
-        for ks = 1:length(dr_passive)
-            P = polyfit(experimental_setup.param',dr_passive(:,ks),1);
-            passive_mode_rate(ks) = P(1);
-            P_start = find(x1 < min(experimental_setup.param), 1, 'last');
-            P_points = polyval(P,x1);
-            % Find the first time after the lowest current that the extrapolation goes negative. 
-            P_loc = find(sign(P_points(P_start:end))==-1,1, 'first');
-            if ~isempty(P_loc)
-            plot(x1, P_points,'DisplayName', ['Mode ', num2str(x_plt_axis(ks)), ': ', num2str(x1(P_loc)), 'mA'], 'LineWidth', 2);
-            plot(experimental_setup.param', dr_passive(:,ks),'ko', 'HandleVisibility', 'off');
-            end %if
-        end %for
-        xlabel(experimental_setup.sweep_parameter)
-        ylabel('Passive damping rates (1/turns)')
-        title('Extrapolated data')
-%         legend('Location', 'eastoutside')
-        legend('off')
-        grid on
-        plot([x1(1), x1(end)], [0,0], 'r:', 'HandleVisibility', 'off')
-        hold off
+        for jse = 1:length(f_names)
+            nexttile(t3)
+            hold on;
+            passive_mode_rate = zeros(length(dataset.(f_names{jse}).damping_rate), 1);
+            for ks = 1:length(dataset.(f_names{jse}).damping_rate)
+                P = polyfit(experimental_setup.param',dataset.(f_names{jse}).damping_rate(:,ks),1);
+                passive_mode_rate(ks) = P(1);
+                P_start = find(x1 < min(experimental_setup.param), 1, 'last');
+                P_points = polyval(P,x1);
+                % Find the first time after the lowest current that the extrapolation goes negative.
+                P_loc = find(sign(P_points(P_start:end))==-1,1, 'first');
+                if ~isempty(P_loc)
+                    plot(x1, P_points,'DisplayName', ['Mode ', num2str(x_plt_axis(ks)), ': ', num2str(x1(P_loc)), 'mA'], 'LineWidth', 2);
+                    plot(experimental_setup.param', dataset.(f_names{jse}).damping_rate(:,ks),'ko', 'HandleVisibility', 'off');
+                end %if
+            end %for
+            xlabel(experimental_setup.sweep_parameter)
+            ylabel([f_names{jse},' rates (1/turns)'])
 
-        axes('OuterPosition', [0.67 0 0.32 0.5]);
-        hold on
-        plot(x_plt_axis, passive_mode_rate)
-                plot([x_plt_axis(1), x_plt_axis(end)], [0,0], 'r:', 'HandleVisibility', 'off')
-        xlabel('Modes')
-        ylabel({'Passive damping' ;'rates change with current (1/turns/current)'})
-        xlim([min(x_plt_axis), max(x_plt_axis)])
-        hold off
-        grid on
-        
-        axes('OuterPosition', [0.33 0.5 0.32 0.5]);
-        hold on;
-        active_mode_rate = zeros(length(dr_active), 1);
-        for ks = 1:length(dr_active)
-            P = polyfit(experimental_setup.param',dr_active(:,ks),1);
-            active_mode_rate(ks) = P(1);
-            P_start = find(x1 < min(experimental_setup.param), 1, 'last');
-             P_points = polyval(P,x1);
-            P_loc = find(sign(P_points(P_start:end))==-1,1, 'first');
-            if ~isempty(P_loc)
-            plot(x1, polyval(P,x1),'DisplayName', ['Mode ', num2str(x_plt_axis(ks)), ': ', num2str(x1(P_loc)), 'mA'], 'LineWidth', 2);
-            plot(experimental_setup.param', dr_active(:,ks),'ko', 'HandleVisibility', 'off');
-            end %if
+            %         legend('Location', 'eastoutside')
+            legend('off')
+            grid on
+            plot([x1(1), x1(end)], [0,0], 'r:', 'HandleVisibility', 'off')
+            hold off
         end %for
-        xlabel(experimental_setup.sweep_parameter)
-        ylabel('Active damping rates (1/turns)')
-        title('Extrapolated data')
-%         legend('Location', 'eastoutside')
-        legend('off')
-        grid on
-        plot([x1(1), x1(end)], [0,0], 'r:', 'HandleVisibility', 'off')
-        hold off
-
-                axes('OuterPosition', [0.67 0.5 0.32 0.5]);
-        hold on
-        plot(x_plt_axis, active_mode_rate)
-        plot([x_plt_axis(1), x_plt_axis(end)], [0,0], 'r:', 'HandleVisibility', 'off')
-        xlabel('Modes')
-        ylabel({'Active damping'; 'rates change with current (1/turns/current)'})
-        xlim([min(x_plt_axis), max(x_plt_axis)])
-        hold off
-        grid on
     end %if
-    
-end %if
-
-
-if nargin == 9
-    figure
-    ax3 = subplot(2,1,1);
-    populate_graph(error_passive, years_input, times, x_plt_axis)
-    title('Passive damping rate errors')
-    xlabel('Mode')
-    ylabel('Passive damping rate errors')
-    ax4 = subplot(2,1,2);
-    populate_graph(error_active, years_input, times, x_plt_axis)
-    title('Active damping rate errors')
-    xlabel('Mode')
-    ylabel('Active damping rate errors')
-    
-    linkaxes([ax3,ax4],'x')
 end %if
 
 function populate_graph(input_data, years_input, times, x_plt_axis)

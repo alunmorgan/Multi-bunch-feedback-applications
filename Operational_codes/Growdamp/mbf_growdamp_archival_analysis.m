@@ -104,9 +104,10 @@ end %for
 
 experimental_setup.anal_type = p.Results.analysis_type;
 if strcmp(p.Results.analysis_type, 'parameter_sweep')
+    f_names = fieldnames(dataset);
     experimental_setup.sweep_parameter = p.Results.sweep_parameter;
     experimental_setup.parameter_step_size = p.Results.parameter_step;
-    if isempty(dataset.passive.damping_rate)
+    if isempty(dataset.(f_names{1}).damping_rate)
         disp('No data left. Try changing analysis settings.')
         return
     else

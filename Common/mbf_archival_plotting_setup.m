@@ -1,4 +1,4 @@
-function mbf_archival_plotting_setup(requested_data, times, experimental_setup)
+function data_panel = mbf_archival_plotting_setup(requested_data, times, experimental_setup)
 % Plots the data processed by mbf_growdamp_archival_analysis.
 % Args:
 %      requested_data(structure): data and metatdata.
@@ -21,15 +21,30 @@ if strcmp(experimental_setup.anal_type, 'parameter_sweep')
 end %if
 
 figure('Position',[50, 50, 1400, 800])
+p = uipanel('Position', [0 0.02 0.175 0.93]);
+data_panel = uipanel('Position', [0.18 0.02 0.82 0.96]);
+t = tiledlayout(p, 3, 1, 'TileSpacing','compact', 'Padding', 'tight');
 annotation('textbox', [0 1-0.3 0.3 0.3], 'String', graph_text, 'FitBoxToText', 'on', 'Interpreter', 'none');
+
+% Plot the RF variation from the setpoint.
+for hse = 1:length(times)
+    requested_data{hse}.RF = requested_data{hse}.RF - 4.99684E8;
+end %for
 
 ck = 1;
 for hrd = 1:length(ranges_to_display)
+    if strcmp(ranges_to_display{hrd}, 'RF')
+        graph_label = 'RF variation (Hz)';
+    elseif strcmp(ranges_to_display{hrd}, 'current')
+        graph_label = 'Current (mA)';
+    else
+        graph_label = ranges_to_display{hrd};
+    end %if
     if isfield(requested_data{1}, ranges_to_display{hrd})
         if strcmp(ranges_to_display{hrd}, 'time')
             continue
         else
-            axes('OuterPosition', [0.01 ck/3 0.2 0.3]);
+            nexttile(t)
             xlabel('Time')
             title(ranges_to_display{hrd})
             data_temp = NaN(length(times),1);
@@ -37,8 +52,11 @@ for hrd = 1:length(ranges_to_display)
                 data_temp(hse) = requested_data{hse}.(ranges_to_display{hrd});
             end %for
             plot(times, data_temp, 'o:')
-            datetick
-            ylabel(ranges_to_display{hrd})
+            datetick('x', 'dd-mmm-yy')
+            ylabel(graph_label)
+            if strcmp(ranges_to_display{hrd}, 'RF')
+                title('reference 499.684MHz')
+            end %if
             clear data_temp
             ck = ck +1;
         end %if
@@ -46,7 +64,7 @@ for hrd = 1:length(ranges_to_display)
 end %for
 
 if isfield(requested_data{1}, 'fill_pattern')
-    axfp = axes('OuterPosition', [0.01 0 0.2 0.3]);
+    axfp = nexttile(t);
     hold on
     for hkw = 1:length(requested_data)
         plot(1:harmonic_number, requested_data{hkw}.fill_pattern, 'b')

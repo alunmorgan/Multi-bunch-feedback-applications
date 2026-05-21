@@ -16,7 +16,7 @@ if isempty(times)
     return
 end %if
 graph_title = 'Frontend system phase scan';
-mbf_archival_plotting_setup(requested_data, times, experimental_setup);
+p = mbf_archival_plotting_setup(requested_data, times, experimental_setup);
 
 x_plt_axis = requested_data{1}.phase;
 this_year = year(datetime("now"));
@@ -32,7 +32,10 @@ if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     end % if
 end %if
 
-ax1 = axes('OuterPosition', [0.12 0.5 0.3 0.5]);
+t = tiledlayout(p, 3, 3,'TileSpacing','compact', 'Padding', 'tight');
+title(t, graph_title)
+xlabel(t, 'Phase (degrees)')
+ax1 = nexttile(t, 1);
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     hold on
     plot(x_plt_axis, leading)
@@ -43,7 +46,6 @@ else
     legend('off')
 end %if
 title('leading bunch')
-xlabel('Phase')
 ylabel('Magnitude')
 ymin = min([min(min(leading,[],2)),min(min(excited,[],2)),min(min(following,[],2))]);
 if ymin > 0
@@ -54,7 +56,7 @@ ylim([ymin ymax]);
 grid on
 
 
-ax2 = axes('OuterPosition', [0.42 0.5 0.3 0.5]);
+ax2 = nexttile(t, 2);
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     plot(x_plt_axis, excited)
 %     legend(graph_labels)
@@ -62,8 +64,7 @@ else
        populate_archive_graph(excited', years_input, times, x_plt_axis)
        legend('off')
 end %if
-title({graph_title, 'excited bunch'} )
-xlabel('Phase')
+title('excited bunch')
 ylabel('Magnitude')
 ymin = min([min(min(leading,[],2)),min(min(excited,[],2)),min(min(following,[],2))]);
 if ymin > 0
@@ -74,7 +75,7 @@ ylim([ymin ymax]);
 grid on
 hold off
 
-ax3 = axes('OuterPosition', [0.72 0.5 0.3 0.5]);
+ax3 = nexttile(t, 3);
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     plot(x_plt_axis, following)
 %     legend(graph_labels)
@@ -83,7 +84,6 @@ else
           legend('off')
 end %if
 title('following bunch')
-xlabel('Phase')
 ylabel('Magnitude')
 ymin = min([min(min(leading,[],2)),min(min(excited,[],2)),min(min(following,[],2))]);
 if ymin > 0
@@ -95,7 +95,7 @@ grid on
 
 diff1 = excited - leading;
 diff2 = excited - following;
-ax4 =axes('OuterPosition', [0.12 0 0.3 0.5]);
+ax4 = nexttile(t, 4);
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     plot(x_plt_axis, diff1)
 %     legend(graph_labels)
@@ -103,8 +103,7 @@ else
     populate_archive_graph(diff1', years_input, times, x_plt_axis)
     legend('off')
 end %if
-title('excited - leading')
-xlabel('Phase')
+title({'difference between'; 'excited and leading bunches'})
 ylabel('Signal differences')
 ymin = min([min(min(diff1,[],2)),min(min(diff2,[],2))]);
 ymax = max([max(max(diff1,[],2)),max(max(diff1,[],2))]);
@@ -112,21 +111,52 @@ ymax = ymax + ymax /10;
 ylim([ymin ymax]);
 grid on
 
-ax5 =axes('OuterPosition', [0.42 0 0.5 0.5]);
+ax5 = nexttile(t, 5);
 if strcmp(experimental_setup.anal_type, 'parameter_sweep')
     plot(x_plt_axis, diff2)
-    legend(graph_labels, 'Location','eastoutside')
+    leg = legend(graph_labels, 'Location','eastoutside');
 else
         populate_archive_graph(diff2', years_input, times, x_plt_axis)
-         legend('Location','eastoutside')
+        leg = legend('Location','eastoutside');
 end %if
-title('excited - following')
-xlabel('Phase')
+leg.Layout.Tile = 'east';
+title({'difference between'; 'excited and following bunches'})
 ylabel('Signal differences')
 ymin = min([min(min(diff1,[],2)),min(min(diff2,[],2))]);
 ymax = max([max(max(diff1,[],2)),max(max(diff1,[],2))]);
 ymax = ymax + ymax /10;
 ylim([ymin ymax]);
 grid on
+
+ax7 = nexttile(t, 7);
+if strcmp(experimental_setup.anal_type, 'parameter_sweep')
+%     plot(x_plt_axis, diff1)
+else
+%     populate_archive_graph(diff1', years_input, times, x_plt_axis)
+    legend('off')
+end %if
+title('ADC amplitude')
+ylabel('Signal differences')
+% ymin = min([min(min(diff1,[],2)),min(min(diff2,[],2))]);
+% ymax = max([max(max(diff1,[],2)),max(max(diff1,[],2))]);
+% ymax = ymax + ymax /10;
+% ylim([ymin ymax]);
+grid on
+
+ax8 = nexttile(t, 8);
+if strcmp(experimental_setup.anal_type, 'parameter_sweep')
+%     plot(x_plt_axis, diff1)
+else
+%     populate_archive_graph(diff1', years_input, times, x_plt_axis)
+    legend('off')
+end %if
+title('ADC phase')
+ylabel('Signal differences')
+% ymin = min([min(min(diff1,[],2)),min(min(diff2,[],2))]);
+% ymax = max([max(max(diff1,[],2)),max(max(diff1,[],2))]);
+% ymax = ymax + ymax /10;
+% ylim([ymin ymax]);
+grid on
+
 
 linkaxes([ax1,ax2, ax3, ax4, ax5],'x')

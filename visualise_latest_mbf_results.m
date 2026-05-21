@@ -46,7 +46,7 @@ end %for
 
 files_wanted = struct;
 for kse = 1:length(dirs)
-    files = dir_list_gen(dirs{kse}, '.mat', 1);
+    files = dir_list_gen(dirs{kse}, '.mat', 'quiet_flag', 1);
     if isempty(files)
         continue
     end %if
@@ -57,13 +57,13 @@ for kse = 1:length(dirs)
                 [~, names, ~] = fileparts(temp_files);
                 test = regexp(names, '.*_(\d\d)_(\d\d)_(\d\d\d\d)_(\d\d)-(\d\d)-(\d\d)','tokens', 'forcecelloutput');
                 for jk = 1:length(test)
-                    dates(jk) = datetime(str2double(test{jk}{1}{3}), str2double(test{jk}{1}{2}),...
+                    temp_dates(jk) = datetime(str2double(test{jk}{1}{3}), str2double(test{jk}{1}{2}),...
                         str2double(test{jk}{1}{1}), str2double(test{jk}{1}{4}),...
                         str2double(test{jk}{1}{5}), str2double(test{jk}{1}{6}));
                 end %for
-                [~,latest_file_ind] = max(dates);
+                [~,latest_file_ind] = max(temp_dates);
                 files_wanted.(exp_name{bws})  = temp_files{latest_file_ind};
-                clear dates names latest_file_ind test temp_files
+                clear temp_dates names latest_file_ind test temp_files
             end %if
         end %if
     end %for
