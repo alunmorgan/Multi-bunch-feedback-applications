@@ -49,7 +49,7 @@ In order to make such a system more easily usable for a wide range of system use
 
 All these codes save the relevant data and graphs to a file structure based on the date, and given unique names based on the date and time the application was run. The root path for this structure is defined in \verb|mbf_system_config.m|, as is the harmonic number of the machine under study. In general all machine/deployment parameters are set in this file. The rest of the codebase it written to adapt to what is set here.
 
-In addition to the system data from the multi bunch hardware, more general machine parameters are also captured for growdamp, modescan and bunch motion codes, in order to enable machine studies (e.g current dependence). This additional data is set in \verb|machine_environment.m|.
+In addition to the system data from the multi bunch hardware, more general machine parameters are also captured to enable machine studies (e.g current dependence). This additional data is set in \verb|machine_environment.m|.
 
 \subsection{Frontend Optimisation}
 In order to work optimally the feedback systems need to be matched in timing/phase with the beam phase (not the RF phase) and be tuned so that the sampling point of the ADC coincides with the maximum signal from each bunch.
@@ -69,31 +69,44 @@ The second requirement is done by adjusting the sampling clock until a maximum s
         \label{fig:phase_shifters}
 \end{figure}
 
-
 Note: The Libera bunch by bunch frontend seems to get into problems when scanning the LO phase shifter. It is probably best not to scan the LO phase if you have that frontend.
 \clearpage
-\subsection{Measurements}
+\subsection{Standard Measurements}
 \subsubsection{Frontend scans}
 Scan the relevant phase shifter or clock delay while monitoring the measure signal amplitude. The resulting graphs will allow appropriate working points to be set.
+
+Basic usage:
+run \verb|BBBFE_full_frontend_checkout|
 
 \subsubsection{Mode scans}
 A mode scan is a sequential excitation of the harmonics of the tune frequency. This is mainly a system check in order to identify any performance limitations or degradation.
 
+Basic usage:
+run \verb|modescan_all('x')|
+
 \subsubsection{Spectra}
 This code captures the requested number of turns from the requested axis and returns the FFT of the centroid motion of each bunch. This is useful for identifying tunes, tune leakage from one axis to another, also for classifying instabilities.
 
+Basic usage:
+run \verb|mbf_spectrum_all('x')|
+
 \subsubsection{Growdamp}
-The measurement comprises a series of excitations at set harmonics of the tune frequency followed by capture of the evolution of bunch centroid positions, both with and without feedback active.
+The measurement comprises a series of excitations at set harmonics of the tune frequency followed by capture of the evolution of bunch centroid positions both with and without feedback active.
+This can be with or without excitation. The latter is useful to find which modes the machine naturally excites.
 
-\subsubsection{Transverse damping}
+The excitation is usually on the tune but can be set to follow a sideband or even a fixed point in tune space.
 
+Basic usage:
+run \verb|growdamp_all('x')|
+
+\subsection{Developmental Measurements}
 \subsubsection{Emittance control}
 This uses one of the oscillators to excite the selected bunches at one of the sideband frequencies. This has the effect of blowing up the beam.
 
 \subsubsection{Bunch motion capture}
 The three systems are setup to be ready to capture on the next external trigger. Once that trigger arrives, the three systems simultaneously capture bunch centroid motion. This is useful for capturing injection transients. 
 
-\chapter{Practical use}
+\chapter{System setup}
 \section{Code location }
 The code is released under an MIT licence. In order to use it please grab it from the \href{https://github.com/alunmorgan/Multi-bunch-feedback-applications}{code repository}
 or use the following command on the system command line in order to copy it to your current location:
@@ -159,7 +172,7 @@ In the front end there are two phases (delays) we are interested in optimising. 
     \item{adjust MBF and fillpattern until they agree with the requested bunch number as given by the timing system.}
     \begin{itemize}
     \item{adjust MBF bunch value as shown on figure \ref{fig:MBF_delays}}
-    \begin{figure}[h]
+    \begin{figure}[ht]
         \centering
         \includegraphics[width=0.6\linewidth]{MBF_delays.png}
         \caption{MBF delay screen}
@@ -263,16 +276,41 @@ The next step is to close the feedback loop.
 
 \subsection{Machine settings}
 \begin{itemize}
-    \item {From an empty machine Inject to 30 - 50~mA into all bunches.}
+    \item {From an empty machine Inject to ~50~mA into all bunches.}
     \begin{itemize}
-    \item{this gives sufficient signal while staying below the instability threshold}
+    \item{this should give sufficient signal while staying below the instability threshold}
+    \item{Check there is no activity on the standard deviation of motion graph (Figure \ref{fig:bunch_motion})}
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.5\linewidth]{bunch_motion_standard_deviation.png}
+        \caption{If you see distortion of the fill pattern or large amounts of jumping then you are probably in an unstable region. Drop the beam and refill to a lower current.}
+        \label{fig:bunch_motion}
+    \end{figure}
     \end{itemize}
     \item{Correct tune values to nominal.}
     \begin{itemize}
         \item{If you are struggling to get a reliable tune value try}
         \begin{itemize}
-            \item{increasing the excitation -{\color{red}ADD SCREENSHOT} (Diagnostics $\rightarrow$ {\color{red}????})}
-            \item{changing from fitted to maximum -{\color{red}ADD SCREENSHOT} (Diagnostics $\rightarrow$ {\color{red}????})}
+            \item{increasing the excitation (Figure \ref{fig:change_tune_excitation})}
+              \begin{itemize}
+            \item{(Diagnostics $\rightarrow$ SR $\rightarrow$ TMBF-X/TMBF-Y/LMBF  $\rightarrow$ System  $\rightarrow$ Control)}
+             \end{itemize}
+            \begin{figure}[ht]
+                \centering
+                \includegraphics[width=0.5\linewidth]{increasing_tune_excitation.png}
+                \caption{Tune setup}
+                \label{fig:change_tune_excitation}
+            \end{figure}
+            \item{changing from fitted to maximum (Figure \ref{fig:tune_measurement_settings})}
+              \begin{itemize}
+            \item{(Diagnostics $\rightarrow$ Summary $\rightarrow$ Click tune value )}
+             \end{itemize}
+             \begin{figure}[ht]
+                 \centering
+                 \includegraphics[width=0.5\linewidth]{tune_measurement_settings.png}
+                 \caption{Tune measurement settings}
+                 \label{fig:tune_measurement_settings}
+             \end{figure}
         \end{itemize}
     \end{itemize}
     \item{Turn tune feedback off once tunes are nominal}
@@ -370,31 +408,56 @@ The following Matlab code will run modescan, growdamp and spectra measurements f
     >> mbf_startup_tests 
 \end{verbatim}
 \vspace{2mm}
-The following explains how to run each separate standard measurement. However there are some common optional inputs.
-\begin{minted}{matlab}
-'plotting', 'yes' or 'no'. 
+The following explains how to run each separate standard measurement. However there are some common inputs.
+\begin{itemize}
+    \item Required
+    \begin{itemize}
+        \item{\begin{minted}{matlab}
+'mbf_axis', 'x' or 'x' or 's'. 
 \end{minted}
-Determines if the plotting is displayed. The raw data is saved in either case.
-\begin{minted}{matlab}
-'auto_setup', 'yes' or 'no'. 
+The axis being measured.}
+        \end{itemize}
+    \item Optional
+    \begin{itemize}
+        \item{\begin{minted}{matlab}
+'plotting', 'yes' or 'no'. Default is yes
 \end{minted}
-This determines whether to use the main scripts to reset the system to a known state. However this is dangerous if the machine is not in an intrinsically stable condition.
-\begin{minted}{matlab}
-'tunes', previously measured tune value.
+Determines if the plotting is displayed. The raw data is saved in either case.}
+        \item{\begin{minted}{matlab}
+'additional_save_location', string representing a filepath. Default is NaN
 \end{minted}
-The default is to measure the tune as part of the measurement.
+Saves the data in the requested location in addition to the standard location.}
+        \item{\begin{minted}{matlab}
+'auto_setup', 'yes' or 'no'. Default is yes
+\end{minted}
+This determines whether to use the main scripts to reset the system to a known state. However this is dangerous if the machine is not in an intrinsically stable condition.}
+    \end{itemize}
+\end{itemize}
+
 \subsubsection{Growdamp}
 The top level code to run a growdamp measurement for each axis is; 
 \begin{minted}{matlab}
-    >> [~] = growdamp_all('x') 
-    >> [~] = growdamp_all('y') 
-    >> [~] = growdamp_all('s') 
+    >> growdamp_all('x') 
+    >> growdamp_all('y') 
+    >> growdamp_all('s') 
 \end{minted}
 
 The parameters for the length of excitation and  capture are set in \verb|mbf_growdamp_config.m|.
  The \verb|mbf_growdamp_setup| code sets up the hardware for the correct type of measurement. 
  
- \verb|mbf_growdamp_capture| triggers the measurement, captures the data and stores it in the file structure defined in \verb|mbf_system_config|. 
+ \verb|mbf_growdamp_capture| triggers the measurement, captures the data and stores it in the file structure defined in \verb|mbf_system_config|. If plotting is selected the code shows the last saved dataset.
+ 
+Additional optional settings
+\begin{itemize}
+\item \verb|excitation(str)|: sets whether the measurement uses an excitation to drive a resonance or if the measurement just uses the natural beam coupling. Defaults to 'yes'
+\item \verb|excitation_location(str)|: The location of the excitation in tune space. The default value is 'tune'.
+\item \verb|excitation_manual(float)|: if \verb|excitation_location| is set to 'manual' then this defines the location of the excitation in tune space.
+\item \verb|pll_tracking (str)|: Sets if the excitation frequency follows the tune jitter. Default is no
+\item \verb|pll_bunches (float)|: bunches the pll is active on.
+\item \verb|pll_guard_bunches (float)|: the number of bunches surrounding the pll bunches for which feedback is switched off.
+\item \verb|bunch_monitor(list(int)|): This determines which bunches are monitored during the measurement. Defaults to and array of ones which means all bunches.
+\item \verb|capture_full_bunch_motion(str)|: Captures the centroid motion for the duration of the measurement. Defaults to no as this is a lot of data. 
+\end{itemize}
 \subsubsection{Modescan}
 The top level code to run a modescan measurement for each axis is; 
 \begin{minted}{matlab}
@@ -404,6 +467,14 @@ The top level code to run a modescan measurement for each axis is;
 \end{minted}
 
 The \verb|mbf_modescan_setup| code sets up the hardware for the correct type of measurement. \verb|mbf_modescan_capture| triggers the measurement, captures the data and stores it in the file structure defined in \verb|mbf_system_config|. 
+
+Additional optional settings
+\begin{itemize}
+    \item \verb|n_repeats(int)|: How many times to repeat each measurement point.
+    \item \verb|dwell (int)|: How many turns to stay at each measurement point.
+    \item \verb|excitation_gain(float)|: level of the excitation.
+\end{itemize}
+
 \subsubsection{Spectra}
 The top level code to run a modescan measurement for each axis is; 
 \begin{minted}{matlab}
@@ -414,15 +485,20 @@ The top level code to run a modescan measurement for each axis is;
 
 The \verb|mbf_spectrum_setup| code sets up the hardware for the correct type of measurement. \verb|mbf_spectrum_capture| triggers the measurement, captures the data and stores it in the file structure defined in \verb|mbf_system_config|. 
 
+Additional optional settings
+\begin{itemize}
+    \item \verb|n_turns (int)|: number of turns to capture. Default is 1000.
+    \item \verb|repeat (int)|: Number of repeat points. Default is 1.
+\end{itemize}
 \section{MBF developmental measurements}
 The MBF system is also used as an instrument for investigating the accelerator behaviour and the behaviour of the beam under different conditions. It can also be used as a driver for certain beam behaviours. These codes tend to be less well tested as they are often only used for particular investigations.
-\subsection{Transverse damping}
 \subsection{Emittance control}
 \subsection{Bunch motion}
+
  \verb|mbf_bunch_motion_setup| sets up all three systems to use the appropriate triggers. 
  
  \verb|mbf_bunch_motion_capture| arms the systems, and once triggered by an external trigger, will capture and store the data.
-
+\subsection{Bunch cleaning}
 \chapter{MBF Archival retrieval}
 
 \section{Introduction}
@@ -436,20 +512,23 @@ The simplest thing is to look at the last results taken. To do this simply run t
    >> visualise_latest_mbf_results 
 \end{minted}
  This will return analysed results for all the standard measurements.
- You can also get the code to save pngs of the graphs at a location of your choosing using optional flags.
-\begin{minted}{matlab}
->> visualise_latest_mbf_results('save_graphs', 'yes', 'out_path', [your desired location])
+ 
+ There are optional flags to modify the standard behaviour.
+ \begin{itemize}
+     \item {\begin{minted}{matlab}
+'save_graphs', 'yes', 'out_path', [your desired location])
 \end{minted}
-It is possible to change the x axis of the Growdamp measurement by using the  \verb+growdamp_plot_mode+ optional input.
-\begin{minted}{matlab}
-    >> visualise_latest_mbf_results('growdamp_plot_mode', 'freq') 
+Save pngs of the graphs at a location of your choosing.}
+   \item {\begin{minted}{matlab}
+'measurements', {'Growdamp', 'Modescan', 'Spectrum', 'system_phase_scan', 'clock_phase_scan'}
 \end{minted}
-Will put the output on a frequency scale rather than the usual mode scale 
-\begin{minted}{matlab}
-    >> visualise_latest_mbf_results('growdamp_plot_mode', 'pos') 
+Select only the measurements you are interested in.}
+   \item {\begin{minted}{matlab}
+'axes', {'x', 'y', 's'}
 \end{minted}
-Will reorganise the modes to be numbered 0:935 rather than –468:468 
-
+Select only the axes you are interested in.}
+ \end{itemize}
+ 
 Figure \ref{fig:growdamp_example} is an example of the output for Growdamp, figure \ref{fig:modescan_example} of Modescan measurements and figure \ref{fig:spectrum_example} of spectral measurements.
 
  \begin{figure}[hbt]
@@ -520,15 +599,7 @@ Figure \ref{fig:growdamp_example} is an example of the output for Growdamp, figu
     \label{fig:spectrum_example}
 \end{figure}
 \clearpage
-\section{Frontend tuning results}
-By running \verb|visualise_latest_bbbfe_results| it will output the results from the latest results from the DORIS and frontend tuning.
-\begin{minted}{matlab}
->> visualise_latest_BBFE_results
-\end{minted}
-You can also get the code to save pngs of the graphs at a location of your choosing using optional flags.
-\begin{minted}{matlab}
->> visualise_latest_BBFE_results('save_graphs', 'yes', 'out_path', [your desired location])
-\end{minted}
+
 \begin{figure}[hbt]
    \centering
     \begin{subfigure}[b]{0.45\textwidth}
@@ -550,6 +621,7 @@ You can also get the code to save pngs of the graphs at a location of your choos
     \caption{Example system phase results}
     \label{fig:system_phase_example}
 \end{figure}
+
 
 \begin{figure}[hbt]
    \centering
@@ -573,23 +645,88 @@ You can also get the code to save pngs of the graphs at a location of your choos
     \label{fig:clock_phase_example}
 \end{figure}
 
+\begin{figure}[hbt]
+    \centering
+    \includegraphics[width=0.5\linewidth]{Documentation//Usage_of_mbf_applications/DORIS_scan.png}
+    \caption{Example DORIS phase scan}
+    \label{fig:doris_phase_scan}
+\end{figure}
 \clearpage
+
 \section{Getting any historic data} 
 
-A more flexible way is to set up the time period you are interested in looking at and use the measurement specific retrieval tool. 
+A more flexible way is to set up the time period you are interested in looking at and use the measurement specific retrieval tool. If there is only one dataset in the chosen date range then the graphs in the previous section are created. Otherwise alternative graphs are plotted which better allow the investigation of variations over time or variation with current for example.
 
-You can set up the period of interest by using a modified version the following example code. 
-\begin{minted}{matlab}
-    >> start_datenum = datetime('16/04/2023_21:38',...
-        'InputFormat','dd/MM/yyyy_HH:mm'); 
-    >> end_datenum = datetime('16/06/2023_22:55',...
-        'InputFormat','dd/MM/yyyy_HH:mm'); 
-    >> date_range = [start_datenum, end_datenum]; 
+Again there are common settings
+\begin{itemize}
+    \item Required
+    \begin{itemize}
+        \item{\begin{minted}{matlab}
+ax, {'x', 'y', 's'}
 \end{minted}
-Starting with growdamp data, the following command will extract any measurements taken within the date range for the y axis and then plot them on top of one another. An example of this is shown in figure \ref{fig:growdamp_collate}.
+Select the axis of interest.}
+    \end{itemize}
+    \begin{itemize}
+        \item{You can set up the period of interest by using a modified version the following example code. 
 \begin{minted}{matlab}
-    >> conditioned_data = mbf_growdamp_archival_retrieval('y',...
-        date_range); 
+>> start_datenum = datetime(2026, 04, 21, 15, 15, 00); 
+>> end_datenum = datetime(2026, 04, 21, 18, 00, 00); 
+>> date_range = [start_datenum, end_datenum]; 
+\end{minted}
+}
+    \end{itemize}
+    \begin{itemize}
+        \item{filter conditions. As machine conditions can be different it is possible to filter on metadata values. Usually current range and RF frequency range. This is often useful to ensure that any measurements used are below instability thresholds. 
+ }
+    \end{itemize}
+    \item Optional
+     \begin{itemize}
+        \item{\begin{minted}{matlab}
+'bypass_index', 'yes' or 'no' Default is no
+\end{minted}
+The codes write data to index files for faster retrieval. If the file is corrupted this option allows the retrieval code to use the underlying data.}
+    \end{itemize}
+     \begin{itemize}
+        \item {\begin{minted}{matlab}
+'metadata_only', 'yes' or 'no' Default is no
+\end{minted}
+Useful to quickly find what measurement have been done.}
+    \end{itemize}
+     \begin{itemize}
+        \item {\begin{minted}{matlab}
+'analysis_type', 'collate' or 'sweep' Default is 'collate'
+\end{minted}
+Either just plot each dataset on top of one another, or sort them against a variable in the dataset.}
+    \end{itemize}
+     \begin{itemize}
+        \item {\begin{minted}{matlab}
+'sweep_parameter', any variable in the dataset Default is 'current'
+\end{minted}
+If analysis type is set to sweep this determines the variable to sweep against.}
+    \end{itemize}
+         \begin{itemize}
+        \item {\begin{minted}{matlab}
+'parameter_step', Default is 0.1
+\end{minted}
+In the sweep datasets with a sweep value closer than this are averaged.}
+    \end{itemize}
+\end{itemize}
+
+An example of putting this together
+\begin{minted}{matlab}
+mbf_growdamp_archival_retrieval('y', 
+[datetime(2026, 04, 21, 15, 15 ,00), datetime(2026, 04, 21, 18, 00, 00)],
+{'current', [30 300]},
+'analysis_type', 'sweep',
+'sweep_parameter', 'current',
+'parameter_step', 5)
+\end{minted}
+In this case we are asking for all data between 3pm and 6pm on 21st April 2026, but only if the current is between 30mA and 300mA. We are asking the output to be plotted as a current sweep with a minimum step of 5mA.
+
+\subsection{Growdamp}
+The following command will extract any measurements taken within the date range for the y axis and then plot them on top of one another. An example of this is shown in figure \ref{fig:growdamp_collate}.
+\begin{minted}{matlab}
+    >> mbf_growdamp_archival_retrieval('y',  date_range, {}); 
 \end{minted}
 \begin{figure}[ht]
     \centering
@@ -600,30 +737,56 @@ Starting with growdamp data, the following command will extract any measurements
 
 This allows easy identification of changes in behaviour 
 
-
-As machine conditions can be different it is possible to filter on current range and RF frequency range 
-
-For example, by setting the \verb+current_range+ optional input we can select only measurements which were taken between 2mA and 40mA (figure \ref{fig:growdamp_collated_limit_current_range}).
-
-\begin{minted}{matlab}
-    >> conditioned_data = mbf_growdamp_archival_retrieval('y',...
-        date_range, 'current_range', [2 40]); 
+\subsubsection{Additional optional settings}
+\begin{itemize}
+    \item{\begin{minted}{matlab}
+'active_override', number of turns to analyse, Default is NaN for all
 \end{minted}
+}
+    \item{\begin{minted}{matlab}
+'passive_override', number of turns to analyse, Default is NaN for all
+\end{minted}
+}
+    \item{\begin{minted}{matlab}
+'advanced_fitting', allows alternative fitting algorithm to be used, 
+Default is 0 for basic fitting 
+\end{minted}
+}
+    \item{\begin{minted}{matlab}
+'debug', plots extra graphs to help identify the cause of odd behaviour, 
+Default is 0 for off
+\end{minted}
+}
+\end{itemize}
 
-This is often useful to ensure that any measurements used are below instability thresholds. 
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=1\linewidth]{growdamp_collate_limit_current_range.png}
-    \caption{Collated growdamp results only returning results which are within the specified current range.}
-    \label{fig:growdamp_collated_limit_current_range}
-\end{figure}
+\subsubsection{Common filtering options}
+\begin{itemize}
+    \item{\begin{minted}{matlab}
+'current', [30 300] The current range to include
+\end{minted}
+}
+    \item{\begin{minted}{matlab}
+ 'excitation_setting', 'yes'or 'no' 
+ This allows one to distinguish between experimanets with driven growth
+ and the machines natural growth.
+\end{minted}
+}
+    \item{\begin{minted}{matlab}
+ 'excitation_location', 'tune' or 'sideband' or 'manual' 
+ This separates out different types of excitation. 
+\end{minted}
+}
+\end{itemize}
+\subsubsection{Examples}
 One common set of measurements beyond simple comparisons is plotting the measurements against a changing machine parameter (usually current) 
 
 Although it is possible to extract such relationships from the data just using the variation over time, it is more usual to have a dedicated measurement set for the purpose. In this case you would set the period to only contain data from that experiment. Then you would run the retrieval with the analysis type set to sweep and then set the appropriate parameter to sweep over (again it is usually current but any variable in the datasets can be used). Figure \ref{fig:growdamp_parameter_sweep} shows an example of this.
 \begin{minted}{matlab}
-    >> conditioned_data = mbf_growdamp_archival_retrieval('y', ...
-        date_range, 'analysis_type', 'sweep',...
-        'sweep_parameter', 'current'); 
+    >> mbf_growdamp_archival_retrieval('y',...
+    [datetime(2026, 04, 21, 15, 15 ,00), datetime(2026, 04, 21, 18, 00, 00)],...
+    {'current', [30 300], 'excitation_setting', 'yes',...
+    'excitation_location', 'tune'}, ...
+    'analysis_type', 'sweep', 'parameter_step', 5)
 \end{minted}
 \begin{figure}[ht]
     \centering
@@ -631,18 +794,39 @@ Although it is possible to extract such relationships from the data just using t
     \caption{Growdamp results against a swept parameter. In this case the beam current. Note: These are placeholder graphs.}
     \label{fig:growdamp_parameter_sweep}
 \end{figure}
-At this point further analysis is possible. In the case of a current sweep, it is possible to predict the current which individual modes will go unstable. (figure \ref{fig:growdamp_parameter_sweep_further_analysis}). 
+At this point further analysis is possible. In the case of a current sweep, it is possible to predict the current which individual modes will go unstable. (figures \ref{fig:growdamp_damping_rates} and \ref{fig:growdamp_extrapolated_damping_rates}). 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=1\linewidth]{growdamp_parameter_sweep_further_analysis.png}
-    \caption{Results from further analysis of the current dependent growdamp data. Note: These are placeholder graphs.}
-    \label{fig:growdamp_parameter_sweep_further_analysis}
+    \includegraphics[width=1\linewidth]{growdamp_damping_rates.png}
+    \caption{Results from further analysis of the current dependent growdamp data.}
+    \label{fig:growdamp_damping_rates}
+\end{figure}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=1\linewidth]{growdamp_extrapolated_damping_rates.png}
+    \caption{Results from further analysis of the current dependent growdamp data. Extrapolating to full operational current.}
+    \label{fig:growdamp_extrapolated_damping_rates}
 \end{figure}
 \clearpage
+
+\subsection{Modescan}
+\subsubsection{Additional optional settings}
+\begin{itemize}
+    \item{None}
+\end{itemize}
+\subsubsection{Common filtering options}
+\begin{itemize}
+    \item{\begin{minted}{matlab}
+'current', [30 300] The current range to include
+\end{minted}
+}
+\end{itemize}
+\subsubsection{Examples}
 Modescan data retrieval is much the same as the growdamp retrieval. Once the date range is set up the following code will extract and display all results from the y axis (figure \ref{fig:modescan_collate}).  
 \begin{minted}{matlab}
-    >> conditioned_data = mbf_modescan_archival_retrieval('y',...
-        date_range); 
+    >> mbf_modescan_archival_retrieval('y', ...
+    [datetime(2026, 04, 21, 15, 15 ,00), datetime(2026, 04, 21, 18, 00, 00)],...
+    {}, 'analysis_type', 'sweep', 'parameter_step', 5)
 \end{minted}
  \begin{figure}[ht]
      \centering
@@ -651,33 +835,18 @@ Modescan data retrieval is much the same as the growdamp retrieval. Once the dat
      \label{fig:modescan_collate}
  \end{figure}
 
-As before you can filter on current range(figure \ref{fig:modescan_collate_limited_range}).  
-\begin{minted}{matlab}
-    >> conditioned_data = mbf_modescan_archival_retrieval('y',...
-        date_range, 'current_range', [2 40]); 
-\end{minted}
- \begin{figure}[ht]
-     \centering
-     \includegraphics[width=1\linewidth]{modescan_collate_limited_range.png}
-     \caption{Collated modescan results restricted to the specified current range.}
-     \label{fig:modescan_collate_limited_range}
- \end{figure}
 
-And can plot against a parameter sweep  (figure \ref{fig:modescan_parameter_sweep}). 
-\begin{minted}{matlab}
-    >> conditioned_data = mbf_modescan_archival_retrieval('y',...
-        date_range, 'analysis_type', 'sweep',...
-        'sweep_parameter', 'current'); 
-\end{minted}
- \begin{figure}[ht]
-     \centering
-     \includegraphics[width=1\linewidth]{modescan_parameter_sweep.png}
-     \caption{Growdamp results against a swept parameter. In this case the beam current.}
-     \label{fig:modescan_parameter_sweep}
- \end{figure}
-\clearpage
-Spectra 
 
+\subsection{Spectra}
+\subsubsection{Additional optional settings}
+\subsubsection{Common filtering options}
+\begin{itemize}
+    \item{\begin{minted}{matlab}
+'current', [30 300] The current range to include
+\end{minted}
+}
+\end{itemize}
+\subsubsection{Examples}
 Tune sweep over modes 
 \clearpage
 
