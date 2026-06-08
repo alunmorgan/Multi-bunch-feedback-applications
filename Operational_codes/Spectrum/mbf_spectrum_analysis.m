@@ -15,8 +15,10 @@ function data = mbf_spectrum_analysis(input_data)
 %           data (structure): analysed data.
 %
 % Example: data = mbf_spectrum_analysis(raw_data, 1)
-
-
+if isstruct(input_data.raw_data)
+    temp = fieldnames(input_data.raw_data);
+    input_data.raw_data = input_data.raw_data.(temp{1});
+end %if
 % for k=1:raw_data.repeat
 %     data_length=length(raw_data.raw_data{k});
 for k=1:input_data.repeat

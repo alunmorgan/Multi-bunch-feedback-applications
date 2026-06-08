@@ -6,7 +6,6 @@ function mbf_modescan_archival_plotting(requested_data, data_magnitude, data_pha
 %      times (numeric vector): Datetimes of the datasets.
 %      experimental_setup (structure): The setup parameters for the
 %                                      analysis.
-%      plot_error_graphs (anything): if present the code will plot the results of the fit errors.
 %
 % Example: mbf_growdamp_archival_plotting(requested_data, data_magnitude, data_phase, times, setup, selections, extents)
 

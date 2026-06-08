@@ -16,7 +16,7 @@ for k=repeat:-1:1
         % LMBF hardware
         set_variable([pv_names.hardware_names.L pv_names.tails.triggers.MEM.arm],1);
         set_variable([pv_names.hardware_names.L, pv_names.tails.triggers.soft], 1)
-        captured_data.s_data{k} = mbf_read_mem(pv_names.hardware_names.L, n_turns,'channel', 0, 'lock', 60);
+        captured_data{k} = mbf_read_mem(pv_names.hardware_names.L, n_turns,'channel', 0, 'lock', 60);
     else
         % TMBF hardware
         set_variable([pv_names.hardware_names.T pv_names.tails.triggers.MEM.arm],1);

@@ -36,12 +36,19 @@ end %for
 dirs = dirs(I);
 
 ck = 1;
-for ax_num = 1:length(p.Results.axes)
-    ax = p.Results.axes{ax_num};
-    for meas_num = 1:length(p.Results.measurements)
+
+for meas_num = 1:length(p.Results.measurements)
+    if contains(p.Results.measurements{meas_num}, 'DORIS_phase_scan',...
+            'IgnoreCase', true)
+        exp_name{ck} = p.Results.measurements{meas_num};
+        ck = ck +1;
+    else
+    for ax_num = 1:length(p.Results.axes)
+        ax = p.Results.axes{ax_num};
         exp_name{ck} = [p.Results.measurements{meas_num}, '_', ax];
         ck = ck +1;
     end %for
+    end %if
 end %for
 
 files_wanted = struct;
@@ -55,9 +62,11 @@ for kse = 1:length(dirs)
             temp_files = files(contains(files, exp_name{bws}, 'IgnoreCase', true));
             if ~isempty(temp_files)
                 [~, names, ~] = fileparts(temp_files);
-                test = regexp(names, '.*_(\d\d)_(\d\d)_(\d\d\d\d)_(\d\d)-(\d\d)-(\d\d)','tokens', 'forcecelloutput');
+                test = regexp(names, '.*_(\d\d)_(\d\d)_(\d\d\d\d)_(\d\d)-(\d\d)-(\d\d)',...
+                    'tokens', 'forcecelloutput');
                 for jk = 1:length(test)
-                    temp_dates(jk) = datetime(str2double(test{jk}{1}{3}), str2double(test{jk}{1}{2}),...
+                    temp_dates(jk) = datetime(str2double(test{jk}{1}{3}),...
+                        str2double(test{jk}{1}{2}),...
                         str2double(test{jk}{1}{1}), str2double(test{jk}{1}{4}),...
                         str2double(test{jk}{1}{5}), str2double(test{jk}{1}{6}));
                 end %for
@@ -86,6 +95,8 @@ for bws = 1:length(exp_name)
              BBBFE_system_phase_scan_plotting(data.data)
         elseif contains(exp_name{bws}, 'clock_phase_scan', 'IgnoreCase',true)
              BBBFE_clock_phase_scan_plotting(data.data)
+        elseif contains(exp_name{bws}, 'DORIS_phase_scan', 'IgnoreCase',true)
+             DORIS_phase_scan_plotting(data.data)
         end %if
         if strcmp(p.Results.save_graphs, 'yes')
             saveas(gcf, [p.Results.out_path, 'MBF ',exp_name{bws}, ...

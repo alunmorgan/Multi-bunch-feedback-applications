@@ -35,18 +35,14 @@ harmonic_number = length(data.(stages{1}).damping_rate);
 if strcmpi(p.Results.plot_mode, 'pos')
     x_plt_axis = 0:harmonic_number-1;
     labelX = 'Mode';
+    for nse = 1:length(stages)
+        data.modes.(stages{nse}) = data.(stages{nse});
+    end %for
 elseif strcmpi(p.Results.plot_mode, 'neg')
     x_plt_axis = (0:harmonic_number-1) - harmonic_number/2;
     labelX = 'Mode';
     for nse = 1:length(stages)
-        data.(stages{nse}) = circshift(data.(stages{nse}), -harmonic_number/2, 1);
-    end %for
-elseif strcmpi(p.Results.plot_mode, 'freq')
-    x_plt_axis = (0:harmonic_number-1) - harmonic_number/2;
-    x_plt_axis = x_plt_axis * metadata.RF / harmonic_number * 1E-6;
-    labelX = 'Frequency (MHz)';
-    for nse = 1:length(stages)
-        data.(stages{nse}) = circshift(data.(stages{nse}), -harmonic_number/2, 1);
+        data.modes.(stages{nse}) = circshift(data.(stages{nse}), -harmonic_number/2, 1);
     end %for
 end %if
 
@@ -55,25 +51,40 @@ ck = 1;
 for wnf = 1:length(stages)
     for ntd = 1:length(stages)
         if wnf ~= ntd
-            freq_diffs(ck,:) = data.(stages{wnf}).frequency_shift - ...
-                data.(stages{ntd}).frequency_shift;
+            freq_diffs(ck,:) = data.modes.(stages{wnf}).frequency_shift - ...
+                data.modes.(stages{ntd}).frequency_shift;
             freq_diff_names{ck} = [stages{wnf}, ' - ', stages{ntd}];
             ck = ck +1;
         end %if
     end %for
 end %for
 
+% Convert to frequencies
+for nse = 1:length(stages)
+    measurements = fieldnames(data.(stages{nse}));
+    for bes = 1:length(measurements)
+        [x_plt_axis_f, data.f.(stages{nse}).(measurements{bes})] = mode_to_frequency(metadata.RF,...
+            harmonic_number,...
+            metadata.tunes.([metadata.ax_label,'_tune']).tune,...
+            data.(stages{nse}).(measurements{bes}));
+    end %for
+end %for
+x_plt_axis_f = x_plt_axis_f * 1E-6;
+
+labelX_f = 'Frequency (MHz)';
+
 %% Plotting
 figure('Position', [20, 40, 800, 800])
-t = tiledlayout(4, 2,'TileSpacing','compact', 'Padding', 'tight');
+t = tiledlayout(4, 3,'TileSpacing','compact', 'Padding', 'tight');
 title(t, {['MBF growdamp results ', metadata.ax_label,' axis ', datestr(metadata.time)];...
     ['Current: ', num2str(round(metadata.current)), 'mA']})
-xlabel(t, labelX)
-ax1 = nexttile(5);
+% xlabel(t, labelX)
+
+ax1 = nexttile(8);
 hold on
 for ns = 1:length(stages)
     if ~contains(stages{ns}, 'growth')
-        plot(x_plt_axis, data.(stages{ns}).error(:), 'DisplayName', stages{ns})
+        plot(x_plt_axis, data.modes.(stages{ns}).error(:), 'DisplayName', stages{ns})
     end %if
 end %for
 hold off
@@ -81,11 +92,12 @@ ylabel('Error')
 legend
 grid on
 xlim([x_plt_axis(1) x_plt_axis(end)])
-ax2 = nexttile(1, [2,1]);
+
+ax2 = nexttile(2, [2,1]);
 hold on
 for ns = 1:length(stages)
     if ~contains(stages{ns}, 'growth')
-        plot(x_plt_axis, data.(stages{ns}).damping_rate(:), 'DisplayName', stages{ns})
+        plot(x_plt_axis, data.modes.(stages{ns}).damping_rate(:), 'DisplayName', stages{ns})
     end %if
 end %for
 hold off
@@ -95,11 +107,11 @@ grid on
 xlim([x_plt_axis(1) x_plt_axis(end)])
 linkaxes([ax1, ax2], 'x')
 
-ax3 =nexttile(7);
+ax3 =nexttile(11);
 hold on
 for ns = 1:length(stages)
     if ~contains(stages{ns}, 'growth')
-        plot(x_plt_axis, data.(stages{ns}).frequency_shift(:), 'DisplayName', stages{ns})
+        plot(x_plt_axis, data.modes.(stages{ns}).frequency_shift(:), 'DisplayName', stages{ns})
     end %if
 end %for
 hold off
@@ -108,12 +120,13 @@ ylabel({'Difference from';'excitation tune'})
 legend
 grid on
 xlim([x_plt_axis(1) x_plt_axis(end)])
+xlabel(labelX)
 
-ax4 = nexttile(6);
+ax4 = nexttile(7);
 hold on
 for ns = 1:length(stages)
     if contains(stages{ns}, 'growth')
-        plot(x_plt_axis, data.(stages{ns}).error(:), 'DisplayName', stages{ns})
+        plot(x_plt_axis, data.modes.(stages{ns}).error(:), 'DisplayName', stages{ns})
     end %if
 end %for
 hold off
@@ -121,11 +134,12 @@ ylabel('Error')
 legend
 grid on
 xlim([x_plt_axis(1) x_plt_axis(end)])
-ax5 = nexttile(2, [2,1]);
+
+ax5 = nexttile(1, [2,1]);
 hold on
 for ns = 1:length(stages)
     if contains(stages{ns}, 'growth')
-        plot(x_plt_axis, data.(stages{ns}).damping_rate(:), 'DisplayName', stages{ns})
+        plot(x_plt_axis, data.modes.(stages{ns}).damping_rate(:), 'DisplayName', stages{ns})
     end %if
 end %for
 hold off
@@ -134,11 +148,11 @@ legend
 grid on
 xlim([x_plt_axis(1) x_plt_axis(end)])
 
-ax6 = nexttile(8);
+ax6 = nexttile(10);
 hold on
 for ns = 1:length(stages)
     if contains(stages{ns}, 'growth')
-        plot(x_plt_axis, data.(stages{ns}).frequency_shift(:), 'DisplayName', stages{ns})
+        plot(x_plt_axis, data.modes.(stages{ns}).frequency_shift(:), 'DisplayName', stages{ns})
     end %if
 end %for
 hold off
@@ -147,25 +161,48 @@ ylabel({'Difference from';'excitation tune'})
 legend
 grid on
 xlim([x_plt_axis(1) x_plt_axis(end)])
+xlabel(labelX)
 
 linkaxes([ax1, ax2, ax3], 'x')
 linkaxes([ax4, ax5, ax6], 'x')
 
-% figure('Position', [20, 40, 800, 800])
-% t = tiledlayout(1, 1);
-% title(t, {['MBF growdamp results ', metadata.ax_label,' axis ', datestr(metadata.time)];...
-%     ['Current: ', num2str(round(metadata.current)), 'mA']})
-% xlabel(t, labelX)
-% nexttile;
-% hold on
-% for ns = 1:length(freq_diff_names)
-%     plot(x_plt_axis, squeeze(freq_diffs(ns,:)), 'DisplayName', freq_diff_names{ns})
-% end %for
-% hold off
-% xlim([x_plt_axis(1) x_plt_axis(end)])
-% ylabel({'Frequency differences between';'experiment stages'})
-% legend
-% grid on
-% xlim([x_plt_axis(1) x_plt_axis(end)])
-% 
-% 
+ax7 = nexttile(9);
+hold on
+for ns = 1:length(stages)
+    if ~contains(stages{ns}, 'growth')
+        plot(x_plt_axis_f, data.f.(stages{ns}).error(:), 'DisplayName', stages{ns})
+    end %if
+end %for
+hold off
+ylabel('Error')
+legend
+grid on
+xlim([x_plt_axis_f(1) x_plt_axis_f(end)])
+
+ax8 = nexttile(3, [2,1]);
+hold on
+for ns = 1:length(stages)
+    if ~contains(stages{ns}, 'growth')
+        plot(x_plt_axis_f, data.f.(stages{ns}).damping_rate(:), 'DisplayName', stages{ns})
+    end %if
+end %for
+hold off
+ylabel('Damping rates (1/turns)')
+legend
+grid on
+xlim([x_plt_axis_f(1) x_plt_axis_f(end)])
+linkaxes([ax7, ax8], 'x')
+
+ax9 =nexttile(12);
+hold on
+for ns = 1:length(stages)
+    if ~contains(stages{ns}, 'growth')
+        plot(x_plt_axis_f, data.f.(stages{ns}).frequency_shift(:), 'DisplayName', stages{ns})
+    end %if
+end %for
+hold off
+ylabel({'Difference from';'excitation tune'})
+legend
+grid on
+xlim([x_plt_axis_f(1) x_plt_axis_f(end)])
+xlabel(labelX_f)
