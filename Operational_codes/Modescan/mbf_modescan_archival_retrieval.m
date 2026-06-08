@@ -40,7 +40,6 @@ addParameter(p, 'metadata_only', 'no', @(x) any(validatestring(x, boolean_string
 addParameter(p, 'analysis_type', 'collate', @ischar)
 addParameter(p, 'sweep_parameter', 'current', @ischar);
 addParameter(p, 'parameter_step', 0.1, validScalarPosNum);
-addParameter(p,'current_range',[2 305]);
 
 parse(p, ax, date_range, filter_conditions, varargin{:});
 

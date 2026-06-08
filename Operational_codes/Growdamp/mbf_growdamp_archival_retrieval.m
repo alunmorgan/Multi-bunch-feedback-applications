@@ -51,7 +51,6 @@ addParameter(p, 'parameter_step', 0.1, validScalarPosNum);
 addParameter(p, 'active_override', NaN);
 addParameter(p, 'passive_override', NaN);
 addParameter(p,'advanced_fitting',0, @isnumeric);
-addParameter(p,'current_range', [2 305]);
 addParameter(p, 'debug', 0);
 
 parse(p, ax, date_range, filter_conditions, varargin{:});
