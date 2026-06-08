@@ -63,13 +63,15 @@ end %function
 function add_original_values(mbf_ax, data)
 
 extents_y = get(gca, 'YLim');
-if strcmpi(mbf_ax, 's')
-    plot([data.original_setting, data.original_setting], extents_y,...
-        'r:', 'DisplayName', 'Original setting(I)', 'LineWidth', 2)
-    plot([data.original_settingQ, data.original_settingQ], extents_y,...
-        'c:', 'DisplayName', 'Original setting(Q)', 'LineWidth', 2)
-else
-    plot([data.original_setting, data.original_setting], extents_y,...
-        'r:', 'DisplayName', 'Original setting', 'LineWidth', 2)
+if isfield(data, 'original_setting')
+    if strcmpi(mbf_ax, 's')
+        plot([data.original_setting, data.original_setting], extents_y,...
+            'r:', 'DisplayName', 'Original setting(I)', 'LineWidth', 2)
+        plot([data.original_settingQ, data.original_settingQ], extents_y,...
+            'c:', 'DisplayName', 'Original setting(Q)', 'LineWidth', 2)
+    else
+        plot([data.original_setting, data.original_setting], extents_y,...
+            'r:', 'DisplayName', 'Original setting', 'LineWidth', 2)
+    end %if
 end %if
 end %function

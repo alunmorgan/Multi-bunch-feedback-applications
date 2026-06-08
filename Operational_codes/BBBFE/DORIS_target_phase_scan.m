@@ -27,7 +27,7 @@ data.base_name = 'doris_phase_scan';
 data.mbf_pv_x = pv_names.hardware_names.x;
 data.mbf_pv_y = pv_names.hardware_names.y;
 data.doris_pv = pv_names.doris.phase;
-original_setting = get_variable(data.doris_pv);
+data.original_setting = get_variable(data.doris_pv);
 
 % moving to starting point in scan
 set_variable(data.doris_pv, -180)
@@ -53,7 +53,7 @@ for dbf = 1:length(data.phase)
 end %for
 
 % move back to the original setting
-set_variable(data.doris_pv, original_setting)
+set_variable(data.doris_pv, data.original_setting)
 
 BBBFE_detector_restore('X')
 BBBFE_detector_restore('Y')

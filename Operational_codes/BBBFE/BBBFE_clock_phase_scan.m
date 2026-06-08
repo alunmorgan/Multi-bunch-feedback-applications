@@ -39,10 +39,10 @@ else
     error('BBBFE:axiserror','Please use input axes X, Y or S')
 end %if
 
-original_setting = get_variable(fe_phase_pv);
+data.original_setting = get_variable(fe_phase_pv);
 
 % moving to starting point in scan
-for pp = original_setting:-20:-180
+for pp = data.original_setting:-20:-180
     set_variable(fe_phase_pv, pp)
     pause(.5)
 end %for
@@ -66,7 +66,7 @@ for x = 1:length(data.phase)
 end %for
 
 % move back to the original setting
-for pp = -180:20:original_setting
+for pp = -180:20:data.original_setting
     set_variable(fe_phase_pv, pp)
     pause(.5)
 end %for
