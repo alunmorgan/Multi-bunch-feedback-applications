@@ -105,6 +105,7 @@ for bws = 1:length(exp_name)
     catch me
         disp(['Problem with ',exp_name{bws}, ' axis data'])
         disp(me.message)
+        disp([me.stack(1).name, ' line ', num2str(me.stack(1).line)])
     end %try
 end %if
 
