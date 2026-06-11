@@ -8,7 +8,7 @@ function growdamp_all(mbf_axis, varargin)
 %       plotting(str): set whether the data is plotted as well as saved. Default
 %                      is yes.
 %       additional_save_location(str): fully defined filename to save the
-%                                      captured data to in addition to the 
+%                                      captured data to in addition to the
 %                                      main archive.
 %       excitation(str): sets whether the measurement uses an excitation to
 %                        drive a resonance or if the measurement just uses the natural beam coupling.
@@ -16,7 +16,7 @@ function growdamp_all(mbf_axis, varargin)
 %       excitation_location(str): The location of the excitation in tune space.
 %                                 The default value is 'tune'.
 %       excitation_manual(float): if excitation_location is set to 'manual' then
-%                                 this defines the location of the excitation 
+%                                 this defines the location of the excitation
 %                                 in tune space.
 %       pll_tracking (str): Sets if the excitation frequency follows the tune
 %                           jitter. Default is no
@@ -26,9 +26,9 @@ function growdamp_all(mbf_axis, varargin)
 %       bunch_monitor(list(int)): This determines which bunches are monitored
 %                                 during the measurement. Defaults to and array
 %                                 of ones which means all bunches.
-%       capture_full_bunch_motion(str): Captures the centroid motion for the 
-%                                       duration of the measuremnt. 
-%                                       Defaults to no as this is a lot of data. 
+%       capture_full_bunch_motion(str): Captures the centroid motion for the
+%                                       duration of the measuremnt.
+%                                       Defaults to no as this is a lot of data.
 % Example: growdamp_all('x')
 
 [root_string, harmonic_number, pv_names, trigger_inputs] = mbf_system_config;
@@ -50,18 +50,18 @@ addRequired(p, 'mbf_axis', @(x) any(validatestring(x, axis_string)));
 addParameter(p, 'auto_setup', 'yes', @(x) any(validatestring(x, boolean_string)));
 addParameter(p, 'plotting', 'yes', @(x) any(validatestring(x, boolean_string)));
 addParameter(p, 'additional_save_location', NaN);
-addParameter(p, 'excitation', 'yes',  @(x) any(validatestring(x, boolean_string)));
+addParameter(p, 'excitation_setting', 'yes',  @(x) any(validatestring(x, boolean_string)));
 addParameter(p, 'excitation_location', 'tune', @(x) any(validatestring(x,excitation_locations)));
 addParameter(p, 'excitation_manual', 0, valid_number);
 addParameter(p, 'pll_tracking', 'no', @(x) any(validatestring(x,boolean_string)));
 addParameter(p, 'pll_bunches', 400, valid_number);
 addParameter(p, 'pll_guard_bunches', 10, valid_number);
-addParameter(p, 'bunch_monitor', ones(harmonic_number,1));
+addParameter(p, 'bunches_monitored', ones(harmonic_number,1));
 addParameter(p, 'capture_full_bunch_motion', 'no', @(x) any(validatestring(x,boolean_string)));
 
 parse(p, mbf_axis, varargin{:});
 
-%% Constructing the different states for the squencer. These will be arranged 
+%% Constructing the different states for the squencer. These will be arranged
 % in various configurations depending on the experiment requested.
 %
 % bank = 1 is Feedback off
@@ -194,34 +194,38 @@ end %if
 growdamp.ax_label = mbf_axis;
 growdamp.base_name = ['Growdamp_' mbf_axis '_axis'];
 growdamp.harmonic_number = harmonic_number;
-growdamp.excitation_location = p.Results.excitation_location;
 growdamp.excitation_tune = excitation_tune;
-growdamp.excitation_setting = p.Results.excitation;
 growdamp.states = states;
 growdamp.state_names = state_names;
-growdamp.bunches_monitored = p.Results.bunch_monitor;
+temp = get_variable([pv_head, ':FIR:GAIN_S']);
+growdamp.fir_gain = temp{1};
+
+input_fields = fieldnames(p.Results);
+for jltf = 1:length(input_fields)
+    growdamp.(input_fields{jltf}) = p.Results.(input_fields{jltf});
+end %for
+% growdamp.auto_setup = p.auto_setup;
+% growdamp.excitation_location = p.Results.excitation_location;
+% growdamp.excitation_setting = p.Results.excitation_setting;
+% growdamp.bunches_monitored = p.Results.bunches_monitored;
+% pll_setup.pll_tracking = p.Results.pll_tracking;
+% pll_setup.pll_bunches = p.Results.pll_bunches;
+% pll_setup.pll_guard_bunches = p.Results.pll_guard_bunches;
 
 if strcmp(p.Results.auto_setup, 'yes')
-    % Get the current FIR gain
-    orig_fir_gain = get_variable([pv_head, ':FIR:GAIN_S']);
     % putting the system into a known state.
     setup_operational_mode(mbf_axis, "Feedback")
     % Setting the FIR gain to its original value.
-    set_variable([pv_head, ':FIR:GAIN_S'], orig_fir_gain{1})
+    set_variable([pv_head, ':FIR:GAIN_S'], growdamp.fir_gain)
 end %if
 
 growdamp.mbf_state = get_operational_mode(mbf_axis);
-pll_setup.pll_tracking = p.Results.pll_tracking;
-pll_setup.pll_bunches = p.Results.pll_bunches;
-pll_setup.pll_guard_bunches = p.Results.pll_guard_bunches;
+
 % Setup the MBF ready for the measurement.
-mbf_growdamp_setup(mbf_axis, pv_names, trigger_inputs, harmonic_number...
-    , states, excitation_tune, pll_setup,...
-    p.Results.bunch_monitor);
+mbf_growdamp_setup(growdamp, pv_names, trigger_inputs);
 
 % Capturing data.
-captured_data = mbf_growdamp_capture(mbf_axis, pv_names,...
-    p.Results.capture_full_bunch_motion);
+captured_data = mbf_growdamp_capture(growdamp, pv_names);
 % adding to output data structure.
 data_fields = fieldnames(captured_data);
 for je = 1:length(data_fields)
@@ -231,7 +235,9 @@ end %for
 if strcmp(p.Results.auto_setup, 'yes')
     setup_operational_mode(mbf_axis, "Feedback")
     % Setting the FIR gain to its original value.
-    set_variable([pv_head, ':FIR:GAIN_S'], orig_fir_gain{1})
+    set_variable([pv_head, ':FIR:GAIN_S'], growdamp.fir_gain)
+else
+    reestablish_tune_measurement(mbf_axis)
 end %if
 
 %% saving the data to a file

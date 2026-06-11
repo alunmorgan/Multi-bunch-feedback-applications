@@ -1,6 +1,4 @@
-function mbf_growdamp_setup(mbf_axis, pv_names, trigger_inputs, harmonic_number,...
-    states, excitation_tune, pll_setup,...
-    bunch_monitor)
+function mbf_growdamp_setup(input_settings, pv_names, trigger_inputs)
 % Sets up the MBF system to be ready for a growdamp measurement.
 %
 %   Args:
@@ -14,6 +12,15 @@ function mbf_growdamp_setup(mbf_axis, pv_names, trigger_inputs, harmonic_number,
 % example: mbf_growdamp_setup('x')
 
 mbf_tools
+
+mbf_axis = input_settings.mbf_axis;
+harmonic_number = input_settings.harmonic_number;
+states = input_settings.states;
+excitation_tune = input_settings.excitation_tune;
+bunch_monitor = input_settings.bunches_monitored;
+pll_setup.pll_tracking = input_settings.pll_tracking;
+pll_setup.pll_bunches = input_settings.pll_bunches;
+pll_setup.pll_guard_bunches = input_settings.pll_guard_bunches;
 
 pv_head = pv_names.hardware_names.(mbf_axis);
 pv_head_mem = pv_names.hardware_names.mem.(mbf_axis);
