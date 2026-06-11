@@ -16,7 +16,7 @@ if strcmp(p.Results.save_graphs, 'yes') && any(isnan(p.Results.out_path))
     error(no_path, 'Please provide a path to store the graphs using the out_paths flag.')
 end %if
 
-[root_path, ~, ~, ~] = mbf_system_config;
+[root_path, ~, ~] = mbf_system_config;
 dirs = dir_list_gen_tree(root_path, 'dirs', 1);
 t1 = regexp(dirs, '.*[A-Za-z]+/\d\d\d\d/\d\d/\d\d$');
 t2 = ones(length(t1), 1);

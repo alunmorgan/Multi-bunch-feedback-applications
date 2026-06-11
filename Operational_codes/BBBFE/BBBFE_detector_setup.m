@@ -1,7 +1,6 @@
 function detector_setup = BBBFE_detector_setup(mbf_axis, single_bunch_location)
 
-mbf_axis = lower(mbf_axis);
-[~, ~, pv_names, ~] = mbf_system_config;
+[~, ~, pv_names] = mbf_system_config;
 mbf_names = pv_names.hardware_names;
 detector = pv_names.tails.Detector;
 
