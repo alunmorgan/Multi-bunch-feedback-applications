@@ -15,10 +15,6 @@ function [leading, excited, following, times, experimental_setup] = ...
 %                                    Multiple data sets which are on the same
 %                                    step will be averaged. (only needed if
 %                                    anal_type set to 'parameter sweep')
-%       overrides (list of ints): Two values setting the number of turns to
-%                                    analyse (passive, active)
-%       debug(int): if 1 then outputs graphs of individual modes to allow
-%                                    selection nof appropriate overrides.
 %
 % Returns:
 %         leading (numeric matrix):
