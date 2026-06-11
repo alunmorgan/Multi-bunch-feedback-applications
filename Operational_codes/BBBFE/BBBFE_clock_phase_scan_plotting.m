@@ -16,7 +16,7 @@ title(t, ['BBBFE ',graph_name, ' axis on ', datestr(data.time)])
 subtitle(t, instructions, "FontAngle", "italic", "FontSize", 10)
 xlabel(t, 'phase (degrees)')
 ax1 = nexttile(1);
-hold all
+hold on
 semilogy(data.phase, data.main, 'DisplayName', 'Excited bunch')
 semilogy(data.phase, data.side1, 'DisplayName','Preceeding bunch')
 semilogy(data.phase, data.side2, 'DisplayName', 'Following bunch')
@@ -27,7 +27,7 @@ grid on
 hold off
 
 ax2 = nexttile(2);
-hold all
+hold on
 semilogy(data.phase, data.main - data.side1, 'DisplayName', 'Excited bunch - Preceeding bunch')
 semilogy(data.phase, data.main - data.side2, 'DisplayName','Excited bunch - Following bunch')
 add_original_values(mbf_ax, data)
@@ -37,7 +37,7 @@ grid on
 hold off
 
 ax3 = nexttile(3);
-hold all
+hold on
 semilogy(data.phase, data.adc_phase, 'DisplayName', 'ADC phase')
 add_original_values(mbf_ax, data)
 legend('Location', 'Best')

@@ -48,13 +48,13 @@ for ehs = 1:length(requested_data)
 temp_data = requested_data{sorting(ehs)};
     data_length = length(temp_data.phase);
     subplot(2,4,1)
-    hold all
+    hold on
     plot(temp_data.phase, temp_data.mag, '*')
     xlabel('target phase')
     ylabel('Loop detected magnitude')
     grid on
     subplot(2,4,2)
-    hold all
+    hold on
         %set the phase values where the magnitude is very low to NaN in order to
     %clean up the graphs
     temp_phase = temp_data.phase;
@@ -66,14 +66,14 @@ temp_data = requested_data{sorting(ehs)};
     grid on
     xlim([0, 1])
     subplot(2,4,3)
-    hold all
+    hold on
     plot(rem(temp_data.f,1), temp_data.mag, '*')
     xlabel('Loop detected fractional tune')
     ylabel('Loop detected magnitude')
     grid on
     xlim([0, 1])
     subplot(2,4,4)
-    hold all
+    hold on
     plot(requested_data{ehs}.iq, '*')
     xlabel('i')
     ylabel('q')
@@ -90,7 +90,7 @@ temp_data = requested_data{sorting(ehs)};
     plot_Y(mag_Z < low_mag_limit) = NaN;
 
     subplot(2,4,5)
-    hold all
+    hold on
     plot3(plot_X, plot_Y, mag_Z, '*')
     ylabel('target phase')
     xlabel(scan_type)
@@ -100,7 +100,7 @@ temp_data = requested_data{sorting(ehs)};
     axis ij
     
     subplot(2,4,6:7)
-    hold all
+    hold on
     plot3(plot_X, rem(f_Z,1), plot_Y, '*','DisplayName', num2str(xval(ehs)))
     ylabel('Loop detected fractional tune')
     xlabel(scan_type)

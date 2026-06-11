@@ -32,11 +32,10 @@ for jk = 1:length(test)
     dates(jk) = datetime(str2double(test{jk}{1}{1}), str2double(test{jk}{1}{2}),...
         str2double(test{jk}{1}{3}));
 end %for
-[dates, I] = sort(dates, 2, 'descend');
+[~, I] = sort(dates, 2, 'descend');
 dirs = dirs(I);
 
 ck = 1;
-
 for meas_num = 1:length(p.Results.measurements)
     if contains(p.Results.measurements{meas_num}, 'DORIS_phase_scan',...
             'IgnoreCase', true)

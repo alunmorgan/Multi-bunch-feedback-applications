@@ -3,7 +3,7 @@ function plot_pll_data(pll_data)
 
 figure(1);
 plot(squeeze(pll_data.maxwf(1,1,:)), 'r', 'DisplayName', 'max');
-hold all;
+hold on;
 plot(squeeze(pll_data.minwf(1,1,:)), 'g','DisplayName', 'min');
 plot(squeeze(pll_data.meanwf(1,1,:)), 'b','DisplayName', 'mean');
 hold off
