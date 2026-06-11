@@ -13,7 +13,7 @@ function data = DORIS_target_phase_scan(single_bunch_location)
 
 BBBFE_detector_setup('X', single_bunch_location)
 BBBFE_detector_setup('Y', single_bunch_location)
-[root_string, ~, pv_names, ~] = mbf_system_config;
+[root_string, ~, pv_names] = mbf_system_config;
 root_string = root_string{1};
 
 % getting general environment data.

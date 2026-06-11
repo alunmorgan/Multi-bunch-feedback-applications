@@ -1,4 +1,4 @@
-function mbf_growdamp_setup(input_settings, pv_names, trigger_inputs)
+function mbf_growdamp_setup(input_settings, pv_names)
 % Sets up the MBF system to be ready for a growdamp measurement.
 %
 %   Args:
@@ -20,6 +20,7 @@ pll_setup.pll_guard_bunches = input_settings.pll_guard_bunches;
 
 pv_head = pv_names.hardware_names.(mbf_axis);
 pv_head_mem = pv_names.hardware_names.mem.(mbf_axis);
+trigger_inputs = pv_names.trigger_inputs;
 triggers = pv_names.tails.triggers;
 memory = pv_names.tails.MEM;
 Sequencer = pv_names.tails.Sequencer;

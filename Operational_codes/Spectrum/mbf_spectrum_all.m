@@ -15,7 +15,7 @@ function mbf_spectrum_all(mbf_axis, varargin)
 %
 % Example mbf_spectrum_all
 
-[root_string, harmonic_number, pv_names, trigger_inputs] = mbf_system_config;
+[root_string, harmonic_number, pv_names] = mbf_system_config;
 pv_head = pv_names.hardware_names.(mbf_axis);
 
 % for archival investigations this allows filtering by machine state.
@@ -63,7 +63,7 @@ end %if
 
 spectrum.mbf_state = get_operational_mode(mbf_axis);
 
-mbf_spectrum_setup(spectrum, pv_names, trigger_inputs);
+mbf_spectrum_setup(spectrum, pv_names);
 
 spectrum.raw_data  = mbf_spectrum_capture(spectrum, pv_names);
 

@@ -31,7 +31,7 @@ function growdamp_all(mbf_axis, varargin)
 %                                       Defaults to no as this is a lot of data.
 % Example: growdamp_all('x')
 
-[root_string, harmonic_number, pv_names, trigger_inputs] = mbf_system_config;
+[root_string, harmonic_number, pv_names] = mbf_system_config;
 pv_head = pv_names.hardware_names.(mbf_axis);
 
 % for archival investigations this allows filtering by machine state.
@@ -222,7 +222,7 @@ end %if
 growdamp.mbf_state = get_operational_mode(mbf_axis);
 
 % Setup the MBF ready for the measurement.
-mbf_growdamp_setup(growdamp, pv_names, trigger_inputs);
+mbf_growdamp_setup(growdamp, pv_names);
 
 % Capturing data.
 captured_data = mbf_growdamp_capture(growdamp, pv_names);

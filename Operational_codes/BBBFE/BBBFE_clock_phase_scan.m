@@ -12,7 +12,7 @@ function BBBFE_clock_phase_scan(mbf_ax, single_bunch_location)
 %
 % Example: BBBFE_clock_phase_scan('X', 400)
 
-[root_string, ~, pv_names, ~] = mbf_system_config;
+[root_string, ~, pv_names] = mbf_system_config;
 root_string = root_string{1};
 mbf_ax = lower(mbf_ax);
 orig_gain = get_variable([pv_names.hardware_names.(mbf_ax), pv_names.tails.Sequencer.seq1.gaindb]);

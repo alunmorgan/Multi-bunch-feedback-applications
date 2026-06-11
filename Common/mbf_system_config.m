@@ -1,4 +1,4 @@
-function [root_path, harmonic_number, pv_names, trigger_inputs] = mbf_system_config
+function [root_path, harmonic_number, pv_names] = mbf_system_config
 
 %       harmonic_number (int): Harmonic number of the machine.
 
@@ -75,9 +75,9 @@ pv_names.hardware_names.ty = [pv_names.hardware_names.lab, ':Y']; % test system
 %% Trigger settings
 pv_names.tails.triggers.mode = ':TRG:SEQ:MODE_S';
 pv_names.tails.triggers.arm = ':TRG:SEQ:ARM_S.PROC';
-trigger_inputs = {'SOFT', 'EXT', 'PM', 'ADC0', 'ADC1', 'SEQ0', 'SEQ1'};
-for trigger_ind = 1:length(trigger_inputs)
-    trigger = trigger_inputs{trigger_ind};
+pv_names.trigger_inputs = {'SOFT', 'EXT', 'PM', 'ADC0', 'ADC1', 'SEQ0', 'SEQ1'};
+for trigger_ind = 1:length(pv_names.trigger_inputs)
+    trigger = pv_names.trigger_inputs{trigger_ind};
     pv_names.tails.triggers.(trigger).enable_status = [':TRG:SEQ:',trigger,':EN_S'];
     pv_names.tails.triggers.(trigger).blanking_status = [':TRG:SEQ:',trigger,':BL_S'];
 end
@@ -94,8 +94,8 @@ pv_names.tails.triggers.soft = ':TRG:SOFT_S.PROC';  % NEED TO TAKE OFF THE X|Y B
 pv_names.tails.triggers.soft_settings = ':TRG:SOFT_S.SCAN';  % NEED TO TAKE OFF THE X|Y BEFORE USE.
 pv_names.tails.triggers.shared = ':TRG:MODE_S'; % NEED TO TAKE OFF THE X|Y BEFORE USE.
 pv_names.tails.triggers.blanking_length = ':TRG:BLANKING_S'; % NEED TO TAKE OFF THE X|Y BEFORE USE.
-for trigger_ind = 1:length(trigger_inputs)
-    trigger = trigger_inputs{trigger_ind};
+for trigger_ind = 1:length(pv_names.trigger_inputs)
+    trigger = pv_names.trigger_inputs{trigger_ind};
     pv_names.tails.triggers.MEM.(trigger).enable_status = [':TRG:MEM:',trigger,':EN_S'];
     pv_names.tails.triggers.MEM.(trigger).blanking_status = [':TRG:MEM:',trigger,':BL_S'];
 end

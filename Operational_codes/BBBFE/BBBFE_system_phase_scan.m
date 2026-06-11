@@ -19,7 +19,7 @@ function BBBFE_system_phase_scan(mbf_ax, single_bunch_location, varargin)
 %
 % Example: BBBFE_system_phase_scan('X', 400)
 
-[root_string, ~, pv_names, ~] = mbf_system_config;
+[root_string, ~, pv_names] = mbf_system_config;
 detector = pv_names.tails.Detector;
 adc =  pv_names.tails.adc;
 fe_system_phase = pv_names.frontend.system_phase;

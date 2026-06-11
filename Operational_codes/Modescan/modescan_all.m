@@ -15,7 +15,7 @@ function modescan_all(mbf_axis, varargin)
 %
 % Example  modescan_all('x')
 
-[root_string, harmonic_number, pv_names, ~] = mbf_system_config;
+[root_string, harmonic_number, pv_names] = mbf_system_config;
 pv_head = pv_names.hardware_names.(mbf_axis);
 
 % for archival investigations this allows filtering by machine state.

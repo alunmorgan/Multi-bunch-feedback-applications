@@ -10,8 +10,7 @@ function BBBFE_LO_scan(phase_centre, sweep_extent)
 %
 % Example: BBBFE_LO_scan(90, 45)
 
-[root_string, ~] = mbf_system_config;
-root_string = root_string{1};
+[root_string] = mbf_system_config;
 
 data.phase_pv = 'SR23C-DI-BBFE-01:PHA';
 old_val = get_variable(data.phase_pv);
