@@ -13,6 +13,9 @@ function BBBFE_system_phase_scan(mbf_ax, single_bunch_location, varargin)
 %       additional_save_location(str): fully defined filename to save the
 %                                      captured data to in addition to the
 %                                      main archive.
+%       sweep_start(int): phase value in degrees to start the sweep.
+%       sweep_step(int):  phase scan step in degrees.
+%       sweep_end(int):   phase value in degreees to stop the sweep.
 %
 % Machine setup
 % fill some charge in bunch 'single_bunch_location' (0.2nC)
@@ -25,6 +28,13 @@ adc =  pv_names.tails.adc;
 frontend = pv_names.frontend.base;
 fe_system_phase = pv_names.frontend.system_phase;
 sequencer1 = pv_names.tails.Sequencer.seq1;
+mbf_pv = pv_names.hardware_names.(mbf_axis);
+if strcmpi(mbf_axis,'x') || strcmpi(mbf_axis, 'y')
+    fe_phase_pv = [pv_names.frontend.base fe_system_phase.(mbf_axis)];
+else
+    fe_phase_pv = [frontend fe_system_phase.sI];
+    fe_phase_pvQ = [frontend fe_system_phase.sQ];
+end %if
 
 % for archival investigations this allows filtering by machine state.
 % but for capture this is not needed so it set to empty.
@@ -44,18 +54,10 @@ addParameter(p, 'auto_setup', 'yes', boolean_string);
 addParameter(p, 'plotting', 'yes', boolean_string);
 addParameter(p, 'additional_save_location', NaN);
 addParameter(p, 'sweep_start', -180, valid_number);
-addParameter(p, 'sweep_step', 20, valid_number);
+addParameter(p, 'sweep_step', 10, valid_number);
 addParameter(p, 'sweep_end', 180, valid_number);
 
 parse(p, mbf_axis, single_bunch_location, varargin{:});
-
-mbf_pv = pv_names.hardware_names.(mbf_axis);
-if strcmpi(mbf_axis,'x') || strcmpi(mbf_axis, 'y')
-    fe_phase_pv = [pv_names.frontend.base fe_system_phase.(mbf_axis)];
-else
-    fe_phase_pv = [frontend fe_system_phase.sI];
-    fe_phase_pvQ = [frontend fe_system_phase.sQ];
-end %if
 
 % getting general environment data.
 data = machine_environment;
@@ -63,7 +65,7 @@ data = machine_environment;
 % Add the extra data to the data structure.
 data.ax_label = mbf_axis;
 data.base_name = ['system_phase_scan_', mbf_ax, '_axis'];
-data.orig_gain = get_variable([pv_names.hardware_names.(mbf_ax), sequencer1.gaindb]);
+data.orig_gain = get_variable([mbf_pv, sequencer1.gaindb]);
 data.original_setting=get_variable(fe_phase_pv);
 if strcmpi(mbf_axis, 's')
     data.original_settingQ=get_variable(fe_phase_pvQ);
@@ -85,9 +87,10 @@ data.side2 = NaN(length(data.phase), 1);
 data.adc_phase = NaN(length(data.phase), 1);
 
 if strcmp(p.Results.auto_setup, 'yes')
-    original_detector_setup = BBBFE_detector_setup(mbf_ax, single_bunch_location);
     setup_operational_mode(mbf_ax, "TuneOnly")
 end %if
+
+original_detector_setup = BBBFE_detector_setup(mbf_ax, single_bunch_location);
 
 % moving to starting point in scan
 for pp = data.original_setting:-p.Results.sweep_step:p.Results.sweep_start
@@ -133,9 +136,10 @@ end %if
 
 if strcmp(p.Results.auto_setup, 'yes')
     setup_operational_mode(mbf_ax, "TuneOnly")
-    BBBFE_detector_restore(mbf_ax, original_detector_setup)
-    set_variable([pv_names.hardware_names.(mbf_ax), sequencer1.gaindb], orig_gain);
+    set_variable([mbf_pv, sequencer1.gaindb], data.orig_gain);
 end %if
+
+BBBFE_detector_restore(mbf_ax, original_detector_setup)
 
 %% saving the data to a file
 save_to_archive(root_string, data)
