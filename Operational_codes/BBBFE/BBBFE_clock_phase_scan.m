@@ -6,11 +6,22 @@ function BBBFE_clock_phase_scan(mbf_ax, single_bunch_location, varargin)
 % Args:
 %      ax (str): Specifies which axis.
 %      single_bunch_location (int): the location of the single bunch.
+%       auto_setup(str): sets whether the setup scripts will be used to put the
+%                        system into a particular state. Default is yes.
+%       plotting(str): set whether the data is plotted as well as saved. Default
+%                      is yes.
+%       additional_save_location(str): fully defined filename to save the
+%                                      captured data to in addition to the
+%                                      main archive.
+%       sweep_start(int): phase value in degrees to start the sweep.
+%       sweep_step(int):  phase scan step in degrees.
+%       sweep_end(int):   phase value in degreees to stop the sweep.
+%
 %
 % Machine setup: (manual for the time being...)
 % fill some charge in bunch 1 (0.2nC)
 %
-% Example: BBBFE_clock_phase_scan('X', 400)
+% Example: BBBFE_clock_phase_scan('x', 400)
 
 [root_string, ~, pv_names] = mbf_system_config;
 detectors = pv_names.tails.Detector;
@@ -37,7 +48,7 @@ addParameter(p, 'auto_setup', 'yes', boolean_string);
 addParameter(p, 'plotting', 'yes', boolean_string);
 addParameter(p, 'additional_save_location', NaN);
 addParameter(p, 'sweep_start', -180, valid_number);
-addParameter(p, 'sweep_step', 20, valid_number);
+addParameter(p, 'sweep_step', 10, valid_number);
 addParameter(p, 'sweep_end', 180, valid_number);
 
 parse(p, mbf_axis, single_bunch_location, varargin{:});
