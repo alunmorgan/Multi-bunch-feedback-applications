@@ -4,11 +4,10 @@ function growdamp = mbf_growdamp_capture(input_settings, pv_names)
 % Saves the resultant data.
 %
 %   Args:
-%       mbf_axis (str): Selects which MBF axis to work on (x, y, s).
-%       capture_full_bunch_motion (str): yes or no. Determines if the full
-%           time series of bunch motion is captured and stored (large data).
+%       input_settings(struct): contains all the setup information.
+%       pv_names(struct): contains the locations of all the machine parameters.
 %
-% example data = mbf_growdamp_capture('x', pv_names, 'no')
+% example data = mbf_growdamp_capture(input_settings, pv_names)
 
 mbf_axis = input_settings.mbf_axis;
 capture_full_bunch_motion = input_settings.capture_full_bunch_motion;

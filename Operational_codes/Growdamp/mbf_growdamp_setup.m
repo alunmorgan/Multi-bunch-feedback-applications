@@ -2,14 +2,10 @@ function mbf_growdamp_setup(input_settings, pv_names, trigger_inputs)
 % Sets up the MBF system to be ready for a growdamp measurement.
 %
 %   Args:
-%       mbf_axis (str): Selects which MBF axis to work on (x, y, s).
-%       states (cell(structs)): Setup details of individual states.
-%       excitation_tune (float) : The excitation location in tune space.
-%       pll_setup (struct): Setup details for the PLL.
-%       bunch_monitor (list(int)): Locations of the bunches to be monitored.
-%                                  Defaults to all bunches.
+%       input_settings(struct): contains all the setup information.
+%       pv_names(struct): contains the locations of all the machine parameters.
 %
-% example: mbf_growdamp_setup('x')
+% example: mbf_growdamp_setup(input_settings, pv_names, trigger_inputs)
 
 mbf_tools
 
