@@ -41,27 +41,28 @@ filter_conditions = {};
 p = inputParser;
 p.StructExpand = false;
 p.CaseSensitive = false;
-axis_string = {'x', 'y', 's'};
-boolean_string = {'yes', 'no'};
+axis_string =  @(x) any(validatestring(x,{'x', 'y', 's'}));
+boolean_string = @(x) any(validatestring(x, {'yes', 'no'}));
 valid_number = @(x) isnumeric(x) && isscalar(x) && (x >= 0);
-excitation_locations = {'tune', 'lower_sideband', 'upper_sideband', 'manual'};
+excitation_locations = @(x) any(validatestring(x, ...
+    {'tune', 'lower_sideband', 'upper_sideband', 'manual'}));
 
-addRequired(p, 'mbf_axis', @(x) any(validatestring(x, axis_string)));
-addParameter(p, 'auto_setup', 'yes', @(x) any(validatestring(x, boolean_string)));
-addParameter(p, 'plotting', 'yes', @(x) any(validatestring(x, boolean_string)));
+addRequired(p, 'mbf_axis', axis_string);
+addParameter(p, 'auto_setup', 'yes', boolean_string);
+addParameter(p, 'plotting', 'yes', boolean_string);
 addParameter(p, 'additional_save_location', NaN);
-addParameter(p, 'excitation_setting', 'yes',  @(x) any(validatestring(x, boolean_string)));
-addParameter(p, 'excitation_location', 'tune', @(x) any(validatestring(x,excitation_locations)));
+addParameter(p, 'excitation_setting', 'yes', boolean_string);
+addParameter(p, 'excitation_location', 'tune', excitation_locations);
 addParameter(p, 'excitation_manual', 0, valid_number);
-addParameter(p, 'pll_tracking', 'no', @(x) any(validatestring(x,boolean_string)));
+addParameter(p, 'pll_tracking', 'no', boolean_string);
 addParameter(p, 'pll_bunches', 400, valid_number);
 addParameter(p, 'pll_guard_bunches', 10, valid_number);
 addParameter(p, 'bunches_monitored', ones(harmonic_number,1));
-addParameter(p, 'capture_full_bunch_motion', 'no', @(x) any(validatestring(x,boolean_string)));
+addParameter(p, 'capture_full_bunch_motion', 'no', boolean_string);
 
 parse(p, mbf_axis, varargin{:});
 
-%% Constructing the different states for the squencer. These will be arranged
+%% Constructing the different states for the sequencer. These will be arranged
 % in various configurations depending on the experiment requested.
 %
 % bank = 1 is Feedback off

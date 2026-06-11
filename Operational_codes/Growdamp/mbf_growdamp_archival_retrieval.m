@@ -35,17 +35,17 @@ function mbf_growdamp_archival_retrieval(ax, date_range, filter_conditions, ...
 p = inputParser;
 p.StructExpand = false;
 p.CaseSensitive = false;
-axis_string = {'x', 'y', 's'};
-boolean_string = {'yes', 'no'};
-analysis_type_string = {'collate', 'sweep'};
+axis_string = @(x) any(validatestring(x, {'x', 'y', 's'}));
+boolean_string = @(x) any(validatestring(x, {'yes', 'no'}));
+analysis_type_string = @(x) any(validatestring(x, {'collate', 'sweep'}));
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
 
 addRequired(p, 'ax', @(x) any(validatestring(x, axis_string)));
 addRequired(p, 'date_range');
 addRequired(p, 'filter_conditions');
-addParameter(p, 'bypass_index', 'no', @(x) any(validatestring(x, boolean_string)));
-addParameter(p, 'metadata_only', 'no', @(x) any(validatestring(x, boolean_string)));
-addParameter(p, 'analysis_type', 'collate', @(x) any(validatestring(x, analysis_type_string)))
+addParameter(p, 'bypass_index', 'no', boolean_string);
+addParameter(p, 'metadata_only', 'no', boolean_string);
+addParameter(p, 'analysis_type', 'collate', analysis_type_string)
 addParameter(p, 'sweep_parameter', 'current', @ischar);
 addParameter(p, 'parameter_step', 0.1, validScalarPosNum);
 addParameter(p, 'active_override', NaN);
