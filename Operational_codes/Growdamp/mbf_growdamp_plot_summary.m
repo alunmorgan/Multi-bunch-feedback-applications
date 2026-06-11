@@ -60,9 +60,16 @@ for wnf = 1:length(stages)
 end %for
 
 % Convert to frequencies
+        info_tag = '';
 for nse = 1:length(stages)
     measurements = fieldnames(data.(stages{nse}));
     for bes = 1:length(measurements)
+        if strcmpi(metadata.ax_label, 's')
+            if ~isfield(metadata, 'tunes')
+                metadata.tunes.s_tune.tune = 0.004;
+                info_tag = 'assumed tune 0.004';
+            end %if
+        end %if
         [x_plt_axis_f, data.f.(stages{nse}).(measurements{bes})] = mode_to_frequency(metadata.RF,...
             harmonic_number,...
             metadata.tunes.([metadata.ax_label,'_tune']).tune,...
@@ -74,13 +81,23 @@ x_plt_axis_f = x_plt_axis_f * 1E-6;
 labelX_f = 'Frequency (MHz)';
 
 %% Plotting
-figure('Position', [20, 40, 800, 800])
-t = tiledlayout(4, 3,'TileSpacing','compact', 'Padding', 'tight');
-title(t, {['MBF growdamp results ', metadata.ax_label,' axis ', datestr(metadata.time)];...
-    ['Current: ', num2str(round(metadata.current)), 'mA']})
+f = figure('Position', [20, 40, 800, 800]);
+title_panel = uipanel(f, 'Position', [0.02 0.91 0.96 0.08]);
+annotation(title_panel,"textbox",[0.4 0.9 0.2 0.2], 'FitBoxToText','on',...
+    "LineStyle", "none","HorizontalAlignment","center","String",...
+    {['MBF growdamp results ', metadata.ax_label,' axis ', datestr(metadata.time)],...
+    ['Current: ', num2str(round(metadata.current)), 'mA'],...
+    'More -ve damping rates means more damping. Active should always be below passive.'});
+annotation(title_panel,"textbox",[0.02 0.9 0.2 0.2],"Color","red", ...
+    "String", info_tag, 'FitBoxToText','on')
+growth_panel = uipanel(f, 'Position', [0.02 0.02 0.31 0.88], 'Title', 'Growth');
+gp = tiledlayout(growth_panel, 4, 1,'TileSpacing','compact', 'Padding', 'tight');
+damping_panel = uipanel(f, 'Position', [0.34 0.02 0.64 0.88], 'Title', 'Damping');
+dp = tiledlayout(damping_panel, 4, 2,'TileSpacing','compact', 'Padding', 'tight');
+
 % xlabel(t, labelX)
 
-ax1 = nexttile(8);
+ax1 = nexttile(dp, 5);
 hold on
 for ns = 1:length(stages)
     if ~contains(stages{ns}, 'growth')
@@ -93,7 +110,7 @@ legend
 grid on
 xlim([x_plt_axis(1) x_plt_axis(end)])
 
-ax2 = nexttile(2, [2,1]);
+ax2 = nexttile(dp, 1, [2,1]);
 hold on
 for ns = 1:length(stages)
     if ~contains(stages{ns}, 'growth')
@@ -107,7 +124,7 @@ grid on
 xlim([x_plt_axis(1) x_plt_axis(end)])
 linkaxes([ax1, ax2], 'x')
 
-ax3 =nexttile(11);
+ax3 =nexttile(dp, 7);
 hold on
 for ns = 1:length(stages)
     if ~contains(stages{ns}, 'growth')
@@ -122,7 +139,7 @@ grid on
 xlim([x_plt_axis(1) x_plt_axis(end)])
 xlabel(labelX)
 
-ax4 = nexttile(7);
+ax4 = nexttile(gp, 3);
 hold on
 for ns = 1:length(stages)
     if contains(stages{ns}, 'growth')
@@ -135,7 +152,7 @@ legend
 grid on
 xlim([x_plt_axis(1) x_plt_axis(end)])
 
-ax5 = nexttile(1, [2,1]);
+ax5 = nexttile(gp, 1, [2,1]);
 hold on
 for ns = 1:length(stages)
     if contains(stages{ns}, 'growth')
@@ -148,7 +165,7 @@ legend
 grid on
 xlim([x_plt_axis(1) x_plt_axis(end)])
 
-ax6 = nexttile(10);
+ax6 = nexttile(gp, 4);
 hold on
 for ns = 1:length(stages)
     if contains(stages{ns}, 'growth')
@@ -166,7 +183,7 @@ xlabel(labelX)
 linkaxes([ax1, ax2, ax3], 'x')
 linkaxes([ax4, ax5, ax6], 'x')
 
-ax7 = nexttile(9);
+ax7 = nexttile(dp, 6);
 hold on
 for ns = 1:length(stages)
     if ~contains(stages{ns}, 'growth')
@@ -179,7 +196,7 @@ legend
 grid on
 xlim([x_plt_axis_f(1) x_plt_axis_f(end)])
 
-ax8 = nexttile(3, [2,1]);
+ax8 = nexttile(dp, 2, [2,1]);
 hold on
 for ns = 1:length(stages)
     if ~contains(stages{ns}, 'growth')
@@ -193,7 +210,7 @@ grid on
 xlim([x_plt_axis_f(1) x_plt_axis_f(end)])
 linkaxes([ax7, ax8], 'x')
 
-ax9 =nexttile(12);
+ax9 =nexttile(dp, 8);
 hold on
 for ns = 1:length(stages)
     if ~contains(stages{ns}, 'growth')
