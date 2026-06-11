@@ -1,4 +1,4 @@
-function modescan = mbf_modescan_capture(mbf_axis, pv_names, n_repeats)
+function modescan = mbf_modescan_capture(input_settings, pv_names)
 % wrapper function to call modescan, gather data on the environment
 % and to save the resultant data.
 %
@@ -12,9 +12,9 @@ function modescan = mbf_modescan_capture(mbf_axis, pv_names, n_repeats)
 %
 % example data = mbf_modescan_capture('x', 100)
 
-pv_head = pv_names.hardware_names.(mbf_axis);
+pv_head = pv_names.hardware_names.(input_settings.mbf_axis);
 
-for hs = 1:n_repeats
+for hs = 1:input_settings.n_repeats
     modescan.magnitude{hs} = get_variable([pv_head, ':TUNE:DMAGNITUDE']);
     modescan.phase{hs} = get_variable([pv_head, ':TUNE:DPHASE']);
 end %for

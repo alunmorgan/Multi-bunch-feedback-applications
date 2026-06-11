@@ -1,14 +1,15 @@
-function captured_data = mbf_spectrum_capture(mbf_axis, pv_names, n_turns, repeat)
+function captured_data = mbf_spectrum_capture(input_settings, pv_names)
 % captures a set of data from the mbf system runs the analysis.
 %
 % Args:
-%       n_turns (str): Number of turns to capture at once. Improves
-%                      frequency resolution.
-%       repeat (int): Repeat the capture this many times in order to
-%                     improve the power resolution.
+%       input_settings(struct): contains all the setup information.
+%       pv_names(struct): contains the locations of all the machine parameters.
 %
-% Example: data = mbf_spectrum_capture('x', pv_names, 1000, 1)
+% Example: data = mbf_spectrum_capture(input_settings, pv_names)
 
+mbf_axis = input_settings.mbf_axis;
+n_turns = input_settings.n_turns;
+repeat = input_settings.repeat;
 
 for k=repeat:-1:1
     % Arm, trigger, read

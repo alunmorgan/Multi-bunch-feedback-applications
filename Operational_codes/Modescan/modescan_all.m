@@ -47,13 +47,19 @@ modescan = machine_environment;
 modescan.ax_label = mbf_axis;
 modescan.base_name = ['Modescan_' mbf_axis '_axis'];
 modescan.harmonic_number = harmonic_number;
-modescan.n_repeats = p.Results.n_repeats;
-modescan.dwell = p.Results.dwell;
-modescan.excitation_gain = p.Results.excitation_gain;
+modescan.excitation_tune = modescan.tunes.([mbf_axis,'_tune']).tune;
+temp = get_variable([pv_head, ':FIR:GAIN_S']);
+modescan.fir_gain = temp{1};
+
+input_fields = fieldnames(p.Results);
+for jltf = 1:length(input_fields)
+    modescan.(input_fields{jltf}) = p.Results.(input_fields{jltf});
+end %for
+% modescan.n_repeats = p.Results.n_repeats;
+% modescan.dwell = p.Results.dwell;
+% modescan.excitation_gain = p.Results.excitation_gain;
 
 if strcmp(p.Results.auto_setup, 'yes')
-    % Get the current FIR gain
-    orig_fir_gain = get_variable([pv_head, ':FIR:GAIN_S']);
     % Programatically press the tune only button on each system.
     setup_operational_mode(mbf_axis, "TuneOnly")
 end %if
@@ -61,13 +67,11 @@ end %if
 modescan.mbf_state = get_operational_mode(mbf_axis);
 
 % Setup the MBF ready for the measurement.
-mbf_modescan_setup(mbf_axis, pv_names, harmonic_number, p.Results.dwell, ...
-    modescan.tunes.([mbf_axis,'_tune']).tune,...
-    p.Results.excitation_gain)
+mbf_modescan_setup(modescan, pv_names)
 pause(2)
 
 % Capturing data.
-captured_data = mbf_modescan_capture(mbf_axis, pv_names, p.Results.n_repeats);
+captured_data = mbf_modescan_capture(modescan, pv_names);
 % adding to output data structure.
 data_fields = fieldnames(captured_data);
 for je = 1:length(data_fields)
@@ -77,7 +81,9 @@ end %for
 if strcmp(p.Results.auto_setup, 'yes')
     setup_operational_mode(mbf_axis, "Feedback")
     % Setting the FIR gain to its original value.
-    set_variable([pv_head, ':FIR:GAIN_S'], orig_fir_gain)
+    set_variable([pv_head, ':FIR:GAIN_S'], modescan.fir_gain)
+else
+    reestablish_tune_measurement(mbf_axis)
 end %if
 
 %% saving the data to a file

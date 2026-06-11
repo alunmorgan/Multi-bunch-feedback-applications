@@ -1,12 +1,14 @@
-function mbf_spectrum_setup(mbf_axis, pv_names, trigger_inputs)
+function mbf_spectrum_setup(input_settings, pv_names, trigger_inputs)
 % sets up the hardware ready to capture data for a spectrum.
 % Args:
-%       mbf_axis (str): 'x', 'y', 's'. Defines which system you are requesting
+%       input_settings(struct): contains all the setup information.
+%       pv_names(struct): contains the locations of all the machine parameters.
 %
-% Example mbf_spectrum_setup('x')
+% Example mbf_spectrum_setup(input_settings, pv_names, trigger_inputs)
 
 mbf_tools
 
+mbf_axis = input_settings.mbf_axis;
 % Disarm the sequencer (tune measurement) and memory triggers
 set_variable([pv_names.hardware_names.(mbf_axis) pv_names.tails.triggers.SEQ.disarm], 1)
 set_variable([pv_names.hardware_names.mem.(mbf_axis) pv_names.tails.triggers.MEM.disarm], 1)

@@ -10,7 +10,8 @@ function mbf_spectrum_all(mbf_axis, varargin)
 %                                      captured data to in addition to the 
 %                                      main archive.
 %       n_turns (int): number of turns to capture. Default is 1000.
-%       repeat (int): Number of repeat points. Default is 1.
+%       repeat (int): Number of repeat points (improves the power resolution). 
+%                     Default is 1.
 %
 % Example mbf_spectrum_all
 
@@ -45,8 +46,13 @@ spectrum = machine_environment;
 spectrum.ax_label = mbf_axis;
 spectrum.base_name = ['Spectrum_',mbf_axis '_axis'];
 spectrum.harmonic_number = harmonic_number;
-spectrum.n_turns = p.Results.n_turns;
-spectrum.repeat = p.Results.repeat;
+
+input_fields = fieldnames(p.Results);
+for jltf = 1:length(input_fields)
+    spectrum.(input_fields{jltf}) = p.Results.(input_fields{jltf});
+end %for
+% spectrum.n_turns = p.Results.n_turns;
+% spectrum.repeat = p.Results.repeat;
 
 if  strcmp(p.Results.auto_setup, 'yes')
             % Get the current FIR gain
@@ -57,10 +63,9 @@ end %if
 
 spectrum.mbf_state = get_operational_mode(mbf_axis);
 
-mbf_spectrum_setup(mbf_axis, pv_names, trigger_inputs);
+mbf_spectrum_setup(spectrum, pv_names, trigger_inputs);
 
-spectrum.raw_data  = mbf_spectrum_capture(mbf_axis, pv_names, p.Results.n_turns,...
-    p.Results.repeat);
+spectrum.raw_data  = mbf_spectrum_capture(spectrum, pv_names);
 
 if strcmp(p.Results.auto_setup, 'yes')
     setup_operational_mode(mbf_axis, "Feedback")
