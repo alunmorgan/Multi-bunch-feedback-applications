@@ -5,7 +5,7 @@ function sig = BBBFE_bunch_phase_variation_simulation(mbf_axis)
 % The idea of this is to simulate the impact of a phase gradient across the
 % bunch train.
 
-[~, harmonic_number, pv_names, ~] = mbf_system_config;
+[~, harmonic_number, pv_names] = mbf_system_config;
 mbf_names = pv_names.hardware_names;
 mbf_vars = pv_names.tails;
 bbbfe_vars = pv_names.frontend;

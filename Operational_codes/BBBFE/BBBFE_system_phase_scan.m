@@ -28,9 +28,9 @@ adc =  pv_names.tails.adc;
 frontend = pv_names.frontend.base;
 fe_system_phase = pv_names.frontend.system_phase;
 sequencer1 = pv_names.tails.Sequencer.seq1;
-mbf_pv = pv_names.hardware_names.(mbf_axis);
-if strcmpi(mbf_axis,'x') || strcmpi(mbf_axis, 'y')
-    fe_phase_pv = [pv_names.frontend.base fe_system_phase.(mbf_axis)];
+mbf_pv = pv_names.hardware_names.(mbf_ax);
+if strcmpi(mbf_ax,'x') || strcmpi(mbf_ax, 'y')
+    fe_phase_pv = [pv_names.frontend.base fe_system_phase.(mbf_ax)];
 else
     fe_phase_pv = [frontend fe_system_phase.sI];
     fe_phase_pvQ = [frontend fe_system_phase.sQ];
@@ -56,18 +56,19 @@ addParameter(p, 'additional_save_location', NaN);
 addParameter(p, 'sweep_start', -180, valid_number);
 addParameter(p, 'sweep_step', 10, valid_number);
 addParameter(p, 'sweep_end', 180, valid_number);
+addParameter(p, 'sweep_speed', 2, valid_number);
 
-parse(p, mbf_axis, single_bunch_location, varargin{:});
+parse(p, mbf_ax, single_bunch_location, varargin{:});
 
 % getting general environment data.
 data = machine_environment;
 
 % Add the extra data to the data structure.
-data.ax_label = mbf_axis;
+data.ax_label = mbf_ax;
 data.base_name = ['system_phase_scan_', mbf_ax, '_axis'];
 data.orig_gain = get_variable([mbf_pv, sequencer1.gaindb]);
 data.original_setting=get_variable(fe_phase_pv);
-if strcmpi(mbf_axis, 's')
+if strcmpi(mbf_ax, 's')
     data.original_settingQ=get_variable(fe_phase_pvQ);
 end %if
 
@@ -97,10 +98,10 @@ for pp = data.original_setting:-p.Results.sweep_step:p.Results.sweep_start
     set_variable(fe_phase_pv, pp)
     pause(.5)
 end %for
-if strcmpi(mbf_axis, 's')
+if strcmpi(mbf_ax, 's')
     % I and Q must be in quadrature
     for pp=data.original_settingQ:-p.Results.sweep_step:p.Results.sweep_start + 90
-        set_variable(fe_phase_pvI, pp)
+        set_variable(fe_phase_pvQ, pp)
         pause(.5)
     end %for
 end %if
@@ -108,25 +109,34 @@ end %if
 % measurement
 for x = 1:length(data.phase)
     set_variable(fe_phase_pv, data.phase(x))
-    if scrcmpi(mbf_axis, 's')
+    if strcmpi(mbf_ax, 's')
         set_variable(fe_phase_pvQ, data.phase(x) + 90)
     end %if
-    pause(2)
+    pause(p.Results.sweep_speed)
     data.side1(x) = max(get_variable([mbf_pv, detector.det1.power]));
     data.main(x) = max(get_variable([mbf_pv, detector.det2.power]));
     data.side2(x) = max(get_variable([mbf_pv, detector.det3.power]));
-    data.adc_phase(x) = max(get_variable([mbf_pv, adc.phase.mean]));
-    data.adc_mean(x) = max(get_variable([mbf_pv, adc.mean]));
-    data.adc_max(x) = max(get_variable([mbf_pv, adc.max]));
-    data.adc_min(x) = max(get_variable([mbf_pv, adc.min]));
-end
+    if strcmpi(mbf_ax, 's')
+        data.adc_phase(x) = max(get_variable([mbf_pv, adc.phase.mean]));
+        data.adc_mean(x) = max(get_variable([mbf_pv(1:end-1), adc.mean]));
+        data.adc_max(x) = max(get_variable([mbf_pv(1:end-1), adc.max]));
+        data.adc_min(x) = max(get_variable([mbf_pv(1:end-1), adc.min]));
+        data.adc_meanQ(x) = max(get_variable([mbf_pv(1:end-2), 'Q', adc.mean]));
+        data.adc_maxQ(x) = max(get_variable([mbf_pv(1:end-2), 'Q', adc.max]));
+        data.adc_minQ(x) = max(get_variable([mbf_pv(1:end-2),'Q' ,adc.min]));
+    else
+        data.adc_mean(x) = max(get_variable([mbf_pv, adc.mean]));
+        data.adc_max(x) = max(get_variable([mbf_pv, adc.max]));
+        data.adc_min(x) = max(get_variable([mbf_pv, adc.min]));
+    end %if
+end %for
 
 % move back to the original setting
 for pp = data.sweep_start:data.sweep_step:data.original_setting
     set_variable(fe_phase_pv, pp)
     pause(.5)
 end %for
-if strcmpi(mbf_axis, 's')
+if strcmpi(mbf_ax, 's')
     % move back to the original setting
     for pp=data.sweep_start + 90:data.sweep_step:data.original_settingQ
         set_variable(fe_phase_pvQ, pp)
@@ -149,6 +159,6 @@ end %if
 
 %% Plotting data
 if strcmp(p.Results.plotting, 'yes')
-    mbf_frontend_system_phase_scan_archival_retrieval(mbf_axis,...
+    mbf_frontend_system_phase_scan_archival_retrieval(mbf_ax,...
         [data.time data.time], filter_conditions)
 end %if

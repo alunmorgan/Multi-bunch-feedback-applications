@@ -4,7 +4,7 @@ function pll_initial_setup_values(mbf_axis)
 % config file or be additional arguments in the future.
 % mbf_axis(str): xys
 
-[~, ~, pv_names, ~] = mbf_system_config;
+[~, ~, pv_names] = mbf_system_config;
 mbf_names = pv_names.hardware_names;
 mbf_vars = pv_names.tails;
 

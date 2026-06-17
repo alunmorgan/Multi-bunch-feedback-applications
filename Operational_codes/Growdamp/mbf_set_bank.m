@@ -12,7 +12,7 @@ function mbf_set_bank(ax, bank, out_type)
 %
 % Example:  mbf_set_bank(ax, bank, out_type)
 
-[~, harmonic_number, pv_names, ~] = mbf_system_config;
+[~, harmonic_number, pv_names] = mbf_system_config;
 BB = pv_names.tails.Bunch_bank.(['bank', num2str(bank)]);
 pv_head = [pv_names.hardware_names.(ax)];
 

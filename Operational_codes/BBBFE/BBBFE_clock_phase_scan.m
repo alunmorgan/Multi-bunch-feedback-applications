@@ -24,7 +24,7 @@ function BBBFE_clock_phase_scan(mbf_ax, single_bunch_location, varargin)
 % Example: BBBFE_clock_phase_scan('x', 400)
 
 [root_string, ~, pv_names] = mbf_system_config;
-detectors = pv_names.tails.Detector;
+detector = pv_names.tails.Detector;
 frontend = pv_names.frontend.base;
 clock_phases = pv_names.frontend.clock_phase;
 sequencer1 = pv_names.tails.Sequencer.seq1;
@@ -42,7 +42,7 @@ axis_string =  @(x) any(validatestring(x,{'x', 'y', 's'}));
 valid_bunch_number = @(x) isnumeric(x) && isscalar(x) && (x >= 0);
 valid_number = @(x) isnumeric(x) && isscalar(x);
 
-addRequired(p, 'mbf_axis', axis_string);
+addRequired(p, 'mbf_ax', axis_string);
 addRequired(p, 'single_bunch_location', valid_bunch_number);
 addParameter(p, 'auto_setup', 'yes', boolean_string);
 addParameter(p, 'plotting', 'yes', boolean_string);
@@ -51,10 +51,10 @@ addParameter(p, 'sweep_start', -180, valid_number);
 addParameter(p, 'sweep_step', 10, valid_number);
 addParameter(p, 'sweep_end', 180, valid_number);
 
-parse(p, mbf_axis, single_bunch_location, varargin{:});
+parse(p, mbf_ax, single_bunch_location, varargin{:});
 
-mbf_pv = pv_names.hardware_names.(mbf_axis);
-fe_phase_pv = [frontend clock_phases.(mbf_axis)];
+mbf_pv = pv_names.hardware_names.(mbf_ax);
+fe_phase_pv = [frontend clock_phases.(mbf_ax)];
 
 % getting general environment data.
 data = machine_environment;
@@ -92,14 +92,23 @@ end %for
 
 for x = 1:length(data.phase)
     set_variable(fe_phase_pv, data.phase(x))
-    pause(2)
-    data.side1(x) = max(get_variable([mbf_pv, detectors.det1.power]));
-    data.main(x) = max(get_variable([mbf_pv, detectors.det2.power]));
-    data.side2(x) = max(get_variable([mbf_pv, detectors.det3.power]));
-    data.adc_phase(x) = max(get_variable([mbf_pv, adc.phase.mean]));
-    data.adc_mean(x) = max(get_variable([mbf_pv, adc.mean]));
-    data.adc_max(x) = max(get_variable([mbf_pv, adc.max]));
-    data.adc_min(x) = max(get_variable([mbf_pv, adc.min]));
+    pause(0.5)
+    data.side1(x) = max(get_variable([mbf_pv, detector.det1.power]));
+    data.main(x) = max(get_variable([mbf_pv, detector.det2.power]));
+    data.side2(x) = max(get_variable([mbf_pv, detector.det3.power]));
+    if strcmpi(mbf_ax, 's')
+        data.adc_phase(x) = max(get_variable([mbf_pv, adc.phase.mean]));
+        data.adc_mean(x) = max(get_variable([mbf_pv(1:end-1), adc.mean]));
+        data.adc_max(x) = max(get_variable([mbf_pv(1:end-1), adc.max]));
+        data.adc_min(x) = max(get_variable([mbf_pv(1:end-1), adc.min]));
+        data.adc_meanQ(x) = max(get_variable([mbf_pv(1:end-2), 'Q', adc.mean]));
+        data.adc_maxQ(x) = max(get_variable([mbf_pv(1:end-2), 'Q', adc.max]));
+        data.adc_minQ(x) = max(get_variable([mbf_pv(1:end-2),'Q' ,adc.min]));
+    else
+        data.adc_mean(x) = max(get_variable([mbf_pv, adc.mean]));
+        data.adc_max(x) = max(get_variable([mbf_pv, adc.max]));
+        data.adc_min(x) = max(get_variable([mbf_pv, adc.min]));
+    end %if
 end %for
 
 % move back to the original setting
@@ -121,6 +130,6 @@ if ~isnan(p.Results.additional_save_location)
 end %if
 %% plotting
 if strcmp(p.Results.plotting, 'yes')
-    mbf_frontend_clock_phase_scan_archival_retrieval(mbf_axis,...
+    mbf_frontend_clock_phase_scan_archival_retrieval(mbf_ax,...
         [data.time data.time], filter_conditions)
 end %if

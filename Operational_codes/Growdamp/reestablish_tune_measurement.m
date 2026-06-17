@@ -5,7 +5,7 @@ function reestablish_tune_measurement(mbf_axis)
 %       mbf_axis(str): 'x','y', or 's'
 % Example: reestablish_tune_measurement('x')
 
-[~, harmonic_number, pv_names, ~] = mbf_system_config;
+[~, harmonic_number, pv_names] = mbf_system_config;
 
 if strcmpi(mbf_axis,'x')
     sweep_start = 80.139;

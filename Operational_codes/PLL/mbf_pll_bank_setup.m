@@ -22,7 +22,7 @@ addParameter(p, 'guardbunches', default_guard, valid_number);
 
 parse(p, mbf_axis, varargin{:});
 
-[~, harmonic_number, pv_names, ~] = mbf_system_config;
+[~, harmonic_number, pv_names] = mbf_system_config;
 mbf_names = pv_names.hardware_names;
 mbf_vars = pv_names.tails;
 

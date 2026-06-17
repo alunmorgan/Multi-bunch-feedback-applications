@@ -32,7 +32,7 @@ addParameter(p, 'tune_override', default_tune_override, validScalarNum);
 
 parse(p,mbf_axis,varargin{:});
 
-[~, ~, pv_names, ~] = mbf_system_config;
+[~, ~, pv_names] = mbf_system_config;
 mbf_names = pv_names.hardware_names;
 mbf_vars = pv_names.tails;
 

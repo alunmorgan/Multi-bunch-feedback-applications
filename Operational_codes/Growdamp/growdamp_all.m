@@ -159,7 +159,7 @@ end %if
 growdamp = machine_environment;
 
 %% Setting up the growdamp experiments.
-if strcmp(p.Results.excitation, 'no')
+if strcmp(p.Results.excitation_setting, 'no')
     states{2} = growth;
     states{1} = active;
     state_names{2} = 'growth';

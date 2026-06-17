@@ -6,12 +6,12 @@ graph_name = regexprep(data.base_name, '_', ' ');
 
 % plotting
 figure('Position', [20, 40, 800, 800])
-t = tiledlayout(3, 1,'TileSpacing','compact', 'Padding', 'tight');
 if strcmpi(mbf_ax, 's')
-    instructions = 'Q should be placed at ADC amplitude minimum (i.e. the zero crossing).';
+    t = tiledlayout(4, 1,'TileSpacing','compact', 'Padding', 'tight');
 else
-    instructions = 'The excited bunch signal should be as high as possible while maximising the signal differences.';
+    t = tiledlayout(3, 1,'TileSpacing','compact', 'Padding', 'tight');
 end %if
+instructions = 'The excited bunch signal should be as high as possible while maximising the signal differences.';
 title(t, ['BBBFE ',graph_name, ' axis on ', datestr(data.time)])
 subtitle(t, instructions, "FontAngle", "italic", "FontSize", 10)
 xlabel(t, 'phase (degrees)')
@@ -38,14 +38,26 @@ hold off
 
 ax3 = nexttile(3);
 hold on
-semilogy(data.phase, data.adc_phase, 'DisplayName', 'ADC phase')
+semilogy(data.phase, data.adc_mean, 'DisplayName', 'ADC amplitude')
 add_original_values(mbf_ax, data)
 legend('Location', 'Best')
-ylabel('ADC phase')
+ylabel('ADC amplitude')
 grid on
 hold off
 
-linkaxes([ax1, ax2, ax3], 'x')
+if strcmpi(mbf_ax, 's')
+    ax4 = nexttile(4);
+    hold on
+    semilogy(data.phase, data.adc_phase, 'DisplayName', 'ADC phase')
+    add_original_values(mbf_ax, data)
+    legend('Location', 'Best')
+    ylabel('ADC phase')
+    grid on
+    hold off
+    linkaxes([ax1, ax2, ax3, ax4], 'x')
+else
+    linkaxes([ax1, ax2, ax3], 'x')
+end %if
 
 end %function
 
@@ -53,7 +65,7 @@ function add_original_values(mbf_ax, data)
 
 extents_y = get(gca, 'YLim');
 if isfield(data, 'original_setting')
-    if strcmpi(mbf_ax, 's')
+    if strcmpi(mbf_ax, 's') && isfield(data, 'original_settingQ')
         plot([data.original_setting, data.original_setting], extents_y,...
             'r:', 'DisplayName', 'Original setting(I)', 'LineWidth', 2)
         plot([data.original_settingQ, data.original_settingQ], extents_y,...

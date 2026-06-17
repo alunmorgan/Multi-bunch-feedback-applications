@@ -61,7 +61,7 @@ requested_data = mbf_archival_dataset_retrieval(selection_name, date_range,...
 if length(requested_data) == 1
    BBBFE_clock_phase_scan_plotting(requested_data{1} )
 else
-    conditioned_data = mbf_archival_conditional_filtering(requested_data,'current_range', p.Results.current_range);
+    conditioned_data = mbf_archival_conditional_filtering(requested_data);
 
     if isempty(conditioned_data)
         disp('No data meeting the requirements')

@@ -29,7 +29,7 @@ else
 end %if
 p = mbf_archival_plotting_setup(requested_data, times, experimental_setup);
 
-[~, harmonic_number, ~, ~] = mbf_system_config;
+[~, harmonic_number, ~] = mbf_system_config;
 x_plt_axis = (0:harmonic_number-1);
 this_year = year(datetime("now"));
 

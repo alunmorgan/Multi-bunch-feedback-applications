@@ -12,7 +12,7 @@ function setup_tune_bunch_selection(mbf_axis, varargin)
 %
 % Example: setup_tune_bunch_selection('x', 40, 90, 10)
 
-[~, harmonic_number, pv_names, ~] = mbf_system_config;
+[~, harmonic_number, pv_names] = mbf_system_config;
 pv_head = pv_names.hardware_names.(mbf_axis);
 %tune measurement
 detector0 =  pv_names.tails.Detector.det0.bunch_selection;

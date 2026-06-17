@@ -14,7 +14,7 @@ function mbf_set_state(ax, state, tune, setup_data)
 %                            keep the data or not
 %
 % Example: mbf_set_state(ax, state, tune, setup_data)
-[~, ~, pv_names, ~] = mbf_system_config;
+[~, ~, pv_names] = mbf_system_config;
 
 system_axis = pv_names.hardware_names.(ax);
 seq = pv_names.tails.Sequencer.(['seq' num2str(state)]);

@@ -5,7 +5,11 @@ mbf_ax = temp{1}{1};
 graph_name = regexprep(data.base_name, '_', ' ');
 
 figure('Position', [20, 40, 800, 800])
-t = tiledlayout(4, 1,'TileSpacing','compact', 'Padding', 'tight');
+if strcmpi(mbf_ax, 's')
+    t = tiledlayout(4, 1,'TileSpacing','compact', 'Padding', 'tight');
+else
+    t = tiledlayout(3, 1,'TileSpacing','compact', 'Padding', 'tight');
+end %if
 if strcmpi(mbf_ax, 's')
     instructions = 'Q should be placed at ADC amplitude minimum (i.e. the zero crossing).';
 else
@@ -37,27 +41,28 @@ hold off
 
 ax3 = nexttile(3);
 hold on
-semilogy(data.phase, data.adc_phase, 'DisplayName', 'ADC phase')
-add_original_values(mbf_ax, data)
-legend('Location', 'Best')
-ylabel('ADC phase')
-grid on
-hold off
-
-ax4 = nexttile(4);
-hold on
-% semilogy(data.phase, data.adc_min, 'DisplayName', 'Min')
-% semilogy(data.phase, data.adc_max, 'DisplayName', 'Max')
-% semilogy(data.phase, data.adc_mean, 'DisplayName', 'Mean')
-
+semilogy(data.phase, data.adc_min, 'DisplayName', 'Min')
+semilogy(data.phase, data.adc_max, 'DisplayName', 'Max')
+semilogy(data.phase, data.adc_mean, 'DisplayName', 'Mean')
 add_original_values(mbf_ax, data)
 legend('Location', 'Best')
 ylabel('ADC Amplitude')
 grid on
 hold off
 
-
-linkaxes([ax1, ax2, ax3, ax4], 'x')
+if strcmpi(mbf_ax, 's')
+    ax4 = nexttile(4);
+    hold on
+    semilogy(data.phase, data.adc_phase, 'DisplayName', 'ADC phase')
+    add_original_values(mbf_ax, data)
+    legend('Location', 'Best')
+    ylabel('ADC phase')
+    grid on
+    hold off
+    linkaxes([ax1, ax2, ax3, ax4], 'x')
+else
+    linkaxes([ax1, ax2, ax3], 'x')
+end %if
 end %function
 
 function add_original_values(mbf_ax, data)

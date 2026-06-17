@@ -20,7 +20,7 @@ if isempty(times)
     return
 end %if
 
-[~, harmonic_number, ~, ~] = mbf_system_config;
+[~, harmonic_number, ~] = mbf_system_config;
 x_plt_axis = (0:harmonic_number-1) - harmonic_number/2;
 this_year = year(datetime("now"));
 ranges_to_display = {'RF', 'time','current'};

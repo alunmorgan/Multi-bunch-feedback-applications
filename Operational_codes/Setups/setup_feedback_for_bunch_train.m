@@ -12,7 +12,7 @@ function setup_feedback_for_bunch_train(mbf_axis, train_length, varargin)
 %
 % Example: setup_for_bunch_train('x', 686)
 
-[~, harmonic_number, pv_names, ~] = mbf_system_config;
+[~, harmonic_number, pv_names] = mbf_system_config;
 pv_head = pv_names.hardware_names.(mbf_axis);
 % feedback during quiecent mode
 feedback0 = pv_names.tails.Bunch_bank.bank0.FIR.enablewf;

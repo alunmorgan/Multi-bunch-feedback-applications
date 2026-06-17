@@ -15,7 +15,7 @@ if strcmp(mbf_axis, "it")
     mbf_axis = "s";
 end %if
 
-[~, ~, pv_names, ~] = mbf_system_config;
+[~, ~, pv_names] = mbf_system_config;
 
 device = pv_names.hardware_names.(mbf_axis);
 

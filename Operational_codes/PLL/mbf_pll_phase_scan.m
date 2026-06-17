@@ -29,7 +29,7 @@ parse(p,mbf_axis,varargin{:});
 range = p.Results.range;
 step = p.Results.step;
 
-[root_path, ~, pv_names, ~] = mbf_system_config;
+[root_path, ~, pv_names] = mbf_system_config;
 pll_phase_scan = machine_environment;
 pll_phase_scan.ax_label = mbf_axis;
 pll_phase_scan.base_name = ['pll_phase_scan_' pll_phase_scan.ax_label '_axis'];

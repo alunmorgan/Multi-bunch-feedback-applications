@@ -22,7 +22,7 @@ addParameter(p, 'guardbunches', default_guardbunches, validScalarNum);
 addParameter(p, 'pll_monitor_bunches', default_pll_monitor_bunches, validNum);
 parse(p, mbf_axis, p_vals, i_vals, varargin{:});
 
-[root_string, ~, pv_names, ~] = mbf_system_config;
+[root_string, ~, pv_names] = mbf_system_config;
 root_string = root_string{1};
 pv_head = pv_names.hardware_names.(mbf_axis);
 pll_tails = pv_names.tails.pll;

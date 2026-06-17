@@ -3,9 +3,7 @@ function mbf_startup_tests
 %
 % Inject 30mA 900 bunches into the machine before running the tests.
 
-[~, ~, pv_names, ~] = mbf_system_config;
-mbf_names = pv_names.hardware_names;
-mbf_vars = pv_names.tails;
+[~, ~, pv_names] = mbf_system_config;
 
 beam_current = get_variable(pv_names.current);
 if beam_current< 10
@@ -13,88 +11,94 @@ if beam_current< 10
     return
 end %if
 
-fir_name_x = [mbf_names.x, mbf_vars.Bunch_bank.FIR_gains];
-fir_name_y = [mbf_names.y, mbf_vars.Bunch_bank.FIR_gains];
-fir_name_s = [mbf_names.s, mbf_vars.Bunch_bank.FIR_gains];
+fir_name_x = [pv_names.hardware_names.x, ':FIR:GAIN_S'];
+fir_name_y = [pv_names.hardware_names.y, ':FIR:GAIN_S'];
+fir_name_s = [pv_names.hardware_names.s, ':FIR:GAIN_S'];
 
 fir_gain_x = get_variable(fir_name_x);
 fir_gain_y = get_variable(fir_name_y);
 fir_gain_s = get_variable(fir_name_s);
 
-% Get the tunes
-tunes = get_all_tunes;
-
 try
     setup_operational_mode('x', "Feedback")
     set_variable(fir_name_x, '0dB')
-    [~] = growdamp_all('x',  'plotting', 'no', 'auto_setup', 'no', 'tunes', tunes);
+    growdamp_all('x',  'plotting', 'no', 'auto_setup', 'no');
     setup_operational_mode('x', "Feedback")
     set_variable(fir_name_x, fir_gain_x)
-catch
+catch me 
     disp('Problem with Growdamp in X axis')
+    disp(me.message)
 end %try
 try
     setup_operational_mode('y', "Feedback")
     set_variable(fir_name_y, '0dB')
-    [~] = growdamp_all('y',  'plotting', 'no', 'auto_setup', 'no', 'tunes', tunes);
+    growdamp_all('y',  'plotting', 'no', 'auto_setup', 'no');
     setup_operational_mode('y', "Feedback")
     set_variable(fir_name_y, fir_gain_y)
-catch
+catch me
     disp('Problem with Growdamp in Y axis')
+        disp(me.message)
 end %try
 try
     setup_operational_mode('s', "Feedback")
     set_variable(fir_name_s, '0dB')
-    [~] = growdamp_all('s',  'plotting', 'no', 'auto_setup', 'no', 'tunes', tunes);
+    growdamp_all('s',  'plotting', 'no', 'auto_setup', 'no');
     setup_operational_mode('s', "TuneOnly")
-catch
+catch me
     disp('Problem with Growdamp in S axis')
+        disp(me.message)
 end %try
 
 try
     setup_operational_mode('x', "TuneOnly")
-    modscan_all('x', 'plotting', 'no', 'auto_setup', 'no', 'tunes', tunes)
-        setup_operational_mode('x', "Feedback")
+    modescan_all('x', 'plotting', 'no', 'auto_setup', 'no')
+    setup_operational_mode('x', "Feedback")
     set_variable(fir_name_x, fir_gain_x)
-catch
+catch me
     disp('Problem with Modescan in X axis')
+        disp(me.message)
 end %try
 try
     setup_operational_mode('y', "TuneOnly")
-    modscan_all('y', 'plotting', 'no', 'auto_setup', 'no', 'tunes', tunes)
-        setup_operational_mode('y', "Feedback")
+    modescan_all('y', 'plotting', 'no', 'auto_setup', 'no')
+    setup_operational_mode('y', "Feedback")
     set_variable(fir_name_y, fir_gain_y)
-catch
+catch me 
     disp('Problem with Modescan in Y axis')
+        disp(me.message)
 end %try
 try
     setup_operational_mode('s', "TuneOnly")
-    modscan_all('s', 'plotting', 'no', 'auto_setup', 'no', 'tunes', tunes)
-catch
+    modescan_all('s', 'plotting', 'no', 'auto_setup', 'no')
+catch me
     disp('Problem with Modescan in S axis')
+        disp(me.message)
 end %try
 
 try
     setup_operational_mode('x', "TuneOnly")
-    mbf_spectrum_all('x',  'plotting', 'no', 'auto_setup', 'no', 'tunes', tunes)
-     setup_operational_mode('x', "Feedback")
+    mbf_spectrum_all('x',  'plotting', 'no', 'auto_setup', 'no')
+    setup_operational_mode('x', "Feedback")
     set_variable(fir_name_x, fir_gain_x)
-catch
+catch me
     disp('Problem with Spectrum in X axis')
+        disp(me.message)
 end %try
 try
     setup_operational_mode('y', "TuneOnly")
-    mbf_spectrum_all('y',  'plotting', 'no', 'auto_setup', 'no', 'tunes', tunes)
-        setup_operational_mode('y', "Feedback")
+    mbf_spectrum_all('y',  'plotting', 'no', 'auto_setup', 'no')
+    setup_operational_mode('y', "Feedback")
     set_variable(fir_name_y, fir_gain_y)
-catch
+catch me
     disp('Problem with Spectrum in Y axis')
+        disp(me.message)
 end %try
 try
     setup_operational_mode('s', "TuneOnly")
-    mbf_spectrum_all('s',  'plotting', 'no', 'auto_setup', 'no', 'tunes', tunes)
-catch
+    mbf_spectrum_all('s',  'plotting', 'no', 'auto_setup', 'no')
+catch me
     disp('Problem with Spectrum in S axis')
+        disp(me.message)
 end %try
 
 % Leaving the system in a known state

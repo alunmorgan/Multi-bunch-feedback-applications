@@ -15,7 +15,6 @@ function data = mbf_spectrum(mbf_axis, n_turns, fold, repeat)
 
 %% Getting the desired system setup parameters.
 [root_string, harmonic_number, pv_names, trigger_inputs] = mbf_system_config;
-root_string = root_string{1};
 
 if ~exist('fold','var')
     fold=1;

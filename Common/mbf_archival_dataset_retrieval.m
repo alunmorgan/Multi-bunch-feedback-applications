@@ -29,7 +29,7 @@ addParameter(p, 'metadata_only', default_metadata_only_index, @(x) any(validates
 parse(p,filter_name, date_range, varargin{:});
 
 % Getting the desired system setup parameters.
-[root_string, ~, ~, ~] = mbf_system_config;
+[root_string, ~, ~] = mbf_system_config;
 
 index_name = [filter_name, '_index'];
 
