@@ -55,6 +55,9 @@ pv_names.frontend.system_phase.sQ = ':PHA:OFF:IL';
 pv_names.frontend.clock_phase.x = ':PHA:CLO:3';
 pv_names.frontend.clock_phase.y = ':PHA:CLO:3';
 pv_names.frontend.clock_phase.s = ':PHA:CLO:4';
+pv_names.frontend.gain.x = ':LEV:X.DESC';
+pv_names.frontend.gain.y = ':LEV:Y.DESC';
+pv_names.frontend.gain.s = ':LEV:I.DESC';
 
 %% Backend PVs
 % Base PVs of the hardware.
