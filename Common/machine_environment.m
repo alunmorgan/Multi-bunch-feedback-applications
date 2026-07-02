@@ -189,4 +189,19 @@ exp_data.mbf.(mbf_axes{sjkh}).pll.readbacks.magnitude = get_variable([mbf_system
 exp_data.mbf.(mbf_axes{sjkh}).pll.readbacks.magnitudedb = get_variable([mbf_systems{sjkh}, ':PLL:FILT:MAG_DB']);
 exp_data.mbf.(mbf_axes{sjkh}).pll.readbacks.phase = get_variable([mbf_systems{sjkh}, ':PLL:FILT:PHASE']);
 end %for
+
+exp_data.bbbfe.x_input_level = get_variable('SR23C-DI-BBFE-01:LEV:X.DESC');
+exp_data.bbbfe.y_input_level = get_variable('SR23C-DI-BBFE-01:LEV:Y.DESC');
+exp_data.bbbfe.i_input_level = get_variable('SR23C-DI-BBFE-01:LEV:I.DESC');
+exp_data.bbbfe.lo_phase = get_variable('SR23C-DI-BBFE-01:PHA');
+exp_data.bbbfe.x_phase = get_variable('SR23C-DI-BBFE-01:PHA:OFF:X');
+exp_data.bbbfe.y_phase = get_variable('SR23C-DI-BBFE-01:PHA:OFF:Y');
+exp_data.bbbfe.it_phase = get_variable('SR23C-DI-BBFE-01:PHA:OFF:IT');
+exp_data.bbbfe.il_phase = get_variable('SR23C-DI-BBFE-01:PHA:OFF:IL');
+exp_data.bbbfe.clk1 = get_variable('SR23C-DI-BBFE-01:PHA:CLO:1');
+exp_data.bbbfe.clk2 = get_variable('SR23C-DI-BBFE-01:PHA:CLO:2');
+exp_data.bbbfe.clk3 = get_variable('SR23C-DI-BBFE-01:PHA:CLO:3');
+exp_data.bbbfe.clk4 = get_variable('SR23C-DI-BBFE-01:PHA:CLO:4');
+
+
 lcaSetSeverityWarnLevel(3)
