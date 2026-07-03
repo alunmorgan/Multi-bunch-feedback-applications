@@ -3,15 +3,19 @@ function chro=chromaticity_from_sidebands(mbf_axis)
 % and the emittance measurement.
 %
 % Args:
-%       mbf_axis (int): number representing the axis 1 = 'x' 2 = 'y'.
+%       mbf_axis (str): 'x' or 'y'.
 %
 % Example: chro=chromaticity_from_sidebands(1)
 
 [~, ~, pv_names] = mbf_system_config;
-MBF_PV = ax2dev(mbf_axis);
-AL = sqrt(get_variable([MBF_PV, pv_names.tails.tune.peak.left_area]));
-AR = sqrt(get_variable([MBF_PV, pv_names.tails.tune.peak.right_area]));
-AC = sqrt(get_variable([MBF_PV, pv_names.tails.tune.peak.centre_area]));
+MBF_PV = pv_names.hardware_names.(mbf_axis);
+tune_pv = pv_names.tails.tune;
+vars = get_variable({[MBF_PV, tune_pv.centre_width]; [MBF_PV, tune_pv.left_width];...
+    [MBF_PV, tune_pv.right_width];[MBF_PV, tune_pv.centre_height];...
+    [MBF_PV, tune_pv.left_height];[MBF_PV, tune_pv.right_height]});
+AL = sqrt(get_variable([MBF_PV, tune_pv.left_area]));
+AR = sqrt(get_variable([MBF_PV, tune_pv.right_area]));
+AC = sqrt(get_variable([MBF_PV, tune_pv.centre_area]));
 R = (AL + AR) / AC;
 if R < .25
     % If the combined area of the sidebands is less than 25% of the area of
@@ -29,6 +33,6 @@ else
           28.222*R - ...
           1.8186;
 end
-Q_S = get_variable([MBF_PV, pv_names.tails.tune.peak.sync_tune]);
+Q_S = get_variable([MBF_PV, tune_pv.sync_tune]);
 sigma_E = get_variable(pv_names.emittance);
 chro = s * Q_S / sigma_E;

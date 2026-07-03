@@ -262,13 +262,16 @@ pv_names.tails.FIR.gaindb = ':FIR:GAIN_DB_S';
 pv_names.tails.FIR.method_of_construction = ':FIR:USEWF_S';
 
 %% Tune settings
-pv_names.tails.tune.peak.left_area = ':PEAK:LEFT:AREA';
-pv_names.tails.tune.peak.right_area = ':PEAK:RIGHT:AREA';
-pv_names.tails.tune.peak.centre_area = ':PEAK:CENTRE:AREA';
-pv_names.tails.tune.peak.sync_tune = ':PEAK:SYNCTUNE';
+pv_names.tails.tune.sync_tune = ':TUNE:SYNCTUNE';
 pv_names.tails.tune.centre = ':TUNE:CENTRE:TUNE';
 pv_names.tails.tune.left = ':TUNE:LEFT:TUNE';
 pv_names.tails.tune.right = ':TUNE:RIGHT:TUNE';
+pv_names.tails.tune.centre_width = ':TUNE:CENTRE:WIDTH';
+pv_names.tails.tune.left_width = ':TUNE:LEFT:WIDTH';
+pv_names.tails.tune.right_width = ':TUNE:RIGHT:WIDTH';
+pv_names.tails.tune.centre_height = ':TUNE:CENTRE:HEIGHT';
+pv_names.tails.tune.left_height = ':TUNE:LEFT:HEIGHT';
+pv_names.tails.tune.right_height = ':TUNE:RIGHT:HEIGHT';
 
 %% PLL settings
 pv_names.tails.pll.detector.dwell = ':PLL:DET:DWELL_S';

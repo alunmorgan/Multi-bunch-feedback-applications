@@ -26,8 +26,8 @@ while 1==1
         chro_y_temp = NaN(1:n_samples,1);
         for kw = 1:n_samples
             time_temp(kw) = datetime("now");
-            chro_x_temp(kw) = chromaticity_from_sidebands(1);
-            chro_y_temp(kw) = chromaticity_from_sidebands(2);
+            chro_x_temp(kw) = chromaticity_from_sidebands('x');
+            chro_y_temp(kw) = chromaticity_from_sidebands('y');
             pause(1.2) % make sure there is new data.
             % maybe better to use monitors.
         end %for
