@@ -1,5 +1,11 @@
 function tunescan_over_modes_all(mbf_axis, varargin)
 % top level function to run the tunescan for all modes in the selected plane.
+
+
+% for archival investigations this allows filtering by machine state.
+% but for capture this is not needed so it set to empty.
+filter_conditions = {};
+
 p = inputParser;
 p.StructExpand = false;
 p.CaseSensitive = false;
@@ -33,14 +39,12 @@ tunescan = machine_environment;
 tunescan.ax_label = mbf_axis;
 tunescan.base_name = ['tunescan_' tunescan.ax_label '_axis'];
 tunescan.harmonic_number = harmonic_number;
-tunescan.n_captures = p.Results.n_captures;
-tunescan.start_mode = p.Results.start_mode;
-tunescan.drive_bunches = p.Results.drive_bunches;
-tunescan.feedback_state = p.Results.feedback_state;
-tunescan.start_frequency = p.Results.start_frequency;
-tunescan.end_frequency = p.Results.end_frequency;
+input_fieldnames = fieldnames(p.Results);
+for ns = 1: length(input_fieldnames)
+    tunescan.(input_fieldnames{ns}) = p.Results.(input_fieldnames{ns});
+end %for
 
-mbf_tunescan_over_modes_setup(mbf_axis, exp_setup);
+mbf_tunescan_over_modes_setup(tunescan);
 pause(2)
 captured_data = mbf_tunescan_over_modes_capture(mbf_axis, pv_names);
 % adding to output data structure.
@@ -67,7 +71,7 @@ if ~isnan(p.Results.additional_save_location)
 end %if
 
 if strcmp(p.Results.plotting, 'yes')
-    mbf_tunescan_over_modes_archival_retrieval(mbf_axis, [growdamp.time growdamp.time],...
+    mbf_tunescan_over_modes_archival_retrieval(mbf_axis, [tunescan.time tunescan.time],...
         filter_conditions)
 %     mbf_tunescan_over_modes_plotting(tunescan)
     % TODO CHANGE THIS TO USE ACHIVAL RETREVAL

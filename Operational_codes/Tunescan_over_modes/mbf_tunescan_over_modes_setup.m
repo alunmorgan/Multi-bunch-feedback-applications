@@ -1,14 +1,14 @@
-function mbf_tunescan_over_modes_setup(mbf_axis, exp_setup)
+function mbf_tunescan_over_modes_setup(tunescan)
 % Sets up the MBF system to be ready for a tunescan measurement.
 %
 %   Args:
 %       mbf_axis (str): Selects which MBF axis to work on (x, y, s).
-%       exp_setup (struct): Contains all the setup parameters.
+%       tunescan (struct): Contains all the setup parameters.
 %
-% example: mbf_tunescan_over_modes_setup('x', exp_setup)
+% example: mbf_tunescan_over_modes_setup(tunescan)
 
 mbf_tools
-if strcmp(exp_setup.feedback_state, 'on')
+if strcmp(tunescan.feedback_state, 'on')
     fb_on_off =1;
 else
     fb_on_off =0;
@@ -19,13 +19,13 @@ Sequencer1 = pv_names.tails.Sequencer.seq1;
 Bunch_bank1 = pv_names.tails.Bunch_bank.bank1;
 
 % Generate the base PV name.
-system_axis = pv_names.hardware_names.(mbf_axis);
+system_axis = pv_names.hardware_names.(tunescan.mbf_axis);
 
-detect_bunch = exp_setup.drive_bunches;
+detect_bunch = tunescan.drive_bunches;
 
 % Only sweep selected bunch
 drive_wf = zeros(1, harmonic_number);
-drive_wf(exp_setup.drive_bunches + 1) = 1;
+drive_wf(tunescan.drive_bunches + 1) = 1;
 
 % chose which bunches to monitor the response
 detect_wf_1 = zeros(1,harmonic_number);
@@ -66,8 +66,8 @@ set_variable([system_axis pv_names.tails.Super_sequencer_reset],1)
 set_variable([system_axis pv_names.tails.Super_sequencer_count],harmonic_number)
 
 % change the number of captures to speed things up (normally 4096)
-set_variable([system_axis Sequencer1.count],exp_setup.n_captures)
+set_variable([system_axis Sequencer1.count],tunescan.n_captures)
 
 % select the tune sweep frequency / mode
-set_variable([system_axis Sequencer1.start_frequency],exp_setup.start_mode + exp_setup.start_frequency)
-set_variable([system_axis Sequencer1.end_frequency],  exp_setup.start_mode + exp_setup.end_frequency)
+set_variable([system_axis Sequencer1.start_frequency],tunescan.start_mode + tunescan.start_frequency)
+set_variable([system_axis Sequencer1.end_frequency],  tunescan.start_mode + tunescan.end_frequency)
