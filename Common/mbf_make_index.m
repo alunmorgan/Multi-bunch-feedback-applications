@@ -8,7 +8,7 @@ function mbf_make_index(application_type, ax)
 %
 % Example mbf_make_index('Growdamp', 'x')
 
-[root_string, ~, ~, ~] = mbf_system_config;
+[root_string, ~, ~] = mbf_system_config;
 
 if strcmp(application_type, 'Bunch_motion') || strcmp(application_type, 'LO_scan') || ...
         strcmp(application_type, 'system_phase_scan') || strcmp(application_type, 'clock_phase_scan')
