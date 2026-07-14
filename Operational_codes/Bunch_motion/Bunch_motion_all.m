@@ -1,6 +1,6 @@
 function Bunch_motion_all(varargin)
 
-[root_string, harmonic_number, pv_names, trigger_inputs] = mbf_system_config;
+[root_string, harmonic_number, pv_names] = mbf_system_config;
 mbf_tools
 % for archival investigations this allows filtering by machine state.
 % but for capture this is not needed so it set to empty.
@@ -40,7 +40,7 @@ bunch_motion.mbf_state_x = get_operational_mode('x');
 bunch_motion.mbf_state_y = get_operational_mode('y');
 bunch_motion.mbf_state_s = get_operational_mode('s');
 
-mbf_bunch_motion_setup(pv_names, trigger_inputs)
+mbf_bunch_motion_setup(pv_names)
 captured_data = mbf_bunch_motion_capture(pv_names);
 % adding to output data structure.
 data_fields = fieldnames(captured_data);
