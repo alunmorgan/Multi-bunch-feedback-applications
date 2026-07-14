@@ -73,7 +73,5 @@ end %if
 if strcmp(p.Results.plotting, 'yes')
     mbf_tunescan_over_modes_archival_retrieval(mbf_axis, [tunescan.time tunescan.time],...
         filter_conditions)
-%     mbf_tunescan_over_modes_plotting(tunescan)
-    % TODO CHANGE THIS TO USE ACHIVAL RETREVAL
 end %if
 

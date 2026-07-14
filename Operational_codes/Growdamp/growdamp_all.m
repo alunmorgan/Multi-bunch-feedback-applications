@@ -205,13 +205,6 @@ input_fields = fieldnames(p.Results);
 for jltf = 1:length(input_fields)
     growdamp.(input_fields{jltf}) = p.Results.(input_fields{jltf});
 end %for
-% growdamp.auto_setup = p.auto_setup;
-% growdamp.excitation_location = p.Results.excitation_location;
-% growdamp.excitation_setting = p.Results.excitation_setting;
-% growdamp.bunches_monitored = p.Results.bunches_monitored;
-% pll_setup.pll_tracking = p.Results.pll_tracking;
-% pll_setup.pll_bunches = p.Results.pll_bunches;
-% pll_setup.pll_guard_bunches = p.Results.pll_guard_bunches;
 
 if strcmp(p.Results.auto_setup, 'yes')
     % putting the system into a known state.
