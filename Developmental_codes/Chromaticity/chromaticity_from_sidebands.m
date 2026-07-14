@@ -1,4 +1,4 @@
-function chro=chromaticity_from_sidebands(mbf_axis, n_trys)
+function chro=chromaticity_from_sidebands(mbf_axis, n_trys, pv_names)
 % calculates the chromaticity from the sideband ratios
 % and the emittance measurement.
 %
@@ -9,7 +9,6 @@ function chro=chromaticity_from_sidebands(mbf_axis, n_trys)
 % Example: chro=chromaticity_from_sidebands('x')
 
 
-[~, ~, pv_names] = mbf_system_config;
 MBF_PV = pv_names.hardware_names.(mbf_axis);
 tune_pv = pv_names.tails.tune;
 for hs = 1:n_trys

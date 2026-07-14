@@ -13,7 +13,7 @@ function chromaticity_plot_live(n_repeats, n_samples, n_trys)
 %
 % Outputs a graph of n_repeat points for each axis vs time of measurement.
 %
-% Example: chromaticity_plot_live(100, 10)
+% Example: chromaticity_plot_live(100, 10, 5)
 
 chro_time = NaT(n_repeats,1);
 chro_x_mean = NaN(n_repeats,1);
