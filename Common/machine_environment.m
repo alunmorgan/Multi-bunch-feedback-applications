@@ -165,6 +165,7 @@ exp_data.orbit_x = get_variable('SR-DI-EBPM-01:SA:X');
 exp_data.orbit_y = get_variable('SR-DI-EBPM-01:SA:Y');
 
 mbf_systems = {'SR23C-DI-TMBF-01:X', 'SR23C-DI-TMBF-01:Y','SR23C-DI-LMBF-01:IQ'};
+mbf_cards = {'SR23C-DI-TMBF-01', 'SR23C-DI-TMBF-01','SR23C-DI-LMBF-01'};
 mbf_axes = {'x', 'y', 's'};
 for sjkh = 1:length(mbf_systems)
 exp_data.mbf.(mbf_axes{sjkh}).pll.target_bunches = get_variable([mbf_systems{sjkh}, ':PLL:DET:BUNCHES_S']);
@@ -188,6 +189,9 @@ exp_data.mbf.(mbf_axes{sjkh}).pll.status.offset_overflow = get_variable([mbf_sys
 exp_data.mbf.(mbf_axes{sjkh}).pll.readbacks.magnitude = get_variable([mbf_systems{sjkh}, ':PLL:FILT:MAG']);
 exp_data.mbf.(mbf_axes{sjkh}).pll.readbacks.magnitudedb = get_variable([mbf_systems{sjkh}, ':PLL:FILT:MAG_DB']);
 exp_data.mbf.(mbf_axes{sjkh}).pll.readbacks.phase = get_variable([mbf_systems{sjkh}, ':PLL:FILT:PHASE']);
+exp_data.mbf.(mbf_axes{sjkh}).delays.fine = get_variable([mbf_cards{sjkh}, ':DLY:DAC:FINE_DELAY_S']);
+exp_data.mbf.(mbf_axes{sjkh}).delays.course = get_variable([mbf_cards{sjkh}, ':DLY:DAC:COARSE_DELAY_S']);
+exp_data.mbf.(mbf_axes{sjkh}).delays.turn_offset = get_variable([mbf_cards{sjkh}, ':DLY:TURN:OFFSET_S']);
 end %for
 
 exp_data.bbbfe.x_input_level = get_variable('SR23C-DI-BBFE-01:LEV:X.DESC');
