@@ -51,10 +51,11 @@ if strcmp(p.Results.auto_setup, 'yes')
     setup_operational_mode(mbf_axis, "TuneOnly")
 end %if
 
+chromaticity.fir_gain = get_variable([pv_head, ':FIR:GAIN_S']);
 chromaticity.mbf_state = get_operational_mode(mbf_axis);
 
 % Capturing data.
-captured_data = mbf_modescan_capture(chromaticity, pv_names);
+captured_data = mbf_chromaticity_capture(chromaticity, pv_names);
 % adding to output data structure.
 data_fields = fieldnames(captured_data);
 for je = 1:length(data_fields)

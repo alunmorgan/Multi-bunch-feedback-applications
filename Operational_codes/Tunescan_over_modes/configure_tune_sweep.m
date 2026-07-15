@@ -4,7 +4,7 @@ function configure_tune_sweep(mbf_axis, drive_bunch, fb_on_off, d0flag, d1flag, 
 % drive_bunch = 123;
 % fb_on_off = 1;      % 0 => off, 1 => on
 
-[~, harmonic_number, pv_names, ~] = mbf_system_config;
+[~, harmonic_number, pv_names] = mbf_system_config;
 head = pv_names.hardware_names.(mbf_axis);
 bank1 = pv_names.tails.Bunch_bank.("bank1");
 detectors = pv_names.tails.Detector;

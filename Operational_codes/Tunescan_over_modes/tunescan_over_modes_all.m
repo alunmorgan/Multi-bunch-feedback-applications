@@ -27,6 +27,8 @@ parse(p, mbf_axis, varargin{:});
 
 [root_string, harmonic_number, pv_names] = mbf_system_config;
 
+pv_head = pv_names.hardware_names.(mbf_axis);
+
 if strcmp(p.Results.auto_setup, 'yes')
 % Programatically press the tune only button on each system
 setup_operational_mode(mbf_axis, "TuneOnly")
@@ -56,7 +58,7 @@ end %for
 %%%%Is this section needed or does the TuneOnly script take care of things?
 configure_tune_sweep(mbf_axis , 0:harmonic_number -1, 1, 1, 0, 0, 0)
 set_variable([pv_head pv_names.tails.triggers.mode],'Rearm')
-set_variable([pv_head Sequencer.reset],1)
+set_variable([pv_head pv_names.tails.Sequencer.reset],1)
 %%%%%%%
 
 if strcmp(p.Results.auto_setup, 'yes')

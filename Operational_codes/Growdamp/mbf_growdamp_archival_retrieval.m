@@ -40,7 +40,7 @@ boolean_string = @(x) any(validatestring(x, {'yes', 'no'}));
 analysis_type_string = @(x) any(validatestring(x, {'collate', 'sweep'}));
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
 
-addRequired(p, 'ax', @(x) any(validatestring(x, axis_string)));
+addRequired(p, 'ax', axis_string);
 addRequired(p, 'date_range');
 addRequired(p, 'filter_conditions');
 addParameter(p, 'bypass_index', 'no', boolean_string);

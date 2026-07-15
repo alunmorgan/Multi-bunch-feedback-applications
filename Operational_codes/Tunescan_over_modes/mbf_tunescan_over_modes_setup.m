@@ -66,7 +66,7 @@ set_variable([system_axis pv_names.tails.Super_sequencer_reset],1)
 set_variable([system_axis pv_names.tails.Super_sequencer_count],harmonic_number)
 
 % change the number of captures to speed things up (normally 4096)
-set_variable([system_axis Sequencer1.count],tunescan.n_captures)
+set_variable([system_axis Sequencer1.turns],tunescan.n_captures)
 
 % select the tune sweep frequency / mode
 set_variable([system_axis Sequencer1.start_frequency],tunescan.start_mode + tunescan.start_frequency)

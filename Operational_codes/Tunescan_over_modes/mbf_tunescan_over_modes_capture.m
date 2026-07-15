@@ -30,5 +30,7 @@ set_variable([pv_head, triggers.SEQ.arm], 1)
 % Trigger
 set_variable([pv_head_mem, triggers.soft], 1)
 % download the data
+measurement_time = ceil(get_variable('SR23C-DI-TMBF-01:Y:SEQ:TOTAL:DURATION:S'))+5;
+pause(measurement_time)
 [tunescan.data, tunescan.scale, ~] = mbf_read_det(pv_head_mem,...
     'axis', chan, 'lock', mem_lock);

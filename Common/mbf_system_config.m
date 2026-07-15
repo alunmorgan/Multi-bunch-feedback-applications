@@ -112,7 +112,7 @@ pv_names.tails.Super_sequencer.reset = ':SEQ:SUPER:RESET_S.PROC';
 % pv_names.tails.Sequencer.Base = ':SEQ';
 % pv_names.tails.Sequencer.start_frequency = ':START_FREQ_S';
 % pv_names.tails.Sequencer.end_frequency = ':END_FREQ_S';
-% pv_names.tails.Sequencer.count = ':COUNT_S';
+
 % pv_names.tails.Sequencer.dwell = ':DWELL_S';
 % pv_names.tails.Sequencer.gain = ':GAIN_S';
 % pv_names.tails.Sequencer.gaindb = ':GAIN_DB_S';
@@ -128,6 +128,7 @@ pv_names.tails.Super_sequencer.reset = ':SEQ:SUPER:RESET_S.PROC';
 pv_names.tails.Sequencer.start_state = ':SEQ:PC_S';
 pv_names.tails.Sequencer.steady_state_bank = ':SEQ:0:BANK_S';
 pv_names.tails.Sequencer.reset = ':SEQ:RESET_S.PROC';
+% pv_names.tails.Sequencer.count = ':COUNT_S';
 
 for n_seq = 1:7
     n_seq_label = num2str(n_seq);
