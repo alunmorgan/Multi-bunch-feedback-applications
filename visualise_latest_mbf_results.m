@@ -8,7 +8,7 @@ boolean_string = {'yes', 'no'};
 addParameter(p, 'save_graphs', 'no', @(x) any(validatestring(x,boolean_string)));
 addParameter(p, 'out_path', NaN);
 addParameter(p, 'measurements', {'Growdamp', 'Modescan', 'Spectrum',...
-    'system_phase_scan', 'clock_phase_scan'});
+    'system_phase_scan', 'clock_phase_scan', 'tunescan'});
 addParameter(p, 'axes', {'x', 'y', 's'});
 parse(p, varargin{:});
 
@@ -113,6 +113,8 @@ for bws = 1:length(exp_name)
             BBBFE_clock_phase_scan_plotting(data.data)
         elseif contains(exp_name{bws}, 'DORIS_phase_scan', 'IgnoreCase',true)
             DORIS_phase_scan_plotting(data.data)
+        elseif contains(exp_name{bws}, 'tunescan', 'IgnoreCase',true)
+            mbf_tunescan_over_modes_plot_summary(data.data)
         end %if
         if strcmp(p.Results.save_graphs, 'yes')
             saveas(gcf, [p.Results.out_path, 'MBF ',exp_name{bws}, ...
