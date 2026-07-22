@@ -41,7 +41,7 @@ tune_sequencer = pv_names.tails.Sequencer.seq1;
 set_variable([base, tune_sequencer.start_frequency], sweep_start);
 set_variable([base, tune_sequencer.end_frequency], sweep_end);
 set_variable([base, tune_sequencer.gaindb], tune_gain);
-set_variable([base, tune_sequencer.count], tune_count);
+set_variable([base, tune_sequencer.turns], tune_count);
 set_variable([base, tune_sequencer.dwell], tune_dwell);
 
 set_variable([base, tune_sequencer.bank_select], {'Bank 1'});
