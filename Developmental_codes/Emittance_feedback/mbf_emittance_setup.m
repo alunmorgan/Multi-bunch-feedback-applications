@@ -22,7 +22,7 @@ function varargout = mbf_emittance_setup(mbf_axis, varargin)
 % Example: mbf_emittance_setup('x')
 
 mbf_axis = lower(mbf_axis);
-[~, harmonic_number, pv_names, ~] = mbf_system_config;
+[~, harmonic_number, pv_names] = mbf_system_config;
 
 default_excitation = -60; %dB
 default_excitation_pattern = ones(harmonic_number,1);
@@ -64,7 +64,7 @@ set_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.frequency], p.Results.harmonic
 
 %% Setting up the NCO gains and setting the tune sweep to follow the PLL.
 set_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.PLL_follow],'Follow');
-set_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.gain_db],p.Results.excitation);
+set_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.gaindb],p.Results.excitation);
 
 %% Extracting the bunches the feedback is operating on 
 fillx = get_variable([mbf_names.(mbf_axis), pv_names.tails.Bunch_bank.bank1.SEQ.enablewf]);
