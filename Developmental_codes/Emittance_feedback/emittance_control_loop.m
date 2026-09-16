@@ -144,7 +144,7 @@ end %if
             emit_error = sign(emit_error) * p.Results.slew_rate_limit;
         end %if
         % error scaling from emittance to output power.
-        power_error = sign(emit_error) * 1E-3 * log10(abs(emit_error));
+        power_error = sign(emit_error) * abs(1E-3 * log10(abs(emit_error)));
         % fraction to apply
         power_error = power_error * p.Results.fraction_to_apply;
         % power monitor
@@ -180,7 +180,7 @@ end %if
 
         % 6. Update states for next step
         prev_error = emit_error;
-        power_new = power_input + sign(emit_error) * 1E-3 * log10(abs(emit_error));
+        power_new = power_input - sign(emit_error) * abs(1E-3 * log10(abs(emit_error)));
 
     end %function
     function heartbeat(mark)
