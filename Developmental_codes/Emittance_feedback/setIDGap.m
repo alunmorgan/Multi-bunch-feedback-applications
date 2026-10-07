@@ -1,38 +1,19 @@
-function results = setIDGap(ID, Gaps, Monitor, Wait)
+function monitored_data = setIDGap(ID, Gaps, monitor_pvs, wait)
 
-results = [];
-
-if strcmp(ID,'I10')|strcmp(ID,'I06')
+if strcmp(ID,'I10')||strcmp(ID,'I06')
     ID = strcat(ID,'A');
-end
+end %if
 
-IDs = {'I02','I03','I04','J04','I05','I06A','I06B','I07','I08','I09',...
-    'J09','I10A','I10B','I11','I13','J13','I14','I16','I18','I19','I20',...
-    'I21','I22','I23','I24'};
-PVs = {'SR02I-MO-SERVC-01:GAPSET.B','SR03I-MO-SERVC-01:GAPSET.B',...
-    'SR04I-MO-SERVC-01:GAPSET.B','SR04J-MO-HPMU-01:Act_Pos_Gap',...
-    'SR05I-MO-SERVC-01:GAPSET.B','SR06I-MO-SERVC-01:GAPSET.B',...
-    'SR06I-MO-SERVC-21:GAPSET.B','SR07I-MO-SERVC-01:GAPSET.B',...
-    'SR08I-MO-SERVC-01:GAPSET.B','SR09I-MO-SERVC-01:GAPSET.B',...
-    'SR09J-MO-SERVC-01:GAPSET.B','SR10I-MO-SERVC-01:GAPSET.B',...
-    'SR10I-MO-SERVC-21:GAPSET.B','SR11I-MO-SERVC-01:GAPSET.B',...
-    'SR13I-MO-SERVC-01:GAPSET.B','S13J-MO-SERVC-01:GAPSET.B',...
-    'SR14I-MO-SERVC-01:GAPSET.B','SR16I-MO-SERVC-01:GAPSET.B',...
-    'SR18I-MO-SERVC-01:GAPSET.B','SR19I-MO-SERVC-01:GAPSET.B',...
-    'SR20I-MO-SERVC-01:GAPSET.B','SR21I-MO-SERVC-01:GAPSET.B',...
-    'SR22I-MO-SERVC-01:GAPSET.B','SR23I-MO-SERVC-01:GAPSET.B',...
-    'SR24I-MO-SERVC-01:GAPSET.B'};
-PV_Lookup = containers.Map(IDs,PVs);
+params = ID_parameters;
+
+PV_Lookup = containers.Map(params.IDs, params.gap_sets);
+readback_Lookup = containers.Map(params.IDs, params.gap_readbacks);
+
 Set_PV = PV_Lookup(ID);
+read_PV = readback_Lookup(ID);
 
-for i = 1:length(Gaps)
-    lcaPut(Set_PV,Gaps(i))
-    lcaPutNoWait(char(strcat(Set_PV(1:end-2),'.PROC')),1)
-    pause(Wait)
-    if ~isempty(Monitor)
-        gap_result = lcaGet(Monitor);
-        results = [results;gap_result];
-    end
-end
-    
-end
+monitored_pvs = cat(1, params.gap_readbacks', params.phase_readbacks', monitor_pvs);
+Execute = char(strcat(Set_PV(1:end-2),'.PROC'));
+
+monitored_data = scan_id_setting(Gaps, Execute, Set_PV, read_PV,...
+    monitored_pvs, wait);
