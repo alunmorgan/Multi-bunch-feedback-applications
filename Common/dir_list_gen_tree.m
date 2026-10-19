@@ -1,8 +1,8 @@
 function [a ,dir_paths] =dir_list_gen_tree(root_dir, type, quiet)
 % finds files of the requested type in current folder and all subfolders
 % ignores hidden folders
-% if one ouptput is given then the absolute paths are returned.
-% if two output are given then the flien names and directory paths are
+% if one output is given then the absolute paths are returned.
+% if two output are given then the files names and directory paths are
 % returned separately.
 %
 % Example: [a dir_paths] =dir_list_gen_tree(root_dir, 'png', 1)
@@ -21,7 +21,7 @@ end %if
 
 % returns a list of files of the requested type in the current directory.
 full_names = dir_list_gen(root_dir, type, 'quiet_flag', quiet);
-% retruns a list of directories in the current directory.
+% returns a list of directories in the current directory.
 [sub_dir,~] = dir_list_gen(root_dir, 'dirs', 'quiet_flag', quiet);
 
 
@@ -48,8 +48,8 @@ if isempty(full_names) == 1
     return
 end %if
 
-dir_paths = cell(size(full_names,1));
-f_names = cell(size(full_names,1));
+dir_paths = cell(size(full_names,1), 1);
+f_names = cell(size(full_names,1), 1);
 for pao =1:size(full_names,1)
     nmd = full_names{pao};
     ks = find(nmd == filesep,1,'last');
