@@ -1,0 +1,189 @@
+    return 
+
+def ID_parameters:
+    params['IDs'] =       {'I02','J02','I03','I04','J04','I05','I06A','I06B','I07','I08','I09','J09','I10A','I10B','I11','I13','J13','I14','I16','I18','I19','I20','I21','I22','I23','I24'}
+    params['gaps_max'] =  { 29,   28,   29,   29,   28,   300,  180,   180,   29,   200,  29,   100,  200,   200,   29,   29,   29,   29,   29,   29,   29 ,  200,  200,  29,   29,   29}
+    params['gaps_user'] = { 7,    4['5'],  7,    7,    8['63'], 300,  50,    50,    7,    200,  7,    100,  50,    50,    7,    7,    7,    7,    7,    7,    7,    50,   200,  7,    6['3'],  7}
+    params['gaps_min'] =  { 5,    4['5'],  5,    5,    4['5'],  23['5'], 16,    18,    5,    16,   5['1'],  22,   16,    16,    5,    5,    6['15'], 5,    5,    5,    5,    11,   20,   5,    5,    5}
+    params['gap_sets'] = {'SR02I-MO-SERVC-01:GAPSET['B']','SR02J-MO-SERVC-01:GAPSET['B']',
+        'SR03I-MO-SERVC-01:GAPSET['B']',
+        'SR04I-MO-SERVC-01:GAPSET['B']','SR04J-MO-HPMU-01:SP_Pos_Gap:SET',
+        'SR05I-MO-SERVC-01:GAPSET['B']','SR06I-MO-SERVC-01:GAPSET['B']',
+        'SR06I-MO-SERVC-21:GAPSET['B']','SR07I-MO-SERVC-01:GAPSET['B']',
+        'SR08I-MO-SERVC-01:GAPSET['B']','SR09I-MO-SERVC-01:GAPSET['B']',
+        'SR09J-MO-SERVC-01:GAPSET['B']','SR10I-MO-SERVC-01:GAPSET['B']',
+        'SR10I-MO-SERVC-21:GAPSET['B']','SR11I-MO-SERVC-01:GAPSET['B']',
+        'SR13I-MO-SERVC-01:GAPSET['B']','SR13J-MO-SERVC-01:GAPSET['B']',
+        'SR14I-MO-SERVC-01:GAPSET['B']','SR16I-MO-SERVC-01:GAPSET['B']',
+        'SR18I-MO-SERVC-01:GAPSET['B']','SR19I-MO-SERVC-01:GAPSET['B']',
+        'SR20I-MO-SERVC-01:GAPSET['B']','SR21I-MO-SERVC-01:GAPSET['B']',
+        'SR22I-MO-SERVC-01:GAPSET['B']','SR23I-MO-SERVC-01:GAPSET['B']',
+        'SR24I-MO-SERVC-01:GAPSET['B']'}
+    params['gap_readbacks'] = {'SR02I-MO-SERVC-01:CURRGAPD','SR02J-MO-SERVC-01:CURRGAPD',
+        'SR03I-MO-SERVC-01:CURRGAPD',
+        'SR04I-MO-SERVC-01:CURRGAPD','SR04J-MO-HPMU-01:SP_Pos_Gap:RBV',
+        'SR05I-MO-SERVC-01:CURRGAPD','SR06I-MO-SERVC-01:CURRGAPD',
+        'SR06I-MO-SERVC-21:CURRGAPD','SR07I-MO-SERVC-01:CURRGAPD',
+        'SR08I-MO-SERVC-01:CURRGAPD','SR09I-MO-SERVC-01:CURRGAPD',
+        'SR09J-MO-SERVC-01:CURRGAPD','SR10I-MO-SERVC-01:CURRGAPD',
+        'SR10I-MO-SERVC-21:CURRGAPD','SR11I-MO-SERVC-01:CURRGAPD',
+        'SR13I-MO-SERVC-01:CURRGAPD','SR13J-MO-SERVC-01:CURRGAPD',
+        'SR14I-MO-SERVC-01:CURRGAPD','SR16I-MO-SERVC-01:CURRGAPD',
+        'SR18I-MO-SERVC-01:CURRGAPD','SR19I-MO-SERVC-01:CURRGAPD',
+        'SR20I-MO-SERVC-01:CURRGAPD','SR21I-MO-SERVC-01:CURRGAPD',
+        'SR22I-MO-SERVC-01:CURRGAPD','SR23I-MO-SERVC-01:CURRGAPD',
+        'SR24I-MO-SERVC-01:CURRGAPD'}
+    params['gap_executes'] = {'SR02I-MO-SERVC-01:GAPSET['PROC']',
+        'SR02J-MO-SERVC-01:GAPSET['PROC']',
+        'SR03I-MO-SERVC-01:GAPSET['PROC']',
+        'SR04I-MO-SERVC-01:GAPSET['PROC']','',
+        'SR05I-MO-SERVC-01:GAPSET['PROC']','SR06I-MO-SERVC-01:GAPSET['PROC']',
+        'SR06I-MO-SERVC-21:GAPSET['PROC']','SR07I-MO-SERVC-01:GAPSET['PROC']',
+        'SR08I-MO-SERVC-01:GAPSET['PROC']','SR09I-MO-SERVC-01:GAPSET['PROC']',
+        'SR09J-MO-SERVC-01:GAPSET['PROC']','SR10I-MO-SERVC-01:GAPSET['PROC']',
+        'SR10I-MO-SERVC-21:GAPSET['PROC']','SR11I-MO-SERVC-01:GAPSET['PROC']',
+        'SR13I-MO-SERVC-01:GAPSET['PROC']','SR13J-MO-SERVC-01:GAPSET['PROC']',
+        'SR14I-MO-SERVC-01:GAPSET['PROC']','SR16I-MO-SERVC-01:GAPSET['PROC']',
+        'SR18I-MO-SERVC-01:GAPSET['PROC']','SR19I-MO-SERVC-01:GAPSET['PROC']',
+        'SR20I-MO-SERVC-01:GAPSET['PROC']','SR21I-MO-SERVC-01:GAPSET['PROC']',
+        'SR22I-MO-SERVC-01:GAPSET['PROC']','SR23I-MO-SERVC-01:GAPSET['PROC']',
+        'SR24I-MO-SERVC-01:GAPSET['PROC']'}
+    params['phase_sets'] = {[],[],[],[],[],
+        {'SR05I-MO-SERVC-01:PHASESET['B']';'SR05I-MO-SERVC-01:PHASESET['C']'},
+        {'SR06I-MO-SERVC-01:PHASESET['B']';'SR06I-MO-SERVC-01:PHASESET['C']'},
+        {'SR06I-MO-SERVC-21:PHASESET['B']';'SR06I-MO-SERVC-21:PHASESET['C']'},
+        [],
+        {'SR08I-MO-SERVC-01:PHASESET['B']';'SR08I-MO-SERVC-01:PHASESET['C']'},
+        [],
+        {'SR09J-MO-SERVC-01:PHASESET['B']';'SR09J-MO-SERVC-01:PHASESET['C']'},
+        {'SR10I-MO-SERVC-01:PHASESET['B']';'SR10I-MO-SERVC-01:PHASESET['C']'},
+        {'SR10I-MO-SERVC-21:PHASESET['B']';'SR10I-MO-SERVC-21:PHASESET['C']'},
+        [],[],[],[],[],[],[],[],
+        {'SR21I-MO-SERVC-01:PHASESET['B']';'SR21I-MO-SERVC-01:PHASESET['C']'},
+        [],[],[]}
+    params['phase_readbacks'] = {[],[],[],[],[],
+        {'SR05I-MO-SERVO-05:MOT['RBV']';'SR05I-MO-SERVO-07:MOT['RBV']' },
+        {'SR06I-MO-SERVO-05:MOT['RBV']';'SR06I-MO-SERVO-06:MOT['RBV']'},
+        {'SR06I-MO-SERVO-25:MOT['RBV']';'SR06I-MO-SERVO-26:MOT['RBV']'},
+        [],
+        {'SR08I-MO-SERVO-05:MOT['RBV']';'SR08I-MO-SERVO-07:MOT['RBV']'},
+        [],
+        {'SR09J-MO-SERVO-05:MOT['RBV']'; 'SR09J-MO-SERVO-07:MOT['RBV']'},
+        {'SR10I-MO-SERVO-03:MOT['RBV']';'SR10I-MO-SERVO-05:MOT['RBV']'},
+        {'SR10I-MO-SERVO-23:MOT['RBV']';'SR10I-MO-SERVO-25:MOT['RBV']'},
+        [],[],[],[],[],[],[],[],
+        {'SR21I-MO-SERVO-05:MOT['RBV']'; 'SR21I-MO-SERVO-07:MOT['RBV']'},
+        [],[],[]}
+    params['phase_executes'] = {'','','','','',
+        'SR05I-MO-SERVC-01:PHASESET['PROC']',
+        'SR06I-MO-SERVC-01:PHASESET['PROC']',
+        'SR06I-MO-SERVC-21:PHASESET['PROC']',
+        '',
+        'SR08I-MO-SERVC-01:PHASESET['PROC']',
+        '',
+        'SR09J-MO-SERVC-01:PHASESET['PROC']',
+        'SR10I-MO-SERVC-01:PHASESET['PROC']',
+        'SR10I-MO-SERVC-21:PHASESET['PROC']',
+        '','','','','','','','',
+        'SR21I-MO-SERVC-01:PHASESET['PROC']',
+        '','',''}
+    params['phase_values'] = {[],[],[],[],[],
+        {[0,0], [70,70], [47,47], [-47,-47]},
+        {[0,0], [32,32], [22,22], [-22,-22]},
+        {[0,0], [32,32], [22,22], [-22,-22]},
+        [],
+        {[0,0], [26['5'],26['5']], [17,17], [-17,-17]},
+        [],
+        {[0,0], [30,30], [17,17], [-17,-17]},
+        {[0,0], [24,24], [15['1724'],15['1724']], [-15['1724'],-15['1724']]},
+        {[0,0], [24,24], [15['1724'],15['1724']], [-15['1724'],-15['1724']]},
+        [],[],[],[],[],[],[],[],
+        {[0,0], [28,28], [18,18], [-18,-18]},
+        [],[],[]}
+    lookups['gaps_set'] = containers['Map'](params['IDs'], params['gap_sets'])
+    lookups['gaps_readback'] = containers['Map'](params['IDs'], params['gap_readbacks'])
+    lookups['gaps_execute'] = containers['Map'](params['IDs'], params['gap_executes'])
+    lookups['gaps_max'] = containers['Map'](params['IDs'], params['gaps_max'])
+    lookups['gaps_min'] = containers['Map'](params['IDs'], params['gaps_min'])
+    lookups['gaps_user'] = containers['Map'](params['IDs'], params['gaps_user'])
+    lookups['phases_set'] = containers['Map'](params['IDs'],params['phase_sets'])
+    lookups['phases_readback'] = containers['Map'](params['IDs'], params['phase_readbacks'])
+    lookups['phases_execute'] = containers['Map'](params['IDs'], params['phase_executes'])
+    lookups['phases_settings'] = containers['Map'](params['IDs'], params['phase_values'])
+    return params,lookups
+
+def scan_id_setting(set_values, Execute, Set_PV, read_PV,:
+        monitored_pvs, wait)
+    nt = 1
+    for i  in range( 1, size(set_values, 1)):
+        lcaPut(Set_PV, set_values[i,:]')
+        if  Execute:
+            lcaPutNoWait(Execute, 1)
+
+        dist_from_target = 1
+        val_history = zeros(10,1)
+        tic
+        warn_flag = 0
+        while any(dist_from_target > 0['1']):
+            val = lcaGet(read_PV)
+            val_history = circshift(val_history, -1)
+            val_history(10) = val
+            val_history_check = val_history - repmat(val, 10)
+            if all(abs(val_history_check) < 0['1']) and warn_flag == 0:
+                print('WARNING  ID does not appear to be moving')
+                warn_flag = 1
+            elif all(abs(val_history_check) >= 0['1']) and warn_flag == 1:
+                print('ID has started moving again')
+                warn_flag = 0
+
+            dist_from_target = abs(val - set_values[i,:]')
+            pause(0['2'])
+            duration = toc
+            monitored_data(1:len(monitored_pvs), nt) = lcaGet(monitored_pvs)
+            monitored_data(len(monitored_pvs) +1, nt) = now
+            nt = nt+1
+            # 2min timer to break out of the loop
+            if duration > 120:
+                print('Timeout reached')
+                break
+
+
+        pause(wait)
+
+    return monitored_data 
+
+def setIDGap(ID, Gaps, monitor_pvs, wait):
+    if strcmp(ID,'I10')||strcmp(ID,'I06'):
+        ID = strcat(ID,'A')
+
+    [params, lookups] = ID_parameters
+    Set_PV = lookups['gaps_set'](ID)
+    read_PV = lookups['gaps_readback'](ID)
+    Execute_PV = lookups['gaps_execute'](ID)
+    monitored_pvs = cat(1, params['gap_readbacks']', params['phase_readbacks']', monitor_pvs)
+    monitored_data = scan_id_setting(Gaps, Execute_PV, Set_PV, read_PV,
+        monitored_pvs, wait)
+    return monitored_data 
+
+def setIDPhase(ID, Phases_in, monitor_pvs, wait):
+    if strcmp(ID,'I10')||strcmp(ID,'I06'):
+        ID = strcat(ID,'A')
+
+    [params, lookups] = ID_parameters
+    Set_PV = lookups['phases_set'](ID)
+    if not Set_PV:
+        print("No phases associated with this ID")
+        return
+
+    read_PV = lookups['phases_readback'](ID)
+    phase_setups = lookups['phases_settings'](ID)
+    Execute_PV = lookups['phases_execute'](ID)
+    Modes = {'H','V','L','R'}
+    phase_setups_Lookup = containers['Map'](Modes, phase_setups)
+    Phase_Puts = []
+    for i  in range( 1, len(Phases_in)):
+        Phase_Puts = [Phase_Puts; phase_setups_Lookup(Phases_in[i])]
+
+    monitored_pvs = cat(1, params['gap_readbacks']', params['phase_readbacks']', monitor_pvs)
+    monitored_data = scan_id_setting(Phase_Puts, Execute_PV, Set_PV, read_PV,
+        monitored_pvs, wait)
