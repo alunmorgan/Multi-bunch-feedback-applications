@@ -5,6 +5,20 @@ import numpy as np
 import scipy
 
 
+def hannwin(data, dim=None):
+    s = data.shape
+    if not dim:
+        [_1, dim] = max(s)
+
+    rh = s
+    rh[dim] = 1
+    t = np.linspace(0, 2 * np.pi, s[dim] + 1)
+    t = t[0:-2]
+    h = 1 - np.cos(t)
+    data_windowed = data * (np.repmat(np.fft.shiftdim(h, dim), rh))
+    return data_windowed
+
+
 def movmean(data, window_size):
     i = 0
     # Initialize an empty list to store moving averages
