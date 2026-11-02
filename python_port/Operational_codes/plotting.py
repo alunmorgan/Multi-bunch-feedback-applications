@@ -2665,3 +2665,55 @@ def mbf_tunescan_over_modes_plot_summary(tunescan):
         )
         plt.xlabel("mode number")
         plt.ylabel("error of fit")
+
+
+def BBBFE_clock_phase_scan_plotting(data: dict):
+    temp = re.findall("[]*_([xys])_axis$", data["base_name"])
+    mbf_ax = temp[0]
+    graph_name = data["base_name"].replace("_", " ")
+    # plotting
+    fig, _1 = plt.subplot_mosaic(
+        [["upper left", "upper right"], ["lower left", "lower right"]],
+        figsize=(5.5, 3.5),
+        layout="constrained",
+    )
+
+    instructions = (
+        "The excited bunch signal should be as high as possible "
+        "while maximising the signal differences."
+    )
+    fig.supplt.title(
+        f"BBBFE '{graph_name} axis on {data['time'].strftime('%a %d %b %Y, %I:%M%p')}"
+    )
+    fig.subplt.title(instructions, "FontAngle", "italic", "FontSize", 10)
+    plt.xlabel("phase (degrees)")
+    plt.semilogy(data["phase"], data["main"], "DisplayName", "Excited bunch")
+    plt.semilogy(data["phase"], data["side1"], "DisplayName", "Preceeding bunch")
+    plt.semilogy(data["phase"], data["side2"], "DisplayName", "Following bunch")
+    add_original_values(mbf_ax, data)
+    plt.legend("Location", "Best")
+    plt.ylabel("Signal")
+    plt.semilogy(
+        data["phase"],
+        data["main"] - data["side1"],
+        "DisplayName",
+        "Excited bunch - Preceeding bunch",
+    )
+    plt.semilogy(
+        data["phase"],
+        data["main"] - data["side2"],
+        "DisplayName",
+        "Excited bunch - Following bunch",
+    )
+    add_original_values(mbf_ax, data)
+    plt.legend("Location", "Best")
+    plt.ylabel("Signal differences")
+    plt.semilogy(data["phase"], data["adc_mean"], "DisplayName", "ADC amplitude")
+    add_original_values(mbf_ax, data)
+    plt.legend("Location", "Best")
+    plt.ylabel("ADC amplitude")
+    if mbf_ax == "s":
+        plt.semilogy(data["phase"], data["adc_phase"], "DisplayName", "ADC phase")
+        add_original_values(mbf_ax, data)
+        plt.legend("Location", "Best")
+        plt.ylabel("ADC phase")
