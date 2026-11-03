@@ -6,6 +6,7 @@ import numpy as np
 import scipy
 
 from Common import (
+    get_operational_mode,
     get_variable,
     hannwin,
     machine_environment,
@@ -13,7 +14,77 @@ from Common import (
     mbf_system_config,
     save_to_archive,
     set_variable,
+    setup_operational_mode,
 )
+
+
+def run_single_axis_measurement(
+    setup_info: dict,
+    hardware_setup_function,
+    capture_function,
+    restore_function,
+    retrival_function,
+):
+    [root_string, harmonic_number, pv_names] = mbf_system_config()
+    pv_head = pv_names["hardware_names"][setup_info["mbf_axis"]]
+
+    frontend = pv_names["frontend"]["base"]
+    clock_phases = pv_names["frontend"]["clock_phase"]
+    sequencer1 = pv_names["tails"]["Sequencer"]["seq1"]
+
+    setup_info["harmonic_number"] = harmonic_number
+    setup_info["fir_gain"] = get_variable(f"{pv_head}:FIR:GAIN_S")
+    setup_info["orig_seq1_gain"] = get_variable(f"{pv_head}{sequencer1['gaindb']}")
+    setup_info["original_frontend_clock_phase"] = get_variable(
+        f"{frontend}{clock_phases[setup_info['mbf_ax']]}"
+    )
+
+    if setup_info["bunches_monitored"] == "all":
+        setup_info["bunches_monitored"] = np.ones(harmonic_number).tolist()
+
+    if setup_info["auto_setup"] == "yes":
+        # putting the system into a known state.
+        setup_operational_mode(setup_info["mbf_axis"], setup_info["start_state"])
+        # Setting the FIR gain to its original value.
+        set_variable(f"{pv_head}:FIR:GAIN_S", setup_info["fir_gain"])
+
+    setup_info["mbf_state"] = get_operational_mode(setup_info["mbf_axis"])
+    # Setup the MBF ready for the measurement.
+    restore_state = hardware_setup_function(setup_info, pv_names)
+    time.sleep(2)
+    # Capturing data.
+    captured_data = capture_function(setup_info, pv_names)
+    # adding to output data structure.
+    data_fields = captured_data.keys()
+    data = setup_info
+    for je in range(len(data_fields)):
+        data[data_fields[je]] = captured_data[data_fields[je]]
+
+    if restore_function:
+        restore_function(setup_info, pv_names, restore_state)
+
+    if setup_info["auto_setup"] == "yes":
+        setup_operational_mode(setup_info["mbf_axis"], setup_info["end_state"])
+        # Setting the FIR gain to its original value.
+        set_variable(f"{pv_head}:FIR:GAIN_S", setup_info["fir_gain"])
+    else:
+        reestablish_tune_measurement(setup_info["mbf_axis"])
+
+    ## saving the data to a file
+    save_to_archive(root_string, data)
+    if setup_info["additional_save_location"]:
+        scipy.savemat(setup_info["additional_save_location"], data)
+
+    ## Plotting data
+    if setup_info["plotting"] == "yes":
+        # for archival investigations this allows filtering by machine state.
+        # but for capture this is not needed so it set to empty.
+        filter_conditions: list = []
+        retrival_function(
+            setup_info["mbf_axis"],
+            [setup_info["time"], setup_info["time"]],
+            filter_conditions,
+        )
 
 
 def mbf_growdamp_capture(input_settings: dict, pv_names: dict):
@@ -721,13 +792,11 @@ def mbf_spectrum_capture(input_settings: dict, pv_names: dict):
     #       pv_names(struct): contains the locations of all the machine parameters.
     #
     # Example: data = mbf_spectrum_capture(input_settings, pv_names)
-    mbf_axis = input_settings["mbf_axis"]
-    n_turns = input_settings["n_turns"]
-    repeat = input_settings["repeat"]
-    captured_data: list = []
-    for k in range(repeat):
+
+    captured_data: dict[list] = {}
+    for k in range(input_settings["repeat"]):
         # Arm, trigger, read
-        if mbf_axis == "s":
+        if input_settings["mbf_axis"] == "s":
             # LMBF hardware
             set_variable(
                 f"{pv_names['hardware_names']['L']}{pv_names['tails']['triggers']['MEM']['arm']}",
@@ -737,8 +806,13 @@ def mbf_spectrum_capture(input_settings: dict, pv_names: dict):
                 f"{pv_names['hardware_names']['L']}{pv_names['tails']['triggers']['soft']}",
                 1,
             )
-            captured_data[k] = mbf_read_mem(
-                pv_names["hardware_names"]["L"], n_turns, "channel", 0, "lock", 60
+            captured_data["raw_data"][k] = mbf_read_mem(
+                pv_names["hardware_names"]["L"],
+                input_settings["n_turns"],
+                "channel",
+                0,
+                "lock",
+                60,
             )
         else:
             # TMBF hardware
@@ -750,14 +824,25 @@ def mbf_spectrum_capture(input_settings: dict, pv_names: dict):
                 f"{pv_names['hardware_names']['T']}{pv_names['tails']['triggers']['soft']}",
                 1,
             )
-            if mbf_axis == "x":
-                captured_data[k] = mbf_read_mem(
-                    pv_names["hardware_names"]["T"], n_turns, "channel", 0, "lock", 60
+            if input_settings["mbf_axis"] == "x":
+                captured_data["raw_data"][k] = mbf_read_mem(
+                    pv_names["hardware_names"]["T"],
+                    input_settings["n_turns"],
+                    "channel",
+                    0,
+                    "lock",
+                    60,
                 )
             else:
-                captured_data[k] = mbf_read_mem(
-                    pv_names["hardware_names"]["T"], n_turns, "channel", 1, "lock", 60
+                captured_data["raw_data"][k] = mbf_read_mem(
+                    pv_names["hardware_names"]["T"],
+                    input_settings["n_turns"],
+                    "channel",
+                    1,
+                    "lock",
+                    60,
                 )
+    return captured_data
 
 
 def mbf_spectrum_setup(input_settings: dict, pv_names: dict):

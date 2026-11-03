@@ -11,7 +11,6 @@ from measurements import (
     mbf_bunch_motion_archival_retrieval,
     mbf_bunch_motion_capture,
     mbf_bunch_motion_setup,
-    mbf_frontend_clock_phase_scan_archival_retrieval,
     mbf_frontend_gain_scan_archival_retrieval,
     mbf_frontend_system_phase_scan_archival_retrieval,
     mbf_growdamp_archival_retrieval,
@@ -24,7 +23,7 @@ from measurements import (
     mbf_spectra_archival_retrieval,
     mbf_spectrum_capture,
     mbf_spectrum_setup,
-    reestablish_tune_measurement,
+    run_single_axis_measurement,
 )
 
 from Common import (
@@ -49,7 +48,7 @@ def growdamp_all(
     pll_tracking: str = "no",
     pll_bunches: int = 400,
     pll_guard_bunches: int = 10,
-    bunches_monitored: list[int] = np.ones(harmonic_number).tolist(),
+    bunches_monitored: list[int] | str = "all",
     capture_full_bunch_motion: str = "no",
 ) -> None:
     # Top level def to run the growdamp measurements on the:
@@ -77,20 +76,14 @@ def growdamp_all(
     #       pll_bunches (float): bunches the pll is active on.
     #       pll_guard_bunches (float): the number of bunches surrounding the pll
     #                                  bunches for which feedback is switched off.
-    #       bunch_monitor(list(int)): This determines which bunches are monitored
-    #                                 during the measurement. Defaults to and array
-    #                                 of ones which means all bunches.
+    #       bunch_monitor(list(int)) | str: This determines which bunches are monitored
+    #                                 during the measurement. Defaults to 'all' which
+    #                                 means all bunches.
     #       capture_full_bunch_motion(str): Captures the centroid motion for the
     #                                       duration of the measuremnt.
     #                                       Defaults to no as this is a lot of data.
     # Example: growdamp_all('x')
-    [root_string, harmonic_number, pv_names] = mbf_system_config()
-    pv_head = pv_names["hardware_names"][mbf_axis]
-    # for archival investigations this allows filtering by machine state.
-    # but for capture this is not needed so it set to empty.
-    filter_conditions: list = []
-    # getting general environment data.
-    growdamp = machine_environment()
+
     ## Constructing the different states for the sequencer. These will be arranged
     # in various configurations depending on the experiment requested.
     #
@@ -178,6 +171,8 @@ def growdamp_all(
         spacer["bank"] = 2
         tune_offset = 0
 
+    # getting general environment data.
+    growdamp = machine_environment()
     ## Setting up the growdamp experiments.
     states: list = []
     state_names: list = []
@@ -217,12 +212,10 @@ def growdamp_all(
     # Add the extra data to the data structure.
     growdamp["ax_label"] = mbf_axis
     growdamp["base_name"] = ["Growdamp_", mbf_axis, "_axis"]
-    growdamp["harmonic_number"] = harmonic_number
     growdamp["excitation_tune"] = excitation_tune
     growdamp["states"] = states
     growdamp["state_names"] = state_names
-    temp = get_variable(f"{pv_head}:FIR:GAIN_S")
-    growdamp["fir_gain"] = temp[0]
+    growdamp["mbf_axis"] = mbf_axis
     growdamp["auto_setup"] = auto_setup
     growdamp["plotting"] = plotting
     growdamp["additional_save_location"] = additional_save_location
@@ -234,40 +227,16 @@ def growdamp_all(
     growdamp["pll_guard_bunches"] = pll_guard_bunches
     growdamp["bunches_monitored"] = bunches_monitored
     growdamp["capture_full_bunch_motion"] = capture_full_bunch_motion
+    growdamp["start_state"] = "Feedback"
+    growdamp["end_state"] = "Feedback"
 
-    if auto_setup == "yes":
-        # putting the system into a known state['']
-        setup_operational_mode(mbf_axis, "Feedback")
-        # Setting the FIR gain to its original value['']
-        set_variable(f"{pv_head}:FIR:GAIN_S", growdamp["fir_gain"])
-
-    growdamp["mbf_state"] = get_operational_mode(mbf_axis)
-    # Setup the MBF ready for the measurement['']
-    mbf_growdamp_setup(growdamp, pv_names)
-    # Capturing data['']
-    captured_data = mbf_growdamp_capture(growdamp, pv_names)
-    # adding to output data structure['']
-    data_fields = captured_data.keys()
-    for je in range(len(data_fields)):
-        growdamp[data_fields[je]] = captured_data[data_fields[je]]
-
-    if auto_setup == "yes":
-        setup_operational_mode(mbf_axis, "Feedback")
-        # Setting the FIR gain to its original value['']
-        set_variable(f"{pv_head}:FIR:GAIN_S", growdamp["fir_gain"])
-    else:
-        reestablish_tune_measurement(mbf_axis)
-
-    ## saving the data to a file
-    save_to_archive(root_string, growdamp)
-    if additional_save_location:
-        scipy.savemat(additional_save_location, growdamp)
-
-    ## Plotting data
-    if plotting == "yes":
-        mbf_growdamp_archival_retrieval(
-            mbf_axis, [growdamp["time"], growdamp["time"]], filter_conditions
-        )
+    run_single_axis_measurement(
+        setup_info=growdamp,
+        hardware_setup_function=mbf_growdamp_setup,
+        capture_function=mbf_growdamp_capture,
+        restore_function=None,
+        retrival_function=mbf_growdamp_archival_retrieval,
+    )
 
 
 def modescan_all(
@@ -294,59 +263,30 @@ def modescan_all(
     #       excitation_gain(float): level of the excitation.
     #
     # Example  modescan_all('x')
-    [root_string, harmonic_number, pv_names] = mbf_system_config()
-    pv_head = pv_names["hardware_names"][mbf_axis]
-    # for archival investigations this allows filtering by machine state.
-    # but for capture this is not needed so it set to empty.
-    filter_conditions: list = []
+
     # getting general environment data
     modescan = machine_environment()
     # Add the extra data to the data structure.
     modescan["ax_label"] = mbf_axis
     modescan["base_name"] = f"Modescan_{mbf_axis}_axis"
-    modescan["harmonic_number"] = harmonic_number
     modescan["excitation_tune"] = modescan["tunes"][f"{mbf_axis}_tune"]["tune"]
-    temp = get_variable(f"{pv_head}:FIR:GAIN_S")
-    modescan["fir_gain"] = temp[0]
+    modescan["mbf_axis"] = mbf_axis
     modescan["auto_setup"] = auto_setup
     modescan["plotting"] = plotting
     modescan["additional_save_location"] = additional_save_location
     modescan["n_repeats"] = n_repeats
     modescan["dwell"] = dwell
     modescan["excitation_gain"] = excitation_gain
+    modescan["start_state"] = "TuneOnly"
+    modescan["end_state"] = "Feedback"
 
-    if auto_setup == "yes":
-        # Programatically press the tune only button on each system.
-        setup_operational_mode(mbf_axis, "TuneOnly")
-
-    modescan["mbf_state"] = get_operational_mode(mbf_axis)
-    # Setup the MBF ready for the measurement.
-    mbf_modescan_setup(modescan, pv_names)
-    time.sleep(2)
-    # Capturing data.
-    captured_data = mbf_modescan_capture(modescan, pv_names)
-    # adding to output data structure.
-    data_fields = captured_data.keys()
-    for je in range(len(data_fields)):
-        modescan[data_fields[je]] = captured_data[data_fields[je]]
-
-    if auto_setup == "yes":
-        setup_operational_mode(mbf_axis, "Feedback")
-        # Setting the FIR gain to its original value.
-        set_variable(f"{pv_head}:FIR:GAIN_S", modescan["fir_gain"])
-    else:
-        reestablish_tune_measurement(mbf_axis)
-
-    ## saving the data to a file
-    save_to_archive(root_string, modescan)
-    if additional_save_location:
-        scipy.savemat(additional_save_location, modescan)
-
-    ## Plotting data
-    if plotting == "yes":
-        mbf_modescan_archival_retrieval(
-            mbf_axis, [modescan["time"], modescan["time"]], filter_conditions
-        )
+    run_single_axis_measurement(
+        setup_info=modescan,
+        hardware_setup_function=mbf_modescan_setup,
+        capture_function=mbf_modescan_capture,
+        restore_function=None,
+        retrival_function=mbf_modescan_archival_retrieval,
+    )
 
 
 def mbf_spectrum_all(
@@ -357,62 +297,43 @@ def mbf_spectrum_all(
     n_turns: int = 1000,
     repeat: int = 1,
 ):
-    # Top level def to run all spectral measurements on selected plane['']:
+    # Top level def to run all spectral measurements on selected plane.:
     # Args:
-    #       mbf_axis (str): 'x', 'y', 's'[''] Defines which system you are requesting
+    #       mbf_axis (str): 'x', 'y', 's'. Defines which system you are requesting
     #       auto_setup(str): sets whether the setup scripts will be used to put the
-    #                        system into a particular state[''] Default is yes['']
-    #       plotting(str): set whether the data is plotted as well as saved[''] Default
-    #                      is yes['']
+    #                        system into a particular state[''] Default is yes.
+    #       plotting(str): set whether the data is plotted as well as saved. Default
+    #                      is yes.
     #       additional_save_location(str): fully defined filename to save the
     #                                      captured data to in addition to the
-    #                                      main archive['']
-    #       n_turns (int): number of turns to capture[''] Default is 1000['']
-    #       repeat (int): Number of repeat points (improves the power resolution)['']
-    #                     Default is 1['']
+    #                                      main archive.
+    #       n_turns (int): number of turns to capture. Default is 1000.
+    #       repeat (int): Number of repeat points (improves the power resolution).
+    #                     Default is 1.
     #
     # Example mbf_spectrum_all
-    [root_string, harmonic_number, pv_names] = mbf_system_config()
-    pv_head = pv_names["hardware_names"][mbf_axis]
-    # for archival investigations this allows filtering by machine state['']
-    # but for capture this is not needed so it set to empty['']
-    filter_conditions: list = []
-    # getting general environment data['']
+
+    # getting general environment data.
     spectrum = machine_environment()
-    # Add the extra data to the data structure['']
+    # Add the extra data to the data structure.
     spectrum["ax_label"] = mbf_axis
     spectrum["base_name"] = f"Spectrum_{mbf_axis}_axis"
-    spectrum["harmonic_number"] = harmonic_number
     spectrum["mbf_axis"] = mbf_axis
     spectrum["auto_setup"] = auto_setup
     spectrum["plotting"] = plotting
     spectrum["additional_save_location"] = additional_save_location
     spectrum["n_turns"] = n_turns
     spectrum["repeat"] = repeat
+    spectrum["start_state"] = "TuneOnly"
+    spectrum["end_state"] = "Feedback"
 
-    if auto_setup == "yes":
-        # Get the current FIR gain
-        orig_fir_gain = get_variable(f"{pv_head}:FIR:GAIN_S")
-        # Programatically press the tune only button on each system['']
-        setup_operational_mode(mbf_axis, "TuneOnly")
-
-    spectrum["mbf_state"] = get_operational_mode(mbf_axis)
-    mbf_spectrum_setup(spectrum, pv_names)
-    spectrum["raw_data"] = mbf_spectrum_capture(spectrum, pv_names)
-    if auto_setup == "yes":
-        setup_operational_mode(mbf_axis, "Feedback")
-        # Setting the FIR gain to its original value['']
-        set_variable(f"{pv_head}:FIR:GAIN_S", orig_fir_gain)
-
-    ## saving the data to a file
-    save_to_archive(root_string, spectrum)
-    if additional_save_location:
-        scipy.savemat(additional_save_location, spectrum)
-
-    if plotting == "yes":
-        mbf_spectra_archival_retrieval(
-            mbf_axis, [spectrum["time"], spectrum["time"]], filter_conditions
-        )
+    run_single_axis_measurement(
+        setup_info=spectrum,
+        hardware_setup_function=mbf_spectrum_setup,
+        capture_function=mbf_spectrum_capture,
+        restore_function=None,
+        retrival_function=mbf_spectra_archival_retrieval,
+    )
 
 
 def Bunch_motion_all(
@@ -423,9 +344,7 @@ def Bunch_motion_all(
     [root_string, harmonic_number, pv_names] = mbf_system_config()
     mbf_tools()
     Bunch_bank1 = pv_names["tails"]["Bunch_bank"]["bank1"]
-    # for archival investigations this allows filtering by machine state.
-    # but for capture this is not needed so it set to empty.
-    filter_conditions: list = []
+
     # getting general environment data
     bunch_motion = machine_environment()
     # Add the extra data to the data structure.
@@ -482,6 +401,9 @@ def Bunch_motion_all(
 
     ## Plotting data
     if plotting == "yes":
+        # for archival investigations this allows filtering by machine state.
+        # but for capture this is not needed so it set to empty.
+        filter_conditions: list = []
         mbf_bunch_motion_archival_retrieval(
             [bunch_motion["time"], bunch_motion["time"]], filter_conditions
         )
@@ -574,23 +496,11 @@ def BBBFE_clock_phase_scan(
     # fill some charge in bunch 1 (0['2nC'])
     #
     # Example: BBBFE_clock_phase_scan('x', 400)
-    [root_string, _1, pv_names] = mbf_system_config()
-    detector = pv_names["tails"]["Detector"]
-    frontend = pv_names["frontend"]["base"]
-    clock_phases = pv_names["frontend"]["clock_phase"]
-    sequencer1 = pv_names["tails"]["Sequencer"]["seq1"]
-    adc = pv_names["tails"]["adc"]
-    # for archival investigations this allows filtering by machine state.
-    # but for capture this is not needed so it set to empty.
-    filter_conditions: list = []
-    mbf_pv = pv_names["hardware_names"][mbf_ax]
-    fe_phase_pv = f"{frontend}{clock_phases[mbf_ax]}"
+
     # getting general environment data.
     data = machine_environment()
     # Add the extra data to the data structure.
     data["base_name"] = f"clock_phase_scan_{mbf_ax}_axis"
-    data["original_setting"] = get_variable(fe_phase_pv)
-    data["orig_gain"] = get_variable(f"{mbf_pv}{sequencer1['gaindb']}")
     data["mbf_ax"] = mbf_ax
     data["single_bunch_location"] = single_bunch_location
     data["auto_setup"] = auto_setup
@@ -599,69 +509,107 @@ def BBBFE_clock_phase_scan(
     data["sweep_start"] = sweep_start
     data["sweep_step"] = sweep_step
     data["sweep_end"] = sweep_end
+    data["start_state"] = "TuneOnly"
+    data["end_state"] = "TuneOnly"
 
+    run_single_axis_measurement(
+        setup_info=data,
+        hardware_setup_function=clock_phase_scan_setup,
+        capture_function=clock_phase_scan_capture,
+        restore_function=clock_phase_scan_restore,
+        retrival_function=clock_phase_scan_retrival,
+    )
+
+
+def clock_phase_scan_setup(setup_info, pv_names):
+
+    if setup_info["auto_setup"] == "yes":
+        original_detector_setup = BBBFE_detector_setup(
+            setup_info["mbf_ax"], setup_info["single_bunch_location"]
+        )
+
+
+def clock_phase_scan_capture(setup_info, pv_names):
+
+    detector = pv_names["tails"]["Detector"]
+    adc = pv_names["tails"]["adc"]
+    pv_head = pv_names["hardware_names"][setup_info["mbf_axis"]]
+    frontend = pv_names["frontend"]["base"]
+    clock_phase = pv_names["frontend"]["clock_phase"][setup_info["mbf_axis"]]
+    fe_phase_pv = f"{frontend}{clock_phase}"
+    data = setup_info
     # set up the sweep
-    data["phase"] = range(data["sweep_start"], data["sweep_end"], data["sweep_step"])
+    data["phase"] = range(
+        setup_info["sweep_start"], setup_info["sweep_end"], setup_info["sweep_step"]
+    )
     data["phase"].extend(
         range(
-            data["sweep_end"] - data["sweep_step"],
-            data["sweep_start"],
-            -data["sweep_step"],
+            setup_info["sweep_end"] - setup_info["sweep_step"],
+            setup_info["sweep_start"],
+            -setup_info["sweep_step"],
         )
     )
-    # prealloacation
+    # moving to starting point in scan
+    for pp in range(
+        setup_info["original_frontend_clock_phase"],
+        setup_info["sweep_start"],
+        -setup_info["sweep_step"],
+    ):
+        set_variable(fe_phase_pv, pp)
+        time.sleep(0.5)
+
     data["side1"] = []
     data["main"] = []
     data["side2"] = []
     data["adc_phase"] = []
-    if auto_setup == "yes":
-        original_detector_setup = BBBFE_detector_setup(mbf_ax, single_bunch_location)
-        setup_operational_mode(mbf_ax, "TuneOnly")
-
-    # moving to starting point in scan
-    for pp in range(data["original_setting"], sweep_start, -sweep_step):
-        set_variable(fe_phase_pv, pp)
-        time.sleep(0.5)
-
     for x in range(len(data["phase"])):
         set_variable(fe_phase_pv, data["phase"][x])
         time.sleep(0.5)
-        data["side1"][x] = max(get_variable(f"{mbf_pv}{detector['det1']['power']}"))
-        data["main"][x] = max(get_variable(f"{mbf_pv}{detector['det2']['power']}"))
-        data["side2"][x] = max(get_variable(f"{mbf_pv}{detector['det3']['power']}"))
-        if mbf_ax.lower() == "s":
-            data["adc_phase"][x] = max(get_variable(f"{mbf_pv}{adc['phase']['mean']}"))
-            data["adc_mean"][x] = max(get_variable(f"{mbf_pv[1:-2]}{adc['mean']}"))
-            data["adc_max"][x] = max(get_variable(f"{mbf_pv[1:-2]}{adc['max']}"))
-            data["adc_min"][x] = max(get_variable(f"{mbf_pv[1:-2]}{adc['min']}"))
-            data["adc_meanQ"][x] = max(get_variable(f"{mbf_pv[1:-3]}Q{adc['mean']}"))
-            data["adc_maxQ"][x] = max(get_variable(f"{mbf_pv[1:-3]}Q{adc['max']}"))
-            data["adc_minQ"][x] = max(get_variable(f"{mbf_pv[1:-3]}Q{adc['min']}"))
+        data["side1"][x] = max(get_variable(f"{pv_head}{detector['det1']['power']}"))
+        data["main"][x] = max(get_variable(f"{pv_head}{detector['det2']['power']}"))
+        data["side2"][x] = max(get_variable(f"{pv_head}{detector['det3']['power']}"))
+        if data["mbf_axis"].lower() == "s":
+            data["adc_phase"][x] = max(get_variable(f"{pv_head}{adc['phase']['mean']}"))
+            data["adc_mean"][x] = max(get_variable(f"{pv_head[1:-2]}{adc['mean']}"))
+            data["adc_max"][x] = max(get_variable(f"{pv_head[1:-2]}{adc['max']}"))
+            data["adc_min"][x] = max(get_variable(f"{pv_head[1:-2]}{adc['min']}"))
+            data["adc_meanQ"][x] = max(get_variable(f"{pv_head[1:-3]}Q{adc['mean']}"))
+            data["adc_maxQ"][x] = max(get_variable(f"{pv_head[1:-3]}Q{adc['max']}"))
+            data["adc_minQ"][x] = max(get_variable(f"{pv_head[1:-3]}Q{adc['min']}"))
         else:
-            data["adc_mean"][x] = max(get_variable(f"{mbf_pv}{adc['mean']}"))
-            data["adc_max"][x] = max(get_variable(f"{mbf_pv}{adc['max']}"))
-            data["adc_min"][x] = max(get_variable(f"{mbf_pv}{adc['min']}"))
+            data["adc_mean"][x] = max(get_variable(f"{pv_head}{adc['mean']}"))
+            data["adc_max"][x] = max(get_variable(f"{pv_head}{adc['max']}"))
+            data["adc_min"][x] = max(get_variable(f"{pv_head}{adc['min']}"))
 
     # move back to the original setting
-    for pp in range(data["sweep_start"], data["original_setting"], data["sweep_step"]):
+    for pp in range(
+        data["sweep_start"], data["original_frontend_clock_phase"], data["sweep_step"]
+    ):
         set_variable(fe_phase_pv, pp)
         time.sleep(0.5)
 
-    if auto_setup == "yes":
-        setup_operational_mode(mbf_ax, "TuneOnly")
-        BBBFE_detector_restore(mbf_ax, original_detector_setup)
-        set_variable(f"{mbf_pv}{sequencer1['gaindb']}", data["orig_gain"])
 
-    ## saving the data to a file
-    save_to_archive(root_string, data)
-    if additional_save_location:
-        scipy.savemat(additional_save_location, data)
+def clock_phase_scan_restore(setup_info, pv_names, restore_state):
+    pv_head = pv_names["hardware_names"][setup_info["mbf_axis"]]
+    sequencer1 = pv_names["tails"]["Sequencer"]["seq1"]
 
-    ## plotting
-    if plotting == "yes":
-        mbf_frontend_clock_phase_scan_archival_retrieval(
-            mbf_ax, [data["time"], data["time"]], filter_conditions
-        )
+    if setup_info["auto_setup"] == "yes":
+        BBBFE_detector_restore(setup_info["mbf_axis"], original_detector_setup)
+        set_variable(f"{pv_head}{sequencer1['gaindb']}", setup_info["orig_seq1_gain"])
+
+    # ## saving the data to a file
+    # save_to_archive(root_string, data)
+    # if additional_save_location:
+    #     scipy.savemat(additional_save_location, data)
+
+    # ## plotting
+    # if plotting == "yes":
+    #     # for archival investigations this allows filtering by machine state.
+    #     # but for capture this is not needed so it set to empty.
+    #     filter_conditions: list = []
+    #     mbf_frontend_clock_phase_scan_archival_retrieval(
+    #         mbf_ax, [data["time"], data["time"]], filter_conditions
+    #     )
 
 
 def BBBFE_full_frontend_checkout(single_bunch_location: int):
@@ -715,9 +663,7 @@ def BBBFE_gain_scan(
     sequencer1 = pv_names["tails"]["Sequencer"]["seq1"]
     mbf_pv = pv_names["hardware_names"][mbf_ax]
     fe_gain_pv = f"{frontend}{fe_gain[mbf_ax]}"
-    # for archival investigations this allows filtering by machine state.
-    # but for capture this is not needed so it set to empty.
-    filter_conditions: list = []
+
     # getting general environment data.
     data = machine_environment()
     # Add the extra data to the data structure.
@@ -778,6 +724,9 @@ def BBBFE_gain_scan(
 
     ## Plotting data
     if plotting == "yes":
+        # for archival investigations this allows filtering by machine state.
+        # but for capture this is not needed so it set to empty.
+        filter_conditions: list = []
         mbf_frontend_gain_scan_archival_retrieval(
             mbf_ax, [data["time"], data["time"]], filter_conditions
         )
@@ -829,9 +778,6 @@ def BBBFE_system_phase_scan(
         fe_phase_pv = f"{frontend}{fe_system_phase['sI']}"
         fe_phase_pvQ = f"{frontend}{fe_system_phase['sQ']}"
 
-    # for archival investigations this allows filtering by machine state.
-    # but for capture this is not needed so it set to empty.
-    filter_conditions: list = []
     # getting general environment data.
     data = machine_environment()
     # Add the extra data to the data structure.
@@ -926,6 +872,9 @@ def BBBFE_system_phase_scan(
 
     ## Plotting data
     if plotting == "yes":
+        # for archival investigations this allows filtering by machine state.
+        # but for capture this is not needed so it set to empty.
+        filter_conditions: list = []
         mbf_frontend_system_phase_scan_archival_retrieval(
             mbf_ax, [data["time"], data["time"]], filter_conditions
         )
