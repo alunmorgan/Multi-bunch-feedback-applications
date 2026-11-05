@@ -64,7 +64,7 @@ from Common import (
 #                 close(h(nq))
 
 
-def mbf_growdamp_archival_plotting(requested_data, dataset, times, experimental_setup):
+def growdamp_archival_plotting(requested_data, dataset, times, experimental_setup):
     # Plots the data processed by mbf_growdamp_archival_analysis['']
     # Args:
     #       dataset (struct): containing
@@ -82,7 +82,7 @@ def mbf_growdamp_archival_plotting(requested_data, dataset, times, experimental_
     #      plot_error_graphs (anything): if present the code will plot the results
     #                                    of the fit errors['']
     #
-    # Example: mbf_growdamp_archival_plotting(requested_data, dataset, error_active,
+    # Example: growdamp_archival_plotting(requested_data, dataset, error_active,
     #                                           times, setup, selections, extents)
     # Only do something if there is data to do something with['']
     if not times:
@@ -307,7 +307,7 @@ def populate_graph(input_data, years_input, times, x_plt_axis):
     plt.legend("show")
 
 
-def mbf_growdamp_plot_summary(data, metadata, plot_mode="pos"):
+def growdamp_plot_summary(data, metadata, plot_mode="pos"):
     # Plots the driven growth rates, and the active and pasive damping rates
     # across all modes['']
     #
@@ -323,7 +323,7 @@ def mbf_growdamp_plot_summary(data, metadata, plot_mode="pos"):
     #       plot_mode: 'pos' or 'neg'[''] Determines if plot modes 0:harmonic_number or
     #       -harmonic_number/2:harmonic_number/2
     #
-    # Example: mbf_growdamp_plot_summary(poly_data, frequency_shifts, 'passive')
+    # Example: growdamp_plot_summary(poly_data, frequency_shifts, 'passive')
 
     # Getting the desired system setup parameters['']
     stages = data.keys()
@@ -518,7 +518,7 @@ def mbf_growdamp_plot_summary(data, metadata, plot_mode="pos"):
     plt.xlabel(labelX_f)
 
 
-def mbf_growthrates_archival_plotting(
+def growthrates_archival_plotting(
     requested_data,
     dr_growth,
     dr_active,
@@ -542,7 +542,7 @@ def mbf_growthrates_archival_plotting(
     #      plot_error_graphs (anything): if present the code will plot the results of
     #                                    the fit errors.
     #
-    # Example: mbf_growdamp_archival_plotting(dr_growth, dr_active, error_growth,
+    # Example: growdamp_archival_plotting(dr_growth, dr_active, error_growth,
     # error_active, times, setup, selections, extents)
     # Only do something if there is data to do something with.
     if not times:
@@ -774,7 +774,7 @@ def mbf_growthrates_archival_plotting(
     #     linkaxes([ax3,ax4],'x')
 
 
-def mbf_modescan_archival_plotting(
+def modescan_archival_plotting(
     requested_data, data_magnitude, data_phase, times, experimental_setup
 ):
     # Plots the data processed by mbf_growdamp_archival_analysis['']
@@ -785,7 +785,7 @@ def mbf_modescan_archival_plotting(
     #      experimental_setup (structure): The setup parameters for the
     #                                      analysis['']
     #
-    # Example: mbf_growdamp_archival_plotting(requested_data, data_magnitude,
+    # Example: growdamp_archival_plotting(requested_data, data_magnitude,
     #                                data_phase, times, setup, selections, extents)
     # Only do something if there is data to do something with['']
     if not times:
@@ -868,7 +868,7 @@ def mbf_modescan_archival_plotting(
     plt.xlim([x_plt_axis[1], x_plt_axis[-1]])
 
 
-def mbf_modescan_plotting(data_magnitude, data_phase, modescan):
+def modescan_plotting(data_magnitude, data_phase, modescan):
     # Plots the effectiveness of correction across all modes['']
     #
     # Args:
@@ -876,7 +876,7 @@ def mbf_modescan_plotting(data_magnitude, data_phase, modescan):
     #       data_phase(vector of floats): averaged signal phase over modes['']
     #       modescan(structure): captured data
     #
-    # Example: mbf_modescan_plotting(data_magnitude, data_phase, modescan)
+    # Example: modescan_plotting(data_magnitude, data_phase, modescan)
 
     # FIXME
     fig, _1 = plt.subplot_mosaic(
@@ -985,7 +985,7 @@ def mbf_modescan_plotting(data_magnitude, data_phase, modescan):
     plt.xlabel("Frequency (MHz)")
 
 
-def mbf_spectra_archival_plotting(requested_data, spec_data, times, experimental_setup):
+def spectra_archival_plotting(requested_data, spec_data, times, experimental_setup):
     # Plots the data processed by mbf_growdamp_archival_analysis.
     # Args:
     #      data_magnitude (numeric matrix):
@@ -996,7 +996,7 @@ def mbf_spectra_archival_plotting(requested_data, spec_data, times, experimental
     #      plot_error_graphs (anything): if present the code will plot the results of
     #                                    the fit errors.
     #
-    # Example: mbf_growdamp_archival_plotting(requested_data, data_magnitude,
+    # Example: growdamp_archival_plotting(requested_data, data_magnitude,
     #                                 data_phase, times, setup, selections, extents)
     # Only do something if there is data to do something with.
     if not times:
@@ -1094,12 +1094,12 @@ def mbf_spectra_archival_plotting(requested_data, spec_data, times, experimental
         plt.title(requested_data[jw]["time"].strftime("%a %d %b %Y, %I:%M%p"))
 
 
-def mbf_spectrum_plotting(requested_data, analysed_data):
+def spectrum_plotting(requested_data, analysed_data):
     # Plots the data saved and analysed by the earlier mbf_spectrum def s['']:
     # Args:
     #         all_data(structure): analysed data['']
     #
-    # Example: mbf_spectrum_plotting(data
+    # Example: spectrum_plotting(data
     if max(max(analysed_data["bunch_f_data"])) == 0:
         print("No data to plot")
         return
@@ -1233,9 +1233,7 @@ def mbf_spectrum_plotting(requested_data, analysed_data):
     plt.xlabel("Tune")
 
 
-def mbf_bunch_motion_archival_plotting(
-    requested_data, dataset, times, experimental_setup
-):
+def bunch_motion_archival_plotting(requested_data, dataset, times, experimental_setup):
     # Plots the data processed by mbf_growdamp_archival_analysis.
     # Args:
     #       dataset (struct): containing
@@ -1253,7 +1251,7 @@ def mbf_bunch_motion_archival_plotting(
     #      plot_error_graphs (anything): if present the code will plot the results of
     #                                    the fit errors.
     #
-    # Example: mbf_growdamp_archival_plotting(dr_passive, dr_active, error_passive,
+    # Example: growdamp_archival_plotting(dr_passive, dr_active, error_passive,
     #                                error_active, times, setup, selections, extents)
 
     # Only do something if there is data to do something with['']
@@ -1475,7 +1473,7 @@ def populate_graph(input_data, years_input, times, x_plt_axis):
     plt.legend("show")
 
 
-def mbf_bunch_motion_plotting(data, selected_bunches, selected_turns):
+def bunch_motion_plotting(data, selected_bunches, selected_turns):
     x = np.reshape(data["x"], data["num_buckets"], [])
     y = np.reshape(data["y"], data["num_buckets"], [])
     z = np.reshape(data["z"], data["num_buckets"], [])
@@ -1649,7 +1647,7 @@ def mbf_bunch_motion_plotting(data, selected_bunches, selected_turns):
     plt.savefig(f"{data['filename']}_turns.png")
 
 
-def mbf_bunch_motion_spectra_plotting(data):
+def bunch_motion_spectra_plotting(data):
     xt = np.reshape(data["x"], data["num_buckets"], [])
     yt = np.reshape(data["y"], data["num_buckets"], [])
     zt = np.reshape(data["z"], data["num_buckets"], [])
@@ -1764,7 +1762,7 @@ def add_original_values(mbf_ax, data):
             )
 
 
-def BBBFE_gain_scan_plotting(data):
+def frontend_gain_scan_plotting(data):
     graph_name = data["base_name"].replace("_", " ")
     # plotting
     fig, _1 = plt.subplot_mosaic(
@@ -1799,7 +1797,7 @@ def BBBFE_gain_scan_plotting(data):
     fig.ylabel("Signal")
 
 
-def BBBFE_system_phase_scan_plotting(data):
+def frontend_system_phase_scan_plotting(data):
     temp = re.findall("[]*_([xys])_axis$", data["base_name"])
     mbf_ax = temp[0]
     graph_name = data["base_name"].replace("_", " ")
@@ -1865,7 +1863,7 @@ def BBBFE_system_phase_scan_plotting(data):
         plt.ylabel("ADC phase")
 
 
-def DORIS_phase_scan_plotting(data):
+def doris_phase_scan_plotting(data):
     # plotting
     fig, _1 = plt.subplot_mosaic(
         [["upper left", "upper right"], ["lower left", "lower right"]],
@@ -1896,7 +1894,7 @@ def DORIS_phase_scan_plotting(data):
     )
 
 
-def mbf_frontend_gain_scan_archival_plotting(
+def frontend_gain_scan_archival_plotting(
     requested_data, adc_mean, adc_max, adc_min, times, experimental_setup
 ):
     # Plots the data processed by mbf_growdamp_archival_analysis.
@@ -1907,7 +1905,7 @@ def mbf_frontend_gain_scan_archival_plotting(
     #      times (numeric vector): Datetimes of the datasets.
     #      experimental_setup (structure): The setup parameters for the
     #                                      analysis.
-    # Example: mbf_frontend_gain_scan_archival_plotting(requested_data, data_magnitude,
+    # Example: frontend_gain_scan_archival_plotting(requested_data, data_magnitude,
     #                            data_phase, times, setup, selections, extents)
 
     # Only do something if there is data to do something with.
@@ -1998,7 +1996,7 @@ def mbf_frontend_gain_scan_archival_plotting(
     return adc_mean, adc_max, adc_min, times, experimental_setup
 
 
-def mbf_frontend_system_phase_scan_archival_plotting(
+def frontend_system_phase_scan_archival_plotting(
     requested_data, leading, excited, following, times, experimental_setup
 ):
     # Plots the data processed by mbf_growdamp_archival_analysis.
@@ -2012,7 +2010,7 @@ def mbf_frontend_system_phase_scan_archival_plotting(
     #      plot_error_graphs (anything): if present the code will plot the results of
     #                                    the fit errors.
     #
-    # Example: mbf_growdamp_archival_plotting(requested_data, data_magnitude,
+    # Example: growdamp_archival_plotting(requested_data, data_magnitude,
     #                                data_phase, times, setup, selections, extents)
 
     # Only do something if there is data to do something with.
@@ -2283,7 +2281,7 @@ def plot_pll_data(pll_data):
     plt.xlabel(["samples (spacing 4096 * ", (pll_data["dwell"]), ")"])
 
 
-def mbf_tunescan_over_modes_archival_plotting(
+def tunescan_over_modes_archival_plotting(
     requested_data, dataset, times, experimental_setup
 ):
     # Plots the data processed by mbf_growdamp_archival_analysis['']
@@ -2303,7 +2301,7 @@ def mbf_tunescan_over_modes_archival_plotting(
     #      plot_error_graphs (anything): if present the code will plot the results
     #                                    of the fit errors['']
     #
-    # Example: mbf_growdamp_archival_plotting(requested_data, dataset, error_active,
+    # Example: growdamp_archival_plotting(requested_data, dataset, error_active,
     #                                         times, setup, selections, extents)
 
     # Only do something if there is data to do something with['']
@@ -2580,7 +2578,7 @@ def mbf_tunescan_over_modes_archival_plotting(
     #     plt.ylabel("Active damping rate errors")
 
 
-def mbf_tunescan_over_modes_plot_summary(tunescan):
+def tunescan_over_modes_plot_summary(tunescan):
     # Plots the effectiveness of correction across all modes['']
     #
     # Args:
@@ -2667,7 +2665,7 @@ def mbf_tunescan_over_modes_plot_summary(tunescan):
         plt.ylabel("error of fit")
 
 
-def BBBFE_clock_phase_scan_plotting(data: dict):
+def frontend_clock_phase_scan_plotting(data: dict):
     temp = re.findall("[]*_([xys])_axis$", data["base_name"])
     mbf_ax = temp[0]
     graph_name = data["base_name"].replace("_", " ")
@@ -2682,10 +2680,10 @@ def BBBFE_clock_phase_scan_plotting(data: dict):
         "The excited bunch signal should be as high as possible "
         "while maximising the signal differences."
     )
-    fig.supplt.title(
+    fig.supplot.title(
         f"BBBFE '{graph_name} axis on {data['time'].strftime('%a %d %b %Y, %I:%M%p')}"
     )
-    fig.subplt.title(instructions, "FontAngle", "italic", "FontSize", 10)
+    fig.subplot.title(instructions, "FontAngle", "italic", "FontSize", 10)
     plt.xlabel("phase (degrees)")
     plt.semilogy(data["phase"], data["main"], "DisplayName", "Excited bunch")
     plt.semilogy(data["phase"], data["side1"], "DisplayName", "Preceeding bunch")
@@ -2717,3 +2715,7 @@ def BBBFE_clock_phase_scan_plotting(data: dict):
         add_original_values(mbf_ax, data)
         plt.legend("Location", "Best")
         plt.ylabel("ADC phase")
+
+
+def frontend_clock_phase_scan_archival_plotting():
+    pass

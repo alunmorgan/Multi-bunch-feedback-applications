@@ -8,7 +8,6 @@ import numpy as np
 from Common import (
     get_variable,
     mbf_archival_plotting_setup,
-    mbf_growthrates_analysis,
     mbf_system_config,
     mean_steps_data_in_stucture,
     movmean,
@@ -1296,7 +1295,7 @@ def mbf_frontend_clock_phase_scan_archival_analysis(
         following = np.mean(following, 1, "omitnan")
 
 
-def mbf_frontend_clock_phase_scan_archival_plotting(
+def frontend_clock_phase_scan_archival_plotting(
     requested_data, leading, excited, following, times, experimental_setup
 ):
     # Plots the data processed by mbf_growdamp_archival_analysis.
@@ -1310,7 +1309,7 @@ def mbf_frontend_clock_phase_scan_archival_plotting(
     #      plot_error_graphs (anything): if present the code will plot the results
     #                                    of the fit errors.
     #
-    # Example: mbf_growdamp_archival_plotting(requested_data, data_magnitude,
+    # Example: growdamp_archival_plotting(requested_data, data_magnitude,
     #                                data_phase, times, setup, selections, extents)
 
     # Only do something if there is data to do something with.

@@ -939,7 +939,7 @@ def mbf_archival_dataset_retrieval(
     #       unpacked_data (cell of structures): The group of requested data
     #                                            structures['']
     #
-    # Example: mbf_growdamp_archival_retrieval('x', [datetime(2023, 1, 1), datetime("now")])
+    # Example: growdamp_archival_retrieval('x', [datetime(2023, 1, 1), datetime("now")])
 
     # Getting the desired system setup parameters['']
     [root_string, _2, _1] = mbf_system_config
@@ -1059,7 +1059,7 @@ def mbf_archival_plotting_setup(requested_data, times, experimental_setup):
     #      experimental_setup (structure): The setup parameters for the
     #                                      analysis['']
     #
-    # Example: mbf_growdamp_archival_plotting(dr_passive, dr_active, error_passive, error_active, times, setup, selections, extents)
+    # Example: growdamp_archival_plotting(dr_passive, dr_active, error_passive, error_active, times, setup, selections, extents)
     [_3, harmonic_number, _2, _1] = mbf_system_config
     ranges_to_printlay = {"RF", "time", "current"}
     graph_text[1] = ["Analysis type: ", experimental_setup["anal_type"]]

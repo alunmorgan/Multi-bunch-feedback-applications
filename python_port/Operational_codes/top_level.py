@@ -3,38 +3,49 @@ import time
 
 import numpy as np
 import scipy
-from measurements import (
-    BBBFE_detector_restore,
-    BBBFE_detector_setup,
-    DORIS_phase_scan_plotting,
-    fll_phase_scan_plotting,
-    mbf_bunch_motion_archival_retrieval,
-    mbf_bunch_motion_capture,
+from data_retrival import (
+    bunch_motion_retrival,
+    clock_phase_scan_retrival,
+    doris_target_phase_scan_retrival,
+    frontend_gain_scan_retrival,
+    frontend_system_phase_scan_retrival,
+    growdamp_archival_retrieval,
+    modescan_archival_retrieval,
+    pll_phase_scan_retrival,
+    spectra_archival_retrieval,
+    tunescan_over_modes_retrival,
+)
+from hardware_setup import (
+    bbbfe_system_phase_scan_restore,
+    bbbfe_system_phase_scan_setup,
+    bunch_motion_restore,
+    clock_phase_scan_restore,
+    clock_phase_scan_setup,
+    doris_target_phase_scan_restore,
+    doris_target_phase_scan_setup,
     mbf_bunch_motion_setup,
-    mbf_frontend_gain_scan_archival_retrieval,
-    mbf_frontend_system_phase_scan_archival_retrieval,
-    mbf_growdamp_archival_retrieval,
-    mbf_growdamp_capture,
     mbf_growdamp_setup,
-    mbf_modescan_archival_retrieval,
-    mbf_modescan_capture,
     mbf_modescan_setup,
-    mbf_pll_start,
-    mbf_spectra_archival_retrieval,
-    mbf_spectrum_capture,
     mbf_spectrum_setup,
+    mbf_tunescan_over_modes_setup,
+    tunescan_over_modes_restore,
+)
+from measurements import (
+    bbbfe_gain_scan_capture,
+    bbbfe_system_phase_scan_capture,
+    clock_phase_scan_capture,
+    doris_target_phase_scan_capture,
+    mbf_bunch_motion_capture,
+    mbf_growdamp_capture,
+    mbf_modescan_capture,
+    mbf_pll_phase_scan_capture,
+    mbf_spectrum_capture,
+    mbf_tunescan_over_modes_capture,
+    run_multi_axis_measurement,
     run_single_axis_measurement,
 )
 
-from Common import (
-    get_operational_mode,
-    get_variable,
-    machine_environment,
-    mbf_system_config,
-    save_to_archive,
-    set_variable,
-    setup_operational_mode,
-)
+from Common import machine_environment
 
 
 def growdamp_all(
@@ -57,15 +68,15 @@ def growdamp_all(
     #       mbf_axis(str): 'x','y', or 's'
     #       auto_setup(str): sets whether the setup scripts will be used to put the
     #                        system into a particular state[''] Default is yes.
-    #       plotting(str): set whether the data is plotted as well as saved[''] Default
+    #       plotting(str): set whether the data is plotted as well as saved. Default
     #                      is yes.
     #       additional_save_location(str): fully defined filename to save the
     #                                      captured data to in addition to the
     #                                      main archive.
-    #       excitation(str): sets whether the measurement uses an excitation to
-    #                        drive a resonance or if the measurement just uses the
-    #                        natural beam coupling.
-    #                        Defaults to 'yes'
+    #       excitation_setting(str): sets whether the measurement uses an excitation to
+    #                                drive a resonance or if the measurement just uses
+    #                                the natural beam coupling.
+    #                                Defaults to 'yes'
     #       excitation_location(str): The location of the excitation in tune space.
     #                                 The default value is 'tune'.
     #       excitation_manual(float): if excitation_location is set to 'manual' then
@@ -235,7 +246,7 @@ def growdamp_all(
         hardware_setup_function=mbf_growdamp_setup,
         capture_function=mbf_growdamp_capture,
         restore_function=None,
-        retrival_function=mbf_growdamp_archival_retrieval,
+        retrival_function=growdamp_archival_retrieval,
     )
 
 
@@ -285,7 +296,7 @@ def modescan_all(
         hardware_setup_function=mbf_modescan_setup,
         capture_function=mbf_modescan_capture,
         restore_function=None,
-        retrival_function=mbf_modescan_archival_retrieval,
+        retrival_function=modescan_archival_retrieval,
     )
 
 
@@ -332,7 +343,7 @@ def mbf_spectrum_all(
         hardware_setup_function=mbf_spectrum_setup,
         capture_function=mbf_spectrum_capture,
         restore_function=None,
-        retrival_function=mbf_spectra_archival_retrieval,
+        retrival_function=spectra_archival_retrieval,
     )
 
 
@@ -341,126 +352,19 @@ def Bunch_motion_all(
     plotting: str = "yes",
     additional_save_location: str | None = None,
 ):
-    [root_string, harmonic_number, pv_names] = mbf_system_config()
-    mbf_tools()
-    Bunch_bank1 = pv_names["tails"]["Bunch_bank"]["bank1"]
-
     # getting general environment data
-    bunch_motion = machine_environment()
-    # Add the extra data to the data structure.
-    bunch_motion["base_name"] = "Bunch_motion"
-    bunch_motion["harmonic_number"] = harmonic_number
-    if auto_setup == "yes":
-        # Get the current FIR gains
-        # FIXME which bank???
-        orig_fir_gain_x = get_variable(
-            f"{pv_names['hardware_names']['x']}{Bunch_bank['FIR_gains']}"
-        )
-        orig_fir_gain_y = get_variable(
-            f"{pv_names['hardware_names']['y']}{Bunch_bank['FIR_gains']}"
-        )
-        orig_fir_gain_s = get_variable(
-            f"{pv_names['hardware_names']['s']}{Bunch_bank['FIR_gains']}"
-        )
-        # Programatically press the tune only button on each system['']
-        setup_operational_mode("x", "TuneOnly")
-        setup_operational_mode("y", "TuneOnly")
-        setup_operational_mode("s", "TuneOnly")
+    data = machine_environment()
+    data["auto_setup"] = auto_setup
+    data["plotting"] = plotting
+    data["additional_save_location"] = additional_save_location
 
-    bunch_motion["mbf_state_x"] = get_operational_mode("x")
-    bunch_motion["mbf_state_y"] = get_operational_mode("y")
-    bunch_motion["mbf_state_s"] = get_operational_mode("s")
-    mbf_bunch_motion_setup(pv_names)
-    captured_data = mbf_bunch_motion_capture(pv_names)
-    # adding to output data structure['']
-    data_fields = captured_data.keys()
-    for je in range(len(data_fields)):
-        bunch_motion[data_fields[je]] = captured_data[data_fields[je]]
-
-    if auto_setup == "yes":
-        setup_operational_mode("x", "Feedback")
-        set_variable(
-            f"{pv_names['hardware_names']['x']}{Bunch_bank['FIR_gains']}",
-            orig_fir_gain_x,
-        )
-        setup_operational_mode("y", "Feedback")
-        set_variable(
-            f"{pv_names['hardware_names']['y']}{Bunch_bank['FIR_gains']}",
-            orig_fir_gain_y,
-        )
-        setup_operational_mode("s", "Feedback")
-        set_variable(
-            f"{pv_names['hardware_names']['s']}{Bunch_bank['FIR_gains']}",
-            orig_fir_gain_s,
-        )
-
-    ## saving the data to a file
-    save_to_archive(root_string, bunch_motion)
-    if additional_save_location:
-        scipy.savemat(additional_save_location, bunch_motion)
-
-    ## Plotting data
-    if plotting == "yes":
-        # for archival investigations this allows filtering by machine state.
-        # but for capture this is not needed so it set to empty.
-        filter_conditions: list = []
-        mbf_bunch_motion_archival_retrieval(
-            [bunch_motion["time"], bunch_motion["time"]], filter_conditions
-        )
-
-
-def BBBFE_LO_scan(phase_centre: int, sweep_extent: int):
-    # Scans the LO phase shift in the bunch by bunch frontend and
-    # records the strength of the tune signal.
-    # Restores the original value after the scan.
-    #
-    # Args:
-    #     phase_centre (int): The phase value to center the sweep on.
-    #     sweep_extent (int): The range to sweep. 45 would sweep 45 degrees
-    #                         above and 45 degrees below the centre value.
-    #
-    # Example: BBBFE_LO_scan(90, 45)
-    root_string = mbf_system_config()
-    data: dict = {}
-    data["phase_pv"] = "SR23C-DI-BBFE-01:PHA"
-    old_val = get_variable(data["phase_pv"])
-    data["n"] = range(
-        phase_centre - sweep_extent,
-        phase_centre + sweep_extent,
-        np.ceil(sweep_extent / 20),
+    run_multi_axis_measurement(
+        setup_info=data,
+        hardware_setup_function=mbf_bunch_motion_setup,
+        capture_function=mbf_bunch_motion_capture,
+        restore_function=bunch_motion_restore,
+        retrival_function=bunch_motion_retrival,
     )
-    data["t1"] = []
-    data["t2"] = []
-    data["t3"] = []
-    for jd in range(len(data["n"])):
-        set_variable(data["phase_pv"], data["n"](jd))
-        time.sleep(2)
-        data["t1"][jd] = max(get_variable("SR23C-DI-TMBF-01:TUNE:POWER"))
-        data["t2"][jd] = max(get_variable("SR23C-DI-TMBF-02:TUNE:POWER"))
-        data["t3"][jd] = max(get_variable("SR23C-DI-TMBF-03:TUNE:POWER"))
-
-    set_variable(data["phase_pv"], old_val)
-
-    data["time"] = datetime.datetime.now()
-    data["base_name"] = "LO_scan"
-    ## saving the data to a file
-    save_to_archive(root_string, data)
-
-    # graph_handles = plt.figure
-    # plt.plot(
-    #     data["n"],
-    #     data["t1"] / max(data["t1"]),
-    #     "b",
-    #     data["n"],
-    #     data["t2"] / max(data["t2"]),
-    #     "r",
-    #     data["n"],
-    #     data["t3"] / max(data["t3"]),
-    #     "c",
-    # )
-    # plt.xlabel("LO phase (degrees)")
-    # plt.ylabel("tune max value (normalised)")
-    # plt.legend("X", "Y", "S")
 
 
 def BBBFE_clock_phase_scan(
@@ -521,97 +425,6 @@ def BBBFE_clock_phase_scan(
     )
 
 
-def clock_phase_scan_setup(setup_info, pv_names):
-
-    if setup_info["auto_setup"] == "yes":
-        original_detector_setup = BBBFE_detector_setup(
-            setup_info["mbf_ax"], setup_info["single_bunch_location"]
-        )
-
-
-def clock_phase_scan_capture(setup_info, pv_names):
-
-    detector = pv_names["tails"]["Detector"]
-    adc = pv_names["tails"]["adc"]
-    pv_head = pv_names["hardware_names"][setup_info["mbf_axis"]]
-    frontend = pv_names["frontend"]["base"]
-    clock_phase = pv_names["frontend"]["clock_phase"][setup_info["mbf_axis"]]
-    fe_phase_pv = f"{frontend}{clock_phase}"
-    data = setup_info
-    # set up the sweep
-    data["phase"] = range(
-        setup_info["sweep_start"], setup_info["sweep_end"], setup_info["sweep_step"]
-    )
-    data["phase"].extend(
-        range(
-            setup_info["sweep_end"] - setup_info["sweep_step"],
-            setup_info["sweep_start"],
-            -setup_info["sweep_step"],
-        )
-    )
-    # moving to starting point in scan
-    for pp in range(
-        setup_info["original_frontend_clock_phase"],
-        setup_info["sweep_start"],
-        -setup_info["sweep_step"],
-    ):
-        set_variable(fe_phase_pv, pp)
-        time.sleep(0.5)
-
-    data["side1"] = []
-    data["main"] = []
-    data["side2"] = []
-    data["adc_phase"] = []
-    for x in range(len(data["phase"])):
-        set_variable(fe_phase_pv, data["phase"][x])
-        time.sleep(0.5)
-        data["side1"][x] = max(get_variable(f"{pv_head}{detector['det1']['power']}"))
-        data["main"][x] = max(get_variable(f"{pv_head}{detector['det2']['power']}"))
-        data["side2"][x] = max(get_variable(f"{pv_head}{detector['det3']['power']}"))
-        if data["mbf_axis"].lower() == "s":
-            data["adc_phase"][x] = max(get_variable(f"{pv_head}{adc['phase']['mean']}"))
-            data["adc_mean"][x] = max(get_variable(f"{pv_head[1:-2]}{adc['mean']}"))
-            data["adc_max"][x] = max(get_variable(f"{pv_head[1:-2]}{adc['max']}"))
-            data["adc_min"][x] = max(get_variable(f"{pv_head[1:-2]}{adc['min']}"))
-            data["adc_meanQ"][x] = max(get_variable(f"{pv_head[1:-3]}Q{adc['mean']}"))
-            data["adc_maxQ"][x] = max(get_variable(f"{pv_head[1:-3]}Q{adc['max']}"))
-            data["adc_minQ"][x] = max(get_variable(f"{pv_head[1:-3]}Q{adc['min']}"))
-        else:
-            data["adc_mean"][x] = max(get_variable(f"{pv_head}{adc['mean']}"))
-            data["adc_max"][x] = max(get_variable(f"{pv_head}{adc['max']}"))
-            data["adc_min"][x] = max(get_variable(f"{pv_head}{adc['min']}"))
-
-    # move back to the original setting
-    for pp in range(
-        data["sweep_start"], data["original_frontend_clock_phase"], data["sweep_step"]
-    ):
-        set_variable(fe_phase_pv, pp)
-        time.sleep(0.5)
-
-
-def clock_phase_scan_restore(setup_info, pv_names, restore_state):
-    pv_head = pv_names["hardware_names"][setup_info["mbf_axis"]]
-    sequencer1 = pv_names["tails"]["Sequencer"]["seq1"]
-
-    if setup_info["auto_setup"] == "yes":
-        BBBFE_detector_restore(setup_info["mbf_axis"], original_detector_setup)
-        set_variable(f"{pv_head}{sequencer1['gaindb']}", setup_info["orig_seq1_gain"])
-
-    # ## saving the data to a file
-    # save_to_archive(root_string, data)
-    # if additional_save_location:
-    #     scipy.savemat(additional_save_location, data)
-
-    # ## plotting
-    # if plotting == "yes":
-    #     # for archival investigations this allows filtering by machine state.
-    #     # but for capture this is not needed so it set to empty.
-    #     filter_conditions: list = []
-    #     mbf_frontend_clock_phase_scan_archival_retrieval(
-    #         mbf_ax, [data["time"], data["time"]], filter_conditions
-    #     )
-
-
 def BBBFE_full_frontend_checkout(single_bunch_location: int):
     # BBBFE_FULL_FRONTEND_CHECKOUT
     # This assumes that the machine is set up with a single bunch in the machine at
@@ -656,21 +469,12 @@ def BBBFE_gain_scan(
     # machine to nominal conditions
     #
     # Example: BBBFE_gain_scan('x')
-    [root_string, _1, pv_names] = mbf_system_config()
-    adc = pv_names["tails"]["adc"]
-    frontend = pv_names["frontend"]["base"]
-    fe_gain = pv_names["frontend"]["gain"]
-    sequencer1 = pv_names["tails"]["Sequencer"]["seq1"]
-    mbf_pv = pv_names["hardware_names"][mbf_ax]
-    fe_gain_pv = f"{frontend}{fe_gain[mbf_ax]}"
 
     # getting general environment data.
     data = machine_environment()
     # Add the extra data to the data structure.
     data["ax_label"] = mbf_ax
     data["base_name"] = ["frontend_gain_scan_", mbf_ax, "_axis"]
-    data["orig_gain"] = get_variable([mbf_pv, sequencer1["gaindb"]])
-    data["original_setting"] = get_variable(fe_gain_pv)
     data["auto_setup"] = auto_setup
     data["plotting"] = plotting
     data["additional_save_location"] = additional_save_location
@@ -678,58 +482,16 @@ def BBBFE_gain_scan(
     data["sweep_step"] = sweep_step
     data["sweep_end"] = sweep_end
     data["sweep_speed"] = sweep_speed
+    data["start_state"] = "TuneOnly"
+    data["end_state"] = "TuneOnly"
 
-    # set up the sweep
-    data["gain"] = range(data["sweep_start"], data["sweep_end"], data["sweep_step"])
-    data["gain"].extend(
-        range(
-            data["sweep_end"] - data["sweep_step"],
-            data["sweep_start"],
-            -data["sweep_step"],
-        )
+    run_single_axis_measurement(
+        setup_info=data,
+        hardware_setup_function=None,
+        capture_function=bbbfe_gain_scan_capture,
+        restore_function=None,
+        retrival_function=frontend_gain_scan_retrival,
     )
-    # prealloacation
-    data["adc_mean"] = []
-    data["adc_max"] = []
-    data["adc_min"] = []
-    if auto_setup == "yes":
-        setup_operational_mode(mbf_ax, "TuneOnly")
-
-    # moving to starting point in scan
-    for pp in range(data["original_setting"], sweep_start, -sweep_step):
-        set_variable(fe_gain_pv, pp)
-        time.sleep(0.5)
-
-    # measurement
-    for x in range(len(data["gain"])):
-        set_variable(fe_gain_pv, data["gain"][x])
-        time.sleep(sweep_speed)
-        data["adc_mean"][x] = max(get_variable([mbf_pv, adc["mean"]]))
-        data["adc_max"][x] = max(get_variable([mbf_pv, adc["max"]]))
-        data["adc_min"][x] = max(get_variable([mbf_pv, adc["min"]]))
-
-    # move back to the original setting
-    for pp in range(data["sweep_start"], data["original_setting"], data["sweep_step"]):
-        set_variable(fe_gain_pv, pp)
-        time.sleep(0.5)
-
-    if auto_setup == "yes":
-        setup_operational_mode(mbf_ax, "TuneOnly")
-        set_variable(f"{mbf_pv}{sequencer1['gaindb']}", data["orig_gain"])
-
-    ## saving the data to a file
-    save_to_archive(root_string, data)
-    if additional_save_location:
-        scipy.savemat(additional_save_location, data)
-
-    ## Plotting data
-    if plotting == "yes":
-        # for archival investigations this allows filtering by machine state.
-        # but for capture this is not needed so it set to empty.
-        filter_conditions: list = []
-        mbf_frontend_gain_scan_archival_retrieval(
-            mbf_ax, [data["time"], data["time"]], filter_conditions
-        )
 
 
 def BBBFE_system_phase_scan(
@@ -765,28 +527,12 @@ def BBBFE_system_phase_scan(
     # fill some charge in bunch 'single_bunch_location' (0['2nC'])
     #
     # Example: BBBFE_system_phase_scan('x', 400)
-    [root_string, _1, pv_names] = mbf_system_config()
-    detector = pv_names["tails"]["Detector"]
-    adc = pv_names["tails"]["adc"]
-    frontend = pv_names["frontend"]["base"]
-    fe_system_phase = pv_names["frontend"]["system_phase"]
-    sequencer1 = pv_names["tails"]["Sequencer"]["seq1"]
-    mbf_pv = pv_names["hardware_names"][mbf_ax]
-    if mbf_ax.lower() == "x" or mbf_ax.lower() == "y":
-        fe_phase_pv = f"{pv_names['frontend']['base']}{fe_system_phase[mbf_ax]}"
-    else:
-        fe_phase_pv = f"{frontend}{fe_system_phase['sI']}"
-        fe_phase_pvQ = f"{frontend}{fe_system_phase['sQ']}"
 
     # getting general environment data.
     data = machine_environment()
     # Add the extra data to the data structure.
     data["ax_label"] = mbf_ax
     data["base_name"] = f"system_phase_scan_{mbf_ax}_axis"
-    data["orig_gain"] = get_variable(f"{mbf_pv}{sequencer1['gaindb']}")
-    data["original_setting"] = get_variable(fe_phase_pv)
-    if mbf_ax.lower() == "s":
-        data["original_settingQ"] = get_variable(fe_phase_pvQ)
     data["single_bunch_location"] = single_bunch_location
     data["auto_setup"] = auto_setup
     data["plotting"] = plotting
@@ -795,89 +541,16 @@ def BBBFE_system_phase_scan(
     data["sweep_step"] = sweep_step
     data["sweep_end"] = sweep_end
     data["sweep_speed"] = sweep_speed
+    data["start_state"] = "TuneOnly"
+    data["end_state"] = "TuneOnly"
 
-    # set up the sweep
-    data["phase"] = range(data["sweep_start"], data["sweep_end"], data["sweep_step"])
-    data["phase"].extend(
-        range(
-            data["sweep_end"] - data["sweep_step"],
-            data["sweep_start"] - data["sweep_step"],
-        )
+    run_single_axis_measurement(
+        setup_info=data,
+        hardware_setup_function=bbbfe_system_phase_scan_setup,
+        capture_function=bbbfe_system_phase_scan_capture,
+        restore_function=bbbfe_system_phase_scan_restore,
+        retrival_function=frontend_system_phase_scan_retrival,
     )
-    # prealloacation
-    data["side1"] = []
-    data["main"] = []
-    data["side2"] = []
-    data["adc_phase"] = []
-    if auto_setup == "yes":
-        setup_operational_mode(mbf_ax, "TuneOnly")
-
-    original_detector_setup = BBBFE_detector_setup(mbf_ax, single_bunch_location)
-    # moving to starting point in scan
-    for pp in range(data["original_setting"], sweep_start, -sweep_step):
-        set_variable(fe_phase_pv, pp)
-        time.sleep(5)
-
-    if mbf_ax.lower() == "s":
-        # I and Q must be in quadrature
-        for pp in range(data["original_settingQ"], sweep_start, -sweep_step) + 90:
-            set_variable(fe_phase_pvQ, pp)
-            time.sleep(5)
-
-    # measurement
-    for x in range(len(data["phase"])):
-        set_variable(fe_phase_pv, data["phase"][x])
-        if mbf_ax.lower() == "s":
-            set_variable(fe_phase_pvQ, data["phase"][x] + 90)
-
-        time.sleep(sweep_speed)
-        data["side1"][x] = max(get_variable(f"{mbf_pv}{detector['det1']['power']}"))
-        data["main"][x] = max(get_variable(f"{mbf_pv}{detector['det2']['power']}"))
-        data["side2"][x] = max(get_variable(f"{mbf_pv}{detector['det3']['power']}"))
-        if mbf_ax.lower() == "s":
-            data["adc_phase"][x] = max(get_variable(f"{mbf_pv}{adc['phase']['mean']}"))
-            data["adc_mean"][x] = max(get_variable(f"{mbf_pv[1:-2]}{adc['mean']}"))
-            data["adc_max"][x] = max(get_variable(f"{mbf_pv[1:-2]}{adc['max']}"))
-            data["adc_min"][x] = max(get_variable(f"{mbf_pv[1:-2]}{adc['min']}"))
-            data["adc_meanQ"][x] = max(get_variable(f"{mbf_pv[1:-3]}Q{adc['mean']}"))
-            data["adc_maxQ"][x] = max(get_variable(f"{mbf_pv[1:-3]}Q{adc['max']}"))
-            data["adc_minQ"][x] = max(get_variable(f"{mbf_pv[1:-3]}Q{adc['min']}"))
-        else:
-            data["adc_mean"][x] = max(get_variable(f"{mbf_pv}{adc['mean']}"))
-            data["adc_max"][x] = max(get_variable(f"{mbf_pv}{adc['max']}"))
-            data["adc_min"][x] = max(get_variable(f"{mbf_pv}{adc['min']}"))
-
-    # move back to the original setting
-    for pp in range(data["sweep_start"], data["original_setting"], data["sweep_step"]):
-        set_variable(fe_phase_pv, pp)
-        time.sleep(5)
-
-    if mbf_ax.lower() == "s":
-        # move back to the original setting
-        for pp in range(
-            data["sweep_start"] + 90, data["original_settingQ"], data["sweep_step"]
-        ):
-            set_variable(fe_phase_pvQ, pp)
-            time.sleep(5)
-
-    if auto_setup == "yes":
-        setup_operational_mode(mbf_ax, "TuneOnly")
-        set_variable(f"{mbf_pv}{sequencer1['gaindb']}", data["orig_gain"])
-
-    BBBFE_detector_restore(mbf_ax, original_detector_setup)
-    ## saving the data to a file
-    save_to_archive(root_string, data)
-    if additional_save_location:
-        scipy.savemat(additional_save_location, data)
-
-    ## Plotting data
-    if plotting == "yes":
-        # for archival investigations this allows filtering by machine state.
-        # but for capture this is not needed so it set to empty.
-        filter_conditions: list = []
-        mbf_frontend_system_phase_scan_archival_retrieval(
-            mbf_ax, [data["time"], data["time"]], filter_conditions
-        )
 
 
 def DORIS_target_phase_scan(
@@ -911,22 +584,12 @@ def DORIS_target_phase_scan(
     # fill some charge in bunch 1 (0.2nC)
     #
     # Example: DORIS_target_phase_scan(400)
-    [root_string, _1, pv_names] = mbf_system_config()
-    detector = pv_names["tails"]["Detector"]
-    doris_pv = pv_names["doris"]["phase"]
-    mbf_pv_x = pv_names["hardware_names"]["x"]
-    mbf_pv_y = pv_names["hardware_names"]["y"]
-    mbf_pv_s = pv_names["hardware_names"]["s"]
-    sequencer1 = pv_names["tails"]["Sequencer"]["seq1"]
 
     # getting general environment data['']
     data = machine_environment()
     # Add the extra data to the data structure['']
     data["base_name"] = "doris_phase_scan"
-    data["original_setting"] = get_variable(doris_pv)
-    data["orig_gain_x"] = get_variable(f"{mbf_pv_x}{sequencer1['gaindb']}")
-    data["orig_gain_y"] = get_variable(f"{mbf_pv_y}{sequencer1['gaindb']}")
-    data["orig_gain_s"] = get_variable(f"{mbf_pv_s}{sequencer1['gaindb']}")
+
     data["single_bunch_location"] = single_bunch_location
     data["auto_setup"] = auto_setup
     data["plotting"] = plotting
@@ -935,78 +598,13 @@ def DORIS_target_phase_scan(
     data["sweep_step"] = sweep_step
     data["sweep_end"] = sweep_end
 
-    # set up the sweep
-    data["phase"] = range(data["sweep_start"], data["sweep_end"], data["sweep_step"])
-    data["phase"].extend(
-        range(
-            data["sweep_end"] - data["sweep_step"],
-            data["sweep_start"],
-            -data["sweep_step"],
-        )
+    run_multi_axis_measurement(
+        setup_info=data,
+        hardware_setup_function=doris_target_phase_scan_setup,
+        capture_function=doris_target_phase_scan_capture,
+        restore_function=doris_target_phase_scan_restore,
+        retrival_function=doris_target_phase_scan_retrival,
     )
-    # prealloacation
-    data["side1_x"] = []
-    data["main_x"] = []
-    data["side2_x"] = []
-    data["side1_y"] = []
-    data["main_y"] = []
-    data["side2_y"] = []
-    if auto_setup == "yes":
-        setup_operational_mode("x", "TuneOnly")
-        setup_operational_mode("y", "TuneOnly")
-        setup_operational_mode("s", "TuneOnly")
-
-    detector_setup_x = BBBFE_detector_setup("x", single_bunch_location)
-    detector_setup_y = BBBFE_detector_setup("y", single_bunch_location)
-    detector_setup_s = BBBFE_detector_setup("s", single_bunch_location)
-    # moving to starting point in scan
-    set_variable(doris_pv, -180)
-    for dbf in range(1, len(data["phase"])):
-        set_variable(doris_pv, data["phase"][dbf])
-        time.sleep(2)
-        data["side1_x"][dbf] = max(
-            get_variable(f"{data['mbf_pv_x']}{detector['det1']['power']}")
-        )
-        data["main_x"][dbf] = max(
-            get_variable(f"{data['mbf_pv_x']}{detector['det2']['power']}")
-        )
-        data["side2_x"][dbf] = max(
-            get_variable(f"{data['mbf_pv_x']}{detector['det3']['power']}")
-        )
-        data["side1_x"][dbf] = max(
-            get_variable(f"{data['mbf_pv_y']}{detector['det1']['power']}")
-        )
-        data["main_x"][dbf] = max(
-            get_variable(f"{data['mbf_pv_y']}{detector['det2']['power']}")
-        )
-        data["side2_x"][dbf] = max(
-            get_variable(f"{data['mbf_pv_y']}{detector['det3']['power']}")
-        )
-        print(".")
-
-    # move back to the original setting
-    set_variable(doris_pv, data["original_setting"])
-    if auto_setup == "yes":
-        setup_operational_mode("x", "TuneOnly")
-        set_variable(f"{mbf_pv_x}{sequencer1['gaindb']}", data["orig_gain_x"])
-        setup_operational_mode("y", "TuneOnly")
-        set_variable(f"{mbf_pv_y}{sequencer1['gaindb']}", data["orig_gain_y"])
-        setup_operational_mode("s", "TuneOnly")
-        set_variable(f"{mbf_pv_s}{sequencer1['gaindb']}", data["orig_gain_s"])
-
-    BBBFE_detector_restore("x", detector_setup_x)
-    BBBFE_detector_restore("y", detector_setup_y)
-    BBBFE_detector_restore("s", detector_setup_s)
-    ## saving the data to a file
-    save_to_archive(root_string, data)
-    if additional_save_location:
-        scipy.savemat(additional_save_location, data)
-
-    ## plotting
-    if plotting == "yes":
-        DORIS_phase_scan_plotting(data)
-
-    return data
 
 
 def mbf_pll_phase_scan(mbf_axis: str, scan_range: int = 270, step: int = 1):
@@ -1023,71 +621,113 @@ def mbf_pll_phase_scan(mbf_axis: str, scan_range: int = 270, step: int = 1):
     #
     # Example: fll_phase_scan = mbf_pll_peakfind('x')
 
-    [root_path, _1, pv_names] = mbf_system_config()
     pll_phase_scan = machine_environment()
     pll_phase_scan["ax_label"] = mbf_axis
     pll_phase_scan["base_name"] = f"pll_phase_scan_{pll_phase_scan['ax_label']}_axis"
-    name = pv_names["hardware_names"][mbf_axis]
-    pll_tails = pv_names["tails"]["pll"]
     pll_phase_scan["scan_step"] = step
     pll_phase_scan["scan_range"] = scan_range
-    pll_phase_scan["mbf_fll"]["target_bunches"] = get_variable(
-        f"{name}{pll_tails['detector']['target_bunches']}"
-    )
-    pll_phase_scan["mbf_fll"]["gain"] = get_variable(
-        f"{name}{pll_tails['nco']['gain']}"
-    )
-    pll_phase_scan["mbf_fll"]["target_phase"] = get_variable(
-        f"{name}{pll_tails['target_phase']}"
-    )
-    pll_phase_scan["mbf_fll"]["KI"] = get_variable(f"{name}{pll_tails['i']}")
-    pll_phase_scan["mbf_fll"]["KP"] = get_variable(f"{name}{pll_tails['p']}")
-    start = get_variable(f"{name}{pll_tails['target_phase']}")
-    pll_phase_scan["phase"] = range(start, start + scan_range, step)
-    pll_phase_scan["phase"].extend(range(start + scan_range, start - scan_range, -step))
-    pll_phase_scan["phase"].extend(range(start - scan_range, start + scan_range, step))
-    pll_phase_scan["phase"].extend(range(start + scan_range, start, -step))
-    pll_phase_scan["mag"] = []
-    pll_phase_scan["iq"] = []
-    pll_phase_scan["f"] = []
-    for n in range(len(pll_phase_scan["phase"])):
-        status = get_variable(f"{name}{pll_tails['status']}")
-        if status == "Running":
-            # the funny mod is required to get into the right range of -180 to +179
-            set_variable(
-                f"{name}{pll_tails['target_phase']}",
-                np.mod(pll_phase_scan["phase"][n] + 180, 360) - 180,
-            )
-            # This will depend on the dwell time and PLL config,
-            # but works with the default
-            time.sleep(2)
-            # get magnitude
-            pll_phase_scan["mag"][n] = get_variable(
-                f"{name}{pll_tails['readback']['magnitude']}"
-            )
-            # get phase readback
-            pll_phase_scan["phase"][n] = get_variable(
-                f"{name}{pll_tails['readback']['phase']}"
-            )
-            pll_phase_scan["iq"][n] = [1, np.i] * get_variable(
-                f"{name}{pll_tails['readback']['i']}{name}{pll_tails['readback']['q']}"
-            )
-            pll_phase_scan["f"][n] = get_variable(
-                f"{name}{pll_tails['nco']['frequency']}"
-            )
-        else:
-            set_variable(f"{name}{pll_tails['target_phase']}", start)
-            break
 
-    save_to_archive(root_path[1], pll_phase_scan)
-    print(f"Data saved to {root_path[1]}{pll_phase_scan['base_name']}")
-    fll_phase_scan_plotting(pll_phase_scan)
-    if not status == "Running":
-        raise ValueError(
-            "PLL:stoppedUnexpectedly"
-            "PLL stopped during phase sweep, please restart using fll_start"
-        )
-    return pll_phase_scan
+    run_single_axis_measurement(
+        setup_info=pll_phase_scan,
+        hardware_setup_function=None,
+        capture_function=mbf_pll_phase_scan_capture,
+        restore_function=None,
+        retrival_function=pll_phase_scan_retrival,
+    )
+
+
+def tunescan_over_modes_all(
+    mbf_axis: str,
+    auto_setup: str = "yes",
+    plotting: str = "yes",
+    additional_save_location: str | None = None,
+    n_captures: int = 1001,
+    start_mode: int = 0,
+    drive_bunches: list[int] | str = "all",
+    feedback_state: str = "on",
+    start_frequency: float = 0,
+    end_frequency: float = 0.5,
+):
+    # top level def to run the tunescan for all modes in the selected plane.
+
+    # getting general environment data
+    tunescan = machine_environment()
+    # Add the extra data to the data structure.
+    tunescan["ax_label"] = mbf_axis
+    tunescan["base_name"] = f"tunescan_{tunescan['ax_label']}_axis"
+    tunescan["auto_setup"] = auto_setup
+    tunescan["plotting"] = plotting
+    tunescan["additional_save_location"] = additional_save_location
+    tunescan["n_captures"] = n_captures
+    tunescan["start_mode"] = start_mode
+    tunescan["drive_bunches"] = drive_bunches
+    tunescan["feedback_state"] = feedback_state
+    tunescan["start_frequency"] = start_frequency
+    tunescan["end_frequency"] = end_frequency
+    tunescan["start_state"] = "TuneOnly"
+    tunescan["end_state"] = "TuneOnly"
+
+    run_single_axis_measurement(
+        setup_info=tunescan,
+        hardware_setup_function=mbf_tunescan_over_modes_setup,
+        capture_function=mbf_tunescan_over_modes_capture,
+        restore_function=tunescan_over_modes_restore,
+        retrival_function=tunescan_over_modes_retrival,
+    )
+
+
+def BBBFE_LO_scan(phase_centre: int, sweep_extent: int):
+    # Scans the LO phase shift in the bunch by bunch frontend and
+    # records the strength of the tune signal.
+    # Restores the original value after the scan.
+    #
+    # Args:
+    #     phase_centre (int): The phase value to center the sweep on.
+    #     sweep_extent (int): The range to sweep. 45 would sweep 45 degrees
+    #                         above and 45 degrees below the centre value.
+    #
+    # Example: BBBFE_LO_scan(90, 45)
+    root_string = mbf_system_config()
+    data: dict = {}
+    data["phase_pv"] = "SR23C-DI-BBFE-01:PHA"
+    old_val = get_variable(data["phase_pv"])
+    data["n"] = range(
+        phase_centre - sweep_extent,
+        phase_centre + sweep_extent,
+        np.ceil(sweep_extent / 20),
+    )
+    data["t1"] = []
+    data["t2"] = []
+    data["t3"] = []
+    for jd in range(len(data["n"])):
+        set_variable(data["phase_pv"], data["n"](jd))
+        time.sleep(2)
+        data["t1"][jd] = max(get_variable("SR23C-DI-TMBF-01:TUNE:POWER"))
+        data["t2"][jd] = max(get_variable("SR23C-DI-TMBF-02:TUNE:POWER"))
+        data["t3"][jd] = max(get_variable("SR23C-DI-TMBF-03:TUNE:POWER"))
+
+    set_variable(data["phase_pv"], old_val)
+
+    data["time"] = datetime.datetime.now()
+    data["base_name"] = "LO_scan"
+    ## saving the data to a file
+    save_to_archive(root_string, data)
+
+    # graph_handles = plt.figure
+    # plt.plot(
+    #     data["n"],
+    #     data["t1"] / max(data["t1"]),
+    #     "b",
+    #     data["n"],
+    #     data["t2"] / max(data["t2"]),
+    #     "r",
+    #     data["n"],
+    #     data["t3"] / max(data["t3"]),
+    #     "c",
+    # )
+    # plt.xlabel("LO phase (degrees)")
+    # plt.ylabel("tune max value (normalised)")
+    # plt.legend("X", "Y", "S")
 
 
 def pll_PI_scan(
@@ -1159,70 +799,3 @@ def pll_PI_scan(
             scipy.savemat(additional_save_location, "pll_data")
 
     return pll_data
-
-
-def tunescan_over_modes_all(
-    mbf_axis: str,
-    auto_setup: str = "yes",
-    plotting: str = "yes",
-    additional_save_location: str | None = None,
-    n_captures: int = 1001,
-    start_mode: int = 0,
-    drive_bunches: list[int] = range(harmonic_number),
-    feedback_state: str = "on",
-    start_frequency: float = 0,
-    end_frequency: float = 0.5,
-):
-    # top level def to run the tunescan for all modes in the selected plane['']:
-    # for archival investigations this allows filtering by machine state['']
-    # but for capture this is not needed so it set to empty['']
-    filter_conditions: list = []
-    [root_string, harmonic_number, pv_names] = mbf_system_config()
-    pv_head = pv_names["hardware_names"][mbf_axis]
-    if auto_setup == "yes":
-        # Programatically press the tune only button on each system
-        setup_operational_mode(mbf_axis, "TuneOnly")
-
-    # getting general environment data
-    tunescan = machine_environment()
-    # Add the extra data to the data structure.
-    tunescan["ax_label"] = mbf_axis
-    tunescan["base_name"] = f"tunescan_{tunescan['ax_label']}_axis"
-    tunescan["harmonic_number"] = harmonic_number
-    tunescan["auto_setup"] = auto_setup
-    tunescan["plotting"] = plotting
-    tunescan["additional_save_location"] = additional_save_location
-    tunescan["n_captures"] = n_captures
-    tunescan["start_mode"] = start_mode
-    tunescan["drive_bunches"] = drive_bunches
-    tunescan["feedback_state"] = feedback_state
-    tunescan["start_frequency"] = start_frequency
-    tunescan["end_frequency"] = end_frequency
-
-    mbf_tunescan_over_modes_setup(tunescan)
-    time.sleep(2)
-    captured_data = mbf_tunescan_over_modes_capture(mbf_axis, pv_names)
-    # adding to output data structure.
-    data_fields = captured_data.keys()
-    for je in range(len(data_fields)):
-        tunescan[data_fields[je]] = captured_data[data_fields[je]]
-
-    # reset the sweep
-    ####Is this section needed or does the TuneOnly script take care of things?
-    configure_tune_sweep(mbf_axis, range(harmonic_number), 1, 1, 0, 0, 0)
-    set_variable(f"{pv_head}{pv_names['tails']['triggers']['mode']}", "Rearm")
-    set_variable(f"{pv_head}{pv_names['tails']['Sequencer']['reset']}", 1)
-    #######
-    if auto_setup == "yes":
-        # Programatically press the tune only button on each system
-        setup_operational_mode(mbf_axis, "TuneOnly")
-
-    ## saving the data to a file
-    save_to_archive(root_string, tunescan)
-    if additional_save_location:
-        scipy.savemat(additional_save_location, tunescan)
-
-    if plotting == "yes":
-        mbf_tunescan_over_modes_archival_retrieval(
-            mbf_axis, [tunescan["time"], tunescan["time"]], filter_conditions
-        )
