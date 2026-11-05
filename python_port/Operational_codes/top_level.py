@@ -19,30 +19,30 @@ from hardware_setup import (
     bbbfe_system_phase_scan_restore,
     bbbfe_system_phase_scan_setup,
     bunch_motion_restore,
+    bunch_motion_setup,
     clock_phase_scan_restore,
     clock_phase_scan_setup,
     doris_target_phase_scan_restore,
     doris_target_phase_scan_setup,
-    mbf_bunch_motion_setup,
-    mbf_growdamp_setup,
-    mbf_modescan_setup,
-    mbf_spectrum_setup,
-    mbf_tunescan_over_modes_setup,
+    growdamp_setup,
+    modescan_setup,
+    spectrum_setup,
     tunescan_over_modes_restore,
+    tunescan_over_modes_setup,
 )
 from measurements import (
     bbbfe_gain_scan_capture,
     bbbfe_system_phase_scan_capture,
+    bunch_motion_capture,
     clock_phase_scan_capture,
     doris_target_phase_scan_capture,
-    mbf_bunch_motion_capture,
-    mbf_growdamp_capture,
-    mbf_modescan_capture,
-    mbf_pll_phase_scan_capture,
-    mbf_spectrum_capture,
-    mbf_tunescan_over_modes_capture,
+    growdamp_capture,
+    modescan_capture,
+    pll_phase_scan_capture,
     run_multi_axis_measurement,
     run_single_axis_measurement,
+    spectrum_capture,
+    tunescan_over_modes_capture,
 )
 
 from Common import machine_environment
@@ -243,8 +243,8 @@ def growdamp_all(
 
     run_single_axis_measurement(
         setup_info=growdamp,
-        hardware_setup_function=mbf_growdamp_setup,
-        capture_function=mbf_growdamp_capture,
+        hardware_setup_function=growdamp_setup,
+        capture_function=growdamp_capture,
         restore_function=None,
         retrival_function=growdamp_archival_retrieval,
     )
@@ -293,8 +293,8 @@ def modescan_all(
 
     run_single_axis_measurement(
         setup_info=modescan,
-        hardware_setup_function=mbf_modescan_setup,
-        capture_function=mbf_modescan_capture,
+        hardware_setup_function=modescan_setup,
+        capture_function=modescan_capture,
         restore_function=None,
         retrival_function=modescan_archival_retrieval,
     )
@@ -340,8 +340,8 @@ def mbf_spectrum_all(
 
     run_single_axis_measurement(
         setup_info=spectrum,
-        hardware_setup_function=mbf_spectrum_setup,
-        capture_function=mbf_spectrum_capture,
+        hardware_setup_function=spectrum_setup,
+        capture_function=spectrum_capture,
         restore_function=None,
         retrival_function=spectra_archival_retrieval,
     )
@@ -360,8 +360,8 @@ def Bunch_motion_all(
 
     run_multi_axis_measurement(
         setup_info=data,
-        hardware_setup_function=mbf_bunch_motion_setup,
-        capture_function=mbf_bunch_motion_capture,
+        hardware_setup_function=bunch_motion_setup,
+        capture_function=bunch_motion_capture,
         restore_function=bunch_motion_restore,
         retrival_function=bunch_motion_retrival,
     )
@@ -630,7 +630,7 @@ def mbf_pll_phase_scan(mbf_axis: str, scan_range: int = 270, step: int = 1):
     run_single_axis_measurement(
         setup_info=pll_phase_scan,
         hardware_setup_function=None,
-        capture_function=mbf_pll_phase_scan_capture,
+        capture_function=pll_phase_scan_capture,
         restore_function=None,
         retrival_function=pll_phase_scan_retrival,
     )
@@ -669,8 +669,8 @@ def tunescan_over_modes_all(
 
     run_single_axis_measurement(
         setup_info=tunescan,
-        hardware_setup_function=mbf_tunescan_over_modes_setup,
-        capture_function=mbf_tunescan_over_modes_capture,
+        hardware_setup_function=tunescan_over_modes_setup,
+        capture_function=tunescan_over_modes_capture,
         restore_function=tunescan_over_modes_restore,
         retrival_function=tunescan_over_modes_retrival,
     )
@@ -687,7 +687,7 @@ def BBBFE_LO_scan(phase_centre: int, sweep_extent: int):
     #                         above and 45 degrees below the centre value.
     #
     # Example: BBBFE_LO_scan(90, 45)
-    root_string = mbf_system_config()
+    root_string = system_config()
     data: dict = {}
     data["phase_pv"] = "SR23C-DI-BBFE-01:PHA"
     old_val = get_variable(data["phase_pv"])
@@ -742,7 +742,7 @@ def pll_PI_scan(
     # This sets up the PLL loop for different P and I settings, then records various
     # statistics in order to assess which setting are most suitable['']
 
-    [root_string, _1, pv_names] = mbf_system_config()
+    [root_string, _1, pv_names] = system_config()
     pv_head = pv_names["hardware_names"][mbf_axis]
     pll_tails = pv_names["tails"]["pll"]
     # getting general environment data['']

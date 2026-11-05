@@ -357,7 +357,7 @@ def find_limits_around_peak(data, scale, peak_amp, peak_ind):
 
 def get_data_from_mbf_memory(mbf_axis, chan, n_turns):
     mbf_tools
-    [ _2 ,harmonic_number, pv_names,  _1 ] = mbf_system_config
+    [ _2 ,harmonic_number, pv_names,  _1 ] = system_config
     data_out['RF'] = lcaGet(pv_names['RF'])
     if strcmpi(mbf_axis, 's'):
         system_name = pv_names['hardware_names']['L']
@@ -399,7 +399,7 @@ def get_data_from_mbf_memory(mbf_axis, chan, n_turns):
     data_out['harmonic_number'] = harmonic_number
 def initialise_checkout(mbf_axis):
     # Set all signals to off for the testing['']
-    [ _2 , harmonic_number, pv_names,  _1 ] = mbf_system_config
+    [ _2 , harmonic_number, pv_names,  _1 ] = system_config
     system_axis = pv_names['hardware_names'][mbf_axis]
     bb = pv_names['tails']['Bunch_bank']['bank1']
     seq = pv_names['tails']['Sequencer']['seq1']
@@ -441,7 +441,7 @@ def mbf_checkout_setup(mbf_axis, varargin):
     addParameter(mbf_p, 'tune_gain', '-42dB')
     # parse(p, mbf_axis)
     parse[mbf_p, mbf_axis, varargin[:]]
-    [ _2 , harmonic_number, pv_names,  _1 ] = mbf_system_config
+    [ _2 , harmonic_number, pv_names,  _1 ] = system_config
     system_axis = pv_names['hardware_names'][mbf_axis]
     nco1 = pv_names['tails']['NCO1']
     nco2 = pv_names['tails']['NCO2']
@@ -481,7 +481,7 @@ def mbf_digital_loopback_checkout(mbf_axis):
     # THIS SHOULD BE RUN WITH NO OTHER SIGNALS (I['E'][''] BEAM)
     #
     # Example:  mbf_digital_loopback_checkout('x')
-    [root_string,  _3 ,  _2 ,  _1 ] = mbf_system_config
+    [root_string,  _3 ,  _2 ,  _1 ] = system_config
     base_name = ['DL_checkout_', mbf_axis]
     exp_time = datevec(datetime("now"))
     # Number of turns to capture['']

@@ -12,7 +12,7 @@ def chromaticity_all(mbf_axis, varargin):
     #       n_repeats(int): How many times to repeat each measurement point['']
     #
     # Example  chromaticity_all('x')
-    [root_string, harmonic_number, pv_names] = mbf_system_config
+    [root_string, harmonic_number, pv_names] = system_config
     pv_head = pv_names['hardware_names'][mbf_axis]
     p = inputParser
     p['StructExpand'] = false

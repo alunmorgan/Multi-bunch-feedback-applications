@@ -32,7 +32,7 @@ def MBF_excitation_capture(mbf_axis, excitation_gain, varargin):
     addParameter(p, 'BPM_data_capture_length', 1, validScalarNum)
     parse[p, mbf_axis, excitation_gain, varargin[:]]
     # Set up MBF environment
-    [root_string,  _3 ,  _2 ,  _1 ] = mbf_system_config
+    [root_string,  _3 ,  _2 ,  _1 ] = system_config
     root_string = root_string[1]
     ## Get environment data
     # getting general environment data['']
@@ -96,7 +96,7 @@ def emittance_control_loop(selected_axis, emittance_target, varargin):
     #       emittance_target(float): nm rad for horizontal, pm rad for vertical['']
     #
     # Example: emittance_control_loop('Y', 9)
-    [ _2 ,  _1 , pv_names] = mbf_system_config
+    [ _2 ,  _1 , pv_names] = system_config
     mbf_names = pv_names['hardware_names']
     mbf_vars = pv_names['tails']
     selected_axis = lower(selected_axis)
@@ -275,7 +275,7 @@ def emittance_control_loop_dd_pid_v1(selected_axis, emittance_target, varargin):
     #
     # Example: emittance_control_loop('Y', 9)
     # Example with DD-PID: emittance_control_loop('Y', 9, 'use_data_driven', true, 'database_file', 'emittance_dd_database['mat']')
-    [ _2 ,  _1 , pv_names] = mbf_system_config
+    [ _2 ,  _1 , pv_names] = system_config
     mbf_names = pv_names['hardware_names']
     mbf_vars = pv_names['tails']
     selected_axis = lower(selected_axis)
@@ -468,7 +468,7 @@ def emittance_control_loop_velocty_pid(selected_axis, emittance_target, varargin
     #       emittance_target(float): nm rad for horizontal, pm rad for vertical['']
     #
     # Example: emittance_control_loop('Y', 9)
-    [ _2 ,  _1 , pv_names] = mbf_system_config
+    [ _2 ,  _1 , pv_names] = system_config
     mbf_names = pv_names['hardware_names']
     mbf_vars = pv_names['tails']
     selected_axis = lower(selected_axis)
@@ -612,7 +612,7 @@ def emittance_control_loop_velocty_pid(selected_axis, emittance_target, varargin
     y_log = zeros(total_steps, 1);  # Measured emittance (emit)
     u_log = zeros(total_steps, 1);  # Excitation power (gain_scalar)
     time_log = zeros(total_steps, 1)
-    [ _2 ,  _1 , pv_names] = mbf_system_config
+    [ _2 ,  _1 , pv_names] = system_config
     mbf_device = pv_names['hardware_names'][''](lower(selected_axis))
     step = 1
     for i  in range( 1, len(target_sequence)):
@@ -923,7 +923,7 @@ def mbf_emittance_control(varargin):
     #       vemit_target(float): Target value for vertical emittance (pm rad)
     #
     # Example: mbf_emittance_control('hemit_target', 3, 'vemit_target', 9)
-    [ _3 ,  _2 , pv_names,  _1 ] = mbf_system_config
+    [ _3 ,  _2 , pv_names,  _1 ] = system_config
     mbf_names = pv_names['hardware_names']
     mbf_vars = pv_names['tails']
     validScalarPosNum = @(x) isnumeric(x) and isscalar(x) and (x > 0)
@@ -963,7 +963,7 @@ def mbf_emittance_scan_frequency(mbf_axis, f_range):
     #
     # Example: peakfreq = mbf_emittance_scan_frequency(axis, f_range)
     mbf_axis = lower(mbf_axis)
-    [ _3 ,  _2 , pv_names,  _1 ] = mbf_system_config
+    [ _3 ,  _2 , pv_names,  _1 ] = system_config
     mbf_names = pv_names['hardware_names']
     mbf_vars = pv_names['tails']
     f_start = get_variable([mbf_names[mbf_axis], mbf_vars['NCO2']['frequency']])
@@ -988,7 +988,7 @@ def mbf_emittance_scan_power(mbf_axis, start_power, stop_power, power_step):
     #
     # Example: mbf_emittance_scan_power('X', -50, -10, 5)
     mbf_axis = lower(mbf_axis)
-    [ _3 ,  _2 , pv_names,  _1 ] = mbf_system_config
+    [ _3 ,  _2 , pv_names,  _1 ] = system_config
     mbf_names = pv_names['hardware_names']
     mbf_vars = pv_names['tails']
     p=linspace(start_power,stop_power,((stop_power - start_power) / power_step) +1 )
@@ -1027,7 +1027,7 @@ def mbf_emittance_setup(mbf_axis, varargin):
     #
     # Example: mbf_emittance_setup('x')
     mbf_axis = lower(mbf_axis)
-    [ _1 , harmonic_number, pv_names] = mbf_system_config
+    [ _1 , harmonic_number, pv_names] = system_config
     default_excitation = -60; #dB
     default_excitation_pattern = ones(harmonic_number,1)
     default_fll_monitor_bunches=400

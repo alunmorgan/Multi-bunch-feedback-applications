@@ -35,7 +35,7 @@ def MBF_single_kick_capture(mbf_axis, excitation_gain, excitation_frequency, var
     addParameter(p, 'repeat_points', 10, validScalarNum)
     parse[p, mbf_axis, excitation_gain, excitation_frequency, varargin[:]]
     # Set up MBF environment
-    [root_string,  _3 ,  _2 ,  _1 ] = mbf_system_config
+    [root_string,  _3 ,  _2 ,  _1 ] = system_config
     root_string = root_string[1]
     ## Get environment data
     # getting general environment data['']

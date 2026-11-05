@@ -4,7 +4,7 @@ def PPRE_aquisition(number_of_repeats):
     # captures all the required data for a single aquisition
     #
     # Example:  data_out = PPRE_aquisition
-    [ _3 ,  _2 , pv_names,  _1 ] = mbf_system_config
+    [ _3 ,  _2 , pv_names,  _1 ] = system_config
     mbf_names = pv_names['hardware_names']
     mbf_vars = pv_names['tails']
     set_variable(pv_names['Hardware_trigger'], 1)
@@ -58,7 +58,7 @@ def mbf_PPRE_capture(mbf_axis, varargin):
     #       frequency, axis 3 is harmonic['']
     #
     # Example: data =  mbf_PPRE_capture('y','excitation_gain', -30, 'save_to_archive', 'no')
-    [root_string, harmonic_number, pv_names,  _1 ] = mbf_system_config
+    [root_string, harmonic_number, pv_names,  _1 ] = system_config
     # Define input and default values
     binary_string = {'yes', 'no'}
     validScalarNum = @(x) isnumeric(x) and isscalar(x)
@@ -244,7 +244,7 @@ def :
     #         experimental_setup (structure): The setup parameters for the
     #                                         analysis['']
     #
-    # Example:[dr_passive, dr_active, error_passive, error_active, times, experimental_setup, extents] = mbf_growdamp_archival_analysis(data_requested, 'average')
+    # Example:[dr_passive, dr_active, error_passive, error_active, times, experimental_setup, extents] = growdamp_archival_analysis(data_requested, 'average')
     p = inputParser
     validScalarPosNum = @(x) isnumeric(x) and isscalar(x) and (x > 0)
     addRequired(p, 'data_requested',@iscell)
@@ -301,7 +301,7 @@ def :
         #     beam_size_p2 = mean(beam_size_p2,1, 'omitnan')
 
 def mbf_ppre_archival_plotting(requested_data, data, times, experimental_setup):
-    # Plots the data processed by mbf_growdamp_archival_analysis['']
+    # Plots the data processed by growdamp_archival_analysis['']
     # Args:
     #      emittance_x (numeric matrix): Horizontal emittance['']
     #                                   (bunches vs datasets)
@@ -319,7 +319,7 @@ def mbf_ppre_archival_plotting(requested_data, data, times, experimental_setup):
     if not times:
         return
 
-    [ _3 , harmonic_number,  _2 ,  _1 ] = mbf_system_config
+    [ _3 , harmonic_number,  _2 ,  _1 ] = system_config
     x_plt_axis = [0:harmonic_number-1] - harmonic_number/2
     this_year = year(datetime("now"))
     ranges_to_printlay = {'RF', 'time','current'}
@@ -593,12 +593,12 @@ def mbf_ppre_archival_retrieval(ax, date_range, varargin):
     elif strcmpi(ax, 's'):
         filter_name = 'PPRE_s_axis'
     else:
-        error('MBF:Archive:InputError', 'mbf_archival_dataset_retrieval: No valid axis given (should be x, y or s)')
+        error('MBF:Archive:InputError', 'archival_dataset_retrieval: No valid axis given (should be x, y or s)')
 
-    requested_data = mbf_archival_dataset_retrieval(filter_name, date_range,
+    requested_data = archival_dataset_retrieval(filter_name, date_range,
         'bypass_index' ,p['Results']['bypass_index'], 'metadata_only', p['Results']['metadata_only'])
     # Only keeping datasets that satify the requested machine conditions['']
-    conditioned_data = mbf_archival_conditional_filtering(requested_data, 'current_range', p['Results']['current_range'])
+    conditioned_data = archival_conditional_filtering(requested_data, 'current_range', p['Results']['current_range'])
     if not conditioned_data:
         print('No data meeting the requirements')
     else:

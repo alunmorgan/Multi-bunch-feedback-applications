@@ -6,13 +6,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from Common import (
+    archival_plotting_setup,
     get_variable,
-    mbf_archival_plotting_setup,
-    mbf_system_config,
     mean_steps_data_in_stucture,
     movmean,
     set_variable,
     sort_data_in_stucture,
+    system_config,
 )
 
 
@@ -469,7 +469,7 @@ def mbf_growdamp_analysis(
     return output_data, output_state
 
 
-def mbf_growdamp_archival_analysis(
+def growdamp_archival_analysis(
     data_requested,
     analysis_type="collate",
     sweep_parameter="current",
@@ -514,7 +514,7 @@ def mbf_growdamp_archival_analysis(
     #         experimental_setup (structure): The setup parameters for the
     #                                         analysis['']
     #
-    # Example:[dr_passive, dr_active, error_passive, error_active, times, experimental_setup, extents] = mbf_growdamp_archival_analysis(data_requested, 'average')
+    # Example:[dr_passive, dr_active, error_passive, error_active, times, experimental_setup, extents] = growdamp_archival_analysis(data_requested, 'average')
 
     # #condition the data in order to harmonise data changes made over time['']
     # for nd = len(data_requested):-1:1
@@ -633,7 +633,7 @@ def mbf_growdamp_basic_fitting(x_data, y_data, length_averaging, threshold_value
     return s, delta, p
 
 
-def mbf_growthrates_archival_analysis(
+def growthrates_archival_analysis(
     data_requested,
     analysis_type="collate",
     sweep_parameter="current",
@@ -675,7 +675,7 @@ def mbf_growthrates_archival_analysis(
     #                                         analysis.
     #
     # Example:[dr_growth, dr_active, error_growth, error_active, times,
-    #          experimental_setup, extents] = mbf_growthrates_archival_analysis(
+    #          experimental_setup, extents] = growthrates_archival_analysis(
     #                                                      data_requested, 'average')
 
     times = []
@@ -796,7 +796,7 @@ def mbf_modescan_analysis(modescan):
     return data_magnitude, data_phase
 
 
-def mbf_modescan_archival_analysis(
+def modescan_archival_analysis(
     data_requested,
     analysis_type="collate",
     sweep_parameter="current",
@@ -830,7 +830,7 @@ def mbf_modescan_archival_analysis(
     #                                         analysis.
     #
     # Example:[dr_passive, dr_active, error_passive, error_active, times,
-    #          experimental_setup, extents] = mbf_growdamp_archival_analysis(
+    #          experimental_setup, extents] = growdamp_archival_analysis(
     #                                               data_requested, 'average')
     times = []
     param = []
@@ -870,7 +870,7 @@ def mbf_modescan_archival_analysis(
         data_phase = np.mean(data_phase, 0)
 
 
-def mbf_spectra_archival_analysis(
+def spectra_archival_analysis(
     data_requested,
     analysis_type="collate",
     sweep_parameter="current",
@@ -900,7 +900,7 @@ def mbf_spectra_archival_analysis(
     #                                         analysis['']
     #
     # Example:[dr_passive, dr_active, error_passive, error_active, times,
-    #          experimental_setup, extents] = mbf_growdamp_archival_analysis(
+    #          experimental_setup, extents] = growdamp_archival_analysis(
     #                                               data_requested, 'average')
     experimental_setup = {}
     experimental_setup["anal_type"] = analysis_type
@@ -1081,7 +1081,7 @@ def mbf_bunch_motion_analysis(data):
     return output
 
 
-def mbf_bunch_motion_archival_analysis(
+def bunch_motion_archival_analysis(
     data_requested,
     analysis_type="collate",
     sweep_parameter="current",
@@ -1115,7 +1115,7 @@ def mbf_bunch_motion_archival_analysis(
     #                                         analysis.
     #
     # Example:[dr_passive, dr_active, error_passive, error_active, times,
-    #          experimental_setup, extents] = mbf_growdamp_archival_analysis(
+    #          experimental_setup, extents] = growdamp_archival_analysis(
     #                                                   data_requested, 'average')
     times = []
     param = []
@@ -1164,7 +1164,7 @@ def BBBFE_bunch_phase_variation_simulation(mbf_axis):
     # For each phase value various DAC outputs are captured['']
     # The idea of this is to simulate the impact of a phase gradient across the
     # bunch train['']
-    [_1, harmonic_number, pv_names] = mbf_system_config
+    [_1, harmonic_number, pv_names] = system_config
     mbf_names = pv_names["hardware_names"]
     mbf_vars = pv_names["tails"]
     bbbfe_vars = pv_names["frontend"]
@@ -1220,7 +1220,7 @@ def BBBFE_bunch_phase_variation_simulation(mbf_axis):
     return sig
 
 
-def mbf_frontend_clock_phase_scan_archival_analysis(
+def frontend_clock_phase_scan_archival_analysis(
     data_requested,
     analysis_type="collate",
     sweep_parameter="current",
@@ -1251,7 +1251,7 @@ def mbf_frontend_clock_phase_scan_archival_analysis(
     #                                         analysis.
     #
     # Example:[dr_passive, dr_active, error_passive, error_active, times,
-    #          experimental_setup, extents] = mbf_growdamp_archival_analysis(
+    #          experimental_setup, extents] = growdamp_archival_analysis(
     #                                                     data_requested, 'average')
     times = []
     leading = np.array(ndmin=2)
@@ -1298,7 +1298,7 @@ def mbf_frontend_clock_phase_scan_archival_analysis(
 def frontend_clock_phase_scan_archival_plotting(
     requested_data, leading, excited, following, times, experimental_setup
 ):
-    # Plots the data processed by mbf_growdamp_archival_analysis.
+    # Plots the data processed by growdamp_archival_analysis.
     # Args:
     #      leading (numeric matrix):
     #      excited (numeric matrix):
@@ -1317,7 +1317,7 @@ def frontend_clock_phase_scan_archival_plotting(
         return
 
     graph_title = "Frontend clock phase scan"
-    mbf_archival_plotting_setup(requested_data, times, experimental_setup)
+    archival_plotting_setup(requested_data, times, experimental_setup)
     x_plt_axis = requested_data[1]["phase"]
     this_year = datetime.datetime.now().year
     years_input = [
@@ -1432,7 +1432,7 @@ def frontend_clock_phase_scan_archival_plotting(
     return leading, excited, following, times, experimental_setup
 
 
-def mbf_frontend_gain_scan_archival_analysis(
+def frontend_gain_scan_archival_analysis(
     data_requested,
     analysis_type="collate",
     sweep_parameter="current",
@@ -1463,7 +1463,7 @@ def mbf_frontend_gain_scan_archival_analysis(
     #                                         analysis.
     #
     # Example:[dr_passive, dr_active, error_passive, error_active, times,
-    #          experimental_setup, extents] = mbf_growdamp_archival_analysis(
+    #          experimental_setup, extents] = growdamp_archival_analysis(
     #                                                     data_requested, 'average')
     times = []
     param = []
@@ -1506,7 +1506,7 @@ def mbf_frontend_gain_scan_archival_analysis(
         adc_min = np.mean(adc_min, 0)
 
 
-def mbf_frontend_system_phase_scan_archival_analysis(
+def frontend_system_phase_scan_archival_analysis(
     data_requested,
     analysis_type="collate",
     sweep_parameter="current",
@@ -1541,7 +1541,7 @@ def mbf_frontend_system_phase_scan_archival_analysis(
     #                                         analysis.
     #
     # Example:[dr_passive, dr_active, error_passive, error_active, times,
-    #          experimental_setup, extents] = mbf_growdamp_archival_analysis(
+    #          experimental_setup, extents] = growdamp_archival_analysis(
     #                                                   data_requested, 'average')
     times = []
     leading = np.array(ndmin=2)
@@ -1711,3 +1711,35 @@ def mbf_tunescan_over_modes_archival_analysis(
                 dataset[states[st]][meass[ms]] = np.mean(
                     dataset[states[st]][meass[ms]], 1, "omitnan"
                 )
+
+
+def tune_fit(tune_scale, tune_trace):
+    # a = width
+    # b = centre
+    # c= height scaling
+    # Lorentz fix with the center locked at the max value['']
+    [start_height, ind] = max(tune_trace)
+    start_centre = tune_scale(ind)
+    start_width = 1e-4
+    fo = fitoptions(
+        "Method",
+        "NonlinearLeastSquares",
+        "Lower",
+        [0, 0],
+        "Upper",
+        [Inf, Inf],
+        "StartPoint",
+        [start_width, start_height / 2 * pi * start_width],
+    )
+    ft = fittype(
+        "c []* ((1 []/ pi) * 0.5 []* a / ((x - n)^2 + (0.5 []* a)[]^2))",
+        "problem",
+        "n",
+        "options",
+        fo,
+    )
+    [fit_curve, gof2] = fit(tune_scale, tune_trace, ft, "problem", start_centre)
+    # figure
+    # plot(tune_scale, tune_trace)
+    # hold on
+    # plot(fit_curve, 'm')

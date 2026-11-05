@@ -1,4 +1,5 @@
 import datetime
+import os
 import re
 
 import matplotlib.pyplot as plt
@@ -6,10 +7,92 @@ import matplotlib.text as mplt
 import numpy as np
 
 from Common import (
-    mbf_archival_plotting_setup,
-    mbf_system_config,
+    archival_plotting_setup,
+    construct_datastamped_filename,
     mode_to_frequency,
+    system_config,
+    tree_gen,
 )
+
+
+def archive_graphs(root_string, metadata, graph_handles=()):
+    # Saves the requested graphs in the given filename in a location
+    # detemined by the time_value.
+    # The relavent folder structure will be generated.
+    #
+    #   Args:
+    #       root_string (str):
+    #       data (struct): original captured meta data
+    #       graph_handles
+    # Example: archive_graphs(root_string, data, graph_handles)
+    # Generating the required directory structure.
+    tree_gen(root_string, metadata["time"])
+    # construct filename and add it to the structure
+    metadata["filename"] = construct_datastamped_filename(
+        metadata["base_name"], metadata["time"]
+    )
+
+    for heaq in range(1, len(graph_handles)):
+        if ishandle(graph_handles(heaq)):
+            graph_save_name = os.path.join(
+                root_string,
+                (metadata["time"].year),
+                f"{metadata['time'].month: 02d}",
+                f"{metadata['time'].day: 02d}",
+                metadata["filename"],
+            )
+            plt.savefig(
+                graph_handles(heaq), f"{graph_save_name}, _figure_, {heaq}, .png"
+            )
+            plt.savefig(
+                graph_handles(heaq), f"{graph_save_name}, _figure_, {heaq}, .fig"
+            )
+
+
+def populate_archive_graph(input_data, years_input, times, x_plt_axis):
+    if not input_data:
+        return
+    years = []
+    states = []
+    cols = []
+    y_max = max(max(input_data))
+    y_min = min(min(input_data))
+    for esr in range(years_input.shape[0]):
+        years[esr] = years_input[esr][0]
+        states[esr] = 0
+        cols[esr] = years_input[esr][1]
+
+    year_list = times.year()
+    if len(np.unique(year_list)) < 2:
+        for ner in range(1, input_data.shape[0]):
+            sample_time = times[ner].strftime("%a %d %b %Y, %I:%M%p")
+            plt.plot(x_plt_axis, input_data[ner, :], "DisplayName", sample_time)
+
+    else:
+        for ner in range(1, input_data.shape[0]):
+            years_ind = np.find(year_list(ner) == years)
+            if states(years_ind) == 0:
+                plt.plot(
+                    x_plt_axis,
+                    input_data[ner, :],
+                    cols[years_ind],
+                    "DisplayName",
+                    (years[years_ind]),
+                )
+                states[years_ind] = 1
+            else:
+                plt.plot(
+                    x_plt_axis,
+                    input_data[ner, :],
+                    cols[years_ind],
+                    "HandleVisibility",
+                    "off",
+                )
+
+    plt.xlim(min(x_plt_axis), max(x_plt_axis))
+    plt.ylim(y_min, y_max)
+    plt.legend("show")
+
 
 # FIXME
 # def make_debug_graphs(nq, ksew, turns, stage_data, graph_title, keep_graphs):
@@ -65,7 +148,7 @@ from Common import (
 
 
 def growdamp_archival_plotting(requested_data, dataset, times, experimental_setup):
-    # Plots the data processed by mbf_growdamp_archival_analysis['']
+    # Plots the data processed by growdamp_archival_analysis['']
     # Args:
     #       dataset (struct): containing
     #      dr_passive (numeric matrix): Passive damping rate['']
@@ -96,8 +179,8 @@ def growdamp_archival_plotting(requested_data, dataset, times, experimental_setu
     else:
         graph_title = "Damping rates for different modes"
 
-    mbf_archival_plotting_setup(requested_data, times, experimental_setup)
-    [_2, harmonic_number, _1] = mbf_system_config
+    archival_plotting_setup(requested_data, times, experimental_setup)
+    [_2, harmonic_number, _1] = system_config
     x_plt_axis = range(harmonic_number)
     this_year = datetime.datetime.now().year
     years_input = [
@@ -527,7 +610,7 @@ def growthrates_archival_plotting(
     times,
     experimental_setup,
 ):
-    # Plots the data processed by mbf_growthrates_archival_analysis.
+    # Plots the data processed by growthrates_archival_analysis.
     # Args:
     #      dr_growth (numeric matrix): Growth rate.
     #                                   (bunches vs datasets)
@@ -548,7 +631,7 @@ def growthrates_archival_plotting(
     if not times:
         return
 
-    [_2, harmonic_number, _1] = mbf_system_config
+    [_2, harmonic_number, _1] = system_config
     x_plt_axis = range(harmonic_number) - harmonic_number / 2
     this_year = datetime.datetime.now().year
     ranges_to_printlay = {"RF", "time", "current"}
@@ -777,7 +860,7 @@ def growthrates_archival_plotting(
 def modescan_archival_plotting(
     requested_data, data_magnitude, data_phase, times, experimental_setup
 ):
-    # Plots the data processed by mbf_growdamp_archival_analysis['']
+    # Plots the data processed by growdamp_archival_analysis['']
     # Args:
     #      data_magnitude (numeric matrix):
     #      data_phase (numeric matrix):
@@ -792,7 +875,7 @@ def modescan_archival_plotting(
         return
 
     graph_title = "Modescan"
-    fig = mbf_archival_plotting_setup(requested_data, times, experimental_setup)
+    fig = archival_plotting_setup(requested_data, times, experimental_setup)
     harmonic_number = requested_data[1]["harmonic_number"]
     x_plt_axis = range(harmonic_number)
     this_year = datetime.datetime.now().year
@@ -986,7 +1069,7 @@ def modescan_plotting(data_magnitude, data_phase, modescan):
 
 
 def spectra_archival_plotting(requested_data, spec_data, times, experimental_setup):
-    # Plots the data processed by mbf_growdamp_archival_analysis.
+    # Plots the data processed by growdamp_archival_analysis.
     # Args:
     #      data_magnitude (numeric matrix):
     #      data_phase (numeric matrix):
@@ -1003,7 +1086,7 @@ def spectra_archival_plotting(requested_data, spec_data, times, experimental_set
         return
 
     graph_title = "Spectra"
-    mbf_archival_plotting_setup(requested_data, times, experimental_setup)
+    archival_plotting_setup(requested_data, times, experimental_setup)
     harmonic_number = requested_data[1]["harmonic_number"]
     x_plt_axis = range(harmonic_number)
     this_year = datetime.datetime.now().year
@@ -1234,7 +1317,7 @@ def spectrum_plotting(requested_data, analysed_data):
 
 
 def bunch_motion_archival_plotting(requested_data, dataset, times, experimental_setup):
-    # Plots the data processed by mbf_growdamp_archival_analysis.
+    # Plots the data processed by growdamp_archival_analysis.
     # Args:
     #       dataset (struct): containing
     #      dr_passive (numeric matrix): Passive damping rate.
@@ -1258,7 +1341,7 @@ def bunch_motion_archival_plotting(requested_data, dataset, times, experimental_
     if not times:
         return
 
-    [_3, harmonic_number, _2, _1] = mbf_system_config
+    [_3, harmonic_number, _2, _1] = system_config
     this_year = datetime.datetime.now().year
     for jshe in range(1, len(requested_data)):
         requested_data[jshe]["turn_of_peak"] = dataset["turn_of_peak"](jshe)
@@ -1897,7 +1980,7 @@ def doris_phase_scan_plotting(data):
 def frontend_gain_scan_archival_plotting(
     requested_data, adc_mean, adc_max, adc_min, times, experimental_setup
 ):
-    # Plots the data processed by mbf_growdamp_archival_analysis.
+    # Plots the data processed by growdamp_archival_analysis.
     # Args:
     #      adc_mean (numeric matrix):
     #      adc_max (numeric matrix):
@@ -1913,7 +1996,7 @@ def frontend_gain_scan_archival_plotting(
         return
 
     graph_title = "Frontend gain scan"
-    mbf_archival_plotting_setup(requested_data, times, experimental_setup)
+    archival_plotting_setup(requested_data, times, experimental_setup)
     x_plt_axis = requested_data[1]["gain"]
     this_year = datetime.datetime.now().year
     years_input = [
@@ -1999,7 +2082,7 @@ def frontend_gain_scan_archival_plotting(
 def frontend_system_phase_scan_archival_plotting(
     requested_data, leading, excited, following, times, experimental_setup
 ):
-    # Plots the data processed by mbf_growdamp_archival_analysis.
+    # Plots the data processed by growdamp_archival_analysis.
     # Args:
     #      leading (numeric matrix):
     #      excited (numeric matrix):
@@ -2018,7 +2101,7 @@ def frontend_system_phase_scan_archival_plotting(
         return
 
     graph_title = "Frontend system phase scan"
-    fig = mbf_archival_plotting_setup(requested_data, times, experimental_setup)
+    fig = archival_plotting_setup(requested_data, times, experimental_setup)
     x_plt_axis = requested_data[1]["phase"]
     this_year = datetime.datetime.now().year
     years_input = [
@@ -2284,7 +2367,7 @@ def plot_pll_data(pll_data):
 def tunescan_over_modes_archival_plotting(
     requested_data, dataset, times, experimental_setup
 ):
-    # Plots the data processed by mbf_growdamp_archival_analysis['']
+    # Plots the data processed by growdamp_archival_analysis['']
     # Args:
     #       dataset (struct): containing
     #      dr_passive (numeric matrix): Passive damping rate['']
@@ -2308,7 +2391,7 @@ def tunescan_over_modes_archival_plotting(
     if not times:
         return
 
-    [_3, harmonic_number, _2, _1] = mbf_system_config
+    [_3, harmonic_number, _2, _1] = system_config
     x_plt_axis = range(harmonic_number)
     # dataset =sort_data_in_stucture[dataset, [936:-1:469, 1:468], 2]
     dr_passive = dataset["passive"]["damping_rate"]

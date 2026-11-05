@@ -11,10 +11,10 @@ from Common import (
     get_variable,
     hannwin,
     machine_environment,
-    mbf_system_config,
     save_to_archive,
     set_variable,
     setup_operational_mode,
+    system_config,
 )
 
 
@@ -25,7 +25,7 @@ def run_single_axis_measurement(
     restore_function,
     retrival_function,
 ):
-    [root_string, harmonic_number, pv_names] = mbf_system_config()
+    [root_string, harmonic_number, pv_names] = system_config()
     pv_head = pv_names["hardware_names"][setup_info["mbf_axis"]]
 
     frontend = pv_names["frontend"]["base"]
@@ -107,7 +107,7 @@ def run_multi_axis_measurement(
     restore_function,
     retrival_function,
 ):
-    [root_string, harmonic_number, pv_names] = mbf_system_config()
+    [root_string, harmonic_number, pv_names] = system_config()
     mbf_pv_x = pv_names["hardware_names"]["x"]
     mbf_pv_y = pv_names["hardware_names"]["y"]
     mbf_pv_s = pv_names["hardware_names"]["s"]
@@ -176,7 +176,7 @@ def run_multi_axis_measurement(
         )
 
 
-def mbf_growdamp_capture(input_settings: dict, pv_names: dict):
+def growdamp_capture(input_settings: dict, pv_names: dict):
     # Gathers data on the machine environment.
     # Runs a growdamp experiment on an already setup system.
     # Saves the resultant data.
@@ -185,7 +185,7 @@ def mbf_growdamp_capture(input_settings: dict, pv_names: dict):
     #       input_settings(struct): contains all the setup information.
     #       pv_names(struct): contains the locations of all the machine parameters.
     #
-    # example data = mbf_growdamp_capture(input_settings, pv_names)
+    # example data = growdamp_capture(input_settings, pv_names)
     growdamp: dict = {}
     mbf_axis = input_settings["mbf_axis"]
     capture_full_bunch_motion = input_settings["capture_full_bunch_motion"]
@@ -323,7 +323,7 @@ def get_stage_details(exp_data: dict):
     return recorded_stage_names, samples_of_stage, turns_of_stage
 
 
-def mbf_modescan_capture(input_settings: dict, pv_names: dict):
+def modescan_capture(input_settings: dict, pv_names: dict):
     # wrapper def to call modescan, gather data on the environment:
     # and to save the resultant data.
     #
@@ -335,7 +335,7 @@ def mbf_modescan_capture(input_settings: dict, pv_names: dict):
     #                          results and the machine conditions['']
     #                          [optional output]
     #
-    # example data = mbf_modescan_capture('x', 100)
+    # example data = modescan_capture('x', 100)
     modescan: dict = {}
     pv_head = pv_names["hardware_names"][input_settings["mbf_axis"]]
     for hs in range(input_settings["n_repeats"]):
@@ -392,7 +392,7 @@ def mbf_spectrum(mbf_axis: str, n_turns: int, fold: int = 1, repeat: int = 1):
     #
     # Example: mbf_spectrum('x',10000)
     ## Getting the desired system setup parameters.
-    [root_string, harmonic_number, pv_names, trigger_inputs] = mbf_system_config()
+    [root_string, harmonic_number, pv_names, trigger_inputs] = system_config()
 
     # Generate the base PV name.
     pv_head = pv_names["hardware_names"][mbf_axis]
@@ -549,14 +549,14 @@ def mbf_spectrum(mbf_axis: str, n_turns: int, fold: int = 1, repeat: int = 1):
     return data
 
 
-def mbf_spectrum_capture(input_settings: dict, pv_names: dict):
+def spectrum_capture(input_settings: dict, pv_names: dict):
     # captures a set of data from the mbf system runs the analysis.
     #
     # Args:
     #       input_settings(struct): contains all the setup information.
     #       pv_names(struct): contains the locations of all the machine parameters.
     #
-    # Example: data = mbf_spectrum_capture(input_settings, pv_names)
+    # Example: data = spectrum_capture(input_settings, pv_names)
 
     captured_data: dict[list] = {}
     for k in range(input_settings["repeat"]):
@@ -610,12 +610,12 @@ def mbf_spectrum_capture(input_settings: dict, pv_names: dict):
     return captured_data
 
 
-def mbf_bunch_motion_capture(pv_names: dict):
+def bunch_motion_capture(pv_names: dict):
     # simultaineously captures bunch by bunch centroid data for all three axes.
     # When armed by the code each system will start aquisition
     # on the next hardware trigger.
     #
-    # Example: bunch_motion = mbf_bunch_motion_capture(pv_names)
+    # Example: bunch_motion = bunch_motion_capture(pv_names)
     [turn_count, turn_offset] = mbf_bunch_motion_config()
     # Generate the base PV names['']
     pv_head_T = pv_names["hardware_names"]["T"]
@@ -674,14 +674,14 @@ def mbf_bunch_motion_config():
     turn_offset = 48000
 
 
-def mbf_tunescan_over_modes_capture(mbf_axis: str, pv_names: dict):
+def tunescan_over_modes_capture(mbf_axis: str, pv_names: dict):
     # wrapper def to call tunescan, gather data on the environment:
     # and to save the resultant data.
     #
     #   Args:
     #       mbf_axis (str): Selects which MBF axis to work on (x, y, s).
     #
-    # example data = mbf_tunescan_over_modes_capture('x', pv_names)
+    # example data = tunescan_over_modes_capture('x', pv_names)
     pv_head = pv_names["hardware_names"][mbf_axis]
     pv_head_mem = pv_names["hardware_names"]["mem"][mbf_axis]
     triggers = pv_names["tails"]["triggers"]
@@ -748,7 +748,7 @@ def mbf_tunescan_over_modes_config(mbf_axis: str):
 def tune_sweep_expt(mbf_axis: str):
     # add the matlab paths for MBF tools
     mbf_tools()
-    [_2, harmonic_number, pv_names, _1] = mbf_system_config()
+    [_2, harmonic_number, pv_names, _1] = system_config()
     mbf_vars = pv_names["tails"]
     system_axis = pv_names["hardware_names"][mbf_axis]
     seq1 = pv_names["tails"]["Sequencer"]["seq1"]
@@ -934,7 +934,7 @@ def bbbfe_gain_scan_capture(setup_info, pv_names):
 
 
 def bbbfe_system_phase_scan_capture(setup_info, pv_names):
-    [root_string, _1, pv_names] = mbf_system_config()
+    [root_string, _1, pv_names] = system_config()
     pv_head = pv_names["hardware_names"][setup_info["mbf_axis"]]
 
     detector = pv_names["tails"]["Detector"]
@@ -1029,7 +1029,7 @@ def bbbfe_system_phase_scan_capture(setup_info, pv_names):
 
 
 def doris_target_phase_scan_capture(setup_info, pv_names):
-    [root_string, _1, pv_names] = mbf_system_config()
+    [root_string, _1, pv_names] = system_config()
 
     doris_pv = pv_names["doris"]["phase"]
     detector = pv_names["tails"]["Detector"]
@@ -1086,8 +1086,8 @@ def doris_target_phase_scan_capture(setup_info, pv_names):
     return data
 
 
-def mbf_pll_phase_scan_capture(setup_info, pv_names):
-    [root_path, _1, pv_names] = mbf_system_config()
+def pll_phase_scan_capture(setup_info, pv_names):
+    [root_path, _1, pv_names] = system_config()
     name = pv_names["hardware_names"][setup_info["mbf_axis"]]
     pll_tails = pv_names["tails"]["pll"]
     setup_info["mbf_fll"]["target_bunches"] = get_variable(
@@ -1154,3 +1154,78 @@ def mbf_pll_phase_scan_capture(setup_info, pv_names):
             )
 
     return data
+
+
+def mbf_make_index(application_type, ax):
+    # Writes index files to speed up archive retrival def s:
+    # Args:
+    #       application_type(str): either 'Growdamp', 'Bunch_motion', 'Modescan',
+    #                           'Spectrum', 'LO_scan', 'system_phase_scan',
+    #                           'clock_phase_scan'['']
+    #       ax(str): 'x', 'y', or 's'
+    #
+    # Example mbf_make_index('Growdamp', 'x')
+    [root_string, _2, _1] = system_config
+    if ax:
+        filter_name = f"{application_type}_{ax}_axis"
+    else:
+        filter_name = f"{application_type}"
+
+    datasets = dir_list_gen_tree(root_string, ".mat")
+    wanted_datasets_type = datasets(
+        find_position_in_cell_lst(strfind(datasets, filter_name))
+    )
+    print(f"Creating lookup index for {application_type} {ax}")
+    if not wanted_datasets_type:
+        print("No files to index")
+    else:
+        ok = np.zeros(len(wanted_datasets_type))
+        file_time = []
+        file_name = []
+        for kse in range(1, len(wanted_datasets_type)):
+            try:  # handling corrupted input files
+                temp = load(wanted_datasets_type[kse])
+            except me1:
+                ok[kse] = 0
+                print(f"{me1} message")
+
+            data_name = temp.keys()
+            # Although the code saves eveything in 'data', older datasets have
+            # a variety of names['']
+            if (
+                data_name[1] == "data"
+                or data_name[1] == "growdamp"
+                or data_name[1] == "what_to_save"
+            ):
+                file_time[kse] = temp[data_name[1]]["time"]
+                file_name[kse] = wanted_datasets_type[kse]
+                ok[kse] = 1
+            else:
+                #             print(fieldnames(temp))
+                ok[kse] = 0
+
+        file_index = cat(1, file_name[ok == 1], file_time[ok == 1])
+        save(fullfile(root_string, [application_type, "_", index_name]), "file_index")
+
+
+def update_all_indexes():
+    # updates all indexes in the data archive
+    # useful if something is corrupted['']
+    mbf_make_index("LO_scan")
+    mbf_make_index("clock_phase_scan")
+    mbf_make_index("system_phase_scan")
+    mbf_make_index("Bunch_motion")
+    mbf_make_index("Spectrum", "x")
+    mbf_make_index("Spectrum", "y")
+    mbf_make_index("Spectrum", "s")
+    mbf_make_index("Growdamp", "x")
+    mbf_make_index("Growdamp", "y")
+    mbf_make_index("Growdamp", "s")
+    mbf_make_index("fll_phase_scan", "x")
+    mbf_make_index("fll_phase_scan", "y")
+    mbf_make_index("Modescan", "x")
+    mbf_make_index("Modescan", "y")
+    mbf_make_index("Modescan", "s")
+    mbf_make_index("tunescan", "x")
+    mbf_make_index("tunescan", "y")
+    mbf_make_index("tunescan", "s")

@@ -2,23 +2,23 @@ import datetime
 import time
 
 import numpy as np
+from hardware_setup import mbf_pll_setup
 
 from Common import (
     get_variable,
-    mbf_fll_setup,
-    mbf_system_config,
     set_variable,
+    system_config,
 )
 
 
-def mbf_growdamp_setup(input_settings: dict, pv_names: dict):
+def growdamp_setup(input_settings: dict, pv_names: dict):
     # Sets up the MBF system to be ready for a growdamp measurement['']
     #
     #   Args:
     #       input_settings(struct): contains all the setup information['']
     #       pv_names(struct): contains the locations of all the machine parameters['']
     #
-    # example: mbf_growdamp_setup(input_settings, pv_names, trigger_inputs)
+    # example: growdamp_setup(input_settings, pv_names, trigger_inputs)
     mbf_tools()
     pll_setup: dict = {}
     mbf_axis = input_settings["mbf_axis"]
@@ -85,7 +85,7 @@ def mbf_growdamp_setup(input_settings: dict, pv_names: dict):
     )
     ## set up PLL
     if pll_setup["pll_tracking"] == "yes":
-        mbf_fll_setup("x", pll_setup["pll_bunches"], pll_setup["pll_guard_bunches"])
+        mbf_pll_setup("x", pll_setup["pll_bunches"], pll_setup["pll_guard_bunches"])
         set_variable(f"{pv_head}{NCO2['PLL_follow']}", "Follow")
         set_variable(f"{pv_head}{NCO2['gaindb']}", -30)
         fillx = get_variable(f"{pv_head}{Bunch_bank['bank1']['SEQ_enablewf']}")
@@ -119,7 +119,7 @@ def mbf_set_bank(ax: str, bank: int, out_type: int):
     #                           7=sweep+NCO+FIR)
     #
     # Example:  mbf_set_bank(ax, bank, out_type)
-    [_1, harmonic_number, pv_names] = mbf_system_config()
+    [_1, harmonic_number, pv_names] = system_config()
     BB = pv_names["tails"]["Bunch_bank"][f"bank{bank}"]
     pv_head = [pv_names["hardware_names"][ax]]
     # bunch output (0=off 1=FIR 2=NCO 3 =NCO+FIR 4=sweep 5=sweep+FIR 6=sweep+NCO
@@ -226,7 +226,7 @@ def mbf_set_state(ax: str, state: int, tune: float, setup_data: dict):
     #                            keep the data or not
     #
     # Example: mbf_set_state(ax, state, tune, setup_data)
-    [_2, _1, pv_names] = mbf_system_config()
+    [_2, _1, pv_names] = system_config()
     system_axis = pv_names["hardware_names"][ax]
     seq1 = pv_names["tails"]["Sequencer"][f"seq1{state}"]
     set_variable(f"{system_axis}{seq1['start_frequency']}", tune)
@@ -248,7 +248,7 @@ def reestablish_tune_measurement(mbf_axis: str):
     #   Args:
     #       mbf_axis(str): 'x','y', or 's'
     # Example: reestablish_tune_measurement('x')
-    [_1, harmonic_number, pv_names] = mbf_system_config()
+    [_1, harmonic_number, pv_names] = system_config()
     if mbf_axis.lower() == "x":
         sweep_start = 80.139
         sweep_end = 80.239
@@ -308,14 +308,14 @@ def reestablish_tune_measurement(mbf_axis: str):
     set_variable(f"{base}{pv_names['tails']['triggers']['SEQ']['arm']}", 1)
 
 
-def mbf_modescan_setup(input_settings: dict, pv_names: dict):
+def modescan_setup(input_settings: dict, pv_names: dict):
     # Sets up the MBF system to be ready for a modescan measurement.
     #
     #   Args:
     #       input_settings(struct): contains all the setup information.
     #       pv_names(struct): contains the locations of all the machine parameters.
     #
-    # example: mbf_modescan_setup(input_settings, pv_names)
+    # example: modescan_setup(input_settings, pv_names)
     mbf_tools()
     # Generate the base PV name.
     system_axis = pv_names["hardware_names"][input_settings["mbf_axis"]]
@@ -335,13 +335,13 @@ def mbf_modescan_setup(input_settings: dict, pv_names: dict):
     set_variable(f"{system_axis}{seq1['blanking_state']}", "Off")
 
 
-def mbf_spectrum_setup(input_settings: dict, pv_names: dict):
+def spectrum_setup(input_settings: dict, pv_names: dict):
     # sets up the hardware ready to capture data for a spectrum['']
     # Args:
     #       input_settings(struct): contains all the setup information['']
     #       pv_names(struct): contains the locations of all the machine parameters['']
     #
-    # Example mbf_spectrum_setup(input_settings, pv_names, trigger_inputs)
+    # Example spectrum_setup(input_settings, pv_names, trigger_inputs)
     mbf_tools()
     mbf_axis = input_settings["mbf_axis"]
     trigger_inputs = pv_names["trigger_inputs"]
@@ -382,11 +382,11 @@ def mbf_spectrum_setup(input_settings: dict, pv_names: dict):
     )
 
 
-def mbf_bunch_motion_setup(setup_info, pv_names: dict):
+def bunch_motion_setup(setup_info, pv_names: dict):
     # Sets up all three axis so that they will take a single set of data each
     # when armed and triggered
     #
-    # Example: mbf_bunch_motion_setup
+    # Example: bunch_motion_setup
     mbf_tools()
     Bunch_bank1 = pv_names["tails"]["Bunch_bank"]["bank1"]
 
@@ -434,7 +434,7 @@ def mbf_bunch_motion_setup(setup_info, pv_names: dict):
 
 def BBBFE_detector_restore(mbf_axis: str, detector_setup: dict):
     mbf_axis = mbf_axis.lower()
-    [_2, _1, pv_names] = mbf_system_config()
+    [_2, _1, pv_names] = system_config()
     mbf_names = pv_names["hardware_names"]
     detector = pv_names["tails"]["Detector"]
     # set up the individual tune detectors to run on 1,2,3
@@ -460,7 +460,7 @@ def BBBFE_detector_restore(mbf_axis: str, detector_setup: dict):
 
 
 def BBBFE_detector_setup(mbf_axis: str, single_bunch_location: int):
-    [_2, _1, pv_names] = mbf_system_config()
+    [_2, _1, pv_names] = system_config()
     mbf_names = pv_names["hardware_names"]
     detector = pv_names["tails"]["Detector"]
     if single_bunch_location == 0:
@@ -527,7 +527,7 @@ def mbf_pll_bank_setup(mbf_axis: str, pllbunches: int = 400, guardbunches: int =
     #
     # example: mbf_fll_bank_setup(name,pllbunches,guardbunches)
 
-    [_1, harmonic_number, pv_names] = mbf_system_config()
+    [_1, harmonic_number, pv_names] = system_config()
     mbf_names = pv_names["hardware_names"]
     mbf_vars = pv_names["tails"]
     pllbunches = np.mod(pllbunches, harmonic_number - 1)
@@ -589,7 +589,7 @@ def mbf_pll_detector_setup(
     #
     # example: mbf_pll_detector_setup(mbf_axis, varargin)
 
-    [_2, _1, pv_names] = mbf_system_config()
+    [_2, _1, pv_names] = system_config()
     mbf_names = pv_names["hardware_names"]
     mbf_vars = pv_names["tails"]
     # Set up the PLL detector
@@ -630,7 +630,7 @@ def mbf_pll_start(
     #       guardbunches (int): number of bunches around the FLL bunches which have
     #                           feddback and capture disabled['']
     #
-    # example: mbf_fll_setup(mbf_axis, pllbunches, guardbunches)
+    # example: mbf_pll_setup(mbf_axis, pllbunches, guardbunches)
 
     mbf_pll_bank_setup(mbf_axis, pllbunches=pllbunches, guardbunches=guardbunches)
     mbf_pll_detector_setup(mbf_axis)
@@ -643,7 +643,7 @@ def pll_initial_setup_values(mbf_axis: str):
     # Some setup with 'working values'[''] These ought to be read from a
     # config file or be additional arguments in the future['']
     # mbf_axis(str): xys
-    [_2, _1, pv_names] = mbf_system_config()
+    [_2, _1, pv_names] = system_config()
     mbf_names = pv_names["hardware_names"]
     mbf_vars = pv_names["tails"]
     set_variable(
@@ -694,7 +694,7 @@ def pll_initialisation(
     # scratch. Once the initial lock is found then the settings are changed to
     # improve tracking. if signal is lost this process can be run again.
     # mbf_axis(str): x, y, or s
-    [_2, _1, pv_names] = mbf_system_config()
+    [_2, _1, pv_names] = system_config()
     mbf_names = pv_names["hardware_names"]
     mbf_vars = pv_names["tails"]
     ## Checking tune
@@ -783,7 +783,7 @@ def setup_feedback_for_bunch_train(
     #
     # Example: setup_for_bunch_train('x', 686)
 
-    [_1, harmonic_number, pv_names] = mbf_system_config()
+    [_1, harmonic_number, pv_names] = system_config()
     pv_head = pv_names["hardware_names"][mbf_axis]
     # feedback during quiecent mode
     feedback0 = pv_names["tails"]["Bunch_bank"]["bank0"]["FIR"]["enablewf"]
@@ -825,7 +825,7 @@ def setup_tune_bunch_selection(
     #                            Defaults to yes.
     #
     # Example: setup_tune_bunch_selection('x', 40, 90, 10)
-    [_1, harmonic_number, pv_names] = mbf_system_config()
+    [_1, harmonic_number, pv_names] = system_config()
     if n_bunch == "all":
         n_bunch = harmonic_number
 
@@ -863,7 +863,7 @@ def configure_tune_sweep(
     # drive_bunch = 0:2:935;    # starts at 0
     # drive_bunch = 123
     # fb_on_off = 1;      # 0 => off, 1 => on
-    [_1, harmonic_number, pv_names] = mbf_system_config()
+    [_1, harmonic_number, pv_names] = system_config()
     head = pv_names["hardware_names"][mbf_axis]
     bank1 = pv_names["tails"]["Bunch_bank"][""]("bank1")
     detectors = pv_names["tails"]["Detector"]
@@ -917,21 +917,21 @@ def configure_tune_sweep(
     return
 
 
-def mbf_tunescan_over_modes_setup(tunescan: dict):
+def tunescan_over_modes_setup(tunescan: dict):
     # Sets up the MBF system to be ready for a tunescan measurement.
     #
     #   Args:
     #       mbf_axis (str): Selects which MBF axis to work on (x, y, s).
     #       tunescan (struct): Contains all the setup parameters.
     #
-    # example: mbf_tunescan_over_modes_setup(tunescan)
+    # example: tunescan_over_modes_setup(tunescan)
     mbf_tools()
     if tunescan["feedback_state"] == "on":
         fb_on_off = 1
     else:
         fb_on_off = 0
 
-    [_1, harmonic_number, pv_names] = mbf_system_config()
+    [_1, harmonic_number, pv_names] = system_config()
     Detector = pv_names["tails"]["Detector"]
     Sequencer1 = pv_names["tails"]["Sequencer"]["seq1"]
     Bunch_bank1 = pv_names["tails"]["Bunch_bank"]["bank1"]
@@ -1095,3 +1095,161 @@ def bunch_motion_restore(setup_info, pv_names, restore_state):
             f"{pv_names['hardware_names']['s']}{Bunch_bank['FIR_gains']}",
             restore_state["orig_fir_gain_s"],
         )
+
+
+def get_all_tunes(axes="xys", n_trys=20):
+    # captures the current tune on all MBF systems['']
+    # if the value is NaN the code will try again for up to 20 tries['']
+    #   Args:
+    #       selected_axes(str): 'xys'
+    #
+    #   Returns:
+    #       tunes(struct): tune and sideband values['']
+    #
+    # Example: tunes = get_all_tunes('xy')
+    [_2, _1, pv_names] = system_config
+    # Initialisation and ensuring the datastructure is consistent regardless of the
+    # number of axes asked for['']
+    tunes = {}
+    tunes["x_tune"]["tune"] = None
+    tunes["x_tune"]["lower_sideband"] = None
+    tunes["x_tune"]["upper_sideband"] = None
+    tunes["y_tune"]["tune"] = None
+    tunes["y_tune"]["lower_sideband"] = None
+    tunes["y_tune"]["upper_sideband"] = None
+    tunes["s_tune"]["tune"] = None
+    tunes["s_tune"]["lower_sideband"] = None
+    tunes["s_tune"]["upper_sideband"] = None
+    # Finding the current tunes for the requested axes['']
+    for bds in range(1, len(axes)):
+        temp_axis = axes[bds]
+        ax_name = [temp_axis, "_tune"]
+        for nfs in range(1, n_trys):
+            try:
+                tunes[ax_name]["tune"] = get_variable(
+                    [
+                        pv_names["hardware_names"][temp_axis],
+                        pv_names["tails"]["tune"]["centre"],
+                    ]
+                )
+            except ValueError:
+                tunes[ax_name]["tune"] = None
+
+            try:
+                tunes[ax_name]["lower_sideband"] = get_variable(
+                    [
+                        pv_names["hardware_names"][temp_axis],
+                        pv_names["tails"]["tune"]["left"],
+                    ]
+                )
+            except ValueError:
+                tunes[ax_name]["lower_sideband"] = None
+
+            try:
+                tunes[ax_name]["upper_sideband"] = get_variable(
+                    [
+                        pv_names["hardware_names"][temp_axis],
+                        pv_names["tails"]["tune"]["right"],
+                    ]
+                )
+            except ValueError:
+                tunes[ax_name]["upper_sideband"] = None
+
+            if nfs == n_trys and (tunes[ax_name]["tune"] == None):
+                print(["Unable to get, ", temp_axis, " axis tune value"])
+                continue
+
+            if tunes[ax_name]["tune"] == None:
+                sleep(0.3)
+
+    return tunes
+
+
+def get_operational_mode(mbf_axis):
+    if mbf_axis == "x":
+        state = get_variable["SR23C-DI-TMBF-01:X:BUN:MODE"]
+    elif mbf_axis == "y":
+        state = get_variable["SR23C-DI-TMBF-01:Y:BUN:MODE"]
+    elif mbf_axis == "s":
+        state = get_variable["SR23C-DI-LMBF-01:IQ:BUN:MODE"]
+    else:
+        raise ValueError("common:get_operational_mode", "Unexpected axis")
+
+    if "Feedback on" in state:
+        return_state = "Feedback"
+    else:
+        return_state = "TuneOnly"
+
+    return return_state
+
+
+def mbf_setup_wait_for_hw_trigger(pv_names):
+    memory_triggers = pv_names["tails"]["triggers"]["MEM"]
+    sequencer_triggers = pv_names["tails"]["triggers"]["SEQ"]
+    mbf_axes = {"x", "y", "s"}
+    # Disarm all the sequencers
+    for ekf in range(1, len(mbf_axes)):
+        set_variable(
+            [pv_names["hardware_names"][mbf_axes[ekf]], sequencer_triggers["disarm"]], 1
+        )
+
+    mbf_systems = {"T", "L"}
+    for hse in range(1, 2):
+        # Generate the base PV name['']
+        pv_head = pv_names["hardware_names"][mbf_systems[hse]]
+        # set up the appropriate triggering
+        # Stop triggering first, otherwise there's a good chance the first thing
+        # we'll do is loose the beam as we change things['']
+        for trigger_ind in range(1, len(pv_names["trigger_inputs"])):
+            trigger = pv_names["trigger_inputs"][trigger_ind]
+            set_variable([pv_head, memory_triggers[trigger]["enable_status"]], "Ignore")
+            set_variable([pv_head, memory_triggers[trigger]["blanking_status"]], "All")
+
+        # Set the trigger to one shot
+        set_variable([pv_head, memory_triggers["mode"]], "One Shot")
+        # Set the triggering to External only
+        set_variable([pv_head, memory_triggers["EXT"]["enable_status"]], "Enable")
+
+
+def setup_operational_mode(mbf_axis, operational_mode):
+    # Runs the setup scripts underlying the blue buttons['']
+    # This allows the system to be put into a known state['']
+    #   Args:
+    #       mbf_axis (char): x, y or  s
+    #       operational_mode (char): 'TuneOnly', 'TuneSpecial' or 'Feedback'
+    mbf_axis = mbf_axis.lower()
+    expected_axis_values = ["x", "y", "s", "it"]
+    expected_operational_modes = ["TuneOnly", "TuneSpecial", "Feedback"]
+    if mbf_axis not in expected_axis_values:
+        raise ValueError("Axis value needs to be x, y, s, or it")
+    if operational_mode not in expected_operational_modes:
+        raise ValueError(
+            "Operational mode needs to be one of TuneOnly, TuneSpecial or Feedback."
+        )
+
+    if mbf_axis == "it":
+        mbf_axis = "s"
+
+    [_2, _1, pv_names] = system_config
+    device = pv_names["hardware_names"][mbf_axis]
+    if operational_mode == "TuneOnly":
+        action = "TUNE"
+    elif operational_mode == "TuneSpecial":
+        action = "AP"
+    elif operational_mode == "Feedback":
+        action = "FB"
+
+    # Pick up the base directory
+    tmp_rc = os.system("configure-ioc s -p DI-MBF-gui-dir")
+    gui_dir = tmp_rc[0]
+    cmd_status = tmp_rc[1]
+    if cmd_status == 0:
+        raise ValueError("Error running `configure-ioc`")
+
+    gui_dir = gui_dir.strip()  # Get rid of trailing newline
+    # construct the bash command
+    description = "Setting MBF defaults"
+    bash_command = f"{gui_dir}//epics/opi/scripts/mbf-run-command '{description}' mbf-setup-tune {device} {action}"
+    rc = os.system(bash_command)
+    if rc[-1] == 0:
+        raise ValueError("Error running mbf-setup-tune")
