@@ -33,6 +33,7 @@ default_harmonic = 10;
 tunes = get_all_tunes;
 leftSB = tunes.([mbf_axis, '_tune']).lower_sideband;
 default_excitation_frequency = leftSB;
+default_target_phase = -60;
 
 validScalarNum = @(x) isnumeric(x) && isscalar(x);
 validNum = @(x) isnumeric(x);
@@ -44,6 +45,8 @@ addParameter(p, 'fll_monitor_bunches', default_fll_monitor_bunches, validNum);
 addParameter(p, 'guardbunches', default_guardbunches, validScalarNum);
 addParameter(p, 'harmonic', default_harmonic, validScalarNum);
 addParameter(p, 'excitation_frequency', default_excitation_frequency, validScalarNum)
+addParameter(p, 'target_phase', default_target_phase)
+
 parse(p,mbf_axis, varargin{:});
 
 
@@ -58,7 +61,7 @@ end %if
 
 % initialise FLL on selected bunches.
 mbf_pll_start(mbf_axis, 'pllbunches',p.Results.fll_monitor_bunches,...
-    'guardbunches',p.Results.guardbunches)
+    'guardbunches',p.Results.guardbunches, 'target_phase', p.Results.target_phase)
 
 set_variable([mbf_names.(mbf_axis), mbf_vars.NCO2.frequency], p.Results.harmonic + excitation_frequency);
 

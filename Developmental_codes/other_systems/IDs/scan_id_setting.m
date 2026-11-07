@@ -1,8 +1,8 @@
 function monitored_data = scan_id_setting(set_values, Execute, Set_PV, read_PV,...
     monitored_pvs, wait)
 nt = 1;
-for i = 1:size(set_values, 1)
-    lcaPut(Set_PV, set_values(i,:)')
+for i = 1:length(set_values)
+    lcaPut(Set_PV, num2str(set_values(i)))
     if ~isempty(Execute)
         lcaPutNoWait(Execute, 1)
     end %if
@@ -14,7 +14,7 @@ for i = 1:size(set_values, 1)
         val = lcaGet(read_PV);
         val_history = circshift(val_history, -1);
         val_history(10) = val;
-        val_history_check = val_history - repmat(val, 10);
+        val_history_check = diff(val_history);
         if all(abs(val_history_check) < 0.1) && warn_flag == 0
            fprintf('WARNING  ID does not appear to be moving')
            warn_flag = 1;
@@ -22,7 +22,7 @@ for i = 1:size(set_values, 1)
            fprintf('ID has started moving again')
            warn_flag = 0;
         end %if
-        dist_from_target = abs(val - set_values(i,:)');
+        dist_from_target = abs(val - set_values(i));
         pause(0.2)
         duration = toc;
         monitored_data(1:length(monitored_pvs), nt) = lcaGet(monitored_pvs);
