@@ -1,4 +1,5 @@
 import datetime
+import os
 import time
 
 import numpy as np
@@ -382,27 +383,33 @@ def spectrum_setup(input_settings: dict, pv_names: dict):
     )
 
 
-def bunch_motion_setup(setup_info, pv_names: dict):
+def bunch_motion_setup(setup_info: dict, pv_names: dict) -> None:
     # Sets up all three axis so that they will take a single set of data each
     # when armed and triggered
     #
     # Example: bunch_motion_setup
+
+    memory_triggers: dict = pv_names["tails"]["triggers"]["MEM"]
+    memory_buffers: dict = pv_names["tails"]["MEM"]
+    mbf_systems: list = ["T", "L"]
+
     mbf_tools()
     Bunch_bank1 = pv_names["tails"]["Bunch_bank"]["bank1"]
 
     # Add the extra data to the data structure.
+    bunch_motion = {}
     bunch_motion["base_name"] = "Bunch_motion"
-    bunch_motion["harmonic_number"] = harmonic_number
-    if auto_setup == "yes":
+    bunch_motion["harmonic_number"] = setup_info["harmonic_number"]
+    if setup_info["auto_setup"] == "yes":
         # Get the current FIR gains
         # FIXME which bank???
-        orig_fir_gain_x = get_variable(
+        setup_info["orig_fir_gain_x"] = get_variable(
             f"{pv_names['hardware_names']['x']}{Bunch_bank['FIR_gains']}"
         )
-        orig_fir_gain_y = get_variable(
+        setup_info["orig_fir_gain_y"] = get_variable(
             f"{pv_names['hardware_names']['y']}{Bunch_bank['FIR_gains']}"
         )
-        orig_fir_gain_s = get_variable(
+        setup_info["orig_fir_gain_s"] = get_variable(
             f"{pv_names['hardware_names']['s']}{Bunch_bank['FIR_gains']}"
         )
         # Programatically press the tune only button on each system['']
@@ -414,11 +421,8 @@ def bunch_motion_setup(setup_info, pv_names: dict):
     bunch_motion["mbf_state_y"] = get_operational_mode("y")
     bunch_motion["mbf_state_s"] = get_operational_mode("s")
 
-    memory_triggers = pv_names["tails"]["triggers"]["MEM"]
-    memory_buffers = pv_names["tails"]["MEM"]
     mbf_setup_wait_for_hw_trigger(pv_names)
-    PVt = pv_names["tails"]
-    mbf_systems: list = ["T", "L"]
+
     for hse in range(2):
         # Generate the base PV name['']
         pv_head = pv_names["hardware_names"][mbf_systems[hse]]
@@ -532,14 +536,14 @@ def mbf_pll_bank_setup(mbf_axis: str, pllbunches: int = 400, guardbunches: int =
     mbf_vars = pv_names["tails"]
     pllbunches = np.mod(pllbunches, harmonic_number - 1)
     # initialise pll pattern
-    pllpattern = False(range(harmonic_number))
-    pllpattern[pllbunches] = True
+    pllpattern = np.zeros(harmonic_number).tolist()
+    pllpattern[pllbunches] = 1
     # now we want to create a pattern with a little more room around the
-    # pll bunches[''] It's a little tricky with a general pattern, and the cirular
+    # pll bunches. It's a little tricky with a general pattern, and the cirular
     # nature the pattern, so I use circshift in a loop
-    guardpattern = True(range(harmonic_number))
+    guardpattern = np.ones(harmonic_number)
     for n in range(-guardbunches, guardbunches):
-        guardpattern[np.fft.circshift(pllpattern, n)] = False
+        guardpattern[pllpattern.rotate(n)] = 0
 
     # Set up PLL bunches in banks 0 and 1 (those are used in typcal sweeps),
     # and in PLL detector.
@@ -827,7 +831,11 @@ def setup_tune_bunch_selection(
     # Example: setup_tune_bunch_selection('x', 40, 90, 10)
     [_1, harmonic_number, pv_names] = system_config()
     if n_bunch == "all":
-        n_bunch = harmonic_number
+        nb: int = harmonic_number
+    elif type(n_bunch) is int:
+        nb = n_bunch
+    else:
+        raise ValueError("n_bunch needs to be an int or 'all'")
 
     pv_head = pv_names["hardware_names"][mbf_axis]
     # tune measurement
@@ -842,7 +850,7 @@ def setup_tune_bunch_selection(
         det_enable_wfm = get_variable([pv_head, detector0])
         seq_enable_wfm = get_variable([pv_head, sequencer1])
 
-    for js in range(n_bunch):
+    for js in range(nb):
         det_enable_wfm[start_bunch + (js - 1) * step_bunch] = 1
         seq_enable_wfm[start_bunch + (js - 1) * step_bunch] = 1
 
@@ -853,7 +861,7 @@ def setup_tune_bunch_selection(
 
 def configure_tune_sweep(
     mbf_axis: str,
-    drive_bunch: list[int],
+    drive_bunches: list[int],
     fb_on_off: int,
     d0flag: int,
     d1flag: int,
@@ -867,27 +875,31 @@ def configure_tune_sweep(
     head = pv_names["hardware_names"][mbf_axis]
     bank1 = pv_names["tails"]["Bunch_bank"][""]("bank1")
     detectors = pv_names["tails"]["Detector"]
-    detect_bunch = drive_bunch
+    detect_bunches: list[int] = drive_bunches
     # Only sweep selected bunch
     drive_wf = np.zeros(harmonic_number)
-    drive_wf[drive_bunch + 1] = 1
+    drive_wf[drive_bunches] = 1
     # chose which bunches to monitor the response
-    detect_wf_1 = np.zeros(1, harmonic_number)
-    detect_wf_1[np.sort(np.mod(detect_bunch + 0, harmonic_number) + 1)] = 1
-    detect_wf_2 = np.zeros(1, harmonic_number)
-    detect_wf_2[np.sort(np.mod(detect_bunch + 1, harmonic_number) + 1)] = 1
-    detect_wf_3 = np.zeros(1, harmonic_number)
-    detect_wf_3[np.sort(np.mod(detect_bunch + 2, harmonic_number) + 1)] = 1
+    detect_wf_1 = np.zeros(harmonic_number)
+    detect_wf_1[np.sort(np.remainder(detect_bunches, harmonic_number))] = 1
+    detect_wf_2 = np.zeros(harmonic_number)
+    detect_wf_2[
+        np.sort(np.remainder([elt + 1 for elt in detect_bunches], harmonic_number))
+    ] = 1
+    detect_wf_3 = np.zeros(harmonic_number)
+    detect_wf_3[
+        np.sort(np.remainder([elt + 2 for elt in detect_bunches], harmonic_number))
+    ] = 1
     # write to the TMBF on which bunches to perform the sweep
     set_variable(f"{head}{bank1['SEQ']['enablewf']}", drive_wf)
     # Configure FIR enable (whether feedback is on or off)
     set_variable(
-        f"{head}{bank1['FIR']['enablewf']}", fb_on_off * np.ones(1, harmonic_number)
+        f"{head}{bank1['FIR']['enablewf']}", fb_on_off * np.ones(harmonic_number)
     )
     # Detector 0 grabs everything
     if d0flag:
         set_variable(
-            f"{head}{detectors['det0']['bunch_selection']}", np.ones(1, harmonic_number)
+            f"{head}{detectors['det0']['bunch_selection']}", np.ones(harmonic_number)
         )
         set_variable(f"{head}{detectors['det0']['enable']}", "Enabled")
     else:
@@ -997,6 +1009,7 @@ def clock_phase_scan_setup(setup_info, pv_names):
         original_detector_setup = BBBFE_detector_setup(
             setup_info["mbf_ax"], setup_info["single_bunch_location"]
         )
+    return original_detector_setup
 
 
 def clock_phase_scan_restore(setup_info, pv_names, restore_state):
@@ -1004,7 +1017,7 @@ def clock_phase_scan_restore(setup_info, pv_names, restore_state):
     sequencer1 = pv_names["tails"]["Sequencer"]["seq1"]
 
     if setup_info["auto_setup"] == "yes":
-        BBBFE_detector_restore(setup_info["mbf_axis"], original_detector_setup)
+        BBBFE_detector_restore(setup_info["mbf_axis"], restore_state)
         set_variable(f"{pv_head}{sequencer1['gaindb']}", setup_info["orig_seq1_gain"])
 
 
@@ -1039,6 +1052,7 @@ def doris_target_phase_scan_setup(setup_info, pv_names):
     original_state["detector_setup_s"] = BBBFE_detector_setup(
         "s", setup_info["single_bunch_location"]
     )
+    return original_state
 
 
 def doris_target_phase_scan_restore(setup_info, pv_names, restore_state):
@@ -1098,18 +1112,18 @@ def bunch_motion_restore(setup_info, pv_names, restore_state):
 
 
 def get_all_tunes(axes="xys", n_trys=20):
-    # captures the current tune on all MBF systems['']
-    # if the value is NaN the code will try again for up to 20 tries['']
+    # captures the current tune on all MBF systems.
+    # if the value is NaN the code will try again for up to 20 tries.
     #   Args:
     #       selected_axes(str): 'xys'
     #
     #   Returns:
-    #       tunes(struct): tune and sideband values['']
+    #       tunes(struct): tune and sideband values.
     #
     # Example: tunes = get_all_tunes('xy')
     [_2, _1, pv_names] = system_config
     # Initialisation and ensuring the datastructure is consistent regardless of the
-    # number of axes asked for['']
+    # number of axes asked for.
     tunes = {}
     tunes["x_tune"]["tune"] = None
     tunes["x_tune"]["lower_sideband"] = None
@@ -1120,7 +1134,7 @@ def get_all_tunes(axes="xys", n_trys=20):
     tunes["s_tune"]["tune"] = None
     tunes["s_tune"]["lower_sideband"] = None
     tunes["s_tune"]["upper_sideband"] = None
-    # Finding the current tunes for the requested axes['']
+    # Finding the current tunes for the requested axes.
     for bds in range(1, len(axes)):
         temp_axis = axes[bds]
         ax_name = [temp_axis, "_tune"]
@@ -1155,12 +1169,12 @@ def get_all_tunes(axes="xys", n_trys=20):
             except ValueError:
                 tunes[ax_name]["upper_sideband"] = None
 
-            if nfs == n_trys and (tunes[ax_name]["tune"] == None):
+            if nfs == n_trys and (tunes[ax_name]["tune"] is None):
                 print(["Unable to get, ", temp_axis, " axis tune value"])
                 continue
 
-            if tunes[ax_name]["tune"] == None:
-                sleep(0.3)
+            if tunes[ax_name]["tune"] is None:
+                time.sleep(0.3)
 
     return tunes
 
