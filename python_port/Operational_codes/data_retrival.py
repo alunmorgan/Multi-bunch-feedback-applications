@@ -35,9 +35,9 @@ from Common import (
 
 
 def archival_retrieval(
-    selection,
-    ax,
-    date_range,
+    selection: str,
+    ax: str,
+    date_range: list[datetime.datetime, datetime.datetime],
     measurement_specific_options,
     analysis_function,
     plotting_function,
@@ -103,7 +103,7 @@ def archival_retrieval(
         )
         plotting_summary_function(dataset, requested_data[0])
     else:
-        # Only keeping datasets that satify the requested machine conditions['']
+        # Only keeping datasets that satify the requested machine conditions.
         conditioned_data = archival_conditional_filtering(
             requested_data, filter_conditions
         )

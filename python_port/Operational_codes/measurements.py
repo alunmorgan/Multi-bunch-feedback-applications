@@ -1,10 +1,15 @@
 import datetime
 import time
+from types import FunctionType
 
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy
-from hardware_setup import configure_tune_sweep, reestablish_tune_measurement
+from hardware_setup import (
+    configure_tune_sweep,
+    mbf_pll_start,
+    reestablish_tune_measurement,
+)
 
 from Common import (
     get_operational_mode,
@@ -20,10 +25,10 @@ from Common import (
 
 def run_single_axis_measurement(
     setup_info: dict,
-    hardware_setup_function,
-    capture_function,
-    restore_function,
-    retrival_function,
+    hardware_setup_function: FunctionType,
+    capture_function: FunctionType,
+    restore_function: FunctionType,
+    retrival_function: FunctionType,
 ):
     [root_string, harmonic_number, pv_names] = system_config()
     pv_head = pv_names["hardware_names"][setup_info["mbf_axis"]]
@@ -102,10 +107,10 @@ def run_single_axis_measurement(
 
 def run_multi_axis_measurement(
     setup_info: dict,
-    hardware_setup_function,
-    capture_function,
-    restore_function,
-    retrival_function,
+    hardware_setup_function: FunctionType,
+    capture_function: FunctionType,
+    restore_function: FunctionType,
+    retrival_function: FunctionType,
 ):
     [root_string, harmonic_number, pv_names] = system_config()
     mbf_pv_x = pv_names["hardware_names"]["x"]
@@ -176,7 +181,7 @@ def run_multi_axis_measurement(
         )
 
 
-def growdamp_capture(input_settings: dict, pv_names: dict):
+def growdamp_capture(input_settings: dict, pv_names: dict) -> dict:
     # Gathers data on the machine environment.
     # Runs a growdamp experiment on an already setup system.
     # Saves the resultant data.
@@ -260,7 +265,7 @@ def growdamp_capture(input_settings: dict, pv_names: dict):
     return growdamp
 
 
-def get_stage_details(exp_data: dict):
+def get_stage_details(exp_data: dict) -> tuple[list, list, list]:
     if "seq1_capture_state" in exp_data:
         stage_names: list = []
         for n in range(len(exp_data["states"])):
@@ -323,7 +328,7 @@ def get_stage_details(exp_data: dict):
     return recorded_stage_names, samples_of_stage, turns_of_stage
 
 
-def modescan_capture(input_settings: dict, pv_names: dict):
+def modescan_capture(input_settings: dict, pv_names: dict) -> dict:
     # wrapper def to call modescan, gather data on the environment:
     # and to save the resultant data.
     #
@@ -345,7 +350,7 @@ def modescan_capture(input_settings: dict, pv_names: dict):
     return modescan
 
 
-def mbf_modescan_config(mbf_axis: str):
+def mbf_modescan_config(mbf_axis: str) -> None:
     # Contains the axis specific settings desired for the modescan experiment.
     #
     # Args:
@@ -377,7 +382,7 @@ def mbf_modescan_config(mbf_axis: str):
         settings["seq_gain"] = -42  # sequencer gain in dB.
 
 
-def mbf_spectrum(mbf_axis: str, n_turns: int, fold: int = 1, repeat: int = 1):
+def mbf_spectrum(mbf_axis: str, n_turns: int, fold: int = 1, repeat: int = 1) -> dict:
     # generates a spectragram of all bunches.
     #
     # Args:
@@ -549,7 +554,7 @@ def mbf_spectrum(mbf_axis: str, n_turns: int, fold: int = 1, repeat: int = 1):
     return data
 
 
-def spectrum_capture(input_settings: dict, pv_names: dict):
+def spectrum_capture(input_settings: dict, pv_names: dict) -> dict:
     # captures a set of data from the mbf system runs the analysis.
     #
     # Args:
@@ -610,7 +615,7 @@ def spectrum_capture(input_settings: dict, pv_names: dict):
     return captured_data
 
 
-def bunch_motion_capture(pv_names: dict):
+def bunch_motion_capture(pv_names: dict) -> dict:
     # simultaineously captures bunch by bunch centroid data for all three axes.
     # When armed by the code each system will start aquisition
     # on the next hardware trigger.
@@ -674,7 +679,7 @@ def mbf_bunch_motion_config():
     turn_offset = 48000
 
 
-def tunescan_over_modes_capture(mbf_axis: str, pv_names: dict):
+def tunescan_over_modes_capture(mbf_axis: str, pv_names: dict) -> dict:
     # wrapper def to call tunescan, gather data on the environment:
     # and to save the resultant data.
     #
@@ -713,7 +718,7 @@ def tunescan_over_modes_capture(mbf_axis: str, pv_names: dict):
     return tunescan
 
 
-def mbf_tunescan_over_modes_config(mbf_axis: str):
+def mbf_tunescan_over_modes_config(mbf_axis: str) -> None:
     # Contains the axis specific settings desired for the tunescan experiment['']
     #
     # Args:
@@ -745,7 +750,7 @@ def mbf_tunescan_over_modes_config(mbf_axis: str):
         settings["seq_gain"] = -42  # sequencer gain in dB.
 
 
-def tune_sweep_expt(mbf_axis: str):
+def tune_sweep_expt(mbf_axis: str) -> None:
     # add the matlab paths for MBF tools
     mbf_tools()
     [_2, harmonic_number, pv_names, _1] = system_config()
@@ -820,7 +825,7 @@ def tune_sweep_expt(mbf_axis: str):
     )
 
 
-def clock_phase_scan_capture(setup_info, pv_names):
+def clock_phase_scan_capture(setup_info: dict, pv_names: dict) -> dict:
 
     detector = pv_names["tails"]["Detector"]
     adc = pv_names["tails"]["adc"]
@@ -881,7 +886,7 @@ def clock_phase_scan_capture(setup_info, pv_names):
     return data
 
 
-def bbbfe_gain_scan_capture(setup_info, pv_names):
+def bbbfe_gain_scan_capture(setup_info: dict, pv_names: dict) -> dict:
     adc = pv_names["tails"]["adc"]
     pv_head = pv_names["hardware_names"][setup_info["mbf_axis"]]
     frontend = pv_names["frontend"]["base"]
@@ -933,7 +938,7 @@ def bbbfe_gain_scan_capture(setup_info, pv_names):
     return data
 
 
-def bbbfe_system_phase_scan_capture(setup_info, pv_names):
+def bbbfe_system_phase_scan_capture(setup_info: dict, pv_names: dict) -> dict:
     [root_string, _1, pv_names] = system_config()
     pv_head = pv_names["hardware_names"][setup_info["mbf_axis"]]
 
@@ -1028,7 +1033,7 @@ def bbbfe_system_phase_scan_capture(setup_info, pv_names):
     return data
 
 
-def doris_target_phase_scan_capture(setup_info, pv_names):
+def doris_target_phase_scan_capture(setup_info: dict, pv_names: dict) -> dict:
     [root_string, _1, pv_names] = system_config()
 
     doris_pv = pv_names["doris"]["phase"]
@@ -1086,7 +1091,7 @@ def doris_target_phase_scan_capture(setup_info, pv_names):
     return data
 
 
-def pll_phase_scan_capture(setup_info, pv_names):
+def pll_phase_scan_capture(setup_info: dict, pv_names: dict) -> dict:
     [root_path, _1, pv_names] = system_config()
     name = pv_names["hardware_names"][setup_info["mbf_axis"]]
     pll_tails = pv_names["tails"]["pll"]
@@ -1156,76 +1161,83 @@ def pll_phase_scan_capture(setup_info, pv_names):
     return data
 
 
-def mbf_make_index(application_type, ax):
-    # Writes index files to speed up archive retrival def s:
-    # Args:
-    #       application_type(str): either 'Growdamp', 'Bunch_motion', 'Modescan',
-    #                           'Spectrum', 'LO_scan', 'system_phase_scan',
-    #                           'clock_phase_scan'['']
-    #       ax(str): 'x', 'y', or 's'
-    #
-    # Example mbf_make_index('Growdamp', 'x')
-    [root_string, _2, _1] = system_config
-    if ax:
-        filter_name = f"{application_type}_{ax}_axis"
-    else:
-        filter_name = f"{application_type}"
+def frontend_lo_phase_scan_capture(data: dict, pv_names: dict) -> dict:
+    old_val = get_variable(data["phase_pv"])
+    data["n"] = range(data["sweep_start"], data["sweep_end"], data["sweep_step"])
 
-    datasets = dir_list_gen_tree(root_string, ".mat")
-    wanted_datasets_type = datasets(
-        find_position_in_cell_lst(strfind(datasets, filter_name))
-    )
-    print(f"Creating lookup index for {application_type} {ax}")
-    if not wanted_datasets_type:
-        print("No files to index")
-    else:
-        ok = np.zeros(len(wanted_datasets_type))
-        file_time = []
-        file_name = []
-        for kse in range(1, len(wanted_datasets_type)):
-            try:  # handling corrupted input files
-                temp = load(wanted_datasets_type[kse])
-            except me1:
-                ok[kse] = 0
-                print(f"{me1} message")
+    data["t1"] = []
+    data["t2"] = []
+    data["t3"] = []
+    for jd in range(len(data["n"])):
+        set_variable(data["phase_pv"], data["n"](jd))
+        time.sleep(2)
+        data["t1"][jd] = max(get_variable("SR23C-DI-TMBF-01:TUNE:POWER"))
+        data["t2"][jd] = max(get_variable("SR23C-DI-TMBF-02:TUNE:POWER"))
+        data["t3"][jd] = max(get_variable("SR23C-DI-TMBF-03:TUNE:POWER"))
 
-            data_name = temp.keys()
-            # Although the code saves eveything in 'data', older datasets have
-            # a variety of names['']
-            if (
-                data_name[1] == "data"
-                or data_name[1] == "growdamp"
-                or data_name[1] == "what_to_save"
-            ):
-                file_time[kse] = temp[data_name[1]]["time"]
-                file_name[kse] = wanted_datasets_type[kse]
-                ok[kse] = 1
-            else:
-                #             print(fieldnames(temp))
-                ok[kse] = 0
-
-        file_index = cat(1, file_name[ok == 1], file_time[ok == 1])
-        save(fullfile(root_string, [application_type, "_", index_name]), "file_index")
+    set_variable(data["phase_pv"], old_val)
+    return data
+    # graph_handles = plt.figure
+    # plt.plot(
+    #     data["n"],
+    #     data["t1"] / max(data["t1"]),
+    #     "b",
+    #     data["n"],
+    #     data["t2"] / max(data["t2"]),
+    #     "r",
+    #     data["n"],
+    #     data["t3"] / max(data["t3"]),
+    #     "c",
+    # )
+    # plt.xlabel("LO phase (degrees)")
+    # plt.ylabel("tune max value (normalised)")
+    # plt.legend("X", "Y", "S")
 
 
-def update_all_indexes():
-    # updates all indexes in the data archive
-    # useful if something is corrupted['']
-    mbf_make_index("LO_scan")
-    mbf_make_index("clock_phase_scan")
-    mbf_make_index("system_phase_scan")
-    mbf_make_index("Bunch_motion")
-    mbf_make_index("Spectrum", "x")
-    mbf_make_index("Spectrum", "y")
-    mbf_make_index("Spectrum", "s")
-    mbf_make_index("Growdamp", "x")
-    mbf_make_index("Growdamp", "y")
-    mbf_make_index("Growdamp", "s")
-    mbf_make_index("fll_phase_scan", "x")
-    mbf_make_index("fll_phase_scan", "y")
-    mbf_make_index("Modescan", "x")
-    mbf_make_index("Modescan", "y")
-    mbf_make_index("Modescan", "s")
-    mbf_make_index("tunescan", "x")
-    mbf_make_index("tunescan", "y")
-    mbf_make_index("tunescan", "s")
+def pll_pi_scan_capture(setup_info: dict, pv_names: dict) -> dict:
+    [root_string, _1, pv_names] = system_config()
+    pv_head = pv_names["hardware_names"][setup_info["mbf_axis"]]
+    pll_tails = pv_names["tails"]["pll"]
+    pll_data = setup_info
+    n_p = len(setup_info["p_vals"])
+    n_i = len(setup_info["i_vals"])
+    n_repeats = 20
+    pll_data["minwf"] = np.array(ndmin=3)
+    pll_data["maxwf"] = np.array(ndmin=3)
+    pll_data["meanwf"] = np.array(ndmin=3)
+    pll_data["stdwf"] = np.array(ndmin=3)
+    pll_data["tunewf"] = np.array(ndmin=3)
+    pll_data["offsetwf"] = np.array(ndmin=3)
+    pll_data["i_values"] = np.array(ndmin=3)
+    pll_data["p_values"] = np.array(ndmin=3)
+    pll_data["dwell"] = get_variable(f"{pv_head}{pll_tails['detector']['dwell']}")
+    for ser in range(n_p):
+        for jfe in range(n_i):
+            # initialise loop
+            set_variable(f"{pv_head}{pll_tails['i']}", setup_info["i_vals"][jfe])
+            set_variable(f"{pv_head}{pll_tails['p']}", setup_info["p_vals"][ser])
+            mbf_pll_start(
+                setup_info["mbf_axis"],
+                pllbunches=setup_info["monitor_bunches"],
+                guardbunches=setup_info["guardbunches"],
+            )
+            for ewn in range(n_repeats):
+                time.sleep(1)
+                data = get_variable(
+                    f"{pv_head}{pll_tails['nco']['offset_waveform']}"
+                    f"{pv_head}{pll_tails['nco']['mean_offset']}"
+                    f"{pv_head}{pll_tails['nco']['std_offset']}"
+                    f"{pv_head}{pll_tails['nco']['tune']}"
+                    f"{pv_head}{pll_tails['nco']['offset']}"
+                )
+                wf = data[1, :]
+                pll_data["minwf"][ser, jfe, ewn] = min(wf)
+                pll_data["maxwf"][ser, jfe, ewn] = max(wf)
+                pll_data["meanwf"][ser, jfe, ewn] = data[1, 0]
+                pll_data["stdwf"][ser, jfe, ewn] = data[2, 0]
+                pll_data["tunewf"][ser, jfe, ewn] = data[3, 0]
+                pll_data["offsetwf"][ser, jfe, ewn] = data[4, 0]
+                pll_data["i_values"][ser, jfe, ewn] = setup_info["i_vals"][jfe]
+                pll_data["p_values"][ser, jfe, ewn] = setup_info["p_vals"][ser]
+
+    return pll_data

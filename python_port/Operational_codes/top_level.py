@@ -1,4 +1,3 @@
-import datetime
 import time
 
 import numpy as np
@@ -36,6 +35,7 @@ from measurements import (
     bunch_motion_capture,
     clock_phase_scan_capture,
     doris_target_phase_scan_capture,
+    frontend_lo_phase_scan_capture,
     growdamp_capture,
     modescan_capture,
     pll_phase_scan_capture,
@@ -676,7 +676,15 @@ def tunescan_over_modes_all(
     )
 
 
-def BBBFE_LO_scan(phase_centre: int, sweep_extent: int):
+def BBBFE_LO_scan(
+    single_bunch_location: int,
+    auto_setup: str = "yes",
+    plotting: str = "yes",
+    additional_save_location: str | None = None,
+    sweep_start: int = -180,
+    sweep_step: int = 5,
+    sweep_end: int = 180,
+):
     # Scans the LO phase shift in the bunch by bunch frontend and
     # records the strength of the tune signal.
     # Restores the original value after the scan.
@@ -687,115 +695,60 @@ def BBBFE_LO_scan(phase_centre: int, sweep_extent: int):
     #                         above and 45 degrees below the centre value.
     #
     # Example: BBBFE_LO_scan(90, 45)
-    root_string = system_config()
-    data: dict = {}
-    data["phase_pv"] = "SR23C-DI-BBFE-01:PHA"
-    old_val = get_variable(data["phase_pv"])
-    data["n"] = range(
-        phase_centre - sweep_extent,
-        phase_centre + sweep_extent,
-        np.ceil(sweep_extent / 20),
-    )
-    data["t1"] = []
-    data["t2"] = []
-    data["t3"] = []
-    for jd in range(len(data["n"])):
-        set_variable(data["phase_pv"], data["n"](jd))
-        time.sleep(2)
-        data["t1"][jd] = max(get_variable("SR23C-DI-TMBF-01:TUNE:POWER"))
-        data["t2"][jd] = max(get_variable("SR23C-DI-TMBF-02:TUNE:POWER"))
-        data["t3"][jd] = max(get_variable("SR23C-DI-TMBF-03:TUNE:POWER"))
-
-    set_variable(data["phase_pv"], old_val)
-
-    data["time"] = datetime.datetime.now()
+    # getting general environment data
+    data = machine_environment()
+    # Add the extra data to the data structure.
     data["base_name"] = "LO_scan"
-    ## saving the data to a file
-    save_to_archive(root_string, data)
+    data["auto_setup"] = auto_setup
+    data["plotting"] = plotting
+    data["additional_save_location"] = additional_save_location
+    data["sweep_start"] = sweep_start
+    data["sweep_step"] = sweep_step
+    data["sweep_end"] = sweep_end
+    data["start_state"] = "TuneOnly"
+    data["end_state"] = "TuneOnly"
+    data["phase_pv"] = "SR23C-DI-BBFE-01:PHA"
 
-    # graph_handles = plt.figure
-    # plt.plot(
-    #     data["n"],
-    #     data["t1"] / max(data["t1"]),
-    #     "b",
-    #     data["n"],
-    #     data["t2"] / max(data["t2"]),
-    #     "r",
-    #     data["n"],
-    #     data["t3"] / max(data["t3"]),
-    #     "c",
-    # )
-    # plt.xlabel("LO phase (degrees)")
-    # plt.ylabel("tune max value (normalised)")
-    # plt.legend("X", "Y", "S")
+    run_multi_axis_measurement(
+        setup_info=data,
+        hardware_setup_function=None,
+        capture_function=frontend_lo_phase_scan_capture,
+        restore_function=None,
+        retrival_function=frontend_lo_phase_scan_retrival,
+    )
 
 
 def pll_PI_scan(
     mbf_axis: str,
     p_vals: list[int],
     i_vals: list[int],
+    auto_setup: str = "yes",
     save_to_archive: str = "yes",
     additional_save_location: str | None = None,
     guardbunches: int = 10,
-    pll_monitor_bunches: int = 400,
+    monitor_bunches: int = 400,
 ):
     # This sets up the PLL loop for different P and I settings, then records various
     # statistics in order to assess which setting are most suitable['']
+    data = machine_environment()
+    # Add the extra data to the data structure.
+    data["ax_label"] = mbf_axis
+    data["base_name"] = "pll_pi_sweep"
+    data["base_name"] = f"PLL_{data["ax_label"]}_PI_scan"]
+    data["auto_setup"] = auto_setup
+    data["additional_save_location"] = additional_save_location
+    data["p_vals"] = p_vals
+    data["i_vlas"] = i_vals
+    data["guardbunches"] = guardbunches
+    data["monitor_bunches"] = monitor_bunches
+    data["start_state"] = "TuneOnly"
+    data["end_state"] = "TuneOnly"
 
-    [root_string, _1, pv_names] = system_config()
-    pv_head = pv_names["hardware_names"][mbf_axis]
-    pll_tails = pv_names["tails"]["pll"]
-    # getting general environment data['']
-    pll_data = machine_environment()
-    # Add the axis label to the data structure['']
-    pll_data["ax_label"] = mbf_axis
-    pll_data["base_name"] = ["PLL_", pll_data["ax_label"], "_PI_scan"]
-    n_p = len(p_vals)
-    n_i = len(i_vals)
-    n_repeats = 20
-    pll_data["minwf"] = np.array(ndmin=3)
-    pll_data["maxwf"] = np.array(ndmin=3)
-    pll_data["meanwf"] = np.array(ndmin=3)
-    pll_data["stdwf"] = np.array(ndmin=3)
-    pll_data["tunewf"] = np.array(ndmin=3)
-    pll_data["offsetwf"] = np.array(ndmin=3)
-    pll_data["i_values"] = np.array(ndmin=3)
-    pll_data["p_values"] = np.array(ndmin=3)
-    pll_data["dwell"] = get_variable(f"{pv_head}{pll_tails['detector']['dwell']}")
-    for ser in range(n_p):
-        for jfe in range(n_i):
-            # initialise loop
-            set_variable(f"{pv_head}{pll_tails['i']}", i_vals[jfe])
-            set_variable(f"{pv_head}{pll_tails['p']}", p_vals[ser])
-            mbf_pll_start(
-                mbf_axis, pllbunches=pll_monitor_bunches, guardbunches=guardbunches
-            )
-            for ewn in range(n_repeats):
-                time.sleep(1)
-                data = get_variable(
-                    f"{pv_head}{pll_tails['nco']['offset_waveform']}"
-                    f"P{pv_head}{pll_tails['nco']['mean_offset']}"
-                    f"{pv_head}{pll_tails['nco']['std_offset']}"
-                    f"{pv_head}{pll_tails['nco']['tune']}"
-                    f"{pv_head}{pll_tails['nco']['offset']}"
-                )
-                wf = data[1, :]
-                pll_data["minwf"][ser, jfe, ewn] = min(wf)
-                pll_data["maxwf"][ser, jfe, ewn] = max(wf)
-                pll_data["meanwf"][ser, jfe, ewn] = data[1, 0]
-                pll_data["stdwf"][ser, jfe, ewn] = data[2, 0]
-                pll_data["tunewf"][ser, jfe, ewn] = data[3, 0]
-                pll_data["offsetwf"][ser, jfe, ewn] = data[4, 0]
-                pll_data["i_values"][ser, jfe, ewn] = i_vals[jfe]
-                pll_data["p_values"][ser, jfe, ewn] = p_vals[ser]
+    run_single_axis_measurement(
+        setup_info=data,
+        hardware_setup_function=pll_PI_scan_setup,
+        capture_function=pll_PI_scan_capture,
+        restore_function=pll_PI_scan_restore,
+        retrival_function=pll_PI_scan_retrival,
+    )
 
-    ## saving the data to a file
-    if mbf_axis == "x" or mbf_axis == "y" or mbf_axis == "s":
-        #     only save if not on test system
-        if save_to_archive == "yes":
-            save_to_archive(root_string, pll_data)
-
-        if additional_save_location:
-            scipy.savemat(additional_save_location, "pll_data")
-
-    return pll_data

@@ -2800,5 +2800,138 @@ def frontend_clock_phase_scan_plotting(data: dict):
         plt.ylabel("ADC phase")
 
 
-def frontend_clock_phase_scan_archival_plotting():
-    pass
+def frontend_clock_phase_scan_archival_plotting(
+    requested_data, leading, excited, following, times, experimental_setup
+):
+    # Plots the data processed by growdamp_archival_analysis.
+    # Args:
+    #      leading (numeric matrix):
+    #      excited (numeric matrix):
+    #      following (numeric matrix):
+    #      times (numeric vector): Datetimes of the datasets.
+    #      experimental_setup (structure): The setup parameters for the
+    #                                      analysis.
+    #      plot_error_graphs (anything): if present the code will plot the results
+    #                                    of the fit errors.
+    #
+    # Example: growdamp_archival_plotting(requested_data, data_magnitude,
+    #                                data_phase, times, setup, selections, extents)
+
+    # Only do something if there is data to do something with.
+    if not times:
+        return
+
+    graph_title = "Frontend clock phase scan"
+    archival_plotting_setup(requested_data, times, experimental_setup)
+    x_plt_axis = requested_data[1]["phase"]
+    this_year = datetime.datetime.now().year
+    years_input = [
+        this_year - 5,
+        this_year - 4,
+        this_year - 3,
+        this_year - 2,
+        this_year - 1,
+        this_year,
+    ]
+    years_colours = ["r", "b", "k", "g", "c", "m"]
+    if experimental_setup["anal_type"] == "parameter_sweep":
+        graph_title = (
+            f"Frontend clock phase as a def of {experimental_setup['sweep_parameter']}"
+        )
+        f"Using a step size of {experimental_setup['parameter_step_size']} in the"
+        f"{experimental_setup['axis']} axis"
+        graph_labels = []
+        for hw in range(len(experimental_setup["param"])):
+            graph_labels[hw] = experimental_setup["param"][hw]
+
+    if experimental_setup["anal_type"] == "parameter_sweep":
+        plt.plot(x_plt_axis, leading)
+        #     plt.legend(graph_labels)
+    else:
+        populate_archive_graph(leading, years_input, times, x_plt_axis)
+        plt.legend("off")
+
+    plt.title("leading bunch")
+    plt.xlabel("Phase")
+    plt.ylabel("Magnitude")
+    ymin = min(
+        [min(min(leading, [], 2)), min(min(excited, [], 2)), min(min(following, [], 2))]
+    )
+    ymin = min(ymin, 0)
+
+    ymax = max(
+        [max(max(leading, [], 2)), max(max(excited, [], 2)), max(max(following, [], 2))]
+    )
+    plt.ylim([ymin, ymax])
+    if experimental_setup["anal_type"] == "parameter_sweep":
+        plt.plot(x_plt_axis, excited)
+        #     plt.legend(graph_labels)
+    else:
+        populate_archive_graph(excited, years_input, years_colours, times, x_plt_axis)
+        plt.legend("off")
+
+    plt.title({graph_title, "excited bunch"})
+    plt.xlabel("Phase")
+    plt.ylabel("Magnitude")
+    ymin = min(
+        [min(min(leading, [], 2)), min(min(excited, [], 2)), min(min(following, [], 2))]
+    )
+    ymin = min(ymin, 0)
+
+    ymax = max(
+        [max(max(leading, [], 2)), max(max(excited, [], 2)), max(max(following, [], 2))]
+    )
+    plt.ylim([ymin, ymax])
+
+    if experimental_setup["anal_type"] == "parameter_sweep":
+        plt.plot(x_plt_axis, following)
+        #     plt.legend(graph_labels)
+    else:
+        populate_archive_graph(following, years_input, times, x_plt_axis)
+        plt.legend("off")
+
+    plt.title("following bunch")
+    plt.xlabel("Phase")
+    plt.ylabel("Magnitude")
+    ymin = min(
+        [min(min(leading, [], 2)), min(min(excited, [], 2)), min(min(following, [], 2))]
+    )
+    ymin = min(ymin, 0)
+
+    ymax = max(
+        [max(max(leading, [], 2)), max(max(excited, [], 2)), max(max(following, [], 2))]
+    )
+    plt.ylim([ymin, ymax])
+    diff1 = excited - leading
+    diff2 = excited - following
+
+    if experimental_setup["anal_type"] == "parameter_sweep":
+        plt.plot(x_plt_axis, diff1)
+        #     plt.legend(graph_labels)
+    else:
+        populate_archive_graph(diff1, years_input, times, x_plt_axis)
+        plt.legend("off")
+
+    plt.title("excited - leading")
+    plt.xlabel("Phase")
+    plt.ylabel("Signal differences")
+    ymin = min([min(min(diff1, [], 2)), min(min(diff2, [], 2))])
+    ymax = max([max(max(diff1, [], 2)), max(max(diff1, [], 2))])
+    ymax = ymax + ymax / 10
+    plt.ylim([ymin, ymax])
+
+    if experimental_setup["anal_type"] == "parameter_sweep":
+        plt.plot(x_plt_axis, diff2)
+        plt.legend(graph_labels, "Location", "eastoutside")
+    else:
+        populate_archive_graph(diff2, years_input, times, x_plt_axis)
+        plt.legend("Location", "eastoutside")
+
+    plt.title("excited - following")
+    plt.xlabel("Phase")
+    plt.ylabel("Signal differences")
+    ymin = min([min(min(diff1, [], 2)), min(min(diff2, [], 2))])
+    ymax = max([max(max(diff1, [], 2)), max(max(diff1, [], 2))])
+    ymax = ymax + ymax / 10
+    plt.ylim([ymin, ymax])
+    return leading, excited, following, times, experimental_setup

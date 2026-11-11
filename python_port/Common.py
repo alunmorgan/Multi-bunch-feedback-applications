@@ -1,26 +1,23 @@
+import csv
 import datetime
 import os
 
 import numpy as np
 import scipy
-from hardware_setup import get_all_tunes
+from cothread.catools import FORMAT_TIME, caget, caput
+
+from Operational_codes.hardware_setup import get_all_tunes
 
 
-def hannwin(data, dim=None):
-    s = data.shape
-    if not dim:
-        [_1, dim] = max(s)
-
-    rh = s
-    rh[dim] = 1
-    t = np.linspace(0, 2 * np.pi, s[dim] + 1)
-    t = t[0:-2]
-    h = 1 - np.cos(t)
-    data_windowed = data * (np.repmat(np.fft.shiftdim(h, dim), rh))
+def hannwin(data: np.ndarray, dim: int = 0) -> np.ndarray:
+    window = np.hanning(data.shape[dim])
+    s = list(data.shape)
+    s[dim] = 1
+    data_windowed = data * np.matlib.repmat(window, s[0], s[1])
     return data_windowed
 
 
-def movmean(data, window_size):
+def movmean(data: list, window_size: int) -> list:
     i = 0
     # Initialize an empty list to store moving averages
     moving_averages = []
@@ -28,7 +25,7 @@ def movmean(data, window_size):
     # Loop through the array to consider every window.
     while i < len(data) - window_size + 1:
         # Calculate the average of current window
-        window_average = np.sum(data[i : i + window_size]) / window_size
+        window_average = sum(data[i : i + window_size]) / window_size
 
         # Store the average of current
         # window in moving average list
@@ -36,73 +33,49 @@ def movmean(data, window_size):
 
         # Shift window to right by one position
         i += 1
-        return moving_averages
+    return moving_averages
 
 
-def cat_multi_dim(cat_dim: int, original_data, new_data):
+def cat_multi_dim(
+    cat_dim: int, original_data: np.ndarray, new_data: np.ndarray
+) -> np.ndarray:
     # concatinates multi-dimensional data in the cat_dim dimension,
     # pads the other dimensions as necessary.
-    # If given 1 output will give the combined matrix.
-    # If given 2 outputs will output the padded components
+    # will return the combined matrix.
     # example
-    # varargout = cat_multi_dim(cat_dim,original_data, new_data)
-    pad_dims = [0, 1, 2, 3]
-    pad_dims[pad_dims == cat_dim] = []
+    # combined_data = cat_multi_dim(cat_dim,original_data, new_data)
+
     ## Padding the arrays to make them the same size in all dimensions
-    sizes = []
-    for n in range(4):
-        if new_data.shape[pad_dims[n]] > original_data.shape[pad_dims[n]]:
-            if pad_dims[n] == 0:
-                sizes[n] = new_data.shape[n] - original_data.shape[n]
-                if sizes[n] == 0:
-                    sizes[n] = 1
-            else:
-                sizes[n] = original_data.shape[n]
+    original_data_size = original_data.shape
+    new_data_size = new_data.shape
+    # find max in each dimension
+    max_size = np.max(np.array([original_data_size, new_data_size]), axis=0)
+    padding_original = max_size - original_data_size
+    padding_new = max_size - new_data_size
+    # do not pad in cat_dim
+    padding_original[cat_dim] = 0
+    padding_new[cat_dim] = 0
 
-            od_padding = NaN(sizes[0], sizes[1], sizes[2], sizes[3])
-            # If the data is a character array, converting the
-            # NaN padding matrix into an array of spaces to stop
-            # the warning messages['']
-            if ischar(original_data) == 1:
-                od_padding[isnan(od_padding)] = " "
-                od_padding = char(od_padding)
+    padded_original = np.pad(
+        original_data,
+        ((0, padding_original[0]), (0, padding_original[1]), (0, padding_original[2])),
+        constant_values=np.nan,
+    )
+    padded_new = np.pad(
+        original_data,
+        ((0, padding_new[0]), (0, padding_new[1]), (0, padding_new[2])),
+        constant_values=np.nan,
+    )
 
-            original_data = cat(pad_dims[n], original_data, od_padding)
-
-        if new_data.shape[pad_dims[n]] < original_data.shape[pad_dims[n]]:
-            if pad_dims[n] == 0:
-                sizes[n] = original_data.shape[n] - new_data.shape[n]
-                if sizes[n] == 0:
-                    sizes[n] = 1
-            else:
-                sizes[n] = new_data.shape[n]
-
-            nd_padding = NaN(sizes[0], sizes[1], sizes[2], sizes[3])
-            # If the data is a character array, converting the
-            # NaN padding matrix into an array of spaces to stop
-            # the warning messages['']
-            if ischar(new_data) == 1:
-                nd_padding[isnan(nd_padding)] = " "
-                nd_padding = char(nd_padding)
-
-            new_data = cat(pad_dims[n], new_data, nd_padding)
-
-    ## Combining the padded arrays
-    combined_data = cat(cat_dim, original_data, new_data)
-    if nargout == 1:
-        varargout = [combined_data]
-    elif nargout == 2:
-        varargout = [original_data][new_data]
-
-    return varargout
+    combined_data = np.concatenate((padded_original, padded_new), axis=cat_dim)
+    return combined_data
 
 
-def condition_mbf_data(input_data):
-    # Mapping values in old datasets to defined variables['']
+def condition_mbf_data(input_data: list[dict]) -> list[dict]:
+    # Mapping values in old datasets to defined variables.
     # Initialisation
-    n_datasets = len(input_data)
     output_data = input_data
-    for jgr in range[n_datasets:-1, 1]:
+    for jgr in range(len(input_data)):
         if "data" in input_data[jgr]:
             continue
 
@@ -115,12 +88,10 @@ def condition_mbf_data(input_data):
     return output_data
 
 
-def condition_mbf_metadata(input_data):
-    # Mapping values in old datasets to defined variables['']
-    # Initialisation
-    n_datasets = len(input_data)
+def condition_mbf_metadata(input_data: list[dict]) -> list[dict]:
+    # Mapping values in old datasets to defined variables.
     output_data = input_data
-    for jgr in range[n_datasets:-1, 1]:
+    for jgr in range(len(input_data)):
         if "I_bpm" in input_data[jgr]:
             output_data[jgr]["current"] = input_data[jgr]["I_bpm"]
 
@@ -155,7 +126,7 @@ def condition_mbf_metadata(input_data):
     return output_data
 
 
-def construct_datastamped_filename(name_str, c):
+def construct_datastamped_filename(name_str: str, c: datetime.datetime) -> str:
     # constructs a datestamped filename
     # name_str is a identifier string added at the begining of the name.
     # c is a datetime object.
@@ -166,29 +137,27 @@ def construct_datastamped_filename(name_str, c):
     return filename
 
 
-def dir_list_gen(directory_name, file_type):
-    # takes in a directory name and outputs the list of files
-    # as a cell array of strings filtered by file type.
+def dir_list_gen(directory_name: str, file_type: str) -> tuple[list[str], str]:
+    # takes in a directory name and outputs the list of files filtered by file type.
     # if a file type of 'dirs' is input it will output a list of directories.
-    # asks for a file if a name is not provided
     # example
-    # [names,directory_name]=dir_list_gen['U:\','mat',1]
-
-    # removes leading . of file_type if present
-    if file_type[0] == ".":
-        file_type = file_type[1:-1]
+    # names,directory_name = dir_list_gen('/home','mat')
+    names = []
+    dirs = []
+    with os.scandir(directory_name) as it:
+        for entry in it:
+            if not entry.name.endswith(file_type) and entry.is_file():
+                names.append(entry.name)
+            elif entry.is_dir():
+                dirs.append(entry.name)
 
     if file_type == "dirs":
-        names = [entry for entry in directory_name.iterdir() if entry.is_dir()]
-    else:
-        names = [
-            entry for entry in directory_name.iterdir() if f".{file_type}" in entry
-        ]
+        names = dirs
 
     return names, directory_name
 
 
-def dir_list_gen_tree(root_dir, filetype):
+def dir_list_gen_tree(root_dir: str, filetype: str):
     # finds files of the requested type in current folder and all subfolders
     # ignores hidden folders
     # the absolute paths are returned.
@@ -198,7 +167,7 @@ def dir_list_gen_tree(root_dir, filetype):
     for entry in os.listdir(root_dir):
         full_path = os.path.join(root_dir, entry)
         if os.path.isdir(full_path):
-            paths.extend(dir_list_gen_tree(full_path))
+            paths.extend(dir_list_gen_tree(full_path, filetype=filetype))
         else:
             head, tail = os.path.split(full_path)
             if filetype in tail:
@@ -207,40 +176,28 @@ def dir_list_gen_tree(root_dir, filetype):
     return paths
 
 
-def get_variable(variable_names, system_type="EPICS", nmax=None, datatype=None):
-    # def to get a set of variables[''] This abstraction allows easier porting:
+def get_variable(variable_names, system_type="EPICS", timeout=5, datatype=None):
+    # def to get a set of variables. This abstraction allows easier porting:
     # between EPICS and TANGO (and potentially others)
     if system_type.upper() == "EPICS":
-        if nmax == None and datatype == None:
-            [value, timestamp] = lcaGet(variable_names)
-        elif nmax != None and datatype == None:
-            [value, timestamp] = lcaGet(variable_names, nmax)
-        elif nmax != None and datatype != None:
-            [value, timestamp] = lcaGet(variable_names, nmax, datatype)
+        values = caget(
+            variable_names, timeout=timeout, datatype=datatype, format=FORMAT_TIME
+        )
+        timestamps = []
+        for value in values:
+            timestamps.append(value.datetime)
+
     elif system_type.upper() == "TANGO":
-        error["getVariable:systemTypeError", "Tango calls are not yet implemented"]
+        raise ValueError(
+            "getVariable:systemTypeError Tango calls are not yet implemented"
+        )
     else:
-        error[
-            "getVariable:systemTypeError",
+        raise ValueError(
+            "getVariable:systemTypeError "
             "alternative sytem calls are not yet implemented",
-        ]
+        )
 
-    return value, timestamp
-
-
-def hannwin(data, dim):
-    s = data.shape
-    if nargin < 2:
-        [_1, dim] = max(s)
-
-    rh = s
-    rh[dim] = 1
-    t = linspace(0, 2 * pi, s(dim) + 1)
-    t = t[1 : -1 - 1]
-    h = 1 - cos(t)
-    data_windowed = data[""] * (repmat(shiftdim(h, dim), rh))
-
-    return data_windowed
+    return values, timestamps
 
 
 def machine_environment():
@@ -281,8 +238,8 @@ def machine_environment():
         exp_data["cavity3_voltage"] = None
 
     # getting the kicker status
-    injection = cell2mat(get_variable["LI-TI-MTGEN-01:SRPREI-MODE"])
-    timing = cell2mat(get_variable["LI-TI-MTGEN-01:STATUS.DESC"])
+    injection = get_variable["LI-TI-MTGEN-01:SRPREI-MODE"]
+    timing = get_variable["LI-TI-MTGEN-01:STATUS.DESC"]
     if injection.lower() == "Off":
         exp_data["kicker_status"] = "off"
     elif injection.lower() == "every shot":
@@ -303,7 +260,7 @@ def machine_environment():
     a = get_variable["SR01C-DI-DCAM-04:PROXY:DATA"]
     alims = get_variable[["SR01C-DI-DCAM-04:WIDTH", "SR01C-DI-DCAM-04:HEIGHT"]]
     a = a[1 : alims(1) * alims(2)]
-    a = reshape(a, alims(1), [])
+    a = np.reshape(a, alims(1), [])
     a[a < 0] = (a[a < 0]) + 256
     exp_data["pinhole"] = a
     # Feedback status
@@ -1081,18 +1038,19 @@ def save_to_archive(root_string, data):
     file_index = []
     print(["Data saved to: , ", save_name])
     index_name = f"{data['base_name']}_index"
-    if os.path.isfile(os.path.join(root_string, f"{index_name}.mat")):
-        f = csv.reader(os.path.join(root_string, f"{index_name}.mat"), "file_index")
-        new_ind = file_index.shape[1] + 1
-        file_index[1][new_ind] = save_name
-        file_index[2][new_ind] = date_vector
-        scipy.savemat(
-            os.path.join(root_string, f"{index_name}.mat"), "file_index", "-v7.3"
-        )
+    if os.path.isfile(os.path.join(root_string, f"{index_name}.csv")):
+        with open(
+            os.path.join(root_string, f"{index_name}.csv"), "rw", newline=""
+        ) as csvfile:
+            f = csv.reader(csvfile, delimiter=",")
+            f.append([save_name, data["time"].strftime("%a %d %b %Y, %I:%M%p")])
+            fw = csv.writer(csvfile, delimiter=",")
+            fw.writerows(f)
+
         print("Index updated")
     else:
         file_index[1][1] = save_name
-        file_index[2][1] = date_vector
+        file_index[2][1] = data["time"].strftime("%a %d %b %Y, %I:%M%p")
         scipy.savemat(
             os.path.join(root_string, f"{index_name}.mat"), "file_index", "-v7.3"
         )
@@ -1103,7 +1061,7 @@ def set_variable(variable_names, variable_values, system_type="EPICS"):
     # def to set a group of variables[''] This abstraction allows easier porting:
     # between EPICS and TANGO (and potentially others)
     if system_type.upper() == "EPICS":
-        lcaPut(variable_names, variable_values)
+        caput(variable_names, variable_values)
     elif system_type.upper() == "TANGO":
         raise ValueError(
             "setVariable:systemTypeErrorTango calls are not yet implemented"
@@ -1115,7 +1073,7 @@ def set_variable(variable_names, variable_values, system_type="EPICS"):
         )
 
 
-def sub_directories(main_dir):
+def sub_directories(main_dir: os.PathLike[str]) -> list[str]:
     # outputs a list of sub-directories of the input directory
     #
     # example: sub_dir = sub_directories(main_dir)
@@ -1125,13 +1083,87 @@ def sub_directories(main_dir):
     return sub_dirs
 
 
-def tree_gen(tree_root, clk):
+def tree_gen(tree_root: os.PathLike[str], clk: datetime.datetime):
     # generates a directory structure using the datetime passed in as clk
     # tree_root is where you want the subdirectories to be placed
 
-    leaf = os.mkdirs(
-        os.path.join(tree_root, clk.year, f"{clk.month: 02d}", f"{clk.day:02d}")
-    )
+    leaf = os.path.join(tree_root, f"{clk.year}", f"{clk.month: 02d}", f"{clk.day:02d}")
+
     # generating directory tree
     if not os.path.isdir(leaf):
-        os.mkdirs(leaf)
+        os.makedirs(leaf)
+
+
+def mbf_make_index(application_type: str, ax: str):
+    # Writes index files to speed up archive retrival def s:
+    # Args:
+    #       application_type(str): either 'Growdamp', 'Bunch_motion', 'Modescan',
+    #                           'Spectrum', 'LO_scan', 'system_phase_scan',
+    #                           'clock_phase_scan'['']
+    #       ax(str): 'x', 'y', or 's'
+    #
+    # Example mbf_make_index('Growdamp', 'x')
+    [root_string, _2, _1] = system_config
+    if ax:
+        filter_name = f"{application_type}_{ax}_axis"
+    else:
+        filter_name = f"{application_type}"
+
+    datasets = dir_list_gen_tree(root_string, ".mat")
+    wanted_datasets_type = datasets(
+        find_position_in_cell_lst(strfind(datasets, filter_name))
+    )
+    print(f"Creating lookup index for {application_type} {ax}")
+    if not wanted_datasets_type:
+        print("No files to index")
+    else:
+        ok = np.zeros(len(wanted_datasets_type))
+        file_time = []
+        file_name = []
+        for kse in range(1, len(wanted_datasets_type)):
+            try:  # handling corrupted input files
+                temp = load(wanted_datasets_type[kse])
+            except me1:
+                ok[kse] = 0
+                print(f"{me1} message")
+
+            data_name = temp.keys()
+            # Although the code saves eveything in 'data', older datasets have
+            # a variety of names['']
+            if (
+                data_name[1] == "data"
+                or data_name[1] == "growdamp"
+                or data_name[1] == "what_to_save"
+            ):
+                file_time[kse] = temp[data_name[1]]["time"]
+                file_name[kse] = wanted_datasets_type[kse]
+                ok[kse] = 1
+            else:
+                #             print(fieldnames(temp))
+                ok[kse] = 0
+
+        file_index = cat(1, file_name[ok == 1], file_time[ok == 1])
+        save(fullfile(root_string, [application_type, "_", index_name]), "file_index")
+
+
+def update_all_indexes():
+    # updates all indexes in the data archive
+    # useful if something is corrupted['']
+    mbf_make_index("LO_scan")
+    mbf_make_index("clock_phase_scan")
+    mbf_make_index("system_phase_scan")
+    mbf_make_index("Bunch_motion")
+    mbf_make_index("Spectrum", "x")
+    mbf_make_index("Spectrum", "y")
+    mbf_make_index("Spectrum", "s")
+    mbf_make_index("Growdamp", "x")
+    mbf_make_index("Growdamp", "y")
+    mbf_make_index("Growdamp", "s")
+    mbf_make_index("fll_phase_scan", "x")
+    mbf_make_index("fll_phase_scan", "y")
+    mbf_make_index("Modescan", "x")
+    mbf_make_index("Modescan", "y")
+    mbf_make_index("Modescan", "s")
+    mbf_make_index("tunescan", "x")
+    mbf_make_index("tunescan", "y")
+    mbf_make_index("tunescan", "s")
