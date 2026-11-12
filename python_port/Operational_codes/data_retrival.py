@@ -1,3 +1,6 @@
+import datetime
+from types import FunctionType
+
 from analysis import (
     bunch_motion_archival_analysis,
     frontend_clock_phase_scan_archival_analysis,
@@ -38,50 +41,51 @@ def archival_retrieval(
     selection: str,
     ax: str,
     date_range: list[datetime.datetime, datetime.datetime],
-    measurement_specific_options,
-    analysis_function,
-    plotting_function,
-    plotting_summary_function,
+    measurement_specific_options: dict,
+    analysis_function: FunctionType,
+    plotting_function: FunctionType,
+    plotting_summary_function: FunctionType,
     filter_conditions,
-    bypass_index,
-    metadata_only,
-    analysis_type,
-    sweep_parameter,
-    parameter_step,
-    debug,
+    bypass_index: bool,
+    metadata_only: bool,
+    analysis_type: str,
+    sweep_parameter: str,
+    parameter_step: float,
+    debug: bool,
 ):
-    # Extracts requested data from the data archive between
-    # the requested times(date_range), and of the correct type (ax).
-    # also filters out datasets with machine settings outside the specified
-    # acceptable range.
-    #
-    # Args:
-    #       ax (str): The number of the axis (x, y, s)
-    #       date_range (pair of datetime instances): The range of time to extract.
-    #       bypass_index (str) : 'no' for use the pregnerated index (much faster)
-    #                            'yes' for work things out from the file metatdata.
-    #                            the default is 'no'.
-    #       metadata_only(str): 'no' return all data
-    #                            'yes' remove the sample data from the output structure.
-    #                            the default is 'no'.
-    #       analysis_type(str): determines the type of analysis to run 'collate' or
-    #                           'sweep', the default is 'collate'.
-    #       sweep_parameter (str): Parameter to be used[''] This name must exist
-    #                              in the data structure[''] (only needed if
-    #                              anal_type set to 'parameter sweep')
-    #       parameter_step_size (float): Defines the spacing of the steps in
-    #                                    the parameter sweep.
-    #                                    Multiple data sets which are on the same
-    #                                    step will be averaged. (only needed if
-    #                                    anal_type set to 'parameter sweep')
-    #       overrides (list of ints): Two values setting the number of turns to
-    #                                    analyse (passive, active)
-    #       debug(int): if 1 then outputs graphs of individual modes to allow
-    #                                    selection nof appropriate overrides.
-    #
-    #
-    # Example: growdamp_archival_retrieval('x',
-    #          [datetime(2023, 1, 1), datetime("now")])
+    """Extracts requested data from the data archive between
+    the requested times(date_range), and of the correct type (ax).
+    also filters out datasets with machine settings outside the specified
+    acceptable range.
+
+    Args:
+          ax: The number of the axis (x, y, s)
+          date_range: The range of time to extract.
+          bypass_index: 'no' for use the pregnerated index (much faster)
+                               'yes' for work things out from the file metatdata.
+                               the default is 'no'.
+          metadata_only: 'no' return all data
+                               'yes' remove the sample data from the output structure.
+                               the default is 'no'.
+          analysis_type: determines the type of analysis to run 'collate' or
+                              'sweep', the default is 'collate'.
+          sweep_parameter: Parameter to be used. This name must exist
+                                 in the data structure. (only needed if
+                                 anal_type set to 'parameter sweep')
+          parameter_step_size: Defines the spacing of the steps in
+                                       the parameter sweep.
+                                       Multiple data sets which are on the same
+                                       step will be averaged. (only needed if
+                                       anal_type set to 'parameter sweep')
+          overrides: Two values setting the number of turns to
+                                       analyse (passive, active)
+          debug: if 1 then outputs graphs of individual modes to allow
+                                       selection nof appropriate overrides.
+
+
+    Example: growdamp_archival_retrieval('x',
+             [datetime(2023, 1, 1), datetime("now")])
+    """
     if ax:
         selection_name = f"{selection}_{ax}_axis"
     else:

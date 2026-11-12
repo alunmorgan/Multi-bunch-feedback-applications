@@ -182,15 +182,16 @@ def run_multi_axis_measurement(
 
 
 def growdamp_capture(input_settings: dict, pv_names: dict) -> dict:
-    # Gathers data on the machine environment.
-    # Runs a growdamp experiment on an already setup system.
-    # Saves the resultant data.
-    #
-    #   Args:
-    #       input_settings(struct): contains all the setup information.
-    #       pv_names(struct): contains the locations of all the machine parameters.
-    #
-    # example data = growdamp_capture(input_settings, pv_names)
+    """Gathers data on the machine environment.
+    Runs a growdamp experiment on an already setup system.
+    Saves the resultant data.
+
+      Args:
+          input_settings: contains all the setup information.
+          pv_names: contains the locations of all the machine parameters.
+
+    example data = growdamp_capture(input_settings, pv_names)
+    """
     growdamp: dict = {}
     mbf_axis = input_settings["mbf_axis"]
     capture_full_bunch_motion = input_settings["capture_full_bunch_motion"]
@@ -329,18 +330,20 @@ def get_stage_details(exp_data: dict) -> tuple[list, list, list]:
 
 
 def modescan_capture(input_settings: dict, pv_names: dict) -> dict:
-    # wrapper def to call modescan, gather data on the environment:
-    # and to save the resultant data.
-    #
-    #   Args:
-    #       mbf_axis (str): Selects which MBF axis to work on (x, y, s).
-    #       n_repeats (int): The number of repeat datapoints to capture
-    #   Returns:
-    #       modescan (struct): data structure containing the experimental
-    #                          results and the machine conditions['']
-    #                          [optional output]
-    #
-    # example data = modescan_capture('x', 100)
+    """wrapper def to call modescan, gather data on the environment:
+    and to save the resultant data.
+
+      Args:
+          input_settings:
+            mbf_axis (str): Selects which MBF axis to work on (x, y, s).
+            n_repeats (int): The number of repeat datapoints to capture
+          pv_names: looks ups to gererate the required PVs.
+      Returns:
+          data structure containing the experimental results and
+          the machine conditions.
+
+    example data = modescan_capture('x', 100)
+    """
     modescan: dict = {}
     pv_head = pv_names["hardware_names"][input_settings["mbf_axis"]]
     for hs in range(input_settings["n_repeats"]):
@@ -351,13 +354,13 @@ def modescan_capture(input_settings: dict, pv_names: dict) -> dict:
 
 
 def mbf_modescan_config(mbf_axis: str) -> None:
-    # Contains the axis specific settings desired for the modescan experiment.
-    #
-    # Args:
-    #       mbf_axis (str): 'x', 'y', 's'. Defines which system you are
-    #                       requesting
-    #
-    # Example: settings = mbf_modescan_config('x')
+    """Contains the axis specific settings desired for the modescan experiment.
+
+    Args:
+          mbf_axis: 'x', 'y', 's'. Defines which system you are requesting.
+
+    Example: settings = mbf_modescan_config('x')
+    """
     settings: dict = {}
     if mbf_axis == "x":
         settings["axis_label"] = "x"
@@ -383,19 +386,19 @@ def mbf_modescan_config(mbf_axis: str) -> None:
 
 
 def mbf_spectrum(mbf_axis: str, n_turns: int, fold: int = 1, repeat: int = 1) -> dict:
-    # generates a spectragram of all bunches.
-    #
-    # Args:
-    #       mbf_axis (str): 'x', 'y', 's'. Defines which system you are
-    #                       requesting
-    #       n_turns (int): The number of turns to capture.
-    #       fold (int): The number of times to fold the data along the
-    #                   frequency axis. This enhances power resolution
-    #                   at the cost of frequency resolution.
-    #       repeat (int): Repeat the capture this many times in order to
-    #                     improve the power resolution.
-    #
-    # Example: mbf_spectrum('x',10000)
+    """generates a spectragram of all bunches.
+
+    Args:
+          mbf_axis: 'x', 'y', 's'. Defines which system you are requesting.
+          n_turns: The number of turns to capture.
+          fold: The number of times to fold the data along the
+                      frequency axis. This enhances power resolution
+                      at the cost of frequency resolution.
+          repeat: Repeat the capture this many times in order to
+                        improve the power resolution.
+
+    Example: mbf_spectrum('x',10000)
+    """
     ## Getting the desired system setup parameters.
     [root_string, harmonic_number, pv_names, trigger_inputs] = system_config()
 
@@ -555,14 +558,14 @@ def mbf_spectrum(mbf_axis: str, n_turns: int, fold: int = 1, repeat: int = 1) ->
 
 
 def spectrum_capture(input_settings: dict, pv_names: dict) -> dict:
-    # captures a set of data from the mbf system runs the analysis.
-    #
-    # Args:
-    #       input_settings(struct): contains all the setup information.
-    #       pv_names(struct): contains the locations of all the machine parameters.
-    #
-    # Example: data = spectrum_capture(input_settings, pv_names)
+    """captures a set of data from the mbf system runs the analysis.
 
+    Args:
+          input_settings: contains all the setup information.
+          pv_names: contains the locations of all the machine parameters.
+
+    Example: data = spectrum_capture(input_settings, pv_names)
+    """
     captured_data: dict[list] = {}
     for k in range(input_settings["repeat"]):
         # Arm, trigger, read
@@ -616,11 +619,12 @@ def spectrum_capture(input_settings: dict, pv_names: dict) -> dict:
 
 
 def bunch_motion_capture(pv_names: dict) -> dict:
-    # simultaineously captures bunch by bunch centroid data for all three axes.
-    # When armed by the code each system will start aquisition
-    # on the next hardware trigger.
-    #
-    # Example: bunch_motion = bunch_motion_capture(pv_names)
+    """simultaineously captures bunch by bunch centroid data for all three axes.
+    When armed by the code each system will start aquisition
+    on the next hardware trigger.
+
+    Example: bunch_motion = bunch_motion_capture(pv_names)
+    """
     [turn_count, turn_offset] = mbf_bunch_motion_config()
     # Generate the base PV names['']
     pv_head_T = pv_names["hardware_names"]["T"]
@@ -680,13 +684,14 @@ def mbf_bunch_motion_config():
 
 
 def tunescan_over_modes_capture(mbf_axis: str, pv_names: dict) -> dict:
-    # wrapper def to call tunescan, gather data on the environment:
-    # and to save the resultant data.
-    #
-    #   Args:
-    #       mbf_axis (str): Selects which MBF axis to work on (x, y, s).
-    #
-    # example data = tunescan_over_modes_capture('x', pv_names)
+    """wrapper def to call tunescan, gather data on the environment:
+    and to save the resultant data.
+
+      Args:
+          mbf_axis: Selects which MBF axis to work on (x, y, s).
+
+    example data = tunescan_over_modes_capture('x', pv_names)
+    """
     pv_head = pv_names["hardware_names"][mbf_axis]
     pv_head_mem = pv_names["hardware_names"]["mem"][mbf_axis]
     triggers = pv_names["tails"]["triggers"]
@@ -719,13 +724,13 @@ def tunescan_over_modes_capture(mbf_axis: str, pv_names: dict) -> dict:
 
 
 def mbf_tunescan_over_modes_config(mbf_axis: str) -> None:
-    # Contains the axis specific settings desired for the tunescan experiment['']
-    #
-    # Args:
-    #       mbf_axis (str): 'x', 'y', 's'[''] Defines which system you are
-    #                       requesting
-    #
-    # Example: settings = mbf_tunescan_config('x')
+    """Contains the axis specific settings desired for the tunescan experiment.
+
+    Args:
+          mbf_axis: 'x', 'y', 's'[''] Defines which system you are requesting.
+
+    Example: settings = mbf_tunescan_config('x')
+    """
     settings: dict = {}
     if mbf_axis.lower() == "x":
         settings["axis_label"] = "x"

@@ -15,16 +15,17 @@ from Common import (
 )
 
 
-def archive_graphs(root_string, metadata, graph_handles=()):
-    # Saves the requested graphs in the given filename in a location
-    # detemined by the time_value.
-    # The relavent folder structure will be generated.
-    #
-    #   Args:
-    #       root_string (str):
-    #       data (struct): original captured meta data
-    #       graph_handles
-    # Example: archive_graphs(root_string, data, graph_handles)
+def archive_graphs(root_string: str, metadata: dict, graph_handles=()):
+    """Saves the requested graphs in the given filename in a location
+    detemined by the time_value.
+    The relavent folder structure will be generated.
+
+      Args:
+          root_string:
+          metadata: original captured meta data
+          graph_handles
+    Example: archive_graphs(root_string, data, graph_handles)
+    """
     # Generating the required directory structure.
     tree_gen(root_string, metadata["time"])
     # construct filename and add it to the structure
@@ -147,26 +148,32 @@ def populate_archive_graph(input_data, years_input, times, x_plt_axis):
 #                 close(h(nq))
 
 
-def growdamp_archival_plotting(requested_data, dataset, times, experimental_setup):
-    # Plots the data processed by growdamp_archival_analysis['']
+def growdamp_archival_plotting(
+    requested_data: list[dict],
+    dataset: dict,
+    times: list[float],
+    experimental_setup: dict,
+):
+    """Plots the data processed by growdamp_archival_analysis.
     # Args:
     #       dataset (struct): containing
-    #      dr_passive (numeric matrix): Passive damping rate['']
+    #      dr_passive (numeric matrix): Passive damping rate.
     #                                   (bunches vs datasets)
-    #      dr_active (numeric matrix): Active damping rate['']
+    #      dr_active (numeric matrix): Active damping rate.
     #                                   (bunches vs datasets)
     #      error_passive (numeric matrix): Error of the fit for the passive
-    #                                      damping rate['']
+    #                                      damping rate.
     #      error_active (numeric matrix): Error of the fit for the active
-    #                                     damping rate['']
-    #      times (numeric vector): Datetimes of the datasets['']
+    #                                     damping rate.
+    #      times (numeric vector): Datetimes of the datasets.
     #      experimental_setup (structure): The setup parameters for the
-    #                                      analysis['']
+    #                                      analysis.
     #      plot_error_graphs (anything): if present the code will plot the results
-    #                                    of the fit errors['']
+    #                                    of the fit errors.
     #
     # Example: growdamp_archival_plotting(requested_data, dataset, error_active,
     #                                           times, setup, selections, extents)
+    """
     # Only do something if there is data to do something with['']
     if not times:
         return
@@ -390,24 +397,24 @@ def populate_graph(input_data, years_input, times, x_plt_axis):
     plt.legend("show")
 
 
-def growdamp_plot_summary(data, metadata, plot_mode="pos"):
-    # Plots the driven growth rates, and the active and pasive damping rates
-    # across all modes['']
+def growdamp_plot_summary(data: dict, metadata: dict, plot_mode: str = "pos"):
+    """Plots the driven growth rates, and the active and pasive damping rates
+    # across all modes.
     #
     # Args:
-    #       poly_data (3 by 3 matrix): axis 1 is coupling mode['']
+    #       poly_data (3 by 3 matrix): axis 1 is coupling mode.
     #                                  axis 2 is expermental state,
-    #                                  excitation, natural damping, active damping)['']
+    #                                  excitation, natural damping, active damping).
     #                                  axis 3 is damping time, offset and
-    #                                  fractional error['']
-    #       frequency_shifts (list of floats): The frequency shift of each mode['']
-    #       metadata (structure): setup information['']
+    #                                  fractional error.
+    #       frequency_shifts (list of floats): The frequency shift of each mode.
+    #       metadata (structure): setup information.
     #       axis: 'x', 'y' or 's'
     #       plot_mode: 'pos' or 'neg'[''] Determines if plot modes 0:harmonic_number or
     #       -harmonic_number/2:harmonic_number/2
     #
     # Example: growdamp_plot_summary(poly_data, frequency_shifts, 'passive')
-
+    """
     # Getting the desired system setup parameters['']
     stages = data.keys()
     harmonic_number = len(data[stages[1]]["damping_rate"])
@@ -602,31 +609,32 @@ def growdamp_plot_summary(data, metadata, plot_mode="pos"):
 
 
 def growthrates_archival_plotting(
-    requested_data,
+    requested_data: list[dict],
     dr_growth,
     dr_active,
     error_growth,
     error_active,
-    times,
-    experimental_setup,
+    times: list[float],
+    experimental_setup: dict,
 ):
-    # Plots the data processed by growthrates_archival_analysis.
-    # Args:
-    #      dr_growth (numeric matrix): Growth rate.
-    #                                   (bunches vs datasets)
-    #      dr_active (numeric matrix): Passive damping rate.
-    #                                   (bunches vs datasets)
-    #      error_passive (numeric matrix): Error of the fit for the growth rate.
-    #      error_active (numeric matrix): Error of the fit for the active
-    #                                     damping rate.
-    #      times (numeric vector): Datetimes of the datasets.
-    #      experimental_setup (structure): The setup parameters for the
-    #                                      analysis.
-    #      plot_error_graphs (anything): if present the code will plot the results of
-    #                                    the fit errors.
-    #
-    # Example: growdamp_archival_plotting(dr_growth, dr_active, error_growth,
-    # error_active, times, setup, selections, extents)
+    """Plots the data processed by growthrates_archival_analysis.
+    Args:
+         dr_growth (numeric matrix): Growth rate.
+                                      (bunches vs datasets)
+         dr_active (numeric matrix): Passive damping rate.
+                                      (bunches vs datasets)
+         error_passive (numeric matrix): Error of the fit for the growth rate.
+         error_active (numeric matrix): Error of the fit for the active
+                                        damping rate.
+         times (numeric vector): Datetimes of the datasets.
+         experimental_setup (structure): The setup parameters for the
+                                         analysis.
+         plot_error_graphs (anything): if present the code will plot the results of
+                                       the fit errors.
+
+    Example: growdamp_archival_plotting(dr_growth, dr_active, error_growth,
+    error_active, times, setup, selections, extents)
+    """
     # Only do something if there is data to do something with.
     if not times:
         return
@@ -858,18 +866,23 @@ def growthrates_archival_plotting(
 
 
 def modescan_archival_plotting(
-    requested_data, data_magnitude, data_phase, times, experimental_setup
+    requested_data: list[dict],
+    data_magnitude,
+    data_phase,
+    times: list[float],
+    experimental_setup: dict,
 ):
-    # Plots the data processed by growdamp_archival_analysis['']
-    # Args:
-    #      data_magnitude (numeric matrix):
-    #      data_phase (numeric matrix):
-    #      times (numeric vector): Datetimes of the datasets['']
-    #      experimental_setup (structure): The setup parameters for the
-    #                                      analysis['']
-    #
-    # Example: growdamp_archival_plotting(requested_data, data_magnitude,
-    #                                data_phase, times, setup, selections, extents)
+    """Plots the data processed by modescan_archival_analysis.
+    Args:
+         data_magnitude (numeric matrix):
+         data_phase (numeric matrix):
+         times (numeric vector): Datetimes of the datasets['']
+         experimental_setup (structure): The setup parameters for the
+                                         analysis['']
+
+    Example: growdamp_archival_plotting(requested_data, data_magnitude,
+                                   data_phase, times, setup, selections, extents)
+    """
     # Only do something if there is data to do something with['']
     if not times:
         return
@@ -951,16 +964,16 @@ def modescan_archival_plotting(
     plt.xlim([x_plt_axis[1], x_plt_axis[-1]])
 
 
-def modescan_plotting(data_magnitude, data_phase, modescan):
-    # Plots the effectiveness of correction across all modes['']
-    #
-    # Args:
-    #       data_magnitude(vector of floats): averaged signal magnitude over modes['']
-    #       data_phase(vector of floats): averaged signal phase over modes['']
-    #       modescan(structure): captured data
-    #
-    # Example: modescan_plotting(data_magnitude, data_phase, modescan)
+def modescan_plotting(data_magnitude, data_phase, modescan: dict):
+    """Plots the effectiveness of correction across all modes['']
 
+    Args:
+          data_magnitude(vector of floats): averaged signal magnitude over modes['']
+          data_phase(vector of floats): averaged signal phase over modes['']
+          modescan(structure): captured data
+
+    Example: modescan_plotting(data_magnitude, data_phase, modescan)
+    """
     # FIXME
     fig, _1 = plt.subplot_mosaic(
         [["upper left", "upper right"], ["lower left", "lower right"]],
@@ -1068,19 +1081,22 @@ def modescan_plotting(data_magnitude, data_phase, modescan):
     plt.xlabel("Frequency (MHz)")
 
 
-def spectra_archival_plotting(requested_data, spec_data, times, experimental_setup):
-    # Plots the data processed by growdamp_archival_analysis.
-    # Args:
-    #      data_magnitude (numeric matrix):
-    #      data_phase (numeric matrix):
-    #      times (numeric vector): Datetimes of the datasets.
-    #      experimental_setup (structure): The setup parameters for the
-    #                                      analysis.
-    #      plot_error_graphs (anything): if present the code will plot the results of
-    #                                    the fit errors.
-    #
-    # Example: growdamp_archival_plotting(requested_data, data_magnitude,
-    #                                 data_phase, times, setup, selections, extents)
+def spectra_archival_plotting(
+    requested_data: list[dict], spec_data, times: list[float], experimental_setup: dict
+):
+    """Plots the data processed by growdamp_archival_analysis.
+    Args:
+         data_magnitude (numeric matrix):
+         data_phase (numeric matrix):
+         times (numeric vector): Datetimes of the datasets.
+         experimental_setup (structure): The setup parameters for the
+                                         analysis.
+         plot_error_graphs (anything): if present the code will plot the results of
+                                       the fit errors.
+
+    Example: growdamp_archival_plotting(requested_data, data_magnitude,
+                                    data_phase, times, setup, selections, extents)
+    """
     # Only do something if there is data to do something with.
     if not times:
         return
@@ -1177,12 +1193,13 @@ def spectra_archival_plotting(requested_data, spec_data, times, experimental_set
         plt.title(requested_data[jw]["time"].strftime("%a %d %b %Y, %I:%M%p"))
 
 
-def spectrum_plotting(requested_data, analysed_data):
-    # Plots the data saved and analysed by the earlier mbf_spectrum def s['']:
+def spectrum_plotting(requested_data: list[dict], analysed_data):
+    """Plots the data saved and analysed by the earlier mbf_spectrum def s['']:
     # Args:
     #         all_data(structure): analysed data['']
     #
     # Example: spectrum_plotting(data
+    """
     if max(max(analysed_data["bunch_f_data"])) == 0:
         print("No data to plot")
         return
@@ -1316,27 +1333,29 @@ def spectrum_plotting(requested_data, analysed_data):
     plt.xlabel("Tune")
 
 
-def bunch_motion_archival_plotting(requested_data, dataset, times, experimental_setup):
-    # Plots the data processed by growdamp_archival_analysis.
-    # Args:
-    #       dataset (struct): containing
-    #      dr_passive (numeric matrix): Passive damping rate.
-    #                                   (bunches vs datasets)
-    #      dr_active (numeric matrix): Passive damping rate.
-    #                                   (bunches vs datasets)
-    #      error_passive (numeric matrix): Error of the fit for the passive
-    #                                      damping rate.
-    #      error_active (numeric matrix): Error of the fit for the active
-    #                                     damping rate.
-    #      times (numeric vector): Datetimes of the datasets.
-    #      experimental_setup (structure): The setup parameters for the
-    #                                      analysis.
-    #      plot_error_graphs (anything): if present the code will plot the results of
-    #                                    the fit errors.
-    #
-    # Example: growdamp_archival_plotting(dr_passive, dr_active, error_passive,
-    #                                error_active, times, setup, selections, extents)
+def bunch_motion_archival_plotting(
+    requested_data: list[dict], dataset, times: list[float], experimental_setup: dict
+):
+    """Plots the data processed by growdamp_archival_analysis.
+    Args:
+          dataset (struct): containing
+         dr_passive (numeric matrix): Passive damping rate.
+                                      (bunches vs datasets)
+         dr_active (numeric matrix): Passive damping rate.
+                                      (bunches vs datasets)
+         error_passive (numeric matrix): Error of the fit for the passive
+                                         damping rate.
+         error_active (numeric matrix): Error of the fit for the active
+                                        damping rate.
+         times (numeric vector): Datetimes of the datasets.
+         experimental_setup (structure): The setup parameters for the
+                                         analysis.
+         plot_error_graphs (anything): if present the code will plot the results of
+                                       the fit errors.
 
+    Example: growdamp_archival_plotting(dr_passive, dr_active, error_passive,
+                                   error_active, times, setup, selections, extents)
+    """
     # Only do something if there is data to do something with['']
     if not times:
         return
@@ -1978,19 +1997,24 @@ def doris_phase_scan_plotting(data):
 
 
 def frontend_gain_scan_archival_plotting(
-    requested_data, adc_mean, adc_max, adc_min, times, experimental_setup
+    requested_data: list[dict],
+    adc_mean,
+    adc_max,
+    adc_min,
+    times: list[float],
+    experimental_setup: dict,
 ):
-    # Plots the data processed by growdamp_archival_analysis.
-    # Args:
-    #      adc_mean (numeric matrix):
-    #      adc_max (numeric matrix):
-    #      adc_min (numeric matrix):
-    #      times (numeric vector): Datetimes of the datasets.
-    #      experimental_setup (structure): The setup parameters for the
-    #                                      analysis.
-    # Example: frontend_gain_scan_archival_plotting(requested_data, data_magnitude,
-    #                            data_phase, times, setup, selections, extents)
-
+    """Plots the data processed by growdamp_archival_analysis.
+    Args:
+         adc_mean (numeric matrix):
+         adc_max (numeric matrix):
+         adc_min (numeric matrix):
+         times (numeric vector): Datetimes of the datasets.
+         experimental_setup (structure): The setup parameters for the
+                                         analysis.
+    Example: frontend_gain_scan_archival_plotting(requested_data, data_magnitude,
+                               data_phase, times, setup, selections, extents)
+    """
     # Only do something if there is data to do something with.
     if not times:
         return
@@ -2080,22 +2104,27 @@ def frontend_gain_scan_archival_plotting(
 
 
 def frontend_system_phase_scan_archival_plotting(
-    requested_data, leading, excited, following, times, experimental_setup
+    requested_data: list[dict],
+    leading,
+    excited,
+    following,
+    times: list[float],
+    experimental_setup: dict,
 ):
-    # Plots the data processed by growdamp_archival_analysis.
-    # Args:
-    #      leading (numeric matrix):
-    #      excited (numeric matrix):
-    #      following (numeric matrix):
-    #      times (numeric vector): Datetimes of the datasets.
-    #      experimental_setup (structure): The setup parameters for the
-    #                                      analysis.
-    #      plot_error_graphs (anything): if present the code will plot the results of
-    #                                    the fit errors.
-    #
-    # Example: growdamp_archival_plotting(requested_data, data_magnitude,
-    #                                data_phase, times, setup, selections, extents)
+    """Plots the data processed by growdamp_archival_analysis.
+    Args:
+         leading (numeric matrix):
+         excited (numeric matrix):
+         following (numeric matrix):
+         times (numeric vector): Datetimes of the datasets.
+         experimental_setup (structure): The setup parameters for the
+                                         analysis.
+         plot_error_graphs (anything): if present the code will plot the results of
+                                       the fit errors.
 
+    Example: growdamp_archival_plotting(requested_data, data_magnitude,
+                                   data_phase, times, setup, selections, extents)
+    """
     # Only do something if there is data to do something with.
     if not times:
         return
@@ -2219,16 +2248,17 @@ def frontend_system_phase_scan_archival_plotting(
 
 
 def pll_phase_scan_plotting(fll_phase_scan):
-    # Plots the results of a FLL phase scan on the
-    # multi binch feedback system
-    #
-    #   Args:
-    #       fll_phase_scan(struct): data captured during the phase scan['']
-    #
-    #   Returns:
-    #       f1(plt.figure handle):
-    #
-    # Example: f1 = fll_phase_scan_plotting(fll_phase_scan)
+    """Plots the results of a FLL phase scan on the
+    multi binch feedback system
+
+      Args:
+          fll_phase_scan(struct): data captured during the phase scan['']
+
+      Returns:
+          f1(plt.figure handle):
+
+    Example: f1 = fll_phase_scan_plotting(fll_phase_scan)
+    """
     [_1, mi] = max(abs(fll_phase_scan["mag"]))
     peak = fll_phase_scan["phase"][mi]
     f1 = plt.figure("Position", [50, 100, 1024, 768])
@@ -2258,17 +2288,18 @@ def pll_phase_scan_plotting(fll_phase_scan):
 def pll_phase_scan_plotting_multi(
     selected_axis, requested_data, scan_type="samples", target_bunch_override=None
 ):
-    # Plots the results of a FLL phase scan on the
-    # multi bunch feedback system
-    #
-    #   Args:
-    #       fll_phase_scan(struct): data captured during the phase scan['']
-    #       scan_type(str): states what the scan variable was
-    #                       'samples', 'charge', 'gain', 'rf'
-    #       target_bunch_override(int): force the target bunch location to be this
-    #                                   value
-    #
-    # Example: fll_phase_scan_plotting_multi(requested_data, varargin)
+    """Plots the results of a FLL phase scan on the
+    multi bunch feedback system
+
+      Args:
+          fll_phase_scan(struct): data captured during the phase scan['']
+          scan_type(str): states what the scan variable was
+                          'samples', 'charge', 'gain', 'rf'
+          target_bunch_override(int): force the target bunch location to be this
+                                      value
+
+    Example: fll_phase_scan_plotting_multi(requested_data, varargin)
+    """
     xval = []
     for ehs in range(len(requested_data)):
         if scan_type == "samples":
@@ -2367,26 +2398,26 @@ def plot_pll_data(pll_data):
 def tunescan_over_modes_archival_plotting(
     requested_data, dataset, times, experimental_setup
 ):
-    # Plots the data processed by growdamp_archival_analysis['']
-    # Args:
-    #       dataset (struct): containing
-    #      dr_passive (numeric matrix): Passive damping rate['']
-    #                                   (bunches vs datasets)
-    #      dr_active (numeric matrix): Active damping rate['']
-    #                                   (bunches vs datasets)
-    #      error_passive (numeric matrix): Error of the fit for the passive
-    #                                      damping rate['']
-    #      error_active (numeric matrix): Error of the fit for the active
-    #                                     damping rate['']
-    #      times (numeric vector): Datetimes of the datasets['']
-    #      experimental_setup (structure): The setup parameters for the
-    #                                      analysis['']
-    #      plot_error_graphs (anything): if present the code will plot the results
-    #                                    of the fit errors['']
-    #
-    # Example: growdamp_archival_plotting(requested_data, dataset, error_active,
-    #                                         times, setup, selections, extents)
+    """Plots the data processed by growdamp_archival_analysis.
+    Args:
+          dataset (struct): containing
+         dr_passive (numeric matrix): Passive damping rate.
+                                      (bunches vs datasets)
+         dr_active (numeric matrix): Active damping rate.
+                                      (bunches vs datasets)
+         error_passive (numeric matrix): Error of the fit for the passive
+                                         damping rate.
+         error_active (numeric matrix): Error of the fit for the active
+                                        damping rate.
+         times (numeric vector): Datetimes of the datasets.
+         experimental_setup (structure): The setup parameters for the
+                                         analysis.
+         plot_error_graphs (anything): if present the code will plot the results
+                                       of the fit errors.
 
+    Example: growdamp_archival_plotting(requested_data, dataset, error_active,
+                                            times, setup, selections, extents)
+    """
     # Only do something if there is data to do something with['']
     if not times:
         return
@@ -2662,12 +2693,13 @@ def tunescan_over_modes_archival_plotting(
 
 
 def tunescan_over_modes_plot_summary(tunescan):
-    # Plots the effectiveness of correction across all modes['']
-    #
-    # Args:
-    #       tunescan (structure): Captured data from a single experiment['']
-    #
-    # Example: mbf_tunescan_plotting(tunescan)
+    """Plots the effectiveness of correction across all modes.
+
+    Args:
+          tunescan (structure): Captured data from a single experiment.
+
+    Example: mbf_tunescan_plotting(tunescan)
+    """
     # reshape the results
     fracttune = tunescan["scale"][1 : tunescan["n_captures"]]
     for n in range(tunescan["data"].shape[1]):
@@ -2801,22 +2833,27 @@ def frontend_clock_phase_scan_plotting(data: dict):
 
 
 def frontend_clock_phase_scan_archival_plotting(
-    requested_data, leading, excited, following, times, experimental_setup
+    requested_data: list[dict],
+    leading,
+    excited,
+    following,
+    times: list[float],
+    experimental_setup: dict,
 ):
-    # Plots the data processed by growdamp_archival_analysis.
-    # Args:
-    #      leading (numeric matrix):
-    #      excited (numeric matrix):
-    #      following (numeric matrix):
-    #      times (numeric vector): Datetimes of the datasets.
-    #      experimental_setup (structure): The setup parameters for the
-    #                                      analysis.
-    #      plot_error_graphs (anything): if present the code will plot the results
-    #                                    of the fit errors.
-    #
-    # Example: growdamp_archival_plotting(requested_data, data_magnitude,
-    #                                data_phase, times, setup, selections, extents)
+    """Plots the data processed by growdamp_archival_analysis.
+    Args:
+         leading (numeric matrix):
+         excited (numeric matrix):
+         following (numeric matrix):
+         times (numeric vector): Datetimes of the datasets.
+         experimental_setup (structure): The setup parameters for the
+                                         analysis.
+         plot_error_graphs (anything): if present the code will plot the results
+                                       of the fit errors.
 
+    Example: growdamp_archival_plotting(requested_data, data_magnitude,
+                                   data_phase, times, setup, selections, extents)
+    """
     # Only do something if there is data to do something with.
     if not times:
         return

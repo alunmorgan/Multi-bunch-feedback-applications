@@ -13,13 +13,14 @@ from Common import (
 
 
 def growdamp_setup(input_settings: dict, pv_names: dict):
-    # Sets up the MBF system to be ready for a growdamp measurement['']
-    #
-    #   Args:
-    #       input_settings(struct): contains all the setup information['']
-    #       pv_names(struct): contains the locations of all the machine parameters['']
-    #
-    # example: growdamp_setup(input_settings, pv_names, trigger_inputs)
+    """Sets up the MBF system to be ready for a growdamp measurement.
+
+      Args:
+          input_settings: contains all the setup information.
+          pv_names: contains the locations of all the machine parameters.
+
+    example: growdamp_setup(input_settings, pv_names, trigger_inputs)
+    """
     mbf_tools()
     pll_setup: dict = {}
     mbf_axis = input_settings["mbf_axis"]
@@ -108,18 +109,18 @@ def growdamp_setup(input_settings: dict, pv_names: dict):
 
 
 def mbf_set_bank(ax: str, bank: int, out_type: int):
-    # Setup an individual bank in an individual MBF system.
-    #
-    #
-    # Args:
-    #       ax (str)          : 'x', 'y', or 's' axis
-    #       bank (int)        : The bunch bank number.
-    #       out_type (int)    : Determines which combination of filters and
-    #                           excitation is required (0=off 1=FIR 2=NCO
-    #                           3 =NCO+FIR 4=sweep 5=sweep+FIR 6=sweep+NCO
-    #                           7=sweep+NCO+FIR)
-    #
-    # Example:  mbf_set_bank(ax, bank, out_type)
+    """Setup an individual bank in an individual MBF system.
+
+    Args:
+          ax: 'x', 'y', or 's' axis
+          bank: The bunch bank number.
+          out_type: Determines which combination of filters and
+                              excitation is required (0=off 1=FIR 2=NCO
+                              3 =NCO+FIR 4=sweep 5=sweep+FIR 6=sweep+NCO
+                              7=sweep+NCO+FIR)
+
+    Example:  mbf_set_bank(ax, bank, out_type)
+    """
     [_1, harmonic_number, pv_names] = system_config()
     BB = pv_names["tails"]["Bunch_bank"][f"bank{bank}"]
     pv_head = [pv_names["hardware_names"][ax]]
@@ -212,21 +213,22 @@ def mbf_set_bank(ax: str, bank: int, out_type: int):
 
 
 def mbf_set_state(ax: str, state: int, tune: float, setup_data: dict):
-    # Setup an individual state in the super sequencer.
-    #
-    # Args:
-    #       ax (str)      : 'x', 'y', or 's' axis
-    #       state (int)   : state number in the sequencer.
-    #       tune (float)  : Tune of the machine.
-    #       setup_data (struct): containing
-    #           bank (int)    : The bunch bank used for this state.
-    #           gain (str)    : the excitation level.
-    #           duration (int): the number of turns the state is active.
-    #           dwell (int)   : Dwell time (turns).
-    #           capture (str) : 'Capture' or 'Discard' depending onn if you want to
-    #                            keep the data or not
-    #
-    # Example: mbf_set_state(ax, state, tune, setup_data)
+    """Setup an individual state in the super sequencer.
+
+    Args:
+          ax: 'x', 'y', or 's' axis
+          state: state number in the sequencer.
+          tune: Tune of the machine.
+          setup_data: containing
+              bank: The bunch bank used for this state.
+              gain: the excitation level.
+              duration: the number of turns the state is active.
+              dwell: Dwell time (turns).
+              capture: 'Capture' or 'Discard' depending onn if you want to
+                               keep the data or not
+
+    Example: mbf_set_state(ax, state, tune, setup_data)
+    """
     [_2, _1, pv_names] = system_config()
     system_axis = pv_names["hardware_names"][ax]
     seq1 = pv_names["tails"]["Sequencer"][f"seq1{state}"]
@@ -244,11 +246,12 @@ def mbf_set_state(ax: str, state: int, tune: float, setup_data: dict):
 
 
 def reestablish_tune_measurement(mbf_axis: str):
-    # sets up the tune measurement by setting bank1 and sequencer state one as
-    # required.
-    #   Args:
-    #       mbf_axis(str): 'x','y', or 's'
-    # Example: reestablish_tune_measurement('x')
+    """sets up the tune measurement by setting bank1 and sequencer state one as
+    required.
+      Args:
+          mbf_axis: 'x','y', or 's'
+    Example: reestablish_tune_measurement('x')
+    """
     [_1, harmonic_number, pv_names] = system_config()
     if mbf_axis.lower() == "x":
         sweep_start = 80.139
@@ -310,13 +313,14 @@ def reestablish_tune_measurement(mbf_axis: str):
 
 
 def modescan_setup(input_settings: dict, pv_names: dict):
-    # Sets up the MBF system to be ready for a modescan measurement.
-    #
-    #   Args:
-    #       input_settings(struct): contains all the setup information.
-    #       pv_names(struct): contains the locations of all the machine parameters.
-    #
-    # example: modescan_setup(input_settings, pv_names)
+    """Sets up the MBF system to be ready for a modescan measurement.
+
+      Args:
+          input_settings: contains all the setup information.
+          pv_names: contains the locations of all the machine parameters.
+
+    example: modescan_setup(input_settings, pv_names)
+    """
     mbf_tools()
     # Generate the base PV name.
     system_axis = pv_names["hardware_names"][input_settings["mbf_axis"]]
@@ -337,12 +341,13 @@ def modescan_setup(input_settings: dict, pv_names: dict):
 
 
 def spectrum_setup(input_settings: dict, pv_names: dict):
-    # sets up the hardware ready to capture data for a spectrum['']
-    # Args:
-    #       input_settings(struct): contains all the setup information['']
-    #       pv_names(struct): contains the locations of all the machine parameters['']
-    #
-    # Example spectrum_setup(input_settings, pv_names, trigger_inputs)
+    """sets up the hardware ready to capture data for a spectrum['']
+    Args:
+          input_settings: contains all the setup information['']
+          pv_names: contains the locations of all the machine parameters['']
+
+    Example spectrum_setup(input_settings, pv_names, trigger_inputs)
+    """
     mbf_tools()
     mbf_axis = input_settings["mbf_axis"]
     trigger_inputs = pv_names["trigger_inputs"]
@@ -384,11 +389,11 @@ def spectrum_setup(input_settings: dict, pv_names: dict):
 
 
 def bunch_motion_setup(setup_info: dict, pv_names: dict) -> None:
-    # Sets up all three axis so that they will take a single set of data each
-    # when armed and triggered
-    #
-    # Example: bunch_motion_setup
+    """Sets up all three axis so that they will take a single set of data each
+    when armed and triggered
 
+    Example: bunch_motion_setup
+    """
     memory_triggers: dict = pv_names["tails"]["triggers"]["MEM"]
     memory_buffers: dict = pv_names["tails"]["MEM"]
     mbf_systems: list = ["T", "L"]
@@ -520,17 +525,19 @@ def BBBFE_detector_setup(mbf_axis: str, single_bunch_location: int):
     return detector_setup
 
 
-def mbf_pll_bank_setup(mbf_axis: str, pllbunches: int = 400, guardbunches: int = 2):
-    # Sets up the banks for FLL operation['']
-    #
-    #   mbf_axis(str): x, y, or s
-    #   pllbunches (float or list of floats): bunches numbers to use for PLL (0-935)
-    #                                         (defaults to 400)
-    #   guardbunches (int): number of bunches around PLL to also take out
-    #                       of sweeper (defaults to 2)
-    #
-    # example: mbf_fll_bank_setup(name,pllbunches,guardbunches)
+def mbf_pll_bank_setup(
+    mbf_axis: str, pllbunches: int | list[int] = 400, guardbunches: int = 2
+):
+    """Sets up the banks for FLL operation['']
 
+      mbf_axis: x, y, or s
+      pllbunches: bunches numbers to use for PLL (0-935)
+                                            (defaults to 400)
+      guardbunches: number of bunches around PLL to also take out
+                          of sweeper (defaults to 2)
+
+    example: mbf_fll_bank_setup(name,pllbunches,guardbunches)
+    """
     [_1, harmonic_number, pv_names] = system_config()
     mbf_names = pv_names["hardware_names"]
     mbf_vars = pv_names["tails"]
@@ -587,12 +594,12 @@ def mbf_pll_detector_setup(
     pll_detector_blanking: str = "Blanking",
     pll_detector_dwell: int = 128,
 ):
-    # Sets up the detector for FLL operation['']
-    #
-    #   mbf_axis (str): x, y, or s. Selects which MBF system to operate on.
-    #
-    # example: mbf_pll_detector_setup(mbf_axis, varargin)
+    """Sets up the detector for FLL operation['']
 
+      mbf_axis: x, y, or s. Selects which MBF system to operate on.
+
+    example: mbf_pll_detector_setup(mbf_axis, varargin)
+    """
     [_2, _1, pv_names] = system_config()
     mbf_names = pv_names["hardware_names"]
     mbf_vars = pv_names["tails"]
@@ -620,22 +627,22 @@ def mbf_pll_detector_setup(
 
 def mbf_pll_start(
     mbf_axis: str,
-    pllbunches: int = 400,
+    pllbunches: int | list[int] = 400,
     guardbunches: int = 2,
     pll_nco_gain: int = -30,
     target_phase: int = 180,
 ):
-    # sets up the frequency locked loop of the MBF system['']
-    # and starts['']
-    #
-    #       mbf_axis (str): x, y, or s[''] Selects which MBF system to operate on['']
-    #       pllbunches (float or list of floats): Selects which bunches to have the
-    #                                             FLL operational on['']
-    #       guardbunches (int): number of bunches around the FLL bunches which have
-    #                           feddback and capture disabled['']
-    #
-    # example: mbf_pll_setup(mbf_axis, pllbunches, guardbunches)
+    """sets up the frequency locked loop of the MBF system.
+    and starts.
 
+          mbf_axis: x, y, or s. Selects which MBF system to operate on.
+          pllbunches: Selects which bunches to have the
+                                                FLL operational on.
+          guardbunches: number of bunches around the FLL bunches which have
+                              feedback and capture disabled.
+
+    example: mbf_pll_setup(mbf_axis, pllbunches, guardbunches)
+    """
     mbf_pll_bank_setup(mbf_axis, pllbunches=pllbunches, guardbunches=guardbunches)
     mbf_pll_detector_setup(mbf_axis)
     pll_initialisation(
@@ -644,9 +651,10 @@ def mbf_pll_start(
 
 
 def pll_initial_setup_values(mbf_axis: str):
-    # Some setup with 'working values'[''] These ought to be read from a
-    # config file or be additional arguments in the future['']
-    # mbf_axis(str): xys
+    """Some setup with 'working values. These ought to be read from a
+    config file or be additional arguments in the future.
+    mbf_axis(str): xys
+    """
     [_2, _1, pv_names] = system_config()
     mbf_names = pv_names["hardware_names"]
     mbf_vars = pv_names["tails"]
@@ -694,10 +702,11 @@ def pll_initialisation(
     pll_target_phase: int = 160,
     tune_override: float | None = None,
 ):
-    # This is to start the phase locked loop (pll) [also called pll] from
-    # scratch. Once the initial lock is found then the settings are changed to
-    # improve tracking. if signal is lost this process can be run again.
-    # mbf_axis(str): x, y, or s
+    """This is to start the phase locked loop (pll) [also called pll] from
+    scratch. Once the initial lock is found then the settings are changed to
+    improve tracking. if signal is lost this process can be run again.
+    mbf_axis(str): x, y, or s
+    """
     [_2, _1, pv_names] = system_config()
     mbf_names = pv_names["hardware_names"]
     mbf_vars = pv_names["tails"]
@@ -774,19 +783,19 @@ def pll_initialisation(
 def setup_feedback_for_bunch_train(
     mbf_axis: str, train_length: int, clear_previous: str = "yes"
 ):
-    # This allows the setup of the MBF to be adjusted to be suitable for the
-    # different bunch train lengths[''] The feedback will ignore anything not in the
-    # bunch train
-    # Inputs:
-    #        mbf_axis (str): axis to apply the settings to[''] ('x' or 'y')
-    #        train_length (int): length of train to apply tune measurement and
-    #                            feedback to[''] Starts from first bunch as per the
-    #                            master timing generator['']
-    #        clear_previous(str): if yes removes existing enable patterns['']
-    #                            Defaults to yes['']
-    #
-    # Example: setup_for_bunch_train('x', 686)
+    """This allows the setup of the MBF to be adjusted to be suitable for the
+    different bunch train lengths. The feedback will ignore anything not in the
+    bunch train
+    Inputs:
+           mbf_axis: axis to apply the settings to. ('x' or 'y')
+           train_length: length of train to apply tune measurement and
+                               feedback to. Starts from first bunch as per the
+                               master timing generator.
+           clear_previous: if yes removes existing enable patterns.
+                               Defaults to yes.
 
+    Example: setup_for_bunch_train('x', 686)
+    """
     [_1, harmonic_number, pv_names] = system_config()
     pv_head = pv_names["hardware_names"][mbf_axis]
     # feedback during quiecent mode
@@ -817,18 +826,18 @@ def setup_tune_bunch_selection(
     n_bunch: str | int = "all",
     clear_previous: str = "yes",
 ):
-    # This allows the setup of the tune to be adjusted from using all bunches to
-    # using a subset. This is useful if the tune measurement is struggling due to
-    # distortion of the IQ plot. Defaults to all bunches.
-    # Inputs:
-    #       mbf_axis (str): axis to apply the settings to. ('x' or 'y')
-    #       start_bunch(int): The first position to take the tune measurement.
-    #       step_bunch(int): The spacing of measurement positions.
-    #       n_bunch(int): How many positions are used.
-    #       clear_previous(str): if yes removes existing enable patterns.
-    #                            Defaults to yes.
-    #
-    # Example: setup_tune_bunch_selection('x', 40, 90, 10)
+    """This allows the setup of the tune to be adjusted from using all bunches to
+    using a subset. This is useful if the tune measurement is struggling due to
+    distortion of the IQ plot. Defaults to all bunches.
+    Inputs:
+          mbf_axis: axis to apply the settings to. ('x' or 'y')
+          start_bunch: The first position to take the tune measurement.
+          step_bunch: The spacing of measurement positions.
+          n_bunch: How many positions are used.
+          clear_previous: if yes removes existing enable patterns.
+
+    Example: setup_tune_bunch_selection('x', 40, 90, 10)
+    """
     [_1, harmonic_number, pv_names] = system_config()
     if n_bunch == "all":
         nb: int = harmonic_number
@@ -930,13 +939,14 @@ def configure_tune_sweep(
 
 
 def tunescan_over_modes_setup(tunescan: dict):
-    # Sets up the MBF system to be ready for a tunescan measurement.
-    #
-    #   Args:
-    #       mbf_axis (str): Selects which MBF axis to work on (x, y, s).
-    #       tunescan (struct): Contains all the setup parameters.
-    #
-    # example: tunescan_over_modes_setup(tunescan)
+    """Sets up the MBF system to be ready for a tunescan measurement.
+
+      Args:
+          mbf_axis: Selects which MBF axis to work on (x, y, s).
+          tunescan: Contains all the setup parameters.
+
+    example: tunescan_over_modes_setup(tunescan)
+    """
     mbf_tools()
     if tunescan["feedback_state"] == "on":
         fb_on_off = 1
@@ -1111,16 +1121,17 @@ def bunch_motion_restore(setup_info, pv_names, restore_state):
         )
 
 
-def get_all_tunes(axes="xys", n_trys=20):
-    # captures the current tune on all MBF systems.
-    # if the value is NaN the code will try again for up to 20 tries.
-    #   Args:
-    #       selected_axes(str): 'xys'
-    #
-    #   Returns:
-    #       tunes(struct): tune and sideband values.
-    #
-    # Example: tunes = get_all_tunes('xy')
+def get_all_tunes(axes: str = "xys", n_trys: int = 20):
+    """captures the current tune on all MBF systems.
+    if the value is NaN the code will try again for up to 20 tries.
+      Args:
+          selected_axes(str): 'xys'
+
+      Returns:
+          tunes(struct): tune and sideband values.
+
+    Example: tunes = get_all_tunes('xy')
+    """
     [_2, _1, pv_names] = system_config
     # Initialisation and ensuring the datastructure is consistent regardless of the
     # number of axes asked for.
@@ -1225,12 +1236,13 @@ def mbf_setup_wait_for_hw_trigger(pv_names):
         set_variable([pv_head, memory_triggers["EXT"]["enable_status"]], "Enable")
 
 
-def setup_operational_mode(mbf_axis, operational_mode):
-    # Runs the setup scripts underlying the blue buttons['']
-    # This allows the system to be put into a known state['']
-    #   Args:
-    #       mbf_axis (char): x, y or  s
-    #       operational_mode (char): 'TuneOnly', 'TuneSpecial' or 'Feedback'
+def setup_operational_mode(mbf_axis: str, operational_mode: str):
+    """Runs the setup scripts underlying the blue buttons['']
+    This allows the system to be put into a known state['']
+      Args:
+          mbf_axis: x, y or  s
+          operational_mode: 'TuneOnly', 'TuneSpecial' or 'Feedback'
+    """
     mbf_axis = mbf_axis.lower()
     expected_axis_values = ["x", "y", "s", "it"]
     expected_operational_modes = ["TuneOnly", "TuneSpecial", "Feedback"]

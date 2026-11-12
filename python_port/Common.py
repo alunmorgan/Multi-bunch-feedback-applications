@@ -39,12 +39,12 @@ def movmean(data: list, window_size: int) -> list:
 def cat_multi_dim(
     cat_dim: int, original_data: np.ndarray, new_data: np.ndarray
 ) -> np.ndarray:
-    # concatinates multi-dimensional data in the cat_dim dimension,
-    # pads the other dimensions as necessary.
-    # will return the combined matrix.
-    # example
-    # combined_data = cat_multi_dim(cat_dim,original_data, new_data)
+    """concatinates multi-dimensional data in the cat_dim dimension,
+    pads the other dimensions as necessary.
+    will return the combined matrix.
 
+    example: combined_data = cat_multi_dim(cat_dim,original_data, new_data)
+    """
     ## Padding the arrays to make them the same size in all dimensions
     original_data_size = original_data.shape
     new_data_size = new_data.shape
@@ -71,27 +71,16 @@ def cat_multi_dim(
     return combined_data
 
 
-def condition_mbf_data(input_data: list[dict]) -> list[dict]:
-    # Mapping values in old datasets to defined variables.
-    # Initialisation
+def condition_mbf_metadata(input_data: list[dict]) -> list[dict]:
+    """Mapping values in old datasets to defined variables."""
     output_data = input_data
     for jgr in range(len(input_data)):
-        if "data" in input_data[jgr]:
-            continue
-
         if "gddata" in input_data[jgr]:
             output_data[jgr]["data"] = input_data[jgr]["gddata"]
 
         if "gddata_freq" in input_data[jgr]:
             output_data[jgr]["data_freq"] = input_data[jgr]["gddata_freq"]
 
-    return output_data
-
-
-def condition_mbf_metadata(input_data: list[dict]) -> list[dict]:
-    # Mapping values in old datasets to defined variables.
-    output_data = input_data
-    for jgr in range(len(input_data)):
         if "I_bpm" in input_data[jgr]:
             output_data[jgr]["current"] = input_data[jgr]["I_bpm"]
 
@@ -127,21 +116,22 @@ def condition_mbf_metadata(input_data: list[dict]) -> list[dict]:
 
 
 def construct_datastamped_filename(name_str: str, c: datetime.datetime) -> str:
-    # constructs a datestamped filename
-    # name_str is a identifier string added at the begining of the name.
-    # c is a datetime object.
-    #
-    # example filename = construct_filename('MBF', clock)
+    """constructs a datestamped filename
+    name_str is a identifier string added at the begining of the name.
+    c is a datetime object.
 
+    example filename = construct_filename('MBF', clock)
+    """
     filename = f"{name_str}_{c.day: 02d}_{c.month:02d}_{c.year}_{c.hour: 02d}-{c.minute: 02d}-{c.second: 02d}"
     return filename
 
 
 def dir_list_gen(directory_name: str, file_type: str) -> tuple[list[str], str]:
-    # takes in a directory name and outputs the list of files filtered by file type.
-    # if a file type of 'dirs' is input it will output a list of directories.
-    # example
-    # names,directory_name = dir_list_gen('/home','mat')
+    """takes in a directory name and outputs the list of files filtered by file type.
+    if a file type of 'dirs' is input it will output a list of directories.
+    example
+    names,directory_name = dir_list_gen('/home','mat')
+    """
     names = []
     dirs = []
     with os.scandir(directory_name) as it:
@@ -158,11 +148,12 @@ def dir_list_gen(directory_name: str, file_type: str) -> tuple[list[str], str]:
 
 
 def dir_list_gen_tree(root_dir: str, filetype: str):
-    # finds files of the requested type in current folder and all subfolders
-    # ignores hidden folders
-    # the absolute paths are returned.
-    #
-    # Example: [a dir_paths] =dir_list_gen_tree(root_dir, 'png')
+    """finds files of the requested type in current folder and all subfolders
+    ignores hidden folders
+    the absolute paths are returned.
+
+    Example: [a dir_paths] =dir_list_gen_tree(root_dir, 'png')
+    """
     paths = []
     for entry in os.listdir(root_dir):
         full_path = os.path.join(root_dir, entry)
@@ -177,8 +168,10 @@ def dir_list_gen_tree(root_dir: str, filetype: str):
 
 
 def get_variable(variable_names, system_type="EPICS", timeout=5, datatype=None):
-    # def to get a set of variables. This abstraction allows easier porting:
-    # between EPICS and TANGO (and potentially others)
+    """function to get a set of variables.
+    This abstraction allows easier porting:
+     between EPICS and TANGO (and potentially others).
+    """
     if system_type.upper() == "EPICS":
         values = caget(
             variable_names, timeout=timeout, datatype=datatype, format=FORMAT_TIME
@@ -201,9 +194,10 @@ def get_variable(variable_names, system_type="EPICS", timeout=5, datatype=None):
 
 
 def machine_environment():
-    # captures the environmental variables of the machine
-    #
-    # Example: exp_data = machine_environment(NaN)
+    """captures the environmental variables of the machine
+
+    Example: exp_data = machine_environment()
+    """
     # timestamp
     exp_data = {}
     exp_data["time"] = datetime.today()
@@ -452,8 +446,7 @@ def machine_environment():
 
 
 def system_config():
-    #       harmonic_number (int): Harmonic number of the machine['']
-    # root_path is the location for captured data['']
+    # root_path is the location for captured data.
     root_path = "/dls/ops-data/Diagnostics/MBF/"
     harmonic_number = 936
     ## RF frequency
@@ -582,19 +575,6 @@ def system_config():
     pv_names["tails"]["Super_sequencer"]["count"] = ":SEQ:SUPER:COUNT_S"
     pv_names["tails"]["Super_sequencer"]["reset"] = ":SEQ:SUPER:RESET_S.PROC"
     ## Sequencer settings
-    # pv_names['tails']['Sequencer']['Base'] = ':SEQ'
-    # pv_names['tails']['Sequencer']['start_frequency'] = ':START_FREQ_S'
-    # pv_names['tails']['Sequencer']['end_frequency'] = ':END_FREQ_S'
-    # pv_names['tails']['Sequencer']['dwell'] = ':DWELL_S'
-    # pv_names['tails']['Sequencer']['gain'] = ':GAIN_S'
-    # pv_names['tails']['Sequencer']['gaindb'] = ':GAIN_DB_S'
-    # pv_names['tails']['Sequencer']['enable'] = ':ENABLE_S'
-    # pv_names['tails']['Sequencer']['step_frequency'] = ':STEP_FREQ_S'
-    # pv_names['tails']['Sequencer']['holdoff'] = ':HOLDOFF_S'
-    # pv_names['tails']['Sequencer']['bank_select'] = ':BANK_S'
-    # pv_names['tails']['Sequencer']['capture_state'] = ':CAPTURE_S'
-    # pv_names['tails']['Sequencer']['windowing_state'] = ':ENWIN_S'
-    # pv_names['tails']['Sequencer']['blanking_state'] = ':BLANK_S'
     # applies to all
     pv_names["tails"]["Sequencer"]["start_state"] = ":SEQ:PC_S"
     pv_names["tails"]["Sequencer"]["steady_state_bank"] = ":SEQ:0:BANK_S"
@@ -680,30 +660,6 @@ def system_config():
         ]
 
     ## Bank settings
-    # pv_names['tails']['Bunch_bank']['Base'] = ':BUN'
-    # pv_names['tails']['Bunch_bank']['Gains'] = ':GAINWF_S'
-    # pv_names['tails']['Bunch_bank']['Output_types'] = ':OUTWF_S'
-    # pv_names['tails']['Bunch_bank']['FIR_select'] = ':FIRWF_S'
-    # pv_names['tails']['Bunch_bank']['FIR_set_enable'] = ':FIR:SET_ENABLE_S['PROC']'
-    # pv_names['tails']['Bunch_bank']['FIR_enable'] = ':FIR:ENABLE_S'
-    # pv_names['tails']['Bunch_bank']['NCO1_set_enable'] = ':NCO1:SET_ENABLE_S['PROC']'
-    # pv_names['tails']['Bunch_bank']['NCO2_set_enable'] = ':NCO2:SET_ENABLE_S['PROC']'
-    # pv_names['tails']['Bunch_bank']['NCO1_enable'] = ':NCO1:ENABLE_S'
-    # pv_names['tails']['Bunch_bank']['NCO2_enable'] = ':NCO2:ENABLE_S'
-    # pv_names['tails']['Bunch_bank']['SEQ_set_enable'] = ':SEQ:SET_ENABLE_S['PROC']'
-    # pv_names['tails']['Bunch_bank']['SEQ_enable'] = ':SEQ:ENABLE_S'
-    # pv_names['tails']['Bunch_bank']['PLL_enable'] = ':PLL:SET_ENABLE_S'
-    # pv_names['tails']['Bunch_bank']['FIR_set_disable'] = ':FIR:SET_DISABLE_S['PROC']'
-    # pv_names['tails']['Bunch_bank']['FIR_disable'] = ':FIR:DISABLE_S'
-    # pv_names['tails']['Bunch_bank']['NCO1_disable'] = ':NCO1:SET_DISABLE_S['PROC']'
-    # pv_names['tails']['Bunch_bank']['NCO2_disable'] = ':NCO2:SET_DISABLE_S['PROC']'
-    # pv_names['tails']['Bunch_bank']['SEQ_disable'] = ':SEQ:SET_DISABLE_S['PROC']'
-    # pv_names['tails']['Bunch_bank']['PLL_disable'] = ':PLL:SET_DISABLE_S['PROC']'
-    # pv_names['tails']['Bunch_bank']['FIR_gains'] = ':FIR:GAIN_S'
-    # pv_names['tails']['Bunch_bank']['NCO1_gains'] = ':NCO1:GAIN_S'
-    # pv_names['tails']['Bunch_bank']['NCO2_gains'] = ':NCO2:GAIN_S'
-    # pv_names['tails']['Bunch_bank']['SEQ_gains'] = ':SEQ:GAIN_S'
-    # pv_names['tails']['Bunch_bank']['PLL_gains'] = ':PLL:GAIN_S'
     for n_bank in range(0, 3):
         n_bank_label = n_bank
         l_bank = ["bank", n_bank_label]
@@ -898,22 +854,22 @@ def system_config():
 
     ## Memory settings
     pv_names["tails"]["MEM"]["status"] = (
-        ":MEM:BUSY"  # NEED TO TAKE OFF THE X|Y BEFORE USE['']
+        ":MEM:BUSY"  # NEED TO TAKE OFF THE X|Y BEFORE USE.
     )
     pv_names["tails"]["MEM"]["channel_select"] = (
-        ":MEM:SELECT_S"  # NEED TO TAKE OFF THE X|Y BEFORE USE['']
+        ":MEM:SELECT_S"  # NEED TO TAKE OFF THE X|Y BEFORE USE.
     )
     pv_names["tails"]["MEM"]["offset"] = (
-        ":MEM:OFFSET_S"  # NEED TO TAKE OFF THE X|Y BEFORE USE['']
+        ":MEM:OFFSET_S"  # NEED TO TAKE OFF THE X|Y BEFORE USE.
     )
     pv_names["tails"]["MEM"]["runout"] = (
-        ":MEM:RUNOUT_S"  # NEED TO TAKE OFF THE X|Y BEFORE USE['']
+        ":MEM:RUNOUT_S"  # NEED TO TAKE OFF THE X|Y BEFORE USE.
     )
     pv_names["tails"]["MEM"]["channel0_target"] = (
-        ":MEM:SEL0_S"  # NEED TO TAKE OFF THE X|Y BEFORE USE['']
+        ":MEM:SEL0_S"  # NEED TO TAKE OFF THE X|Y BEFORE USE.
     )
     pv_names["tails"]["MEM"]["channel1_target"] = (
-        ":MEM:SEL1_S"  # NEED TO TAKE OFF THE X|Y BEFORE USE['']
+        ":MEM:SEL1_S"  # NEED TO TAKE OFF THE X|Y BEFORE USE.
     )
     pv_names["tails"]["TRG"]["memory_status"] = ":TRG:MEM:STATUS"
     ## NCO settings
@@ -1005,7 +961,7 @@ def system_config():
 
 
 def mode_to_frequency(RF, harmonic_number, tune, data):
-    # converts a mode scan into the equivalent frequencies.
+    """converts a mode scan into the equivalent frequencies."""
     x_data_p1 = (RF / harmonic_number) * (range(harmonic_number / 2) + tune)
     x_data_p2 = RF - (RF / harmonic_number) * (
         range((harmonic_number / 2), (harmonic_number)) + tune
@@ -1017,11 +973,12 @@ def mode_to_frequency(RF, harmonic_number, tune, data):
 
 
 def save_to_archive(root_string, data):
-    # Saves the requested variables in the given filename in a location
-    # detemined by the time_value.
-    # The relavent folder structure will be generated.
-    #
-    # Example: save_to_archive(root_string, what_to_save)
+    """Saves the requested variables in the given filename in a location
+    detemined by the time_value.
+    The relavent folder structure will be generated.
+
+    Example: save_to_archive(root_string, what_to_save)
+    """
     # Generating the required directory structure.
     tree_gen(root_string, data["time"])
     # construct filename and add it to the structure
@@ -1058,8 +1015,9 @@ def save_to_archive(root_string, data):
 
 
 def set_variable(variable_names, variable_values, system_type="EPICS"):
-    # def to set a group of variables[''] This abstraction allows easier porting:
-    # between EPICS and TANGO (and potentially others)
+    """function to set a group of variables[''] This abstraction allows easier porting:
+    # between EPICS and TANGO (and potentially others)."""
+
     if system_type.upper() == "EPICS":
         caput(variable_names, variable_values)
     elif system_type.upper() == "TANGO":
@@ -1074,9 +1032,10 @@ def set_variable(variable_names, variable_values, system_type="EPICS"):
 
 
 def sub_directories(main_dir: os.PathLike[str]) -> list[str]:
-    # outputs a list of sub-directories of the input directory
-    #
-    # example: sub_dir = sub_directories(main_dir)
+    """outputs a list of sub-directories of the input directory
+
+    example: sub_dir = sub_directories(main_dir)
+    """
     # finding the subdirectories
     sub_dirs = [entry for entry in main_dir.iterdir() if entry.is_dir()]
 
@@ -1084,8 +1043,8 @@ def sub_directories(main_dir: os.PathLike[str]) -> list[str]:
 
 
 def tree_gen(tree_root: os.PathLike[str], clk: datetime.datetime):
-    # generates a directory structure using the datetime passed in as clk
-    # tree_root is where you want the subdirectories to be placed
+    """generates a directory structure using the datetime passed in as clk
+    tree_root is where you want the subdirectories to be placed."""
 
     leaf = os.path.join(tree_root, f"{clk.year}", f"{clk.month: 02d}", f"{clk.day:02d}")
 
@@ -1095,15 +1054,16 @@ def tree_gen(tree_root: os.PathLike[str], clk: datetime.datetime):
 
 
 def mbf_make_index(application_type: str, ax: str):
-    # Writes index files to speed up archive retrival def s:
-    # Args:
-    #       application_type(str): either 'Growdamp', 'Bunch_motion', 'Modescan',
-    #                           'Spectrum', 'LO_scan', 'system_phase_scan',
-    #                           'clock_phase_scan'['']
-    #       ax(str): 'x', 'y', or 's'
-    #
-    # Example mbf_make_index('Growdamp', 'x')
-    [root_string, _2, _1] = system_config
+    """Writes index files to speed up archive retrival def s:
+    Args:
+          application_type: either 'Growdamp', 'Bunch_motion', 'Modescan',
+                              'Spectrum', 'LO_scan', 'system_phase_scan',
+                              'clock_phase_scan'.
+          ax: 'x', 'y', or 's'
+
+    Example mbf_make_index('Growdamp', 'x')
+    """
+    root_string, _2, _1 = system_config()
     if ax:
         filter_name = f"{application_type}_{ax}_axis"
     else:
@@ -1118,11 +1078,11 @@ def mbf_make_index(application_type: str, ax: str):
         print("No files to index")
     else:
         ok = np.zeros(len(wanted_datasets_type))
-        file_time = []
-        file_name = []
+        file_time: list = []
+        file_name: list[str] = []
         for kse in range(1, len(wanted_datasets_type)):
             try:  # handling corrupted input files
-                temp = load(wanted_datasets_type[kse])
+                temp = os.load(wanted_datasets_type[kse])
             except me1:
                 ok[kse] = 0
                 print(f"{me1} message")
@@ -1147,8 +1107,8 @@ def mbf_make_index(application_type: str, ax: str):
 
 
 def update_all_indexes():
-    # updates all indexes in the data archive
-    # useful if something is corrupted['']
+    """updates all indexes in the data archive
+    useful if something is corrupted."""
     mbf_make_index("LO_scan")
     mbf_make_index("clock_phase_scan")
     mbf_make_index("system_phase_scan")

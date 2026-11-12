@@ -1,7 +1,3 @@
-import time
-
-import numpy as np
-import scipy
 from data_retrival import (
     bunch_motion_retrival,
     clock_phase_scan_retrival,
@@ -62,39 +58,36 @@ def growdamp_all(
     bunches_monitored: list[int] | str = "all",
     capture_full_bunch_motion: str = "no",
 ) -> None:
-    # Top level def to run the growdamp measurements on the:
+    """Top level def to run the growdamp measurements on the:
     # selected plane
     #   Args:
-    #       mbf_axis(str): 'x','y', or 's'
-    #       auto_setup(str): sets whether the setup scripts will be used to put the
-    #                        system into a particular state[''] Default is yes.
-    #       plotting(str): set whether the data is plotted as well as saved. Default
-    #                      is yes.
-    #       additional_save_location(str): fully defined filename to save the
+    #       mbf_axis: 'x','y', or 's'
+    #       auto_setup: sets whether the setup scripts will be used to put the
+    #                        system into a particular state.
+    #       plotting: set whether the data is plotted as well as saved.
+    #       additional_save_location: fully defined filename to save the
     #                                      captured data to in addition to the
     #                                      main archive.
-    #       excitation_setting(str): sets whether the measurement uses an excitation to
+    #       excitation_setting: sets whether the measurement uses an excitation to
     #                                drive a resonance or if the measurement just uses
     #                                the natural beam coupling.
-    #                                Defaults to 'yes'
-    #       excitation_location(str): The location of the excitation in tune space.
-    #                                 The default value is 'tune'.
-    #       excitation_manual(float): if excitation_location is set to 'manual' then
+    #       excitation_location: The location of the excitation in tune space.
+    #       excitation_manual: if excitation_location is set to 'manual' then
     #                                 this defines the location of the excitation
     #                                 in tune space.
-    #       pll_tracking (str): Sets if the excitation frequency follows the tune
-    #                           jitter. Default is no
-    #       pll_bunches (float): bunches the pll is active on.
-    #       pll_guard_bunches (float): the number of bunches surrounding the pll
+    #       pll_tracking: Sets if the excitation frequency follows the tune
+    #                           jitter.
+    #       pll_bunches: bunches the pll is active on.
+    #       pll_guard_bunches: the number of bunches surrounding the pll
     #                                  bunches for which feedback is switched off.
-    #       bunch_monitor(list(int)) | str: This determines which bunches are monitored
+    #       bunch_monitor: This determines which bunches are monitored
     #                                 during the measurement. Defaults to 'all' which
     #                                 means all bunches.
-    #       capture_full_bunch_motion(str): Captures the centroid motion for the
+    #       capture_full_bunch_motion: Captures the centroid motion for the
     #                                       duration of the measuremnt.
     #                                       Defaults to no as this is a lot of data.
     # Example: growdamp_all('x')
-
+    """
     ## Constructing the different states for the sequencer. These will be arranged
     # in various configurations depending on the experiment requested.
     #
@@ -259,22 +252,21 @@ def modescan_all(
     dwell: int = 500,
     excitation_gain: float = -30,
 ):
-    # Top level def to run the modescan for all selected plane.:
-    # Args:
-    #       mbf_axis (str): 'x', 'y', 's'. Defines which system you are requesting
-    #       auto_setup(str): sets whether the setup scripts will be used to put the
-    #                        system into a particular state. Default is yes.
-    #       plotting(str): set whether the data is plotted as well as saved. Default
-    #                      is yes.
-    #       additional_save_location(str): fully defined filename to save the
-    #                                      captured data to in addition to the
-    #                                      main archive.
-    #       n_repeats(int): How many times to repeat each measurement point.
-    #       dwell (int): How many turns to stay at each measurement point.
-    #       excitation_gain(float): level of the excitation.
-    #
-    # Example  modescan_all('x')
+    """Top level def to run the modescan for all selected plane.:
+    Args:
+          mbf_axis: 'x', 'y', 's'. Defines which system you are requesting
+          auto_setup: sets whether the setup scripts will be used to put the
+                           system into a particular state.
+          plotting: set whether the data is plotted as well as saved.
+          additional_save_location: fully defined filename to save the
+                                         captured data to in addition to the
+                                         main archive.
+          n_repeats: How many times to repeat each measurement point.
+          dwell: How many turns to stay at each measurement point.
+          excitation_gain: level of the excitation.
 
+    Example  modescan_all('x')
+    """
     # getting general environment data
     modescan = machine_environment()
     # Add the extra data to the data structure.
@@ -308,22 +300,20 @@ def mbf_spectrum_all(
     n_turns: int = 1000,
     repeat: int = 1,
 ):
-    # Top level def to run all spectral measurements on selected plane.:
-    # Args:
-    #       mbf_axis (str): 'x', 'y', 's'. Defines which system you are requesting
-    #       auto_setup(str): sets whether the setup scripts will be used to put the
-    #                        system into a particular state[''] Default is yes.
-    #       plotting(str): set whether the data is plotted as well as saved. Default
-    #                      is yes.
-    #       additional_save_location(str): fully defined filename to save the
-    #                                      captured data to in addition to the
-    #                                      main archive.
-    #       n_turns (int): number of turns to capture. Default is 1000.
-    #       repeat (int): Number of repeat points (improves the power resolution).
-    #                     Default is 1.
-    #
-    # Example mbf_spectrum_all
+    """Top level def to run all spectral measurements on selected plane.:
+    Args:
+          mbf_axis: 'x', 'y', 's'. Defines which system you are requesting
+          auto_setup: sets whether the setup scripts will be used to put the
+                           system into a particular state.
+          plotting: set whether the data is plotted as well as saved.
+          additional_save_location: fully defined filename to save the
+                                         captured data to in addition to the
+                                         main archive.
+          n_turns: number of turns to capture.
+          repeat: Number of repeat points (improves the power resolution).
 
+    Example mbf_spectrum_all
+    """
     # getting general environment data.
     spectrum = machine_environment()
     # Add the extra data to the data structure.
@@ -377,30 +367,28 @@ def BBBFE_clock_phase_scan(
     sweep_step: int = 10,
     sweep_end: int = 180,
 ):
-    # Scans one of the clock phase shifts in the bunch by bunch frontend and
-    # records the strength of the tune signal.
-    # Restores the original value after the scan.
-    #
-    # Args:
-    #      ax (str): Specifies which axis.
-    #      single_bunch_location (int): the location of the single bunch.
-    #       auto_setup(str): sets whether the setup scripts will be used to put the
-    #                        system into a particular state. Default is yes.
-    #       plotting(str): set whether the data is plotted as well as saved. Default
-    #                      is yes.
-    #       additional_save_location(str): fully defined filename to save the
-    #                                      captured data to in addition to the
-    #                                      main archive.
-    #       sweep_start(int): phase value in degrees to start the sweep.
-    #       sweep_step(int):  phase scan step in degrees.
-    #       sweep_end(int):   phase value in degreees to stop the sweep.
-    #
-    #
-    # Machine setup: (manual for the time being.)
-    # fill some charge in bunch 1 (0['2nC'])
-    #
-    # Example: BBBFE_clock_phase_scan('x', 400)
+    """Scans one of the clock phase shifts in the bunch by bunch frontend and
+    records the strength of the tune signal.
+    Restores the original value after the scan.
 
+    Args:
+         ax: Specifies which axis.
+         single_bunch_location: the location of the single bunch.
+          auto_setup: sets whether the setup scripts will be used to put the
+                           system into a particular state.
+          plotting: set whether the data is plotted as well as saved.
+          additional_save_location: fully defined filename to save the
+                                         captured data to in addition to the
+                                         main archive.
+          sweep_start: phase value in degrees to start the sweep.
+          sweep_step:  phase scan step in degrees.
+          sweep_end:   phase value in degreees to stop the sweep.
+
+    Machine setup: (manual for the time being.)
+    fill some charge in a single bunch (0.2nC)
+
+    Example: BBBFE_clock_phase_scan('x', 400)
+    """
     # getting general environment data.
     data = machine_environment()
     # Add the extra data to the data structure.
@@ -426,9 +414,9 @@ def BBBFE_clock_phase_scan(
 
 
 def BBBFE_full_frontend_checkout(single_bunch_location: int):
-    # BBBFE_FULL_FRONTEND_CHECKOUT
-    # This assumes that the machine is set up with a single bunch in the machine at
-    # the single_bunch_location
+    """BBBFE_FULL_FRONTEND_CHECKOUT
+    This assumes that the machine is set up with a single bunch in the machine at
+    the single_bunch_location."""
     BBBFE_system_phase_scan("x", single_bunch_location)
     BBBFE_system_phase_scan("y", single_bunch_location)
     BBBFE_system_phase_scan("s", single_bunch_location)
@@ -448,28 +436,27 @@ def BBBFE_gain_scan(
     sweep_end: int = 10,
     sweep_speed: int = 2,
 ):
-    # Scans one of the individual axis gains in the
-    # bunch by bunch frontend and records the strength of the ADC signal.
-    # Restores the original value after the scan.
-    #
-    # Args:
-    #       mbf_axis(str): 'x','y', or 's'
-    #       auto_setup(str): sets whether the setup scripts will be used to put the
-    #                        system into a particular state. Default is yes.
-    #       plotting(str): set whether the data is plotted as well as saved. Default
-    #                      is yes.
-    #       additional_save_location(str): fully defined filename to save the
-    #                                      captured data to in addition to the
-    #                                      main archive.
-    #       sweep_start(int): level value to start the sweep.
-    #       sweep_step(int):  level step.
-    #       sweep_end(int):   level value to stop the sweep.
-    #
-    # Machine setup
-    # machine to nominal conditions
-    #
-    # Example: BBBFE_gain_scan('x')
+    """Scans one of the individual axis gains in the
+    bunch by bunch frontend and records the strength of the ADC signal.
+    Restores the original value after the scan.
 
+    Args:
+          mbf_axis: 'x','y', or 's'
+          auto_setup: sets whether the setup scripts will be used to put the
+                           system into a particular state.
+          plotting: set whether the data is plotted as well as saved.
+          additional_save_location: fully defined filename to save the
+                                         captured data to in addition to the
+                                         main archive.
+          sweep_start: level value to start the sweep.
+          sweep_step:  level step.
+          sweep_end:   level value to stop the sweep.
+
+    Machine setup
+    machine to nominal conditions
+
+    Example: BBBFE_gain_scan('x')
+    """
     # getting general environment data.
     data = machine_environment()
     # Add the extra data to the data structure.
@@ -505,29 +492,28 @@ def BBBFE_system_phase_scan(
     sweep_end: int = 180,
     sweep_speed: int = 2,
 ):
-    # Scans one of the individual axis system phase shifts in the
-    # bunch by bunch frontend and records the strength of the tune signal['']
-    # Restores the original value after the scan['']
-    #
-    # Args:
-    #       mbf_axis(str): 'x','y', or 's'
-    #       single_bunch_location(int): location of the target bunch['']
-    #       auto_setup(str): sets whether the setup scripts will be used to put the
-    #                        system into a particular state[''] Default is yes['']
-    #       plotting(str): set whether the data is plotted as well as saved[''] Default
-    #                      is yes['']
-    #       additional_save_location(str): fully defined filename to save the
-    #                                      captured data to in addition to the
-    #                                      main archive['']
-    #       sweep_start(int): phase value in degrees to start the sweep['']
-    #       sweep_step(int):  phase scan step in degrees['']
-    #       sweep_end(int):   phase value in degreees to stop the sweep['']
-    #
-    # Machine setup
-    # fill some charge in bunch 'single_bunch_location' (0['2nC'])
-    #
-    # Example: BBBFE_system_phase_scan('x', 400)
+    """Scans one of the individual axis system phase shifts in the
+    bunch by bunch frontend and records the strength of the tune signal.
+    Restores the original value after the scan.
 
+    Args:
+          mbf_axis: 'x','y', or 's'
+          single_bunch_location: location of the target bunch.
+          auto_setup: sets whether the setup scripts will be used to put the
+                           system into a particular state.
+          plotting(str): set whether the data is plotted as well as saved.
+          additional_save_location: fully defined filename to save the
+                                         captured data to in addition to the
+                                         main archive.
+          sweep_start: phase value in degrees to start the sweep.
+          sweep_step:  phase scan step in degrees.
+          sweep_end:   phase value in degreees to stop the sweep.
+
+    Machine setup
+    fill some charge in bunch 'single_bunch_location' (0.2nC)
+
+    Example: BBBFE_system_phase_scan('x', 400)
+    """
     # getting general environment data.
     data = machine_environment()
     # Add the extra data to the data structure.
@@ -562,29 +548,28 @@ def DORIS_target_phase_scan(
     sweep_step: int = 5,
     sweep_end: int = 180,
 ):
-    # Scans the phase of the DORIS unit upstream of the MBF frontend and
-    # records the strength of the tune signal.
-    # Restores the original value after the scan.
-    #
-    # Args:
-    #      single_bunch_location (int): the location of the single bunch.
-    #
-    #       auto_setup(str): sets whether the setup scripts will be used to put the
-    #                        system into a particular state. Default is yes.
-    #       plotting(str): set whether the data is plotted as well as saved. Default
-    #                      is yes.
-    #       additional_save_location(str): fully defined filename to save the
-    #                                      captured data to in addition to the
-    #                                      main archive.
-    #       sweep_start(int): phase value in degrees to start the sweep.
-    #       sweep_step(int):  phase scan step in degrees.
-    #       sweep_end(int):   phase value in degreees to stop the sweep.
-    #
-    # Machine setup: (manual for the time being.)
-    # fill some charge in bunch 1 (0.2nC)
-    #
-    # Example: DORIS_target_phase_scan(400)
+    """Scans the phase of the DORIS unit upstream of the MBF frontend and
+    records the strength of the tune signal.
+    Restores the original value after the scan.
 
+    Args:
+         single_bunch_location: the location of the single bunch.
+
+          auto_setup: sets whether the setup scripts will be used to put the
+                           system into a particular state.
+          plotting: set whether the data is plotted as well as saved.
+          additional_save_location: fully defined filename to save the
+                                         captured data to in addition to the
+                                         main archive.
+          sweep_start: phase value in degrees to start the sweep.
+          sweep_step:  phase scan step in degrees.
+          sweep_end:   phase value in degreees to stop the sweep.
+
+    Machine setup: (manual for the time being.)
+    fill some charge in bunch 1 (0.2nC)
+
+    Example: DORIS_target_phase_scan(400)
+    """
     # getting general environment data['']
     data = machine_environment()
     # Add the extra data to the data structure['']
@@ -607,20 +592,16 @@ def DORIS_target_phase_scan(
     )
 
 
-def mbf_pll_phase_scan(mbf_axis: str, scan_range: int = 270, step: int = 1):
-    #
-    #       Args:
-    #           mbf_axis(str): 'x' or 'y'
-    #           scan_range(int): phase range in degree to search around the
-    #                       current target phase default is 80 degrees
-    #           step(int): step in degree, default is 5 degrees
-    #       Returns:
-    #          fll_phase_scan(struct): structure containing captured data from
-    #                                  the MBF plus general operating
-    #                                  conditions of the machine
-    #
-    # Example: fll_phase_scan = mbf_pll_peakfind('x')
+def mbf_pll_phase_scan(mbf_axis: str, scan_range: int = 270, step: int = 1) -> None:
+    """
+          Args:
+              mbf_axis: 'x' or 'y'
+              scan_range: phase range in degree to search around the
+                          current target phase default is 80 degrees
+              step: step in degree, default is 5 degrees
 
+    Example: fll_phase_scan = mbf_pll_peakfind('x')
+    """
     pll_phase_scan = machine_environment()
     pll_phase_scan["ax_label"] = mbf_axis
     pll_phase_scan["base_name"] = f"pll_phase_scan_{pll_phase_scan['ax_label']}_axis"
@@ -648,7 +629,7 @@ def tunescan_over_modes_all(
     start_frequency: float = 0,
     end_frequency: float = 0.5,
 ):
-    # top level def to run the tunescan for all modes in the selected plane.
+    """top level def to run the tunescan for all modes in the selected plane."""
 
     # getting general environment data
     tunescan = machine_environment()
@@ -685,16 +666,17 @@ def BBBFE_LO_scan(
     sweep_step: int = 5,
     sweep_end: int = 180,
 ):
-    # Scans the LO phase shift in the bunch by bunch frontend and
-    # records the strength of the tune signal.
-    # Restores the original value after the scan.
-    #
-    # Args:
-    #     phase_centre (int): The phase value to center the sweep on.
-    #     sweep_extent (int): The range to sweep. 45 would sweep 45 degrees
-    #                         above and 45 degrees below the centre value.
-    #
-    # Example: BBBFE_LO_scan(90, 45)
+    """Scans the LO phase shift in the bunch by bunch frontend and
+    records the strength of the tune signal.
+    Restores the original value after the scan.
+
+    Args:
+        phase_centre: The phase value to center the sweep on.
+        sweep_extent: The range to sweep. 45 would sweep 45 degrees
+                            above and 45 degrees below the centre value.
+
+    Example: BBBFE_LO_scan(90, 45)
+    """
     # getting general environment data
     data = machine_environment()
     # Add the extra data to the data structure.
@@ -728,13 +710,13 @@ def pll_PI_scan(
     guardbunches: int = 10,
     monitor_bunches: int = 400,
 ):
-    # This sets up the PLL loop for different P and I settings, then records various
-    # statistics in order to assess which setting are most suitable['']
+    """This sets up the PLL loop for different P and I settings, then records various
+    # statistics in order to assess which setting are most suitable."""
     data = machine_environment()
     # Add the extra data to the data structure.
     data["ax_label"] = mbf_axis
     data["base_name"] = "pll_pi_sweep"
-    data["base_name"] = f"PLL_{data["ax_label"]}_PI_scan"]
+    data["base_name"] = f"PLL_{data['ax_label']}_PI_scan"
     data["auto_setup"] = auto_setup
     data["additional_save_location"] = additional_save_location
     data["p_vals"] = p_vals
@@ -751,4 +733,3 @@ def pll_PI_scan(
         restore_function=pll_PI_scan_restore,
         retrival_function=pll_PI_scan_retrival,
     )
-
