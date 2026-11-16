@@ -1279,3 +1279,11 @@ def setup_operational_mode(mbf_axis: str, operational_mode: str):
     rc = os.system(bash_command)
     if rc[-1] == 0:
         raise ValueError("Error running mbf-setup-tune")
+
+
+def pll_PI_scan_setup():
+    pass
+
+
+def pll_PI_scan_restore():
+    pass

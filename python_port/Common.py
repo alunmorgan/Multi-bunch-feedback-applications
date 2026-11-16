@@ -36,6 +36,18 @@ def movmean(data: list, window_size: int) -> list:
     return moving_averages
 
 
+def reconfigure_to_lists(input_data: list[dict]) -> dict:
+    """Change from a list of dictionaries to a dictionary of lists."""
+    out: dict = {}
+    data_field_names = input_data[0].keys()
+    for field_name in data_field_names:
+        out[field_name] = []
+        for ke in range(len(input_data)):
+            out[field_name].append(input_data[ke][field_name])
+
+    return out
+
+
 def cat_multi_dim(
     cat_dim: int, original_data: np.ndarray, new_data: np.ndarray
 ) -> np.ndarray:
@@ -71,50 +83,6 @@ def cat_multi_dim(
     return combined_data
 
 
-def condition_mbf_metadata(input_data: list[dict]) -> list[dict]:
-    """Mapping values in old datasets to defined variables."""
-    output_data = input_data
-    for jgr in range(len(input_data)):
-        if "gddata" in input_data[jgr]:
-            output_data[jgr]["data"] = input_data[jgr]["gddata"]
-
-        if "gddata_freq" in input_data[jgr]:
-            output_data[jgr]["data_freq"] = input_data[jgr]["gddata_freq"]
-
-        if "I_bpm" in input_data[jgr]:
-            output_data[jgr]["current"] = input_data[jgr]["I_bpm"]
-
-        if "I_dcct5" in input_data[jgr]:
-            output_data[jgr]["current"] = input_data[jgr]["I_dcct5"]
-
-        if "fill" in input_data[jgr]:
-            output_data[jgr]["fill_pattern"] = input_data[jgr]["fill"]
-
-        if "RFread" in input_data[jgr]:
-            output_data[jgr]["cavity1_voltage"] = input_data[jgr]["RFread"](1)
-            output_data[jgr]["cavity2_voltage"] = input_data[jgr]["RFread"](2)
-
-        if "life" in input_data[jgr] and "bpm" in input_data[jgr]["life"]:
-            output_data[jgr]["beam_lifetime"] = input_data[jgr]["life"]["bpm"][
-                "life300sec"
-            ]
-
-        if "id" in input_data[jgr]:
-            output_data[jgr]["wiggler_field_I12"] = input_data[jgr]["id"]["i12field"]
-            output_data[jgr]["wiggler_field_I15"] = input_data[jgr]["id"]["i15field"]
-
-        if "qy" in input_data[jgr]:
-            output_data[jgr]["tune"] = input_data[jgr]["qy"]
-
-        if "qx" in input_data[jgr]:
-            output_data[jgr]["tune"] = input_data[jgr]["qx"]
-
-        if "tunes" in input_data[jgr]:
-            output_data[jgr]["tune"] = input_data[jgr]["tunes"]
-
-    return output_data
-
-
 def construct_datastamped_filename(name_str: str, c: datetime.datetime) -> str:
     """constructs a datestamped filename
     name_str is a identifier string added at the begining of the name.
@@ -122,7 +90,9 @@ def construct_datastamped_filename(name_str: str, c: datetime.datetime) -> str:
 
     example filename = construct_filename('MBF', clock)
     """
-    filename = f"{name_str}_{c.day: 02d}_{c.month:02d}_{c.year}_{c.hour: 02d}-{c.minute: 02d}-{c.second: 02d}"
+    filename = f"""{name_str}_{c.day: 02d}_{c.month:02d}_{c.year}_{c.hour: 02d}-
+        {c.minute: 02d}-{c.second: 02d}"""
+
     return filename
 
 
@@ -991,27 +961,8 @@ def save_to_archive(root_string, data):
         f"{data['filename']}.mat",
     )
     scipy.savemat(save_name, "data", "-v7.3")
-    # FIXME index files need to be csv rather than mat.
-    file_index = []
     print(["Data saved to: , ", save_name])
-    index_name = f"{data['base_name']}_index"
-    if os.path.isfile(os.path.join(root_string, f"{index_name}.csv")):
-        with open(
-            os.path.join(root_string, f"{index_name}.csv"), "rw", newline=""
-        ) as csvfile:
-            f = csv.reader(csvfile, delimiter=",")
-            f.append([save_name, data["time"].strftime("%a %d %b %Y, %I:%M%p")])
-            fw = csv.writer(csvfile, delimiter=",")
-            fw.writerows(f)
-
-        print("Index updated")
-    else:
-        file_index[1][1] = save_name
-        file_index[2][1] = data["time"].strftime("%a %d %b %Y, %I:%M%p")
-        scipy.savemat(
-            os.path.join(root_string, f"{index_name}.mat"), "file_index", "-v7.3"
-        )
-        print("New index file created")
+    update_index(data, root_string, save_name)
 
 
 def set_variable(variable_names, variable_values, system_type="EPICS"):
@@ -1031,13 +982,13 @@ def set_variable(variable_names, variable_values, system_type="EPICS"):
         )
 
 
-def sub_directories(main_dir: os.PathLike[str]) -> list[str]:
+def sub_directories(main_dir: str) -> list[str]:
     """outputs a list of sub-directories of the input directory
 
     example: sub_dir = sub_directories(main_dir)
     """
     # finding the subdirectories
-    sub_dirs = [entry for entry in main_dir.iterdir() if entry.is_dir()]
+    sub_dirs = [str(entry) for entry in os.scandir(main_dir) if entry.is_dir()]
 
     return sub_dirs
 
@@ -1053,7 +1004,22 @@ def tree_gen(tree_root: os.PathLike[str], clk: datetime.datetime):
         os.makedirs(leaf)
 
 
-def mbf_make_index(application_type: str, ax: str):
+def update_index(data: dict, root_string: str, save_name: str) -> None:
+    index_name = f"{data['base_name']}_index"
+    timestamp = data["time"].strftime("%a %d %b %Y, %I:%M%p")
+    location = os.path.join(root_string, f"{index_name}.csv")
+    if not os.path.isfile(location):
+        os.makedirs(location)
+        print("New index file created")
+
+    with open(
+        os.path.join(root_string, f"{index_name}.csv"), "a", newline=""
+    ) as csvfile:
+        fw = csv.writer(csvfile, delimiter=",")
+        fw.writerows([save_name, timestamp])
+
+
+def mbf_make_index(application_type: str, ax: str | None):
     """Writes index files to speed up archive retrival def s:
     Args:
           application_type: either 'Growdamp', 'Bunch_motion', 'Modescan',
@@ -1070,40 +1036,15 @@ def mbf_make_index(application_type: str, ax: str):
         filter_name = f"{application_type}"
 
     datasets = dir_list_gen_tree(root_string, ".mat")
-    wanted_datasets_type = datasets(
-        find_position_in_cell_lst(strfind(datasets, filter_name))
-    )
+    wanted_datasets = [item for item in datasets if filter_name in item]
+
     print(f"Creating lookup index for {application_type} {ax}")
-    if not wanted_datasets_type:
+    if not wanted_datasets:
         print("No files to index")
     else:
-        ok = np.zeros(len(wanted_datasets_type))
-        file_time: list = []
-        file_name: list[str] = []
-        for kse in range(1, len(wanted_datasets_type)):
-            try:  # handling corrupted input files
-                temp = os.load(wanted_datasets_type[kse])
-            except me1:
-                ok[kse] = 0
-                print(f"{me1} message")
-
-            data_name = temp.keys()
-            # Although the code saves eveything in 'data', older datasets have
-            # a variety of names['']
-            if (
-                data_name[1] == "data"
-                or data_name[1] == "growdamp"
-                or data_name[1] == "what_to_save"
-            ):
-                file_time[kse] = temp[data_name[1]]["time"]
-                file_name[kse] = wanted_datasets_type[kse]
-                ok[kse] = 1
-            else:
-                #             print(fieldnames(temp))
-                ok[kse] = 0
-
-        file_index = cat(1, file_name[ok == 1], file_time[ok == 1])
-        save(fullfile(root_string, [application_type, "_", index_name]), "file_index")
+        for dataset in wanted_datasets:
+            data = scipy.io.loadmat(dataset)
+            update_index(data, root_string, dataset)
 
 
 def update_all_indexes():

@@ -2972,3 +2972,88 @@ def frontend_clock_phase_scan_archival_plotting(
     ymax = ymax + ymax / 10
     plt.ylim([ymin, ymax])
     return leading, excited, following, times, experimental_setup
+
+
+def archival_plotting_setup(requested_data, times, experimental_setup):
+    # Plots the data processed by growdamp_archival_analysis['']
+    # Args:
+    #      requested_data(structure): data and metatdata['']
+    #      times (numeric vector): Datetimes of the datasets['']
+    #      experimental_setup (structure): The setup parameters for the
+    #                                      analysis['']
+    #
+    # Example: growdamp_archival_plotting(dr_passive, dr_active, error_passive, error_active, times, setup, selections, extents)
+    [_3, harmonic_number, _2, _1] = system_config
+    ranges_to_printlay = {"RF", "time", "current"}
+    graph_text[1] = ["Analysis type: ", experimental_setup["anal_type"]]
+    if experimental_setup["anal_type"] == "parameter_sweep":
+        graph_labels = []
+        for hw in range(1, len(experimental_setup["param"])):
+            graph_labels[hw] = experimental_setup["param"](hw)
+
+    fig, _1 = plt.subplot_mosaic(
+        [["upper left", "upper right"], ["lower left", "lower right"]],
+        figsize=(5.5, 3.5),
+        layout="constrained",
+    )
+    annotation(
+        "textbox",
+        [0, 1, -0.3, 0.3, 0.3],
+        "String",
+        graph_text,
+        "FitBoxToText",
+        "on",
+        "Interpreter",
+        "none",
+    )
+    # Plot the RF variation from the setpoint['']
+    for hse in range(1, len(times)):
+        requested_data[hse]["RF"] = requested_data[hse]["RF"] - 4.99684e8
+
+    ck = 1
+    for hrd in range(1, len(ranges_to_printlay)):
+        if ranges_to_printlay[hrd] == "RF":
+            graph_label = "RF variation (Hz)"
+        elif ranges_to_printlay[hrd] == "current":
+            graph_label = "Current (mA)"
+        else:
+            graph_label = ranges_to_printlay[hrd]
+
+        if ranges_to_printlay[hrd] in requested_data[1]:
+            if ranges_to_printlay[hrd] == "time":
+                continue
+            else:
+                nexttile(t)
+                xlabel("Time")
+                title(ranges_to_printlay[hrd])
+                data_temp = NaN(len(times), 1)
+                for hse in range(1, len(times)):
+                    data_temp[hse] = requested_data[hse][ranges_to_printlay[hrd]]
+
+                plot[times, data_temp, "o:"]
+                datetick("x", "dd-mmm-yy")
+                ylabel(graph_label)
+                if strcmp(ranges_to_printlay[hrd], "RF"):
+                    title("reference 499.684MHz")
+
+                ck = ck + 1
+
+    if "fill_pattern" in requested_data[1]:
+        axfp = nexttile(t)
+        for hkw in range(1, len(requested_data)):
+            plot[1:harmonic_number, requested_data[hkw]["fill_pattern"], "b"]
+
+        ylim([0, inf])
+        xlim([1, harmonic_number])
+        set(axfp, "XTick", [])
+        title("Fill pattern variation")
+        ylabel("Charge (nC)")
+
+    # add labels if it is a parameter sweep['']
+    if nargin == 4 and experimental_setup["anal_type"] == "parameter_sweep":
+        for tb in range(len(experimental_setup["param"], -1, 1)):
+            labels[tb] = experimental_setup["param"](tb)
+
+        legend(labels)
+
+    return fig
