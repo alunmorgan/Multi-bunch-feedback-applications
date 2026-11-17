@@ -1,6 +1,7 @@
 import csv
 import datetime
 import os
+import time
 
 import numpy as np
 import scipy
@@ -46,6 +47,31 @@ def reconfigure_to_lists(input_data: list[dict]) -> dict:
             out[field_name].append(input_data[ke][field_name])
 
     return out
+
+
+def generate_sweep(sweep_start: float, sweep_end: float, sweep_step: float):
+    """Generate a sweep from start to end and back again."""
+    sweep_vals = list(np.arange(sweep_start, sweep_end, sweep_step))
+    sweep_vals.extend(
+        list(
+            np.arange(
+                sweep_end - sweep_step,
+                sweep_start,
+                -sweep_step,
+            )
+        )
+    )
+    return sweep_vals
+
+
+def slew_to_value(existing_value, target_value, step, pv):
+    for pp in range(
+        existing_value,
+        target_value,
+        step,
+    ):
+        set_variable(pv, pp)
+        time.sleep(0.5)
 
 
 def cat_multi_dim(

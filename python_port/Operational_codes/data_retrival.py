@@ -138,6 +138,15 @@ def archival_retrieval(
     return dataset, times, setup
 
 
+def retrieve_single_axis_data(
+    retrieval_function: FunctionType, mbf_axis: str, timestamp: datetime.datetime
+):
+    dataset, times, setup = retrieval_function(
+        mbf_axis, [timestamp, timestamp], filter_conditions=[]
+    )
+    return dataset
+
+
 def growdamp_archival_retrieval(
     ax,
     date_range,

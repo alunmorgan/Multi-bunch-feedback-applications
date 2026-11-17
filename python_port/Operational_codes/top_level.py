@@ -9,6 +9,7 @@ from data_retrival import (
     modescan_archival_retrieval,
     pll_phase_scan_retrival,
     pll_pi_scan_retrival,
+    retrieve_single_axis_data,
     spectra_archival_retrieval,
     tunescan_over_modes_retrival,
 )
@@ -181,7 +182,7 @@ def growdamp_all(
         tune_offset = 0
 
     # getting general environment data.
-    growdamp = machine_environment()
+    data = machine_environment()
     ## Setting up the growdamp experiments.
     states: list = []
     state_names: list = []
@@ -205,47 +206,52 @@ def growdamp_all(
         state_names[0] = "spacer"
         if "lower_sideband" in excitation_location:
             excitation_tune = (
-                growdamp["tunes"][f"{mbf_axis}_tune"]["lower_sideband"] + tune_offset
+                data["tunes"][f"{mbf_axis}_tune"]["lower_sideband"] + tune_offset
             )
         elif "upper_sideband" in excitation_location:
             excitation_tune = (
-                growdamp["tunes"][f"{mbf_axis}_tune"]["upper_sideband"] + tune_offset
+                data["tunes"][f"{mbf_axis}_tune"]["upper_sideband"] + tune_offset
             )
         elif "manual" in excitation_location:
             excitation_tune = excitation_manual
         else:
-            excitation_tune = (
-                growdamp["tunes"][f"{mbf_axis}_tune"]["tune"] + tune_offset
-            )
+            excitation_tune = data["tunes"][f"{mbf_axis}_tune"]["tune"] + tune_offset
 
     # Add the extra data to the data structure.
-    growdamp["ax_label"] = mbf_axis
-    growdamp["base_name"] = ["Growdamp_", mbf_axis, "_axis"]
-    growdamp["excitation_tune"] = excitation_tune
-    growdamp["states"] = states
-    growdamp["state_names"] = state_names
-    growdamp["mbf_axis"] = mbf_axis
-    growdamp["auto_setup"] = auto_setup
-    growdamp["plotting"] = plotting
-    growdamp["additional_save_location"] = additional_save_location
-    growdamp["excitation_setting"] = excitation_setting
-    growdamp["excitation_location"] = excitation_location
-    growdamp["excitation_manual"] = excitation_manual
-    growdamp["pll_tracking="] = pll_tracking
-    growdamp["pll_bunches"] = pll_bunches
-    growdamp["pll_guard_bunches"] = pll_guard_bunches
-    growdamp["bunches_monitored"] = bunches_monitored
-    growdamp["capture_full_bunch_motion"] = capture_full_bunch_motion
-    growdamp["start_state"] = "Feedback"
-    growdamp["end_state"] = "Feedback"
+    data["ax_label"] = mbf_axis
+    data["base_name"] = ["Growdamp_", mbf_axis, "_axis"]
+    data["excitation_tune"] = excitation_tune
+    data["states"] = states
+    data["state_names"] = state_names
+    data["mbf_axis"] = mbf_axis
+    data["auto_setup"] = auto_setup
+    data["plotting"] = plotting
+    data["additional_save_location"] = additional_save_location
+    data["excitation_setting"] = excitation_setting
+    data["excitation_location"] = excitation_location
+    data["excitation_manual"] = excitation_manual
+    data["pll_tracking="] = pll_tracking
+    data["pll_bunches"] = pll_bunches
+    data["pll_guard_bunches"] = pll_guard_bunches
+    data["bunches_monitored"] = bunches_monitored
+    data["capture_full_bunch_motion"] = capture_full_bunch_motion
+    data["start_state"] = "Feedback"
+    data["end_state"] = "Feedback"
 
     run_single_axis_measurement(
-        setup_info=growdamp,
+        setup_info=data,
         hardware_setup_function=growdamp_setup,
         capture_function=growdamp_capture,
         restore_function=None,
-        retrival_function=growdamp_archival_retrieval,
     )
+
+    ## Plotting data
+    if plotting == "yes":
+        retrieve_single_axis_data(
+            retrival_function=growdamp_archival_retrieval,
+            mbf_axis=mbf_axis,
+            timestamp=data["time"],
+        )
 
 
 def modescan_all(
@@ -273,28 +279,35 @@ def modescan_all(
     Example  modescan_all('x')
     """
     # getting general environment data
-    modescan = machine_environment()
+    data = machine_environment()
     # Add the extra data to the data structure.
-    modescan["ax_label"] = mbf_axis
-    modescan["base_name"] = f"Modescan_{mbf_axis}_axis"
-    modescan["excitation_tune"] = modescan["tunes"][f"{mbf_axis}_tune"]["tune"]
-    modescan["mbf_axis"] = mbf_axis
-    modescan["auto_setup"] = auto_setup
-    modescan["plotting"] = plotting
-    modescan["additional_save_location"] = additional_save_location
-    modescan["n_repeats"] = n_repeats
-    modescan["dwell"] = dwell
-    modescan["excitation_gain"] = excitation_gain
-    modescan["start_state"] = "TuneOnly"
-    modescan["end_state"] = "Feedback"
+    data["ax_label"] = mbf_axis
+    data["base_name"] = f"Modescan_{mbf_axis}_axis"
+    data["excitation_tune"] = data["tunes"][f"{mbf_axis}_tune"]["tune"]
+    data["mbf_axis"] = mbf_axis
+    data["auto_setup"] = auto_setup
+    data["plotting"] = plotting
+    data["additional_save_location"] = additional_save_location
+    data["n_repeats"] = n_repeats
+    data["dwell"] = dwell
+    data["excitation_gain"] = excitation_gain
+    data["start_state"] = "TuneOnly"
+    data["end_state"] = "Feedback"
 
     run_single_axis_measurement(
-        setup_info=modescan,
+        setup_info=data,
         hardware_setup_function=modescan_setup,
         capture_function=modescan_capture,
         restore_function=None,
-        retrival_function=modescan_archival_retrieval,
     )
+
+    ## Plotting data
+    if plotting == "yes":
+        retrieve_single_axis_data(
+            retrival_function=modescan_archival_retrieval,
+            mbf_axis=mbf_axis,
+            timestamp=data["time"],
+        )
 
 
 def mbf_spectrum_all(
@@ -320,26 +333,33 @@ def mbf_spectrum_all(
     Example mbf_spectrum_all
     """
     # getting general environment data.
-    spectrum = machine_environment()
+    data = machine_environment()
     # Add the extra data to the data structure.
-    spectrum["ax_label"] = mbf_axis
-    spectrum["base_name"] = f"Spectrum_{mbf_axis}_axis"
-    spectrum["mbf_axis"] = mbf_axis
-    spectrum["auto_setup"] = auto_setup
-    spectrum["plotting"] = plotting
-    spectrum["additional_save_location"] = additional_save_location
-    spectrum["n_turns"] = n_turns
-    spectrum["repeat"] = repeat
-    spectrum["start_state"] = "TuneOnly"
-    spectrum["end_state"] = "Feedback"
+    data["ax_label"] = mbf_axis
+    data["base_name"] = f"Spectrum_{mbf_axis}_axis"
+    data["mbf_axis"] = mbf_axis
+    data["auto_setup"] = auto_setup
+    data["plotting"] = plotting
+    data["additional_save_location"] = additional_save_location
+    data["n_turns"] = n_turns
+    data["repeat"] = repeat
+    data["start_state"] = "TuneOnly"
+    data["end_state"] = "Feedback"
 
     run_single_axis_measurement(
-        setup_info=spectrum,
+        setup_info=data,
         hardware_setup_function=spectrum_setup,
         capture_function=spectrum_capture,
         restore_function=None,
-        retrival_function=spectra_archival_retrieval,
     )
+
+    ## Plotting data
+    if plotting == "yes":
+        retrieve_single_axis_data(
+            retrival_function=spectra_archival_retrieval,
+            mbf_axis=mbf_axis,
+            timestamp=data["time"],
+        )
 
 
 def Bunch_motion_all(
@@ -358,8 +378,15 @@ def Bunch_motion_all(
         hardware_setup_function=bunch_motion_setup,
         capture_function=bunch_motion_capture,
         restore_function=bunch_motion_restore,
-        retrival_function=bunch_motion_retrival,
     )
+    if plotting == "yes":
+        # for archival investigations this allows filtering by machine state.
+        # but for capture this is not needed so it set to empty.
+        filter_conditions: list = []
+        bunch_motion_retrival(
+            [data["time"], data["time"]],
+            filter_conditions,
+        )
 
 
 def BBBFE_clock_phase_scan(
@@ -414,8 +441,15 @@ def BBBFE_clock_phase_scan(
         hardware_setup_function=clock_phase_scan_setup,
         capture_function=clock_phase_scan_capture,
         restore_function=clock_phase_scan_restore,
-        retrival_function=clock_phase_scan_retrival,
     )
+    if plotting == "yes":
+        # for archival investigations this allows filtering by machine state.
+        # but for capture this is not needed so it set to empty.
+        filter_conditions: list = []
+        clock_phase_scan_retrival(
+            [data["time"], data["time"]],
+            filter_conditions,
+        )
 
 
 def BBBFE_full_frontend_checkout(single_bunch_location: int):
@@ -607,14 +641,14 @@ def mbf_pll_phase_scan(mbf_axis: str, scan_range: int = 270, step: int = 1) -> N
 
     Example: fll_phase_scan = mbf_pll_peakfind('x')
     """
-    pll_phase_scan = machine_environment()
-    pll_phase_scan["ax_label"] = mbf_axis
-    pll_phase_scan["base_name"] = f"pll_phase_scan_{pll_phase_scan['ax_label']}_axis"
-    pll_phase_scan["scan_step"] = step
-    pll_phase_scan["scan_range"] = scan_range
+    data = machine_environment()
+    data["ax_label"] = mbf_axis
+    data["base_name"] = f"pll_phase_scan_{data['ax_label']}_axis"
+    data["scan_step"] = step
+    data["scan_range"] = scan_range
 
     run_single_axis_measurement(
-        setup_info=pll_phase_scan,
+        setup_info=data,
         hardware_setup_function=None,
         capture_function=pll_phase_scan_capture,
         restore_function=None,
@@ -637,29 +671,35 @@ def tunescan_over_modes_all(
     """top level def to run the tunescan for all modes in the selected plane."""
 
     # getting general environment data
-    tunescan = machine_environment()
+    data = machine_environment()
     # Add the extra data to the data structure.
-    tunescan["ax_label"] = mbf_axis
-    tunescan["base_name"] = f"tunescan_{tunescan['ax_label']}_axis"
-    tunescan["auto_setup"] = auto_setup
-    tunescan["plotting"] = plotting
-    tunescan["additional_save_location"] = additional_save_location
-    tunescan["n_captures"] = n_captures
-    tunescan["start_mode"] = start_mode
-    tunescan["drive_bunches"] = drive_bunches
-    tunescan["feedback_state"] = feedback_state
-    tunescan["start_frequency"] = start_frequency
-    tunescan["end_frequency"] = end_frequency
-    tunescan["start_state"] = "TuneOnly"
-    tunescan["end_state"] = "TuneOnly"
+    data["ax_label"] = mbf_axis
+    data["base_name"] = f"tunescan_{data['ax_label']}_axis"
+    data["auto_setup"] = auto_setup
+    data["plotting"] = plotting
+    data["additional_save_location"] = additional_save_location
+    data["n_captures"] = n_captures
+    data["start_mode"] = start_mode
+    data["drive_bunches"] = drive_bunches
+    data["feedback_state"] = feedback_state
+    data["start_frequency"] = start_frequency
+    data["end_frequency"] = end_frequency
+    data["start_state"] = "TuneOnly"
+    data["end_state"] = "TuneOnly"
 
     run_single_axis_measurement(
-        setup_info=tunescan,
+        setup_info=data,
         hardware_setup_function=tunescan_over_modes_setup,
         capture_function=tunescan_over_modes_capture,
         restore_function=tunescan_over_modes_restore,
-        retrival_function=tunescan_over_modes_retrival,
     )
+    ## Plotting data
+    if plotting == "yes":
+        retrieve_single_axis_data(
+            retrival_function=tunescan_over_modes_retrival,
+            mbf_axis=mbf_axis,
+            timestamp=data["time"],
+        )
 
 
 def BBBFE_LO_scan(

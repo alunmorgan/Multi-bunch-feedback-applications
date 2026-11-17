@@ -1,4 +1,3 @@
-import datetime
 import time
 from types import FunctionType
 
@@ -12,13 +11,13 @@ from hardware_setup import (
 )
 
 from Common import (
+    generate_sweep,
     get_operational_mode,
     get_variable,
-    hannwin,
-    machine_environment,
     save_to_archive,
     set_variable,
     setup_operational_mode,
+    slew_to_value,
     system_config,
 )
 
@@ -28,7 +27,6 @@ def run_single_axis_measurement(
     hardware_setup_function: FunctionType,
     capture_function: FunctionType,
     restore_function: FunctionType,
-    retrival_function: FunctionType,
 ):
     [root_string, harmonic_number, pv_names] = system_config()
     pv_head = pv_names["hardware_names"][setup_info["mbf_axis"]]
@@ -93,24 +91,12 @@ def run_single_axis_measurement(
     if setup_info["additional_save_location"]:
         scipy.savemat(setup_info["additional_save_location"], data)
 
-    ## Plotting data
-    if setup_info["plotting"] == "yes":
-        # for archival investigations this allows filtering by machine state.
-        # but for capture this is not needed so it set to empty.
-        filter_conditions: list = []
-        retrival_function(
-            setup_info["mbf_axis"],
-            [setup_info["time"], setup_info["time"]],
-            filter_conditions,
-        )
-
 
 def run_multi_axis_measurement(
     setup_info: dict,
     hardware_setup_function: FunctionType,
     capture_function: FunctionType,
     restore_function: FunctionType,
-    retrival_function: FunctionType,
 ):
     [root_string, harmonic_number, pv_names] = system_config()
     mbf_pv_x = pv_names["hardware_names"]["x"]
@@ -169,17 +155,6 @@ def run_multi_axis_measurement(
     if setup_info["additional_save_location"]:
         scipy.savemat(setup_info["additional_save_location"], data)
 
-    ## Plotting data
-    if setup_info["plotting"] == "yes":
-        # for archival investigations this allows filtering by machine state.
-        # but for capture this is not needed so it set to empty.
-        filter_conditions: list = []
-        retrival_function(
-            setup_info["mbf_axis"],
-            [setup_info["time"], setup_info["time"]],
-            filter_conditions,
-        )
-
 
 def growdamp_capture(input_settings: dict, pv_names: dict) -> dict:
     """Gathers data on the machine environment.
@@ -216,7 +191,7 @@ def growdamp_capture(input_settings: dict, pv_names: dict) -> dict:
     ## Preparing system for data capture
     set_variable(f"{pv_head_mem}{triggers['MEM']['disarm']}", 1)
     time.sleep(0.5)  # Letting the hardware sort itself out.
-    # Arm the memory so that it cycles[''] This means that all the status PV are
+    # Arm the memory so that it cycles. This means that all the status PV are
     # updated. Otherwise the code will say the memory is not ready as the status is
     # stale.
     set_variable(f"{pv_head_mem}{triggers['MEM']['arm']}", 1)
@@ -281,8 +256,8 @@ def get_stage_details(exp_data: dict) -> tuple[list, list, list]:
                     else:
                         stage_names[n] = "passive"
         ck: int = 1
-        # change the ordering so that the first stage in time is at index 1['']
-        # works out which samples in the time series correspond to each stage['']
+        # change the ordering so that the first stage in time is at index 1.
+        # works out which samples in the time series correspond to each stage.
         end_of_stage: list = []
         recorded_stage_names: list = []
         samples_of_stage: list = []
@@ -383,178 +358,6 @@ def mbf_modescan_config(mbf_axis: str) -> None:
         settings["dwell"] = 200
         settings["det_gain"] = -24  # detector gain in dB.
         settings["seq_gain"] = -42  # sequencer gain in dB.
-
-
-def mbf_spectrum(mbf_axis: str, n_turns: int, fold: int = 1, repeat: int = 1) -> dict:
-    """generates a spectragram of all bunches.
-
-    Args:
-          mbf_axis: 'x', 'y', 's'. Defines which system you are requesting.
-          n_turns: The number of turns to capture.
-          fold: The number of times to fold the data along the
-                      frequency axis. This enhances power resolution
-                      at the cost of frequency resolution.
-          repeat: Repeat the capture this many times in order to
-                        improve the power resolution.
-
-    Example: mbf_spectrum('x',10000)
-    """
-    ## Getting the desired system setup parameters.
-    [root_string, harmonic_number, pv_names, trigger_inputs] = system_config()
-
-    # Generate the base PV name.
-    pv_head = pv_names["hardware_names"][mbf_axis]
-    if mbf_axis == "s":
-        system_name = pv_names["hardware_names"]["L"]
-    else:
-        system_name = pv_names["hardware_names"]["T"]
-
-    PVt = pv_names["tails"]
-    # getting general environment data.
-    mbf_spec = machine_environment()
-    mbf_spec["axis_label"] = mbf_axis
-    # Disarm the sequencer and memory triggers
-    set_variable(
-        f"{pv_names['hardware_names'][mbf_axis]}"
-        f"{pv_names['tails']['triggers']['SEQ']['disarm']}",
-        1,
-    )
-    set_variable(f"{system_name}{pv_names['tails']['triggers']['MEM']['disarm']}", 1)
-    for trigger_ind in range(len(trigger_inputs)):
-        trigger = trigger_inputs[trigger_ind]
-        set_variable(
-            f"{pv_head}{pv_names['tails']['triggers']['MEM'][trigger]['enable_status']}",
-            "Ignore",
-        )
-        set_variable(
-            f"{pv_head}{pv_names['tails']['triggers']['MEM'][trigger]['blanking_status']}",
-            "All",
-        )
-
-    # Set the trigger to one shot
-    set_variable(f"{pv_head}{PVt['triggers']['MEM']['mode']}", "One Shot")
-    # Set the triggering to External only
-    set_variable(
-        f"{pv_head}{pv_names['triggers']['MEM']['EXT']['enable_status']}", "Enable"
-    )
-    #  set up the memory buffer to capture ADC data['']
-    set_variable(f"{pv_head}{pv_names['MEM']['channel_select']}", "ADC0/ADC1")
-    mode_data = np.zeros(n_turns / fold, harmonic_number)
-    bunch_data = np.zeros(n_turns / 2, harmonic_number)
-    if mbf_axis == "x" or mbf_axis == "s":
-        chan = 0
-    elif mbf_axis == "y":
-        chan = 1
-
-    for k in range(1, repeat):
-        set_variable(f"{ax2dev(mbf_axis)}{pv_names['tails']['MEM_arm']}", 1)
-        if mbf_axis == "s":
-            set_variable(
-                f"{pv_names['hardware_names']['L']}{pv_names['tails']['triggers']['soft']}",
-                1,
-            )
-            raw_data = mbf_read_mem(
-                pv_names["hardware_names"]["L"], n_turns, "channel", chan, "lock", 60
-            )
-        else:
-            set_variable(
-                f"{pv_names['hardware_names']['T']}{pv_names['tails']['triggers']['soft']}",
-                1,
-            )
-            raw_data = mbf_read_mem(
-                pv_names["hardware_names"]["T"], n_turns, "channel", chan, "lock", 60
-            )
-
-        data_length = len(raw_data)
-        # remove everything that is constant each revolotion
-        xx = np.reshape(
-            raw_data, harmonic_number, []
-        )  # turn into matrix bunches x turns
-        xx = xx - np.repmat(
-            np.mean(xx, 2), 1, n_turns
-        )  # subtract the average position per bunch
-        motion_only = np.reshape(xx, 1, [])  # stretch out again
-        # This enhances power resolution at the cost of frequency resolution['']
-        folded_motion = np.reshape(motion_only, data_length / fold, fold)
-        # calculate spectrum over all bunches
-        s = 2 * np.sqrt(
-            np.mean(abs(np.fft(hannwin(folded_motion)) / (data_length / fold)) ^ 2, 2)
-        )
-        ss1 = np.reshape(s, n_turns / fold, harmonic_number)  # fold into tune x modes
-        mode_data = mode_data ^ 2 + ss1 ^ 2  # accumulating['']
-        xf1 = abs(np.fft(hannwin(xx), [], 2)) / n_turns
-        # only taking the lower half of the FFT
-        bunch_data = (
-            bunch_data ^ 2 + (xf1[:, 1 : np.floor(len(xf1) / 2)]) ^ 2
-        )  # accumulating
-    data = {}
-    data["bunch_data"] = bunch_data
-    data["bunch_bunches"] = np.sum(bunch_data[""] ^ 2, 1)
-    data["bunch_tune"] = np.sum(bunch_data[""] ^ 2, 2)
-    data["tune_data"] = np.fft.fftshift(mode_data, 2)
-    data["mode_modes"] = np.sum(bunch_data[""] ^ 2, 1)
-    data["mode_tune"] = np.sum(mode_data[1 : np.floor(len(mode_data)) / 2, :] ^ 2, 2)
-    data["tune_axis"] = np.linspace(0, 0.5, len(data["bunch_tune"]))
-    data["bunch_axis"] = range(harmonic_number)
-    data["mode_axis"] = range(-harmonic_number / 2, (harmonic_number / 2))
-
-    graph_handles = plt.figure
-    ax1 = plt.subplot("position", [0.02, 0.35, 0.7, 0.6])
-    plt.imagesc(
-        data["bunch_axis"],
-        data["tune_axis"],
-        np.log10(data["bunch_data"]),
-        [-3, 0] + np.log10(max(max(data["bunch_data"]))),
-    )
-    set(ax1, "YAxisLocation", "right")
-    set(ax1, "YDir", "normal")
-    set(ax1, "XTick", [])
-    set(ax1, "YTick", [])
-    plt.title(data["axis_label"])
-    # Frequencies graph
-    ax2 = plt.subplot("position", [0.72, 0.35, 0.18, 0.6])
-    plt.plot(data["bunch_tune"], data["tune_axis"])
-    set(ax2, "YAxisLocation", "right")
-    set(ax2, "XAxisLocation", "top")
-    set(ax2, "XTick", [])
-    plt.ylabel("Fractional tune")
-    # bunches graph
-    [_1, bpi] = max(data["mode_tune"])
-    ax3 = plt.subplot("position", [0.02, 0.11, 0.7, 0.24])
-    plt.plot(data["bunch_data"][bpi, :])
-    plt.xlabel(f"Bunches at peak tune {data['tune_axis'][bpi]}")
-    set(ax3, "YTick", [])
-
-    graph_handles = plt.figure
-    ax4 = plt.subplot("position", [0.02, 0.35, 0.7, 0.6])
-    plt.imagesc(
-        data["mode_axis"],
-        data["tune_axis"],
-        np.log10(data["tune_data"][1 : -1 / 2, :]),
-        [-3, 0] + np.log10(max(max(data["tune_data"][1 : -1 / 2, :]))),
-    )
-    set(ax4, "YAxisLocation", "right")
-    set(ax4, "YDir", "normal")
-    set(ax4, "XTick", [])
-    set(ax4, "YTick", [])
-    ax5 = plt.subplot("position", [0.72, 0.35, 0.18, 0.6])
-    plt.plot(data["mode_tune"], data["tune_axis"])
-    set(ax5, "YAxisLocation", "right")
-    set(ax5, "XAxisLocation", "top")
-    set(ax5, "XTick", [])
-    plt.ylabel("Fractional tune")
-    ax6 = plt.subplot("position", [0.02, 0.11, 0.7, 0.24])
-    plt.plot(data["mode_axis"][data["tune_data"][bpi, :]])
-    plt.xlabel(f"Modes at peak tune {data['tune_axis'][bpi]}")
-    set(ax6, "YTick", [])
-
-    data["time"] = datetime.datetime.now()
-    data["base_name"] = ["Spectrum_", mbf_axis, "_axis"]
-    ## saving the data to a file
-    save_to_archive(root_string, data, graph_handles)
-    mbf_restore_all()
-
-    return data
 
 
 def spectrum_capture(input_settings: dict, pv_names: dict) -> dict:
@@ -840,24 +643,16 @@ def clock_phase_scan_capture(setup_info: dict, pv_names: dict) -> dict:
     fe_phase_pv = f"{frontend}{clock_phase}"
     data = setup_info
     # set up the sweep
-    data["phase"] = range(
+    setup_info["gain"] = generate_sweep(
         setup_info["sweep_start"], setup_info["sweep_end"], setup_info["sweep_step"]
     )
-    data["phase"].extend(
-        range(
-            setup_info["sweep_end"] - setup_info["sweep_step"],
-            setup_info["sweep_start"],
-            -setup_info["sweep_step"],
-        )
-    )
     # moving to starting point in scan
-    for pp in range(
-        setup_info["original_frontend_clock_phase"],
-        setup_info["sweep_start"],
-        -setup_info["sweep_step"],
-    ):
-        set_variable(fe_phase_pv, pp)
-        time.sleep(0.5)
+    slew_to_value(
+        existing_value=setup_info["original_frontend_gain"],
+        target_value=setup_info["sweep_start"],
+        step=-setup_info["sweep_step"],
+        pv=fe_phase_pv,
+    )
 
     data["side1"] = []
     data["main"] = []
@@ -883,11 +678,13 @@ def clock_phase_scan_capture(setup_info: dict, pv_names: dict) -> dict:
             data["adc_min"][x] = max(get_variable(f"{pv_head}{adc['min']}"))
 
     # move back to the original setting
-    for pp in range(
-        data["sweep_start"], data["original_frontend_clock_phase"], data["sweep_step"]
-    ):
-        set_variable(fe_phase_pv, pp)
-        time.sleep(0.5)
+    slew_to_value(
+        existing_value=setup_info["sweep_start"],
+        target_value=data["original_frontend_clock_phase"],
+        step=setup_info["sweep_step"],
+        pv=fe_phase_pv,
+    )
+
     return data
 
 
@@ -900,29 +697,22 @@ def bbbfe_gain_scan_capture(setup_info: dict, pv_names: dict) -> dict:
 
     data = setup_info
     # set up the sweep
-    setup_info["gain"] = range(
+    setup_info["gain"] = generate_sweep(
         setup_info["sweep_start"], setup_info["sweep_end"], setup_info["sweep_step"]
     )
-    setup_info["gain"].extend(
-        range(
-            setup_info["sweep_end"] - setup_info["sweep_step"],
-            setup_info["sweep_start"],
-            -setup_info["sweep_step"],
-        )
-    )
+
     # prealloacation
     data["adc_mean"] = []
     data["adc_max"] = []
     data["adc_min"] = []
 
     # moving to starting point in scan
-    for pp in range(
-        setup_info["original_frontend_gain"],
-        setup_info["sweep_start"],
-        -setup_info["sweep_step"],
-    ):
-        set_variable(fe_gain_pv, pp)
-        time.sleep(0.5)
+    slew_to_value(
+        existing_value=setup_info["original_frontend_gain"],
+        target_value=setup_info["sweep_start"],
+        step=-setup_info["sweep_step"],
+        pv=fe_gain_pv,
+    )
 
     # measurement
     for x in range(len(setup_info["gain"])):
@@ -933,13 +723,13 @@ def bbbfe_gain_scan_capture(setup_info: dict, pv_names: dict) -> dict:
         data["adc_min"][x] = max(get_variable([pv_head, adc["min"]]))
 
     # move back to the original setting
-    for pp in range(
-        setup_info["sweep_start"],
-        setup_info["original_frontend_gain"],
-        setup_info["sweep_step"],
-    ):
-        set_variable(fe_gain_pv, pp)
-        time.sleep(0.5)
+    slew_to_value(
+        existing_value=setup_info["sweep_start"],
+        target_value=setup_info["original_frontend_gain"],
+        step=setup_info["sweep_step"],
+        pv=fe_gain_pv,
+    )
+
     return data
 
 
@@ -959,14 +749,8 @@ def bbbfe_system_phase_scan_capture(setup_info: dict, pv_names: dict) -> dict:
         fe_phase_pvQ = f"{frontend}{fe_system_phase['sQ']}"
 
     # set up the sweep
-    setup_info["phase"] = range(
+    setup_info["gain"] = generate_sweep(
         setup_info["sweep_start"], setup_info["sweep_end"], setup_info["sweep_step"]
-    )
-    setup_info["phase"].extend(
-        range(
-            setup_info["sweep_end"] - setup_info["sweep_step"],
-            setup_info["sweep_start"] - setup_info["sweep_step"],
-        )
     )
     data = setup_info
     # prealloacation
@@ -976,26 +760,21 @@ def bbbfe_system_phase_scan_capture(setup_info: dict, pv_names: dict) -> dict:
     data["adc_phase"] = []
 
     # moving to starting point in scan
-    for pp in range(
-        data["original_system_phase"],
-        setup_info["sweep_start"],
-        -setup_info["sweep_step"],
-    ):
-        set_variable(fe_phase_pv, pp)
-        time.sleep(5)
+    slew_to_value(
+        existing_value=data["original_system_phase"],
+        target_value=setup_info["sweep_start"],
+        step=-setup_info["sweep_step"],
+        pv=fe_phase_pv,
+    )
 
     if setup_info["mbf_axis"].lower() == "s":
         # I and Q must be in quadrature
-        for pp in (
-            range(
-                data["original_system_phaseQ"],
-                setup_info["sweep_start"],
-                -setup_info["sweep_step"],
-            )
-            + 90
-        ):
-            set_variable(fe_phase_pvQ, pp)
-            time.sleep(5)
+        slew_to_value(
+            existing_value=data["original_system_phase"] + 90,
+            target_value=setup_info["sweep_start"] + 90,
+            step=-setup_info["sweep_step"],
+            pv=fe_phase_pvQ,
+        )
 
     # measurement
     for x in range(len(data["phase"])):
@@ -1021,19 +800,21 @@ def bbbfe_system_phase_scan_capture(setup_info: dict, pv_names: dict) -> dict:
             data["adc_min"][x] = max(get_variable(f"{pv_head}{adc['min']}"))
 
     # move back to the original setting
-    for pp in range(
-        data["sweep_start"], data["original_system_phase"], data["sweep_step"]
-    ):
-        set_variable(fe_phase_pv, pp)
-        time.sleep(5)
+    slew_to_value(
+        existing_value=setup_info["sweep_start"],
+        target_value=data["original_system_phase"],
+        step=setup_info["sweep_step"],
+        pv=fe_phase_pv,
+    )
 
     if setup_info["mbf_axis"].lower() == "s":
         # move back to the original setting
-        for pp in range(
-            data["sweep_start"] + 90, data["original_system_phaseQ"], data["sweep_step"]
-        ):
-            set_variable(fe_phase_pvQ, pp)
-            time.sleep(5)
+        slew_to_value(
+            existing_value=setup_info["sweep_start"] + 90,
+            target_value=data["original_system_phaseQ"],
+            step=setup_info["sweep_step"],
+            pv=fe_phase_pvQ,
+        )
 
     return data
 
@@ -1047,15 +828,8 @@ def doris_target_phase_scan_capture(setup_info: dict, pv_names: dict) -> dict:
     setup_info["original_doris_target_phase"] = get_variable(doris_pv)
 
     # set up the sweep
-    setup_info["phase"] = range(
+    setup_info["gain"] = generate_sweep(
         setup_info["sweep_start"], setup_info["sweep_end"], setup_info["sweep_step"]
-    )
-    setup_info["phase"].extend(
-        range(
-            setup_info["sweep_end"] - setup_info["sweep_step"],
-            setup_info["sweep_start"],
-            -setup_info["sweep_step"],
-        )
     )
     data = setup_info
     # prealloacation
@@ -1068,6 +842,8 @@ def doris_target_phase_scan_capture(setup_info: dict, pv_names: dict) -> dict:
 
     # moving to starting point in scan
     set_variable(doris_pv, -180)
+
+    # measurement
     for dbf in range(1, len(data["phase"])):
         set_variable(doris_pv, data["phase"][dbf])
         time.sleep(2)
