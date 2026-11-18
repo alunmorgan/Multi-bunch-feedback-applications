@@ -5,9 +5,9 @@ import re
 import matplotlib.pyplot as plt
 import matplotlib.text as mplt
 import numpy as np
+from analysis import tune_fit
 
 from Common import (
-    archival_plotting_setup,
     construct_datastamped_filename,
     mode_to_frequency,
     system_config,
@@ -148,7 +148,7 @@ def populate_archive_graph(input_data, years_input, times, x_plt_axis):
 #                 close(h(nq))
 
 
-def growdamp_archival_plotting(
+def archival_plotting_growdamp(
     requested_data: list[dict],
     dataset: dict,
     times: list[float],
@@ -397,7 +397,7 @@ def populate_graph(input_data, years_input, times, x_plt_axis):
     plt.legend("show")
 
 
-def growdamp_plot_summary(data: dict, metadata: dict, plot_mode: str = "pos"):
+def plotting_growdamp(data: dict, metadata: dict, plot_mode: str = "pos"):
     """Plots the driven growth rates, and the active and pasive damping rates
     # across all modes.
     #
@@ -608,7 +608,7 @@ def growdamp_plot_summary(data: dict, metadata: dict, plot_mode: str = "pos"):
     plt.xlabel(labelX_f)
 
 
-def growthrates_archival_plotting(
+def archival_plotting_growthrates(
     requested_data: list[dict],
     dr_growth,
     dr_active,
@@ -865,7 +865,7 @@ def growthrates_archival_plotting(
     #     linkaxes([ax3,ax4],'x')
 
 
-def modescan_archival_plotting(
+def archival_plotting_modescan(
     requested_data: list[dict],
     data_magnitude,
     data_phase,
@@ -964,7 +964,7 @@ def modescan_archival_plotting(
     plt.xlim([x_plt_axis[1], x_plt_axis[-1]])
 
 
-def modescan_plotting(data_magnitude, data_phase, modescan: dict):
+def plotting_modescan(data_magnitude, data_phase, modescan: dict):
     """Plots the effectiveness of correction across all modes['']
 
     Args:
@@ -1081,7 +1081,7 @@ def modescan_plotting(data_magnitude, data_phase, modescan: dict):
     plt.xlabel("Frequency (MHz)")
 
 
-def spectra_archival_plotting(
+def archival_plotting_spectrum(
     requested_data: list[dict], spec_data, times: list[float], experimental_setup: dict
 ):
     """Plots the data processed by growdamp_archival_analysis.
@@ -1193,7 +1193,7 @@ def spectra_archival_plotting(
         plt.title(requested_data[jw]["time"].strftime("%a %d %b %Y, %I:%M%p"))
 
 
-def spectrum_plotting(requested_data: list[dict], analysed_data):
+def plotting_spectrum(requested_data: list[dict], analysed_data):
     """Plots the data saved and analysed by the earlier mbf_spectrum def s['']:
     # Args:
     #         all_data(structure): analysed data['']
@@ -1333,7 +1333,7 @@ def spectrum_plotting(requested_data: list[dict], analysed_data):
     plt.xlabel("Tune")
 
 
-def bunch_motion_archival_plotting(
+def archival_plotting_bunch_motion(
     requested_data: list[dict], dataset, times: list[float], experimental_setup: dict
 ):
     """Plots the data processed by growdamp_archival_analysis.
@@ -1518,64 +1518,7 @@ def bunch_motion_archival_plotting(
         plt.legend(labels)
 
 
-def populate_graph(input_data, years_input, times, x_plt_axis):
-    if not input_data:
-        return
-
-    y_max = max(max(input_data))
-    y_min = min(min(input_data))
-    years = []
-    states = []
-    cols = []
-    for esr in range(years_input.shape[0]):
-        years[esr] = years_input[esr][0]
-        states[esr] = 0
-        cols[esr] = years_input[esr][1]
-
-    year_list = times.year
-    if len(np.unique(year_list)) < 2:
-        for ner in range(input_data.shape[0]):
-            sample_time = times[ner].strftime("%a %d %b %Y, %I:%M%p")
-            plt.plot(
-                x_plt_axis,
-                input_data[ner, :],
-                "DisplayName",
-                sample_time,
-                "LineWidth",
-                2,
-            )
-
-    else:
-        for ner in range(input_data.shape[0]):
-            years_ind = np.find(year_list(ner) == years)
-            if states[years_ind] == 0:
-                plt.plot(
-                    x_plt_axis,
-                    input_data[ner, :],
-                    cols[years_ind],
-                    "DisplayName",
-                    (year_list(ner)),
-                    "LineWidth",
-                    2,
-                )
-                states[years_ind] = 1
-            else:
-                plt.plot(
-                    x_plt_axis,
-                    input_data[ner, :],
-                    cols[years_ind],
-                    "HandleVisibility",
-                    "off",
-                    "LineWidth",
-                    2,
-                )
-
-    plt.xlim(x_plt_axis(1), x_plt_axis(-1))
-    plt.ylim(y_min, y_max)
-    plt.legend("show")
-
-
-def bunch_motion_plotting(data, selected_bunches, selected_turns):
+def plotting_bunch_motion(data, selected_bunches, selected_turns):
     x = np.reshape(data["x"], data["num_buckets"], [])
     y = np.reshape(data["y"], data["num_buckets"], [])
     z = np.reshape(data["z"], data["num_buckets"], [])
@@ -1749,7 +1692,7 @@ def bunch_motion_plotting(data, selected_bunches, selected_turns):
     plt.savefig(f"{data['filename']}_turns.png")
 
 
-def bunch_motion_spectra_plotting(data):
+def plotting_bunch_motion_spectra(data):
     xt = np.reshape(data["x"], data["num_buckets"], [])
     yt = np.reshape(data["y"], data["num_buckets"], [])
     zt = np.reshape(data["z"], data["num_buckets"], [])
@@ -1864,7 +1807,7 @@ def add_original_values(mbf_ax, data):
             )
 
 
-def frontend_gain_scan_plotting(data):
+def plotting_frontend_gain_scan(data):
     graph_name = data["base_name"].replace("_", " ")
     # plotting
     fig, _1 = plt.subplot_mosaic(
@@ -1899,7 +1842,7 @@ def frontend_gain_scan_plotting(data):
     fig.ylabel("Signal")
 
 
-def frontend_system_phase_scan_plotting(data):
+def plotting_frontend_system_phase_scan(data):
     temp = re.findall("[]*_([xys])_axis$", data["base_name"])
     mbf_ax = temp[0]
     graph_name = data["base_name"].replace("_", " ")
@@ -1965,7 +1908,7 @@ def frontend_system_phase_scan_plotting(data):
         plt.ylabel("ADC phase")
 
 
-def doris_phase_scan_plotting(data):
+def plotting_doris_target_phase_scan(data):
     # plotting
     fig, _1 = plt.subplot_mosaic(
         [["upper left", "upper right"], ["lower left", "lower right"]],
@@ -1996,7 +1939,7 @@ def doris_phase_scan_plotting(data):
     )
 
 
-def frontend_gain_scan_archival_plotting(
+def archival_plotting_frontend_gain_scan(
     requested_data: list[dict],
     adc_mean,
     adc_max,
@@ -2103,7 +2046,7 @@ def frontend_gain_scan_archival_plotting(
     return adc_mean, adc_max, adc_min, times, experimental_setup
 
 
-def frontend_system_phase_scan_archival_plotting(
+def archival_plotting_frontend_system_phase_scan(
     requested_data: list[dict],
     leading,
     excited,
@@ -2247,7 +2190,7 @@ def frontend_system_phase_scan_archival_plotting(
     plt.ylabel("Signal differences")
 
 
-def pll_phase_scan_plotting(fll_phase_scan):
+def plotting_pll_phase_scan(fll_phase_scan):
     """Plots the results of a FLL phase scan on the
     multi binch feedback system
 
@@ -2285,7 +2228,7 @@ def pll_phase_scan_plotting(fll_phase_scan):
     return f1
 
 
-def pll_phase_scan_plotting_multi(
+def plotting_pll_phase_scan_multi(
     selected_axis, requested_data, scan_type="samples", target_bunch_override=None
 ):
     """Plots the results of a FLL phase scan on the
@@ -2395,7 +2338,7 @@ def plot_pll_data(pll_data):
     plt.xlabel(["samples (spacing 4096 * ", (pll_data["dwell"]), ")"])
 
 
-def tunescan_over_modes_archival_plotting(
+def archival_plotting_tunescan_over_modes(
     requested_data, dataset, times, experimental_setup
 ):
     """Plots the data processed by growdamp_archival_analysis.
@@ -2692,7 +2635,7 @@ def tunescan_over_modes_archival_plotting(
     #     plt.ylabel("Active damping rate errors")
 
 
-def tunescan_over_modes_plot_summary(tunescan):
+def plotting_tunescan_over_modes(tunescan):
     """Plots the effectiveness of correction across all modes.
 
     Args:
@@ -2780,7 +2723,7 @@ def tunescan_over_modes_plot_summary(tunescan):
         plt.ylabel("error of fit")
 
 
-def frontend_clock_phase_scan_plotting(data: dict):
+def plotting_frontend_clock_phase_scan(data: dict):
     temp = re.findall("[]*_([xys])_axis$", data["base_name"])
     mbf_ax = temp[0]
     graph_name = data["base_name"].replace("_", " ")
@@ -2832,7 +2775,7 @@ def frontend_clock_phase_scan_plotting(data: dict):
         plt.ylabel("ADC phase")
 
 
-def frontend_clock_phase_scan_archival_plotting(
+def archival_plotting_frontend_clock_phase_scan(
     requested_data: list[dict],
     leading,
     excited,

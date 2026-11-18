@@ -5,7 +5,7 @@ import time
 
 import numpy as np
 import scipy
-from cothread.catools import FORMAT_TIME, caget, caput
+from cothread.catools import FORMAT_TIME, caget, caput  # type: ignore
 
 from Operational_codes.hardware_setup import get_all_tunes
 

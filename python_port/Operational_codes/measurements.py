@@ -1,14 +1,13 @@
 import time
 from types import FunctionType
 
-import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 from hardware_setup import (
-    configure_tune_sweep,
     mbf_pll_start,
     reestablish_tune_measurement,
 )
+from pyMBF_read.mbf_read import read_det, read_mem
 
 from Common import (
     generate_sweep,
@@ -156,7 +155,7 @@ def run_multi_axis_measurement(
         scipy.savemat(setup_info["additional_save_location"], data)
 
 
-def growdamp_capture(input_settings: dict, pv_names: dict) -> dict:
+def capture_growdamp(input_settings: dict, pv_names: dict) -> dict:
     """Gathers data on the machine environment.
     Runs a growdamp experiment on an already setup system.
     Saves the resultant data.
@@ -228,83 +227,20 @@ def growdamp_capture(input_settings: dict, pv_names: dict) -> dict:
     # Trigger
     set_variable(f"{pv_head_mem}{triggers['soft']}", 1)
     # download the data
-    [growdamp["data"], growdamp["data_freq"], _1] = mbf_read_det(
+    [growdamp["data"], growdamp["data_freq"], _1] = read_det(
         pv_head_mem, "axis", chan, "lock", mem_lock
     )
     ## Capturing full bunch motion data
     if capture_full_bunch_motion.lower() == "yes":
         turn_count = 1250 * 400
         turn_offset = 0
-        growdamp["bunch_motion"] = mbf_read_mem(
+        growdamp["bunch_motion"] = read_mem(
             pv_head_mem, turn_count, "offset", turn_offset, "channel", 0, "lock", 60
         )
     return growdamp
 
 
-def get_stage_details(exp_data: dict) -> tuple[list, list, list]:
-    if "seq1_capture_state" in exp_data:
-        stage_names: list = []
-        for n in range(len(exp_data["states"])):
-            if "Discard" in exp_data[f"seq1{n}_capture_state"]:
-                stage_names[n] = "spacer"
-            else:
-                if "On" in exp_data[f"seq1{n}_enable"]:
-                    stage_names[n] = "growth"
-                else:
-                    if "Bank 2" in exp_data[f"seq1{n}_bank_select"]:
-                        stage_names[n] = "active"
-                    else:
-                        stage_names[n] = "passive"
-        ck: int = 1
-        # change the ordering so that the first stage in time is at index 1.
-        # works out which samples in the time series correspond to each stage.
-        end_of_stage: list = []
-        recorded_stage_names: list = []
-        samples_of_stage: list = []
-        turns_of_stage: list = []
-
-        for jjse in range(len(stage_names)):
-            if "spacer" not in stage_names[jjse]:
-                recorded_stage_names[ck] = stage_names[jjse]
-                length_of_stage = exp_data["states"][jjse]["duration"]
-                dwell_of_stage = exp_data["states"][jjse]["dwell"]
-                if ck == 1:
-                    end_of_stage[ck] = length_of_stage
-                    samples_of_stage[ck] = range(end_of_stage[ck])
-                    turns_of_stage[ck] = len(samples_of_stage[ck]) / dwell_of_stage
-                else:
-                    end_of_stage[ck] = end_of_stage[ck - 1] + length_of_stage
-                    samples_of_stage[ck] = range(
-                        (end_of_stage[ck - 1] + 1), end_of_stage[ck]
-                    )
-                    turns_of_stage[ck] = len(samples_of_stage[ck]) / dwell_of_stage
-
-                ck = ck + 1
-    else:
-        # Old dataset use implict order in structure to order stages.
-        test = exp_data.keys()
-        names = test["_turns" in test]
-        names = names["spacer" not in names]
-        turns_of_stage = np.zeros(len(names)).tolist()
-        samples_of_stage: list = []
-        recorded_stage_names: list = []
-        for nrs in range(len(names)):
-            turns_of_stage[nrs] = exp_data[names[nrs]]
-
-        turns_of_stage = turns_of_stage.reverse()
-        for nrs in range(len(names)):
-            samples_of_stage[nrs] = range(
-                np.sum(turns_of_stage[1 : nrs - 1]) + 1, np.sum(turns_of_stage[1:nrs])
-            )
-
-        for hs in range(len(names)):
-            recorded_stage_names[hs] = names[hs].replace("_turns", "")
-
-        recorded_stage_names = recorded_stage_names.reverse()
-    return recorded_stage_names, samples_of_stage, turns_of_stage
-
-
-def modescan_capture(input_settings: dict, pv_names: dict) -> dict:
+def capture_modescan(input_settings: dict, pv_names: dict) -> dict:
     """wrapper def to call modescan, gather data on the environment:
     and to save the resultant data.
 
@@ -360,7 +296,7 @@ def mbf_modescan_config(mbf_axis: str) -> None:
         settings["seq_gain"] = -42  # sequencer gain in dB.
 
 
-def spectrum_capture(input_settings: dict, pv_names: dict) -> dict:
+def capture_spectrum(input_settings: dict, pv_names: dict) -> dict:
     """captures a set of data from the mbf system runs the analysis.
 
     Args:
@@ -382,7 +318,7 @@ def spectrum_capture(input_settings: dict, pv_names: dict) -> dict:
                 f"{pv_names['hardware_names']['L']}{pv_names['tails']['triggers']['soft']}",
                 1,
             )
-            captured_data["raw_data"][k] = mbf_read_mem(
+            captured_data["raw_data"][k] = read_mem(
                 pv_names["hardware_names"]["L"],
                 input_settings["n_turns"],
                 "channel",
@@ -401,7 +337,7 @@ def spectrum_capture(input_settings: dict, pv_names: dict) -> dict:
                 1,
             )
             if input_settings["mbf_axis"] == "x":
-                captured_data["raw_data"][k] = mbf_read_mem(
+                captured_data["raw_data"][k] = read_mem(
                     pv_names["hardware_names"]["T"],
                     input_settings["n_turns"],
                     "channel",
@@ -410,7 +346,7 @@ def spectrum_capture(input_settings: dict, pv_names: dict) -> dict:
                     60,
                 )
             else:
-                captured_data["raw_data"][k] = mbf_read_mem(
+                captured_data["raw_data"][k] = read_mem(
                     pv_names["hardware_names"]["T"],
                     input_settings["n_turns"],
                     "channel",
@@ -421,7 +357,7 @@ def spectrum_capture(input_settings: dict, pv_names: dict) -> dict:
     return captured_data
 
 
-def bunch_motion_capture(pv_names: dict) -> dict:
+def capture_bunch_motion(pv_names: dict) -> dict:
     """simultaineously captures bunch by bunch centroid data for all three axes.
     When armed by the code each system will start aquisition
     on the next hardware trigger.
@@ -458,13 +394,13 @@ def bunch_motion_capture(pv_names: dict) -> dict:
     # Triggering the measurement[''] #### SHOULD TRIGGER ON THE NEXT EXTERNAL
     set_variable(pv_names["Hardware_trigger"], 1)
     # Triggering memory under a lock['']
-    bunch_motion_temp = mbf_read_mem(
+    bunch_motion_temp = read_mem(
         pv_names["hardware_names"]["T"], turn_count, "offset", turn_offset, "lock", 60
     )
     bunch_motion = {}
     bunch_motion["x"] = bunch_motion_temp[:, 1]
     bunch_motion["y"] = bunch_motion_temp[:, 2]
-    bunch_motion["z"] = mbf_read_mem(
+    bunch_motion["z"] = read_mem(
         pv_names["hardware_names"]["L"],
         turn_count,
         "offset",
@@ -478,15 +414,17 @@ def bunch_motion_capture(pv_names: dict) -> dict:
 
 
 def mbf_bunch_motion_config():
-    # Contains the specific settings desired for the bunch motion experiment.
-    # # Example: [turn_count, turn_offset] = mbf_bunch_motion_config
+    """Contains the specific settings desired for the bunch motion experiment.
+    Example: turn_count, turn_offset = mbf_bunch_motion_config()
+    """
     # Number of turns to capture.
     turn_count = 8962
     # Trigger is zero.
     turn_offset = 48000
+    return turn_count, turn_offset
 
 
-def tunescan_over_modes_capture(mbf_axis: str, pv_names: dict) -> dict:
+def capture_tunescan_over_modes(mbf_axis: str, pv_names: dict) -> dict:
     """wrapper def to call tunescan, gather data on the environment:
     and to save the resultant data.
 
@@ -520,7 +458,7 @@ def tunescan_over_modes_capture(mbf_axis: str, pv_names: dict) -> dict:
         np.ceil(get_variable["SR23C-DI-TMBF-01:Y:SEQ:TOTAL:DURATION:S"]) + 5
     )
     time.sleep(measurement_time)
-    tunescan["data"], tunescan["scale"] = mbf_read_det(
+    tunescan["data"], tunescan["scale"] = read_det(
         pv_head_mem, "axis", chan, "lock", mem_lock
     )
     return tunescan
@@ -558,82 +496,82 @@ def mbf_tunescan_over_modes_config(mbf_axis: str) -> None:
         settings["seq_gain"] = -42  # sequencer gain in dB.
 
 
-def tune_sweep_expt(mbf_axis: str) -> None:
-    # add the matlab paths for MBF tools
-    mbf_tools()
-    [_2, harmonic_number, pv_names, _1] = system_config()
-    mbf_vars = pv_names["tails"]
-    system_axis = pv_names["hardware_names"][mbf_axis]
-    seq1 = pv_names["tails"]["Sequencer"]["seq1"]
-    # experiment parameters
-    savefile = appendtimestamp("tmbf_expt")
-    ncap = 1001  # 4096; # 1001 takes ~ 3 minutes
-    startmode = 0
-    drive_bunch = range(harmonic_number)
-    # drive_bunch = 100
-    fb_on_off = 1
-    if mbf_axis == "x":
-        start_freq = 0.139
-        end_freq = 0.239
-    else:
-        start_freq = 0.227
-        end_freq = 0.327
+# def tune_sweep_expt(mbf_axis: str) -> None:
+#     # add the matlab paths for MBF tools
+#     mbf_tools()
+#     [_2, harmonic_number, pv_names, _1] = system_config()
+#     mbf_vars = pv_names["tails"]
+#     system_axis = pv_names["hardware_names"][mbf_axis]
+#     seq1 = pv_names["tails"]["Sequencer"]["seq1"]
+#     # experiment parameters
+#     savefile = appendtimestamp("tmbf_expt")
+#     ncap = 1001  # 4096; # 1001 takes ~ 3 minutes
+#     startmode = 0
+#     drive_bunch = range(harmonic_number)
+#     # drive_bunch = 100
+#     fb_on_off = 1
+#     if mbf_axis == "x":
+#         start_freq = 0.139
+#         end_freq = 0.239
+#     else:
+#         start_freq = 0.227
+#         end_freq = 0.327
 
-    ### configure the sweep
-    configure_tune_sweep(mbf_axis, drive_bunch, fb_on_off, 1, 1, 1, 1)
-    # arm the TMBF as one-shot rather than continuous
-    set_variable(f"{system_axis}{mbf_vars['triggers']['mode']}", "One Shot")
-    set_variable(f"{system_axis}{pv_names['tails']['Sequencer']['reset']}", 1)
-    # set the super-sequencer to have the correct number of modes
-    set_variable(f"{system_axis}{mbf_vars['Super_sequencer_reset']}", 1)
-    set_variable(f"{system_axis}{mbf_vars['Super_sequencer_count']}", harmonic_number)
-    # change the number of captures to speed things up (normally 4096)
-    set_variable(f"{system_axis}{seq1['count']}", ncap)
-    # select the tune sweep frequency / mode
-    set_variable(f"{system_axis}{seq1['start_frequency']}", startmode + start_freq)
-    set_variable(f"{system_axis}{seq1['end_frequency']}", startmode + end_freq)
-    # start the multi-mode sweep
-    set_variable(f"{system_axis}{mbf_vars['triggers']['SEQ']['arm']}", 1)
-    # download the data
-    # (Eww['']  Convert axis string into 0 or 1[''])
-    det_axis = np.find("xy" == mbf_axis) - 1
-    [data, scale] = mbf_read_det(system_axis, "axis", det_axis, "lock", 1800)
-    # reset the sweep
-    configure_tune_sweep(mbf_axis, range(harmonic_number), 1, 1, 0, 0, 0)
-    set_variable(f"{system_axis}{mbf_vars['triggers']['SEQ']['mode']}", "Rearm")
-    set_variable(f"{system_axis}{pv_names['tails']['Sequencer']['reset']}", 1)
-    # reshape the results
-    fracttune = scale[1:ncap]
-    for n in range(data.shape[1]):
-        result = np.reshape(abs(data[:, n]), ncap, harmonic_number)
-        # plot the results
-        plt.figure[n]
-        plt.imagesc(range(harmonic_number), fracttune, result)
-        plt.xlabel("mode number")
-        plt.ylabel("fractional tune")
-        plt.ylabel("magnitude of response")
+#     ### configure the sweep
+#     configure_tune_sweep(mbf_axis, drive_bunch, fb_on_off, 1, 1, 1, 1)
+#     # arm the TMBF as one-shot rather than continuous
+#     set_variable(f"{system_axis}{mbf_vars['triggers']['mode']}", "One Shot")
+#     set_variable(f"{system_axis}{pv_names['tails']['Sequencer']['reset']}", 1)
+#     # set the super-sequencer to have the correct number of modes
+#     set_variable(f"{system_axis}{mbf_vars['Super_sequencer_reset']}", 1)
+#     set_variable(f"{system_axis}{mbf_vars['Super_sequencer_count']}", harmonic_number)
+#     # change the number of captures to speed things up (normally 4096)
+#     set_variable(f"{system_axis}{seq1['count']}", ncap)
+#     # select the tune sweep frequency / mode
+#     set_variable(f"{system_axis}{seq1['start_frequency']}", startmode + start_freq)
+#     set_variable(f"{system_axis}{seq1['end_frequency']}", startmode + end_freq)
+#     # start the multi-mode sweep
+#     set_variable(f"{system_axis}{mbf_vars['triggers']['SEQ']['arm']}", 1)
+#     # download the data
+#     # (Eww['']  Convert axis string into 0 or 1[''])
+#     det_axis = np.find("xy" == mbf_axis) - 1
+#     [data, scale] = mbf_read_det(system_axis, "axis", det_axis, "lock", 1800)
+#     # reset the sweep
+#     configure_tune_sweep(mbf_axis, range(harmonic_number), 1, 1, 0, 0, 0)
+#     set_variable(f"{system_axis}{mbf_vars['triggers']['SEQ']['mode']}", "Rearm")
+#     set_variable(f"{system_axis}{pv_names['tails']['Sequencer']['reset']}", 1)
+#     # reshape the results
+#     fracttune = scale[1:ncap]
+#     for n in range(data.shape[1]):
+#         result = np.reshape(abs(data[:, n]), ncap, harmonic_number)
+#         # plot the results
+#         plt.figure[n]
+#         plt.imagesc(range(harmonic_number), fracttune, result)
+#         plt.xlabel("mode number")
+#         plt.ylabel("fractional tune")
+#         plt.ylabel("magnitude of response")
 
-    # get the stored beam conditions
-    fill_pattern = get_variable(pv_names["bunch_pattern"])
-    current = get_variable(pv_names["current"])
-    # save the data
-    scipy.savemat(
-        savefile,
-        "data",
-        "scale",
-        "mbf_axis",
-        "ncap",
-        "startmode",
-        "drive_bunch",
-        "fb_on_off",
-        "start_freq",
-        "end_freq",
-        "fill_pattern",
-        "current",
-    )
+#     # get the stored beam conditions
+#     fill_pattern = get_variable(pv_names["bunch_pattern"])
+#     current = get_variable(pv_names["current"])
+#     # save the data
+#     scipy.savemat(
+#         savefile,
+#         "data",
+#         "scale",
+#         "mbf_axis",
+#         "ncap",
+#         "startmode",
+#         "drive_bunch",
+#         "fb_on_off",
+#         "start_freq",
+#         "end_freq",
+#         "fill_pattern",
+#         "current",
+#     )
 
 
-def clock_phase_scan_capture(setup_info: dict, pv_names: dict) -> dict:
+def capture_frontend_clock_phase_scan(setup_info: dict, pv_names: dict) -> dict:
 
     detector = pv_names["tails"]["Detector"]
     adc = pv_names["tails"]["adc"]
@@ -688,7 +626,7 @@ def clock_phase_scan_capture(setup_info: dict, pv_names: dict) -> dict:
     return data
 
 
-def bbbfe_gain_scan_capture(setup_info: dict, pv_names: dict) -> dict:
+def capture_frontend_gain_scan(setup_info: dict, pv_names: dict) -> dict:
     adc = pv_names["tails"]["adc"]
     pv_head = pv_names["hardware_names"][setup_info["mbf_axis"]]
     frontend = pv_names["frontend"]["base"]
@@ -733,7 +671,7 @@ def bbbfe_gain_scan_capture(setup_info: dict, pv_names: dict) -> dict:
     return data
 
 
-def bbbfe_system_phase_scan_capture(setup_info: dict, pv_names: dict) -> dict:
+def capture_frontend_system_phase_scan(setup_info: dict, pv_names: dict) -> dict:
     [root_string, _1, pv_names] = system_config()
     pv_head = pv_names["hardware_names"][setup_info["mbf_axis"]]
 
@@ -819,7 +757,7 @@ def bbbfe_system_phase_scan_capture(setup_info: dict, pv_names: dict) -> dict:
     return data
 
 
-def doris_target_phase_scan_capture(setup_info: dict, pv_names: dict) -> dict:
+def capture_doris_target_phase_scan(setup_info: dict, pv_names: dict) -> dict:
     [root_string, _1, pv_names] = system_config()
 
     doris_pv = pv_names["doris"]["phase"]
@@ -872,7 +810,7 @@ def doris_target_phase_scan_capture(setup_info: dict, pv_names: dict) -> dict:
     return data
 
 
-def pll_phase_scan_capture(setup_info: dict, pv_names: dict) -> dict:
+def capture_pll_phase_scan(setup_info: dict, pv_names: dict) -> dict:
     [root_path, _1, pv_names] = system_config()
     name = pv_names["hardware_names"][setup_info["mbf_axis"]]
     pll_tails = pv_names["tails"]["pll"]
@@ -942,7 +880,7 @@ def pll_phase_scan_capture(setup_info: dict, pv_names: dict) -> dict:
     return data
 
 
-def frontend_lo_phase_scan_capture(data: dict, pv_names: dict) -> dict:
+def capture_frontend_lo_phase_scan(data: dict, pv_names: dict) -> dict:
     old_val = get_variable(data["phase_pv"])
     data["n"] = range(data["sweep_start"], data["sweep_end"], data["sweep_step"])
 
@@ -975,7 +913,7 @@ def frontend_lo_phase_scan_capture(data: dict, pv_names: dict) -> dict:
     # plt.legend("X", "Y", "S")
 
 
-def pll_pi_scan_capture(setup_info: dict, pv_names: dict) -> dict:
+def capture_pll_pi_scan(setup_info: dict, pv_names: dict) -> dict:
     [root_string, _1, pv_names] = system_config()
     pv_head = pv_names["hardware_names"][setup_info["mbf_axis"]]
     pll_tails = pv_names["tails"]["pll"]

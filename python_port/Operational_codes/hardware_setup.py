@@ -12,7 +12,7 @@ from Common import (
 )
 
 
-def growdamp_setup(input_settings: dict, pv_names: dict):
+def setup_growdamp(input_settings: dict, pv_names: dict):
     """Sets up the MBF system to be ready for a growdamp measurement.
 
       Args:
@@ -21,7 +21,6 @@ def growdamp_setup(input_settings: dict, pv_names: dict):
 
     example: growdamp_setup(input_settings, pv_names, trigger_inputs)
     """
-    mbf_tools()
     pll_setup: dict = {}
     mbf_axis = input_settings["mbf_axis"]
     harmonic_number = input_settings["harmonic_number"]
@@ -312,7 +311,7 @@ def reestablish_tune_measurement(mbf_axis: str):
     set_variable(f"{base}{pv_names['tails']['triggers']['SEQ']['arm']}", 1)
 
 
-def modescan_setup(input_settings: dict, pv_names: dict):
+def setup_modescan(input_settings: dict, pv_names: dict):
     """Sets up the MBF system to be ready for a modescan measurement.
 
       Args:
@@ -321,7 +320,6 @@ def modescan_setup(input_settings: dict, pv_names: dict):
 
     example: modescan_setup(input_settings, pv_names)
     """
-    mbf_tools()
     # Generate the base PV name.
     system_axis = pv_names["hardware_names"][input_settings["mbf_axis"]]
     # state 1 of sequencer
@@ -340,7 +338,7 @@ def modescan_setup(input_settings: dict, pv_names: dict):
     set_variable(f"{system_axis}{seq1['blanking_state']}", "Off")
 
 
-def spectrum_setup(input_settings: dict, pv_names: dict):
+def setup_spectrum(input_settings: dict, pv_names: dict):
     """sets up the hardware ready to capture data for a spectrum['']
     Args:
           input_settings: contains all the setup information['']
@@ -348,16 +346,17 @@ def spectrum_setup(input_settings: dict, pv_names: dict):
 
     Example spectrum_setup(input_settings, pv_names, trigger_inputs)
     """
-    mbf_tools()
     mbf_axis = input_settings["mbf_axis"]
     trigger_inputs = pv_names["trigger_inputs"]
     # Disarm the sequencer (tune measurement) and memory triggers
     set_variable(
-        f"{pv_names['hardware_names'][mbf_axis]}{pv_names['tails']['triggers']['SEQ']['disarm']}",
+        f"""{pv_names["hardware_names"][mbf_axis]}
+        {pv_names["tails"]["triggers"]["SEQ"]["disarm"]}""",
         1,
     )
     set_variable(
-        f"{pv_names['hardware_names']['mem'][mbf_axis]}{pv_names['tails']['triggers']['MEM']['disarm']}",
+        f"""{pv_names["hardware_names"]["mem"][mbf_axis]}
+        {pv_names["tails"]["triggers"]["MEM"]["disarm"]}""",
         1,
     )
     for trigger_ind in range(len(trigger_inputs)):
@@ -388,7 +387,7 @@ def spectrum_setup(input_settings: dict, pv_names: dict):
     )
 
 
-def bunch_motion_setup(setup_info: dict, pv_names: dict) -> None:
+def setup_bunch_motion(setup_info: dict, pv_names: dict) -> None:
     """Sets up all three axis so that they will take a single set of data each
     when armed and triggered
 
@@ -398,7 +397,6 @@ def bunch_motion_setup(setup_info: dict, pv_names: dict) -> None:
     memory_buffers: dict = pv_names["tails"]["MEM"]
     mbf_systems: list = ["T", "L"]
 
-    mbf_tools()
     Bunch_bank1 = pv_names["tails"]["Bunch_bank"]["bank1"]
 
     # Add the extra data to the data structure.
@@ -441,7 +439,7 @@ def bunch_motion_setup(setup_info: dict, pv_names: dict) -> None:
         set_variable(f"{pv_head}{memory_buffers['channel_select']}", "ADC0/ADC1")
 
 
-def BBBFE_detector_restore(mbf_axis: str, detector_setup: dict):
+def frontend_detector_restore(mbf_axis: str, detector_setup: dict):
     mbf_axis = mbf_axis.lower()
     [_2, _1, pv_names] = system_config()
     mbf_names = pv_names["hardware_names"]
@@ -468,7 +466,7 @@ def BBBFE_detector_restore(mbf_axis: str, detector_setup: dict):
         set_variable(f"{mbf_names[mbf_axis]}{detector[det_name]['set_selection']}", 1)
 
 
-def BBBFE_detector_setup(mbf_axis: str, single_bunch_location: int):
+def frontend_detector_setup(mbf_axis: str, single_bunch_location: int):
     [_2, _1, pv_names] = system_config()
     mbf_names = pv_names["hardware_names"]
     detector = pv_names["tails"]["Detector"]
@@ -938,7 +936,7 @@ def configure_tune_sweep(
     return
 
 
-def tunescan_over_modes_setup(tunescan: dict):
+def setup_tunescan_over_modes(tunescan: dict):
     """Sets up the MBF system to be ready for a tunescan measurement.
 
       Args:
@@ -947,7 +945,6 @@ def tunescan_over_modes_setup(tunescan: dict):
 
     example: tunescan_over_modes_setup(tunescan)
     """
-    mbf_tools()
     if tunescan["feedback_state"] == "on":
         fb_on_off = 1
     else:
@@ -1013,59 +1010,59 @@ def tunescan_over_modes_setup(tunescan: dict):
     )
 
 
-def clock_phase_scan_setup(setup_info, pv_names):
+def setup_frontend_clock_phase_scan(setup_info, pv_names):
 
     if setup_info["auto_setup"] == "yes":
-        original_detector_setup = BBBFE_detector_setup(
+        original_detector_setup = frontend_detector_setup(
             setup_info["mbf_ax"], setup_info["single_bunch_location"]
         )
     return original_detector_setup
 
 
-def clock_phase_scan_restore(setup_info, pv_names, restore_state):
+def restore_frontend_clock_phase_scan(setup_info, pv_names, restore_state):
     pv_head = pv_names["hardware_names"][setup_info["mbf_axis"]]
     sequencer1 = pv_names["tails"]["Sequencer"]["seq1"]
 
     if setup_info["auto_setup"] == "yes":
-        BBBFE_detector_restore(setup_info["mbf_axis"], restore_state)
+        frontend_detector_restore(setup_info["mbf_axis"], restore_state)
         set_variable(f"{pv_head}{sequencer1['gaindb']}", setup_info["orig_seq1_gain"])
 
 
-def bbbfe_system_phase_scan_setup(setup_info, pv_names):
-    original_detector_setup = BBBFE_detector_setup(
+def setup_frontend_system_phase_scan(setup_info, pv_names):
+    original_detector_setup = frontend_detector_setup(
         setup_info["mbf_axis"], setup_info["single_bunch_location"]
     )
     return original_detector_setup
 
 
-def bbbfe_system_phase_scan_restore(setup_info, pv_names, restore_state):
+def restore_frontend_system_phase_scan(setup_info, pv_names, restore_state):
     if setup_info["auto_setup"] == "yes":
         pv_head = pv_names["hardware_names"][setup_info["mbf_axis"]]
         sequencer1 = pv_names["tails"]["Sequencer"]["seq1"]
         set_variable(f"{pv_head}{sequencer1['gaindb']}", setup_info["orig_seq1_gain"])
 
-    BBBFE_detector_restore(setup_info["mbf_ax"], restore_state)
+    frontend_detector_restore(setup_info["mbf_ax"], restore_state)
 
 
-def doris_target_phase_scan_setup(setup_info, pv_names):
+def setup_doris_target_phase_scan(setup_info, pv_names):
     if setup_info["auto_setup"] == "yes":
         setup_operational_mode("x", "TuneOnly")
         setup_operational_mode("y", "TuneOnly")
         setup_operational_mode("s", "TuneOnly")
     original_state = {}
-    original_state["detector_setup_x"] = BBBFE_detector_setup(
+    original_state["detector_setup_x"] = frontend_detector_setup(
         "x", setup_info["single_bunch_location"]
     )
-    original_state["detector_setup_y"] = BBBFE_detector_setup(
+    original_state["detector_setup_y"] = frontend_detector_setup(
         "y", setup_info["single_bunch_location"]
     )
-    original_state["detector_setup_s"] = BBBFE_detector_setup(
+    original_state["detector_setup_s"] = frontend_detector_setup(
         "s", setup_info["single_bunch_location"]
     )
     return original_state
 
 
-def doris_target_phase_scan_restore(setup_info, pv_names, restore_state):
+def restore_doris_target_phase_scan(setup_info, pv_names, restore_state):
     mbf_pv_x = pv_names["hardware_names"]["x"]
     mbf_pv_y = pv_names["hardware_names"]["y"]
     mbf_pv_s = pv_names["hardware_names"]["s"]
@@ -1078,15 +1075,15 @@ def doris_target_phase_scan_restore(setup_info, pv_names, restore_state):
         set_variable(f"{mbf_pv_y}{sequencer1['gaindb']}", setup_info["orig_gain_y"])
         setup_operational_mode("s", "TuneOnly")
         set_variable(f"{mbf_pv_s}{sequencer1['gaindb']}", setup_info["orig_gain_s"])
-    BBBFE_detector_restore("x", restore_state["detector_setup_x"])
-    BBBFE_detector_restore("y", restore_state["detector_setup_y"])
-    BBBFE_detector_restore("s", restore_state["detector_setup_s"])
+    frontend_detector_restore("x", restore_state["detector_setup_x"])
+    frontend_detector_restore("y", restore_state["detector_setup_y"])
+    frontend_detector_restore("s", restore_state["detector_setup_s"])
     reestablish_tune_measurement("x")
     reestablish_tune_measurement("y")
     reestablish_tune_measurement("s")
 
 
-def tunescan_over_modes_restore(setup_info, pv_names, restore_state):
+def restore_tunescan_over_modes(setup_info, pv_names, restore_state):
     pv_head = pv_names["hardware_names"][setup_info["mbf_axis"]]
     # reset the sweep
     ####Is this section needed or does the TuneOnly script take care of things?
@@ -1101,7 +1098,7 @@ def tunescan_over_modes_restore(setup_info, pv_names, restore_state):
         setup_operational_mode(setup_info["mbf_axis"], "TuneOnly")
 
 
-def bunch_motion_restore(setup_info, pv_names, restore_state):
+def restore_bunch_motion(setup_info, pv_names, restore_state):
 
     if setup_info["auto_setup"] == "yes":
         setup_operational_mode("x", "Feedback")
@@ -1275,15 +1272,16 @@ def setup_operational_mode(mbf_axis: str, operational_mode: str):
     gui_dir = gui_dir.strip()  # Get rid of trailing newline
     # construct the bash command
     description = "Setting MBF defaults"
-    bash_command = f"{gui_dir}//epics/opi/scripts/mbf-run-command '{description}' mbf-setup-tune {device} {action}"
+    bash_command = f"""{gui_dir}//epics/opi/scripts/mbf-run-command '{description}'
+     mbf-setup-tune {device} {action}"""
     rc = os.system(bash_command)
     if rc[-1] == 0:
         raise ValueError("Error running mbf-setup-tune")
 
 
-def pll_PI_scan_setup():
+def setup_pll_pi_scan():
     pass
 
 
-def pll_PI_scan_restore():
+def restore_pll_pi_scan():
     pass

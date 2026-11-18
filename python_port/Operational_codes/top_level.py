@@ -1,50 +1,66 @@
+from analysis import (
+    analysis_bunch_motion,
+    analysis_doris_target_phase_scan,
+    analysis_frontend_clock_phase_scan,
+    analysis_frontend_gain_scan,
+    analysis_frontend_lo_phase_scan,
+    analysis_frontend_system_phase_scan,
+    analysis_growdamp,
+    analysis_modescan,
+    analysis_pll_phase_scan,
+    analysis_pll_pi_scan,
+    analysis_spectrum,
+    analysis_tunescan_over_modes,
+)
 from data_retrival import (
-    bunch_motion_retrival,
-    clock_phase_scan_retrival,
-    doris_target_phase_scan_retrival,
-    frontend_gain_scan_retrival,
-    frontend_lo_phase_scan_retrival,
-    frontend_system_phase_scan_retrival,
-    growdamp_archival_retrieval,
-    modescan_archival_retrieval,
-    pll_phase_scan_retrival,
-    pll_pi_scan_retrival,
-    retrieve_single_axis_data,
-    spectra_archival_retrieval,
-    tunescan_over_modes_retrival,
+    archival_retrieval,
 )
 from hardware_setup import (
-    bbbfe_system_phase_scan_restore,
-    bbbfe_system_phase_scan_setup,
-    bunch_motion_restore,
-    bunch_motion_setup,
-    clock_phase_scan_restore,
-    clock_phase_scan_setup,
-    doris_target_phase_scan_restore,
-    doris_target_phase_scan_setup,
-    growdamp_setup,
-    modescan_setup,
-    pll_PI_scan_restore,
-    pll_PI_scan_setup,
-    spectrum_setup,
-    tunescan_over_modes_restore,
-    tunescan_over_modes_setup,
+    restore_bbbfe_system_phase_scan,
+    restore_bunch_motion,
+    restore_doris_target_phase_scan,
+    restore_frontend_clock_phase_scan,
+    restore_pll_pi_scan,
+    restore_tunescan_over_modes,
+    setup_bbbfe_system_phase_scan,
+    setup_bunch_motion,
+    setup_doris_target_phase_scan,
+    setup_frontend_clock_phase_scan,
+    setup_growdamp,
+    setup_modescan,
+    setup_pll_pi_scan,
+    setup_spectrum,
+    setup_tunescan_over_modes,
 )
 from measurements import (
-    bbbfe_gain_scan_capture,
-    bbbfe_system_phase_scan_capture,
-    bunch_motion_capture,
-    clock_phase_scan_capture,
-    doris_target_phase_scan_capture,
-    frontend_lo_phase_scan_capture,
-    growdamp_capture,
-    modescan_capture,
-    pll_phase_scan_capture,
-    pll_pi_scan_capture,
+    capture_bunch_motion,
+    capture_doris_target_phase_scan,
+    capture_frontend_clock_phase_scan,
+    capture_frontend_gain_scan,
+    capture_frontend_lo_phase_scan,
+    capture_frontend_system_phase_scan,
+    capture_growdamp,
+    capture_modescan,
+    capture_pll_phase_scan,
+    capture_pll_pi_scan,
+    capture_spectrum,
+    capture_tunescan_over_modes,
     run_multi_axis_measurement,
     run_single_axis_measurement,
-    spectrum_capture,
-    tunescan_over_modes_capture,
+)
+from plotting import (
+    plotting_bunch_motion,
+    plotting_doris_target_phase_scan,
+    plotting_frontend_clock_phase_scan,
+    plotting_frontend_gain_scan,
+    plotting_frontend_lo_phase_scan,
+    plotting_frontend_system_phase_scan,
+    plotting_growdamp,
+    plotting_modescan,
+    plotting_pll_phase_scan,
+    plotting_pll_pi_scan,
+    plotting_spectrum,
+    plotting_tunescan_over_modes,
 )
 
 from Common import machine_environment
@@ -240,18 +256,23 @@ def growdamp_all(
 
     run_single_axis_measurement(
         setup_info=data,
-        hardware_setup_function=growdamp_setup,
-        capture_function=growdamp_capture,
+        hardware_setup_function=setup_growdamp,
+        capture_function=capture_growdamp,
         restore_function=None,
     )
 
     ## Plotting data
     if plotting == "yes":
-        retrieve_single_axis_data(
-            retrival_function=growdamp_archival_retrieval,
-            mbf_axis=mbf_axis,
-            timestamp=data["time"],
+        requested_data = archival_retrieval(
+            "Growdamp",
+            ax=mbf_axis,
+            date_range=[data["time"], data["time"]],
+            filter_conditions=[],
+            bypass_index="no",
+            metadata_only="no",
         )
+        analysed_data = analysis_growdamp(requested_data[0])
+        plotting_growdamp(analysed_data, requested_data[0])
 
 
 def modescan_all(
@@ -296,18 +317,23 @@ def modescan_all(
 
     run_single_axis_measurement(
         setup_info=data,
-        hardware_setup_function=modescan_setup,
-        capture_function=modescan_capture,
+        hardware_setup_function=setup_modescan,
+        capture_function=capture_modescan,
         restore_function=None,
     )
 
     ## Plotting data
     if plotting == "yes":
-        retrieve_single_axis_data(
-            retrival_function=modescan_archival_retrieval,
-            mbf_axis=mbf_axis,
-            timestamp=data["time"],
+        requested_data = archival_retrieval(
+            "Modescan",
+            ax=mbf_axis,
+            date_range=[data["time"], data["time"]],
+            filter_conditions=[],
+            bypass_index="no",
+            metadata_only="no",
         )
+        analysed_data = analysis_modescan(requested_data[0])
+        plotting_modescan(analysed_data, requested_data[0])
 
 
 def mbf_spectrum_all(
@@ -348,18 +374,22 @@ def mbf_spectrum_all(
 
     run_single_axis_measurement(
         setup_info=data,
-        hardware_setup_function=spectrum_setup,
-        capture_function=spectrum_capture,
+        hardware_setup_function=setup_spectrum,
+        capture_function=capture_spectrum,
         restore_function=None,
     )
-
     ## Plotting data
     if plotting == "yes":
-        retrieve_single_axis_data(
-            retrival_function=spectra_archival_retrieval,
-            mbf_axis=mbf_axis,
-            timestamp=data["time"],
+        requested_data = archival_retrieval(
+            "Spectrum",
+            ax=mbf_axis,
+            date_range=[data["time"], data["time"]],
+            filter_conditions=[],
+            bypass_index="no",
+            metadata_only="no",
         )
+        analysed_data = analysis_spectrum(requested_data[0])
+        plotting_spectrum(analysed_data, requested_data[0])
 
 
 def Bunch_motion_all(
@@ -375,21 +405,26 @@ def Bunch_motion_all(
 
     run_multi_axis_measurement(
         setup_info=data,
-        hardware_setup_function=bunch_motion_setup,
-        capture_function=bunch_motion_capture,
-        restore_function=bunch_motion_restore,
+        hardware_setup_function=setup_bunch_motion,
+        capture_function=capture_bunch_motion,
+        restore_function=restore_bunch_motion,
     )
+
+    ## Plotting data
     if plotting == "yes":
-        # for archival investigations this allows filtering by machine state.
-        # but for capture this is not needed so it set to empty.
-        filter_conditions: list = []
-        bunch_motion_retrival(
-            [data["time"], data["time"]],
-            filter_conditions,
+        requested_data = archival_retrieval(
+            "bunch_motion",
+            ax=None,
+            date_range=[data["time"], data["time"]],
+            filter_conditions=[],
+            bypass_index="no",
+            metadata_only="no",
         )
+        analysed_data = analysis_bunch_motion(requested_data[0])
+        plotting_bunch_motion(analysed_data, requested_data[0])
 
 
-def BBBFE_clock_phase_scan(
+def frontend_clock_phase_scan(
     mbf_ax: str,
     single_bunch_location: int,
     auto_setup: str = "yes",
@@ -438,33 +473,38 @@ def BBBFE_clock_phase_scan(
 
     run_single_axis_measurement(
         setup_info=data,
-        hardware_setup_function=clock_phase_scan_setup,
-        capture_function=clock_phase_scan_capture,
-        restore_function=clock_phase_scan_restore,
+        hardware_setup_function=setup_frontend_clock_phase_scan,
+        capture_function=capture_frontend_clock_phase_scan,
+        restore_function=restore_frontend_clock_phase_scan,
     )
+
+    ## Plotting data
     if plotting == "yes":
-        # for archival investigations this allows filtering by machine state.
-        # but for capture this is not needed so it set to empty.
-        filter_conditions: list = []
-        clock_phase_scan_retrival(
-            [data["time"], data["time"]],
-            filter_conditions,
+        requested_data = archival_retrieval(
+            "frontend_clock_phase_scan",
+            ax=None,
+            date_range=[data["time"], data["time"]],
+            filter_conditions=[],
+            bypass_index="no",
+            metadata_only="no",
         )
+        analysed_data = analysis_frontend_clock_phase_scan(requested_data[0])
+        plotting_frontend_clock_phase_scan(analysed_data, requested_data[0])
 
 
-def BBBFE_full_frontend_checkout(single_bunch_location: int):
+def full_frontend_checkout(single_bunch_location: int):
     """BBBFE_FULL_FRONTEND_CHECKOUT
     This assumes that the machine is set up with a single bunch in the machine at
     the single_bunch_location."""
-    BBBFE_system_phase_scan("x", single_bunch_location)
-    BBBFE_system_phase_scan("y", single_bunch_location)
-    BBBFE_system_phase_scan("s", single_bunch_location)
-    BBBFE_clock_phase_scan("x", single_bunch_location)
-    BBBFE_clock_phase_scan("y", single_bunch_location)
-    BBBFE_clock_phase_scan("s", single_bunch_location)
+    frontend_system_phase_scan("x", single_bunch_location)
+    frontend_system_phase_scan("y", single_bunch_location)
+    frontend_system_phase_scan("s", single_bunch_location)
+    frontend_clock_phase_scan("x", single_bunch_location)
+    frontend_clock_phase_scan("y", single_bunch_location)
+    frontend_clock_phase_scan("s", single_bunch_location)
 
 
-def BBBFE_gain_scan(
+def frontend_gain_scan(
     mbf_ax: str,
     single_bunch_location: int,
     auto_setup: str = "yes",
@@ -514,14 +554,25 @@ def BBBFE_gain_scan(
     run_single_axis_measurement(
         setup_info=data,
         hardware_setup_function=None,
-        capture_function=bbbfe_gain_scan_capture,
+        capture_function=capture_frontend_gain_scan,
         restore_function=None,
-        retrival_function=frontend_gain_scan_retrival,
     )
+    ## Plotting data
+    if plotting == "yes":
+        requested_data = archival_retrieval(
+            "frontend_gain_scan",
+            ax=None,
+            date_range=[data["time"], data["time"]],
+            filter_conditions=[],
+            bypass_index="no",
+            metadata_only="no",
+        )
+        data_magnitude, data_phase = analysis_frontend_gain_scan(requested_data[0])
+        plotting_frontend_gain_scan(data_magnitude, data_phase, requested_data[0])
 
 
-def BBBFE_system_phase_scan(
-    mbf_ax: str,
+def frontend_system_phase_scan(
+    mbf_axis: str,
     single_bunch_location: int,
     auto_setup: str = "yes",
     plotting: str = "yes",
@@ -556,8 +607,8 @@ def BBBFE_system_phase_scan(
     # getting general environment data.
     data = machine_environment()
     # Add the extra data to the data structure.
-    data["ax_label"] = mbf_ax
-    data["base_name"] = f"system_phase_scan_{mbf_ax}_axis"
+    data["ax_label"] = mbf_axis
+    data["base_name"] = f"system_phase_scan_{mbf_axis}_axis"
     data["single_bunch_location"] = single_bunch_location
     data["auto_setup"] = auto_setup
     data["plotting"] = plotting
@@ -571,11 +622,26 @@ def BBBFE_system_phase_scan(
 
     run_single_axis_measurement(
         setup_info=data,
-        hardware_setup_function=bbbfe_system_phase_scan_setup,
-        capture_function=bbbfe_system_phase_scan_capture,
-        restore_function=bbbfe_system_phase_scan_restore,
-        retrival_function=frontend_system_phase_scan_retrival,
+        hardware_setup_function=setup_bbbfe_system_phase_scan,
+        capture_function=capture_frontend_system_phase_scan,
+        restore_function=restore_bbbfe_system_phase_scan,
     )
+    ## Plotting data
+    if plotting == "yes":
+        requested_data = archival_retrieval(
+            "frontend_system_phase_scan",
+            ax=mbf_axis,
+            date_range=[data["time"], data["time"]],
+            filter_conditions=[],
+            bypass_index="no",
+            metadata_only="no",
+        )
+        data_magnitude, data_phase = analysis_frontend_system_phase_scan(
+            requested_data[0]
+        )
+        plotting_frontend_system_phase_scan(
+            data_magnitude, data_phase, requested_data[0]
+        )
 
 
 def DORIS_target_phase_scan(
@@ -609,9 +675,9 @@ def DORIS_target_phase_scan(
 
     Example: DORIS_target_phase_scan(400)
     """
-    # getting general environment data['']
+    # getting general environment data.
     data = machine_environment()
-    # Add the extra data to the data structure['']
+    # Add the extra data to the data structure.
     data["base_name"] = "doris_phase_scan"
 
     data["single_bunch_location"] = single_bunch_location
@@ -624,14 +690,30 @@ def DORIS_target_phase_scan(
 
     run_multi_axis_measurement(
         setup_info=data,
-        hardware_setup_function=doris_target_phase_scan_setup,
-        capture_function=doris_target_phase_scan_capture,
-        restore_function=doris_target_phase_scan_restore,
-        retrival_function=doris_target_phase_scan_retrival,
+        hardware_setup_function=setup_doris_target_phase_scan,
+        capture_function=capture_doris_target_phase_scan,
+        restore_function=restore_doris_target_phase_scan,
     )
+    ## Plotting data
+    if plotting == "yes":
+        requested_data = archival_retrieval(
+            "doris_target_phase_scan",
+            ax=None,
+            date_range=[data["time"], data["time"]],
+            filter_conditions=[],
+            bypass_index="no",
+            metadata_only="no",
+        )
+        data_magnitude, data_phase = analysis_doris_target_phase_scan(requested_data[0])
+        plotting_doris_target_phase_scan(data_magnitude, data_phase, requested_data[0])
 
 
-def mbf_pll_phase_scan(mbf_axis: str, scan_range: int = 270, step: int = 1) -> None:
+def mbf_pll_phase_scan(
+    mbf_axis: str,
+    scan_range: int = 270,
+    step: int = 1,
+    plotting: str = "yes",
+) -> None:
     """
           Args:
               mbf_axis: 'x' or 'y'
@@ -650,10 +732,21 @@ def mbf_pll_phase_scan(mbf_axis: str, scan_range: int = 270, step: int = 1) -> N
     run_single_axis_measurement(
         setup_info=data,
         hardware_setup_function=None,
-        capture_function=pll_phase_scan_capture,
+        capture_function=capture_pll_phase_scan,
         restore_function=None,
-        retrival_function=pll_phase_scan_retrival,
     )
+    ## Plotting data
+    if plotting == "yes":
+        requested_data = archival_retrieval(
+            "pll_phase_scan",
+            ax=mbf_axis,
+            date_range=[data["time"], data["time"]],
+            filter_conditions=[],
+            bypass_index="no",
+            metadata_only="no",
+        )
+        data_magnitude, data_phase = analysis_pll_phase_scan(requested_data[0])
+        plotting_pll_phase_scan(data_magnitude, data_phase, requested_data[0])
 
 
 def tunescan_over_modes_all(
@@ -689,17 +782,23 @@ def tunescan_over_modes_all(
 
     run_single_axis_measurement(
         setup_info=data,
-        hardware_setup_function=tunescan_over_modes_setup,
-        capture_function=tunescan_over_modes_capture,
-        restore_function=tunescan_over_modes_restore,
+        hardware_setup_function=setup_tunescan_over_modes,
+        capture_function=capture_tunescan_over_modes,
+        restore_function=restore_tunescan_over_modes,
     )
+
     ## Plotting data
     if plotting == "yes":
-        retrieve_single_axis_data(
-            retrival_function=tunescan_over_modes_retrival,
-            mbf_axis=mbf_axis,
-            timestamp=data["time"],
+        requested_data = archival_retrieval(
+            "tunescan_over_modes",
+            ax=mbf_axis,
+            date_range=[data["time"], data["time"]],
+            filter_conditions=[],
+            bypass_index="no",
+            metadata_only="no",
         )
+        data_magnitude, data_phase = analysis_tunescan_over_modes(requested_data[0])
+        plotting_tunescan_over_modes(data_magnitude, data_phase, requested_data[0])
 
 
 def BBBFE_LO_scan(
@@ -739,10 +838,21 @@ def BBBFE_LO_scan(
     run_multi_axis_measurement(
         setup_info=data,
         hardware_setup_function=None,
-        capture_function=frontend_lo_phase_scan_capture,
+        capture_function=capture_frontend_lo_phase_scan,
         restore_function=None,
-        retrival_function=frontend_lo_phase_scan_retrival,
     )
+    ## Plotting data
+    if plotting == "yes":
+        requested_data = archival_retrieval(
+            "frontend_lo_phase_scan",
+            ax=None,
+            date_range=[data["time"], data["time"]],
+            filter_conditions=[],
+            bypass_index="no",
+            metadata_only="no",
+        )
+        data_magnitude, data_phase = analysis_frontend_lo_phase_scan(requested_data[0])
+        plotting_frontend_lo_phase_scan(data_magnitude, data_phase, requested_data[0])
 
 
 def pll_PI_scan(
@@ -752,6 +862,7 @@ def pll_PI_scan(
     auto_setup: str = "yes",
     save_to_archive: str = "yes",
     additional_save_location: str | None = None,
+    plotting: str = "yes",
     guardbunches: int = 10,
     monitor_bunches: int = 400,
 ):
@@ -773,8 +884,19 @@ def pll_PI_scan(
 
     run_single_axis_measurement(
         setup_info=data,
-        hardware_setup_function=pll_PI_scan_setup,
-        capture_function=pll_pi_scan_capture,
-        restore_function=pll_PI_scan_restore,
-        retrival_function=pll_pi_scan_retrival,
+        hardware_setup_function=setup_pll_pi_scan,
+        capture_function=capture_pll_pi_scan,
+        restore_function=restore_pll_pi_scan,
     )
+    ## Plotting data
+    if plotting == "yes":
+        requested_data = archival_retrieval(
+            "pll_pi_scan",
+            ax=mbf_axis,
+            date_range=[data["time"], data["time"]],
+            filter_conditions=[],
+            bypass_index="no",
+            metadata_only="no",
+        )
+        data_magnitude, data_phase = analysis_pll_pi_scan(requested_data[0])
+        plotting_pll_pi_scan(data_magnitude, data_phase, requested_data[0])
