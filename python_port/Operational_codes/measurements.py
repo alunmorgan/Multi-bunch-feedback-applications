@@ -8,7 +8,6 @@ from hardware_setup import (
     reestablish_tune_measurement,
 )
 from pyMBF_read.mbf_read import read_det, read_mem
-from system_configuration import system_config
 
 from Common import (
     generate_sweep,
@@ -19,6 +18,7 @@ from Common import (
     setup_operational_mode,
     slew_to_value,
 )
+from system_configuration import system_config
 
 
 def run_single_axis_measurement(

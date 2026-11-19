@@ -6,6 +6,7 @@ import time
 import numpy as np
 import scipy
 from cothread.catools import FORMAT_TIME, caget, caput  # type: ignore
+
 from system_configuration import system_config
 
 

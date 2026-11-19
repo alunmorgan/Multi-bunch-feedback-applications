@@ -4,12 +4,12 @@ import time
 
 import numpy as np
 from hardware_setup import mbf_pll_setup
-from system_configuration import system_config
 
 from Common import (
     get_variable,
     set_variable,
 )
+from system_configuration import system_config
 
 
 def setup_growdamp(input_settings: dict, pv_names: dict):
