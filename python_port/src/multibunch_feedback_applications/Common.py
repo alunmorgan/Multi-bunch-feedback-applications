@@ -6,11 +6,11 @@ import time
 import numpy as np
 import scipy
 from cothread.catools import FORMAT_TIME, caget, caput  # type: ignore
-
 from system_configuration import system_config
 
 
 def hannwin(data: np.ndarray, dim: int = 0) -> np.ndarray:
+    """apply a hanning window to the data."""
     window = np.hanning(data.shape[dim])
     s = list(data.shape)
     s[dim] = 1

@@ -1,7 +1,6 @@
 import time
 
 import numpy as np
-
 from Common import (
     get_variable,
     movmean,
@@ -458,16 +457,18 @@ def growthrates_analysis(data_requested: dict) -> dict:
 # FIXME
 # def drive_damp_analysis_longitudinal_expfit(name):
 # # Exponential fit def for drive-damp measurements:
-#     # Last edit: 28['09']['2023'] (G['Rehm'], A['Matveenko'])
+#     # Last edit: 28.09.2023 (G.Rehm, A.Matveenko)
 #     n_cycles = 400
 #     aa = np.reshape(abs(name['iq']), name['dampcapture'], n_cycles)
 #     time = range(name['dampcapture']) * name['dampdwell'] / 1.249e6 # s
-#     # fit parameters are amplitude - p(1), damping - p(2), and "zero"-point offset - p(3)
-#     f = @(p, time) (p(1) ['']* exp(-p(2) ['']* time) + p(3))
+#     # fit parameters are amplitude - p(1),
+#             damping - p(2), and "zero"-point offset - p(3)
+#     f = @(p, time) (p(1) * exp(-p(2) * time) + p(3))
 #     # further "optimisation" of opts can make the fit faster
 #     opts = optimset('MaxFunEvals', 50000, 'MaxIter', 10000)
 #     for m  in range( 1, n_cycles):
-#         OLS = @(p) np.sum((f(p, time) - aa(:,m))^2) # sum of squares of model-measurement
+#         sum of squares of model-measurement
+#         OLS = @(p) np.sum((f(p, time) - aa(:,m))^2)
 #         res0 = [aa(1,m); 150; aa(300,m)] # guess-values
 #         p[m,1:3] = fminsearch(OLS, res0, opts)
 #         #[p[m,1:2],stemp]=polyfit(t,log(aa(:,m)),1)

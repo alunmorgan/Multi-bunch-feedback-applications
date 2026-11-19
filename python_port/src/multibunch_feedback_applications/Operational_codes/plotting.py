@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import matplotlib.text as mplt
 import numpy as np
 from analysis import tune_fit
-
 from Common import (
     construct_datastamped_filename,
     mode_to_frequency,
@@ -1175,7 +1174,7 @@ def plotting_tunescan_over_modes(tunescan):
         lower_tune_limit = np.mean(fit_centre) - np.max(fit_width) / 2
         upper_tune_limit = np.mean(fit_centre) + np.max(fit_width) / 2
         # plot the results
-        f = plt.figure("Position", [20, 40, 1600, 800])
+        plt.figure("Position", [20, 40, 1600, 800])
         fig, _1 = plt.subplot_mosaic(
             [["upper left", "upper right"], ["lower left", "lower right"]],
             figsize=(5.5, 3.5),
