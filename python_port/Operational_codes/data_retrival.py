@@ -4,8 +4,9 @@ import os
 
 import numpy as np
 import scipy
+from system_configuration import system_config
 
-from Common import dir_list_gen, dir_list_gen_tree, reconfigure_to_lists, system_config
+from Common import dir_list_gen, dir_list_gen_tree, reconfigure_to_lists
 
 
 def archival_retrieval(

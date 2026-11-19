@@ -1,12 +1,12 @@
 import time
 
 import numpy as np
+from system_configuration import system_config
 
 from Common import (
     get_variable,
     movmean,
     set_variable,
-    system_config,
 )
 
 

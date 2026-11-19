@@ -62,8 +62,7 @@ from plotting import (
     plotting_spectrum,
     plotting_tunescan_over_modes,
 )
-
-from Common import machine_environment
+from system_configuration import machine_environment
 
 
 def growdamp_all(

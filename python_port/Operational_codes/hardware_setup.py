@@ -4,11 +4,11 @@ import time
 
 import numpy as np
 from hardware_setup import mbf_pll_setup
+from system_configuration import system_config
 
 from Common import (
     get_variable,
     set_variable,
-    system_config,
 )
 
 
