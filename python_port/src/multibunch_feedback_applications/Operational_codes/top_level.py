@@ -29,6 +29,7 @@ from hardware_setup import (
     setup_growdamp,
     setup_modescan,
     setup_pll_pi_scan,
+    setup_sequencer_stage,
     setup_spectrum,
     setup_tunescan_over_modes,
 )
@@ -62,7 +63,6 @@ from plotting import (
     plotting_spectrum,
     plotting_tunescan_over_modes,
 )
-
 from system_configuration import machine_environment
 
 
@@ -115,90 +115,108 @@ def growdamp_all(
     #
     # bank = 1 is Feedback off
     # bank = 2 is Feedback on
-    #       tune_offset (float): Tune fraction to offset from the peak.
-    #       dwell (int): number of turns at each point.
-    #       durations (struct): number of points for each stage.
+    #       tune_offset: Tune fraction to offset from the peak.
+    #       dwell: number of turns at each point.
+    #       duration: number of points for each stage.
     growth: dict = {}
     excitation: dict = {}
     passive: dict = {}
     active: dict = {}
     spacer: dict = {}
+    tune_offset: float = 0
     if mbf_axis.lower() == "x" or mbf_axis.lower() == "y":
         # Passive Growth
-        growth["duration"] = 2500
-        growth["dwell"] = 1
-        growth["capture"] = "Capture"
-        growth["excitation"] = "Off"
-        growth["excitation_level"] = "-48dB"
-        growth["bank"] = 1
+        growth = setup_sequencer_stage(
+            duration=2500,
+            dwell=1,
+            capture="Capture",
+            excitation="Off",
+            excitation_level="-48dB",
+            bank=1,
+        )
         # Excitation
-        excitation["duration"] = 750
-        excitation["dwell"] = 1
-        excitation["capture"] = "Capture"
-        excitation["excitation"] = "On"
-        excitation["excitation_level"] = "-18dB"
-        excitation["bank"] = 1
+        excitation = setup_sequencer_stage(
+            duration=750,
+            dwell=1,
+            capture="Capture",
+            excitation="On",
+            excitation_level="-18dB",
+            bank=1,
+        )
         # Passive decay (assuming no instability)
-        passive["duration"] = 1500
-        passive["dwell"] = 1
-        passive["capture"] = "Capture"
-        passive["excitation"] = "Off"
-        passive["excitation_level"] = "-48dB"
-        passive["bank"] = 1
+        passive = setup_sequencer_stage(
+            duration=1500,
+            dwell=1,
+            capture="Capture",
+            excitation="Off",
+            excitation_level="-48dB",
+            bank=1,
+        )
         # Feedback active
-        active["duration"] = 1500
-        active["dwell"] = 1
-        active["capture"] = "Capture"
-        active["excitation"] = "Off"
-        active["excitation_level"] = "-48dB"
-        active["bank"] = 2
+        active = setup_sequencer_stage(
+            duration=1500,
+            dwell=1,
+            capture="Capture",
+            excitation="Off",
+            excitation_level="-48dB",
+            bank=2,
+        )
         # Feedback active but no capture
-        spacer["duration"] = 4000
-        spacer["dwell"] = 1
-        spacer["capture"] = "Discard"
-        spacer["excitation"] = "Off"
-        spacer["excitation_level"] = "-48dB"
-        spacer["bank"] = 2
-        tune_offset = 0
+        spacer = setup_sequencer_stage(
+            duration=4000,
+            dwell=1,
+            capture="Discard",
+            excitation="Off",
+            excitation_level="-48dB",
+            bank=2,
+        )
     elif mbf_axis.lower() == "s":
-        growth["duration"] = 10
-        growth["dwell"] = 480
-        growth["capture"] = "Capture"
-        growth["excitation"] = "Off"
-        growth["excitation_level"] = "-48dB"
-        growth["bank"] = 1
+        # Passive Growth
+        growth = setup_sequencer_stage(
+            duration=10,
+            dwell=480,
+            capture="Capture",
+            excitation="Off",
+            excitation_level="-48dB",
+            bank=1,
+        )
         # Excitation
-        excitation["duration"] = 10
-        excitation["dwell"] = 480
-        excitation["capture"] = "Capture"
-        excitation["excitation"] = "On"
-        excitation["excitation_level"] = "-18dB"
-        excitation["bank"] = 1
+        excitation = setup_sequencer_stage(
+            duration=10,
+            dwell=480,
+            capture="Capture",
+            excitation="On",
+            excitation_level="-18dB",
+            bank=1,
+        )
         # Passive decay (assuming no instability)
-        passive["duration"] = 10
-        passive["dwell"] = 480
-        passive["capture"] = "Capture"
-        passive["excitation"] = "Off"
-        passive["excitation_level"] = "-48dB"
-        passive["bank"] = 1
+        passive = setup_sequencer_stage(
+            duration=10,
+            dwell=480,
+            capture="Capture",
+            excitation="Off",
+            excitation_level="-48dB",
+            bank=1,
+        )
         # Feedback active
-        active["duration"] = 50
-        active["dwell"] = 480
-        active["capture"] = "Capture"
-        active["excitation"] = "Off"
-        active["excitation_level"] = "-48dB"
-        active["bank"] = 2
+        active = setup_sequencer_stage(
+            duration=50,
+            dwell=480,
+            capture="Capture",
+            excitation="Off",
+            excitation_level="-48dB",
+            bank=2,
+        )
         # Feedback active but no capture
-        spacer["duration"] = 100
-        spacer["dwell"] = 480
-        spacer["capture"] = "Discard"
-        spacer["excitation"] = "Off"
-        spacer["excitation_level"] = "-48dB"
-        spacer["bank"] = 2
-        tune_offset = 0
+        spacer = setup_sequencer_stage(
+            duration=100,
+            dwell=480,
+            capture="Discard",
+            excitation="Off",
+            excitation_level="-48dB",
+            bank=2,
+        )
 
-    # getting general environment data.
-    data = machine_environment()
     ## Setting up the growdamp experiments.
     states: list = []
     state_names: list = []
@@ -220,23 +238,13 @@ def growdamp_all(
         state_names[2] = "excitation"
         state_names[1] = "active"
         state_names[0] = "spacer"
-        if "lower_sideband" in excitation_location:
-            excitation_tune = (
-                data["tunes"][f"{mbf_axis}_tune"]["lower_sideband"] + tune_offset
-            )
-        elif "upper_sideband" in excitation_location:
-            excitation_tune = (
-                data["tunes"][f"{mbf_axis}_tune"]["upper_sideband"] + tune_offset
-            )
-        elif "manual" in excitation_location:
-            excitation_tune = excitation_manual
-        else:
-            excitation_tune = data["tunes"][f"{mbf_axis}_tune"]["tune"] + tune_offset
+
+    # getting general environment data.
+    data = machine_environment()
 
     # Add the extra data to the data structure.
     data["ax_label"] = mbf_axis
     data["base_name"] = ["Growdamp_", mbf_axis, "_axis"]
-    data["excitation_tune"] = excitation_tune
     data["states"] = states
     data["state_names"] = state_names
     data["mbf_axis"] = mbf_axis
@@ -253,6 +261,20 @@ def growdamp_all(
     data["capture_full_bunch_motion"] = capture_full_bunch_motion
     data["start_state"] = "Feedback"
     data["end_state"] = "Feedback"
+    if "lower_sideband" in excitation_location:
+        data["excitation_tune"] = (
+            data["tunes"][f"{mbf_axis}_tune"]["lower_sideband"] + tune_offset
+        )
+    elif "upper_sideband" in excitation_location:
+        data["excitation_tune"] = (
+            data["tunes"][f"{mbf_axis}_tune"]["upper_sideband"] + tune_offset
+        )
+    elif "manual" in excitation_location:
+        data["excitation_tune"] = excitation_manual
+    else:
+        data["excitation_tune"] = (
+            data["tunes"][f"{mbf_axis}_tune"]["tune"] + tune_offset
+        )
 
     run_single_axis_measurement(
         setup_info=data,
@@ -263,6 +285,7 @@ def growdamp_all(
 
     ## Plotting data
     if plotting == "yes":
+        # Retrieving from datastore to ensure data has been written.
         requested_data = archival_retrieval(
             "Growdamp",
             ax=mbf_axis,
@@ -324,6 +347,7 @@ def modescan_all(
 
     ## Plotting data
     if plotting == "yes":
+        # Retrieving from datastore to ensure data has been written.
         requested_data = archival_retrieval(
             "Modescan",
             ax=mbf_axis,
@@ -380,6 +404,7 @@ def mbf_spectrum_all(
     )
     ## Plotting data
     if plotting == "yes":
+        # Retrieving from datastore to ensure data has been written.
         requested_data = archival_retrieval(
             "Spectrum",
             ax=mbf_axis,
@@ -412,6 +437,7 @@ def Bunch_motion_all(
 
     ## Plotting data
     if plotting == "yes":
+        # Retrieving from datastore to ensure data has been written.
         requested_data = archival_retrieval(
             "bunch_motion",
             ax=None,
@@ -480,6 +506,7 @@ def frontend_clock_phase_scan(
 
     ## Plotting data
     if plotting == "yes":
+        # Retrieving from datastore to ensure data has been written.
         requested_data = archival_retrieval(
             "frontend_clock_phase_scan",
             ax=None,
@@ -559,6 +586,7 @@ def frontend_gain_scan(
     )
     ## Plotting data
     if plotting == "yes":
+        # Retrieving from datastore to ensure data has been written.
         requested_data = archival_retrieval(
             "frontend_gain_scan",
             ax=None,
@@ -628,6 +656,7 @@ def frontend_system_phase_scan(
     )
     ## Plotting data
     if plotting == "yes":
+        # Retrieving from datastore to ensure data has been written.
         requested_data = archival_retrieval(
             "frontend_system_phase_scan",
             ax=mbf_axis,
@@ -696,6 +725,7 @@ def DORIS_target_phase_scan(
     )
     ## Plotting data
     if plotting == "yes":
+        # Retrieving from datastore to ensure data has been written.
         requested_data = archival_retrieval(
             "doris_target_phase_scan",
             ax=None,
@@ -737,6 +767,7 @@ def mbf_pll_phase_scan(
     )
     ## Plotting data
     if plotting == "yes":
+        # Retrieving from datastore to ensure data has been written.
         requested_data = archival_retrieval(
             "pll_phase_scan",
             ax=mbf_axis,
@@ -789,6 +820,7 @@ def tunescan_over_modes_all(
 
     ## Plotting data
     if plotting == "yes":
+        # Retrieving from datastore to ensure data has been written.
         requested_data = archival_retrieval(
             "tunescan_over_modes",
             ax=mbf_axis,
@@ -843,6 +875,7 @@ def BBBFE_LO_scan(
     )
     ## Plotting data
     if plotting == "yes":
+        # Retrieving from datastore to ensure data has been written.
         requested_data = archival_retrieval(
             "frontend_lo_phase_scan",
             ax=None,
@@ -890,6 +923,7 @@ def pll_PI_scan(
     )
     ## Plotting data
     if plotting == "yes":
+        # Retrieving from datastore to ensure data has been written.
         requested_data = archival_retrieval(
             "pll_pi_scan",
             ax=mbf_axis,

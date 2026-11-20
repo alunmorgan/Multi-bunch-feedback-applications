@@ -3,13 +3,37 @@ import os
 import time
 
 import numpy as np
-from hardware_setup import mbf_pll_setup
-
 from Common import (
     get_variable,
     set_variable,
 )
+from hardware_setup import pll_setup
 from system_configuration import system_config
+
+
+def setup_sequencer_stage_data(
+    duration: int,
+    dwell: int,
+    capture: str,
+    excitation: str,
+    excitation_level: str,
+    bank,
+    blanking="Blanking",
+    windowing="Windowed",
+    holdoff=0,
+    tune_pll="Ignore",
+) -> dict:
+    data = {}
+    data["duration"]: int = duration
+    data["dwell"]: int = dwell
+    data["capture"] = capture
+    data["excitation"] = excitation
+    data["excitation_level"] = excitation_level
+    data["bank"]: int = bank
+    data["blanking"] = blanking
+    data["windowing"] = windowing
+    data["holdoff"] = holdoff
+    return data
 
 
 def setup_growdamp(input_settings: dict, pv_names: dict):
@@ -21,28 +45,19 @@ def setup_growdamp(input_settings: dict, pv_names: dict):
 
     example: growdamp_setup(input_settings, pv_names, trigger_inputs)
     """
-    pll_setup: dict = {}
-    mbf_axis = input_settings["mbf_axis"]
-    harmonic_number = input_settings["harmonic_number"]
-    states = input_settings["states"]
-    excitation_tune = input_settings["excitation_tune"]
-    bunch_monitor = input_settings["bunches_monitored"]
-    pll_setup["pll_tracking"] = input_settings["pll_tracking"]
-    pll_setup["pll_bunches"] = input_settings["pll_bunches"]
-    pll_setup["pll_guard_bunches"] = input_settings["pll_guard_bunches"]
-    pv_head = pv_names["hardware_names"][mbf_axis]
-    pv_head_mem = pv_names["hardware_names"]["mem"][mbf_axis]
+    pv_head = pv_names["hardware_names"][input_settings["mbf_axis"]]
+    pv_head_mem = pv_names["hardware_names"]["mem"][input_settings["mbf_axis"]]
     trigger_inputs = pv_names["trigger_inputs"]
     triggers = pv_names["tails"]["triggers"]
     memory = pv_names["tails"]["MEM"]
     Sequencer = pv_names["tails"]["Sequencer"]
     Detector = pv_names["tails"]["Detector"]
     Bunch_bank = pv_names["tails"]["Bunch_bank"]
-    NCO2 = pv_names["tails"]["NCO2"]
+    nco2 = pv_names["tails"]["NCO2"]
     ## Set up triggering
     # set up the appropriate triggering
     # Stop triggering first, otherwise there's a good chance the first thing
-    # we'll do is loose the beam as we change things['']
+    # we'll do is loose the beam as we change things.
     for trigger_ind in range(len(trigger_inputs)):
         trigger = trigger_inputs[trigger_ind]
         set_variable(f"{pv_head}{triggers[trigger]['enable_status']}", "Ignore")
@@ -63,36 +78,45 @@ def setup_growdamp(input_settings: dict, pv_names: dict):
     # Delay to make sure the currently set up sweeps have finished.
     time.sleep(1)  # TODO look for system to be in bank 0.
     ## Set up banks
-    # bunch output (0=off 1=FIR 2=NCO 3 =NCO+FIR 4=sweep 5=sweep+FIR 6=sweep+NCO
-    #               7=sweep+NCO+FIR)
     # bunch bank 2 (the feedback)
-    mbf_set_bank(mbf_axis, 2, 1)  # FIR
+    set_bank(ax=input_settings["mbf_axis"], bank=2, out_type=1)  # FIR
     # bunch bank 1 (the excitation)
-    mbf_set_bank(mbf_axis, 1, 4)  # Sweep
+    set_bank(ax=input_settings["mbf_axis"], bank=1, out_type=4)  # Sweep
     # bunch bank 0 (the resting condition)
-    mbf_set_bank(mbf_axis, 0, 1)  # FIR
+    set_bank(ax=input_settings["mbf_axis"], bank=0, out_type=1)  # FIR
     ## Set up states
     # (ax, state, tune, bank, gain, enable, duration, dwell, capture)
-    for st in range(len(states)):
-        mbf_set_state(mbf_axis, st, excitation_tune, states[st])
+    for st in range(len(input_settings["states"])):
+        set_sequencer_state(
+            ax=input_settings["mbf_axis"],
+            state=st,
+            tune=input_settings["excitation_tune"],
+            setup_data=input_settings["states"][st],
+            blanking="Off",
+            windowing="Disabled",
+            holdoff=0,
+        )
 
     # start state
-    set_variable(f"{pv_head}{Sequencer['start_state']}", len(states))
+    set_variable(f"{pv_head}{Sequencer['start_state']}", len(input_settings["states"]))
     # steady state bank
     set_variable(f"{pv_head}{Sequencer['steady_state_bank']}", "Bank 0")
     ## set the super sequencer to scan all modes.
     set_variable(
-        f"{pv_head}{pv_names['tails']['Super_sequencer_count']}", harmonic_number
+        f"{pv_head}{pv_names['tails']['Super_sequencer_count']}",
+        input_settings["harmonic_number"],
     )
     ## set up PLL
-    if pll_setup["pll_tracking"] == "yes":
-        mbf_pll_setup("x", pll_setup["pll_bunches"], pll_setup["pll_guard_bunches"])
-        set_variable(f"{pv_head}{NCO2['PLL_follow']}", "Follow")
-        set_variable(f"{pv_head}{NCO2['gaindb']}", -30)
+    if input_settings["pll_tracking"] == "yes":
+        pll_setup(
+            "x", input_settings["pll_bunches"], input_settings["pll_guard_bunches"]
+        )
+        set_variable(f"{pv_head}{nco2['PLL_follow']}", "Follow")
+        set_variable(f"{pv_head}{nco2['gaindb']}", -30)
         fillx = get_variable(f"{pv_head}{Bunch_bank['bank1']['SEQ_enablewf']}")
         set_variable(f"{pv_head}{Bunch_bank['bank0']['NCO2_enablewf']}", fillx)
         set_variable(f"{pv_head}{Bunch_bank['bank1']['NCO2_enablewf']}", fillx)
-        set_variable(f"{pv_head}{NCO2['enable']}", "On")
+        set_variable(f"{pv_head}{nco2['enable']}", "On")
 
     ## Set up the detector.
     # Set the detector input to FIR
@@ -104,10 +128,13 @@ def setup_growdamp(input_settings: dict, pv_names: dict):
 
     set_variable(f"{pv_head}{Detector['det0']['enable']}", "Enabled")
     # Set which bunches detector 0 records.
-    set_variable(f"{pv_head}{Detector['det0']['bunch_selection']}", bunch_monitor)
+    set_variable(
+        f"{pv_head}{Detector['det0']['bunch_selection']}",
+        input_settings["bunches_monitored"],
+    )
 
 
-def mbf_set_bank(ax: str, bank: int, out_type: int):
+def set_bank(ax: str, bank: int, out_type: int):
     """Setup an individual bank in an individual MBF system.
 
     Args:
@@ -120,99 +147,99 @@ def mbf_set_bank(ax: str, bank: int, out_type: int):
 
     Example:  mbf_set_bank(ax, bank, out_type)
     """
-    [_1, harmonic_number, pv_names] = system_config()
-    BB = pv_names["tails"]["Bunch_bank"][f"bank{bank}"]
+    _1, harmonic_number, pv_names = system_config()
+    bb = pv_names["tails"]["Bunch_bank"][f"bank{bank}"]
     pv_head = [pv_names["hardware_names"][ax]]
-    # bunch output (0=off 1=FIR 2=NCO 3 =NCO+FIR 4=sweep 5=sweep+FIR 6=sweep+NCO
-    #               7=sweep+NCO+FIR)
     if out_type == 0:
         # all off
-        set_variable(f"{pv_head}{BB['FIR']['set_disable']}", 1)
-        set_variable(f"{pv_head}{BB['NCO1']['set_disable']}", 1)
-        set_variable(f"{pv_head}{BB['NCO2']['set_disable']}", 1)
-        set_variable(f"{pv_head}{BB['SEQ']['set_disable']}", 1)
-        set_variable(f"{pv_head}{BB['PLL']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['FIR']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['NCO1']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['NCO2']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['SEQ']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['PLL']['set_disable']}", 1)
     elif out_type == 1:
         # FIR only
-        set_variable(f"{pv_head}{BB['FIR']['gainwf']}", np.ones(1, harmonic_number) * 1)
-        set_variable(f"{pv_head}{BB['FIR']['set_enable']}", 1)
-        set_variable(f"{pv_head}{BB['NCO1']['set_disable']}", 1)
-        set_variable(f"{pv_head}{BB['NCO2']['set_disable']}", 1)
-        set_variable(f"{pv_head}{BB['SEQ']['set_disable']}", 1)
-        set_variable(f"{pv_head}{BB['PLL']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['FIR']['gainwf']}", np.ones(1, harmonic_number) * 1)
+        set_variable(f"{pv_head}{bb['FIR']['set_enable']}", 1)
+        set_variable(f"{pv_head}{bb['NCO1']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['NCO2']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['SEQ']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['PLL']['set_disable']}", 1)
     elif out_type == 2:
         # NCO only
-        set_variable(f"{pv_head}{BB['FIR']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['FIR']['set_disable']}", 1)
         set_variable(
-            f"{pv_head}{BB['NCO1']['gainswf']}", np.ones(1, harmonic_number) * 1
+            f"{pv_head}{bb['NCO1']['gainswf']}", np.ones(1, harmonic_number) * 1
         )
-        set_variable(f"{pv_head}{BB['NCO1']['set_enable']}", 1)
-        set_variable(f"{pv_head}{BB['NCO2']['set_disable']}", 1)
-        set_variable(f"{pv_head}{BB['SEQ']['set_disable']}", 1)
-        set_variable(f"{pv_head}{BB['PLL']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['NCO1']['set_enable']}", 1)
+        set_variable(f"{pv_head}{bb['NCO2']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['SEQ']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['PLL']['set_disable']}", 1)
     elif out_type == 3:
         # NCO + FIR
-        set_variable(f"{pv_head}{BB['FIR']['gainwf']}", np.ones(1, harmonic_number) * 1)
-        set_variable(f"{pv_head}{BB['FIR']['set_enable']}", 1)
+        set_variable(f"{pv_head}{bb['FIR']['gainwf']}", np.ones(1, harmonic_number) * 1)
+        set_variable(f"{pv_head}{bb['FIR']['set_enable']}", 1)
         set_variable(
-            f"{pv_head}{BB['NCO1']['gainswf']}", np.ones(1, harmonic_number) * 1
+            f"{pv_head}{bb['NCO1']['gainswf']}", np.ones(1, harmonic_number) * 1
         )
-        set_variable(f"{pv_head}{BB['NCO1']['set_enable']}", 1)
-        set_variable(f"{pv_head}{BB['NCO2']['set_disable']}", 1)
-        set_variable(f"{pv_head}{BB['SEQ']['set_disable']}", 1)
-        set_variable(f"{pv_head}{BB['PLL']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['NCO1']['set_enable']}", 1)
+        set_variable(f"{pv_head}{bb['NCO2']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['SEQ']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['PLL']['set_disable']}", 1)
     elif out_type == 4:
         # sweep only
-        set_variable(f"{pv_head}{BB['FIR']['set_disable']}", 1)
-        set_variable(f"{pv_head}{BB['NCO1']['set_disable']}", 1)
-        set_variable(f"{pv_head}{BB['NCO2']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['FIR']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['NCO1']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['NCO2']['set_disable']}", 1)
         set_variable(
-            f"{pv_head}{BB['SEQ']['gainswf']}", np.ones(1, harmonic_number) * 1
+            f"{pv_head}{bb['SEQ']['gainswf']}", np.ones(1, harmonic_number) * 1
         )
-        set_variable(f"{pv_head}{BB['SEQ']['set_enable']}", 1)
-        set_variable(f"{pv_head}{BB['PLL']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['SEQ']['set_enable']}", 1)
+        set_variable(f"{pv_head}{bb['PLL']['set_disable']}", 1)
     elif out_type == 5:
         # sweep + FIR
-        set_variable(f"{pv_head}{BB['FIR']['gainwf']}", np.ones(1, harmonic_number) * 1)
-        set_variable(f"{pv_head}{BB['FIR']['set_enable']}", 1)
-        set_variable(f"{pv_head}{BB['NCO1']['set_disable']}", 1)
-        set_variable(f"{pv_head}{BB['NCO2']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['FIR']['gainwf']}", np.ones(1, harmonic_number) * 1)
+        set_variable(f"{pv_head}{bb['FIR']['set_enable']}", 1)
+        set_variable(f"{pv_head}{bb['NCO1']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['NCO2']['set_disable']}", 1)
         set_variable(
-            f"{pv_head}{BB['SEQ']['gainswf']}", np.ones(1, harmonic_number) * 1
+            f"{pv_head}{bb['SEQ']['gainswf']}", np.ones(1, harmonic_number) * 1
         )
-        set_variable(f"{pv_head}{BB['SEQ']['set_enable']}", 1)
-        set_variable(f"{pv_head}{BB['PLL']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['SEQ']['set_enable']}", 1)
+        set_variable(f"{pv_head}{bb['PLL']['set_disable']}", 1)
     elif out_type == 6:
         # sweep + NCO
-        set_variable(f"{pv_head}{BB['FIR']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['FIR']['set_disable']}", 1)
         set_variable(
-            f"{pv_head}{BB['NCO1']['gainswf']}", np.ones(1, harmonic_number) * 1
+            f"{pv_head}{bb['NCO1']['gainswf']}", np.ones(1, harmonic_number) * 1
         )
-        set_variable(f"{pv_head}{BB['NCO1']['set_enable']}", 1)
-        set_variable(f"{pv_head}{BB['NCO2']['set_disable']}", 1)
-        set_variable(f"{pv_head}{BB['SEQ']['set_disable']}", 1)
-        set_variable(f"{pv_head}{BB['PLL']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['NCO1']['set_enable']}", 1)
+        set_variable(f"{pv_head}{bb['NCO2']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['SEQ']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['PLL']['set_disable']}", 1)
     elif out_type == 7:
         # sweep + NCO + FIR
-        set_variable(f"{pv_head}{BB['FIR']['gainwf']}", np.ones(1, harmonic_number) * 1)
-        set_variable(f"{pv_head}{BB['FIR']['set_enable']}", 1)
+        set_variable(f"{pv_head}{bb['FIR']['gainwf']}", np.ones(1, harmonic_number) * 1)
+        set_variable(f"{pv_head}{bb['FIR']['set_enable']}", 1)
         set_variable(
-            f"{pv_head}{BB['NCO1']['gainswf']}", np.ones(1, harmonic_number) * 1
+            f"{pv_head}{bb['NCO1']['gainswf']}", np.ones(1, harmonic_number) * 1
         )
-        set_variable(f"{pv_head}{BB['NCO1']['set_enable']}", 1)
-        set_variable(f"{pv_head}{BB['NCO2']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['NCO1']['set_enable']}", 1)
+        set_variable(f"{pv_head}{bb['NCO2']['set_disable']}", 1)
         set_variable(
-            f"{pv_head}{BB['SEQ']['gainswf']}", np.ones(1, harmonic_number) * 1
+            f"{pv_head}{bb['SEQ']['gainswf']}", np.ones(1, harmonic_number) * 1
         )
-        set_variable(f"{pv_head}{BB['SEQ']['set_enable']}", 1)
-        set_variable(f"{pv_head}{BB['PLL']['set_disable']}", 1)
+        set_variable(f"{pv_head}{bb['SEQ']['set_enable']}", 1)
+        set_variable(f"{pv_head}{bb['PLL']['set_disable']}", 1)
 
     # select which FIR filter to use
-    set_variable(f"{pv_head}{BB['FIR']['selectwf']}", np.ones(1, harmonic_number) * 0)
+    set_variable(f"{pv_head}{bb['FIR']['selectwf']}", np.ones(1, harmonic_number) * 0)
 
 
-def mbf_set_state(ax: str, state: int, tune: float, setup_data: dict):
-    """Setup an individual state in the super sequencer.
+def set_sequencer_state(
+    ax: str, state: int, sweep_start: float, sweep_end: float, setup_data: dict
+):
+    """Setup an individual state in the sequencer.
 
     Args:
           ax: 'x', 'y', or 's' axis
@@ -223,78 +250,72 @@ def mbf_set_state(ax: str, state: int, tune: float, setup_data: dict):
               gain: the excitation level.
               duration: the number of turns the state is active.
               dwell: Dwell time (turns).
-              capture: 'Capture' or 'Discard' depending onn if you want to
+              capture: 'Capture' or 'Discard' depending on if you want to
                                keep the data or not
 
-    Example: mbf_set_state(ax, state, tune, setup_data)
+    Example: set_sequencer_state(ax, state, tune, setup_data)
     """
-    [_2, _1, pv_names] = system_config()
+    _2, _1, pv_names = system_config()
     system_axis = pv_names["hardware_names"][ax]
-    seq1 = pv_names["tails"]["Sequencer"][f"seq1{state}"]
-    set_variable(f"{system_axis}{seq1['start_frequency']}", tune)
-    set_variable(f"{system_axis}{['step_frequency']}", 0)
-    set_variable(f"{system_axis}{['turns']}", setup_data["duration"])
-    set_variable(f"{system_axis}{['holdoff']}", 0)
-    set_variable(f"{system_axis}{['dwell']}", setup_data["dwell"])
-    set_variable(f"{system_axis}{['bank_select']}", ["Bank ", (setup_data["bank"])])
-    set_variable(f"{system_axis}{['capture_state']}", setup_data["capture"])
-    set_variable(f"{system_axis}{['windowing_state']}", "Disabled")
-    set_variable(f"{system_axis}{['gain']}", setup_data["excitation_level"])
-    set_variable(f"{system_axis}{['blanking_state']}", "Off")
-    set_variable(f"{system_axis}{['enable']}", setup_data["excitation"])
+    seq = pv_names["tails"]["Sequencer"][f"seq{state}"]
+    set_variable(f"{system_axis}{seq['start_frequency']}", sweep_start)
+    set_variable(f"{system_axis}{seq['step_frequency']}", sweep_end)
+    set_variable(f"{system_axis}{seq['turns']}", setup_data["duration"])
+    set_variable(f"{system_axis}{seq['holdoff']}", setup_data["holdoff"])
+    set_variable(f"{system_axis}{seq['dwell']}", setup_data["dwell"])
+    set_variable(f"{system_axis}{seq['bank_select']}", ["Bank ", (setup_data["bank"])])
+    set_variable(f"{system_axis}{seq['capture_state']}", setup_data["capture"])
+    set_variable(f"{system_axis}{seq['windowing_state']}", setup_data["windowing"])
+    set_variable(f"{system_axis}{seq['gain']}", setup_data["excitation_level"])
+    set_variable(f"{system_axis}{seq['blanking_state']}", setup_data["blanking"])
+    set_variable(f"{system_axis}{seq['enable']}", setup_data["excitation"])
+    set_variable(f"{system_axis}{seq['tune_pll_following']}", setup_data["tune_pll"])
 
 
-def reestablish_tune_measurement(mbf_axis: str):
+def reestablish_tune_measurement(
+    mbf_axis: str,
+    sweep_start: float,
+    sweep_end: float,
+    tune_gain: float = -54,
+    tune_dwell: int = 100,
+    tune_count: int = 4096,
+):
     """sets up the tune measurement by setting bank1 and sequencer state one as
     required.
       Args:
           mbf_axis: 'x','y', or 's'
     Example: reestablish_tune_measurement('x')
     """
-    [_1, harmonic_number, pv_names] = system_config()
-    if mbf_axis.lower() == "x":
-        sweep_start = 80.139
-        sweep_end = 80.239
-        tune_gain = -54
-        tune_dwell = 100
-        tune_count = 4096
-        base = pv_names["hardware_names"]["x"]
-    elif mbf_axis.lower() == "y":
-        sweep_start = 80.227
-        sweep_end = 80.327
-        tune_gain = -54
-        tune_dwell = 100
-        tune_count = 4096
-        base = pv_names["hardware_names"]["y"]
-    elif mbf_axis.lower() == "s":
-        sweep_start = 80.00320
-        sweep_end = 80.00520
-        tune_gain = -18
-        tune_dwell = 100
-        tune_count = 4096
-        base = pv_names["hardware_names"]["s"]
-    else:
-        raise ValueError("MBF:InputError Please set required axis to x, y, or s")
+    _1, harmonic_number, pv_names = system_config()
+    base = pv_names["hardware_names"][mbf_axis]
+    tune_sequencer = pv_names["tails"]["Sequencer"]["seq1"]
+    tune_bank = pv_names["tails"]["Bunch_bank"]["bank1"]
 
-    # setting up sequencer state 1 to be the tune sweep['']
+    # setting up sequencer state 1 to be the tune sweep.
     set_variable(f"{base}{pv_names['tails']['Super_sequencer']['count']}", 1)
     set_variable(f"{base}{pv_names['tails']['Sequencer']['start_state']}", 1)
-    tune_sequencer = pv_names["tails"]["Sequencer"]["seq1"]
-    set_variable(f"{base}{tune_sequencer['start_frequency']}", sweep_start)
-    set_variable(f"{base}{tune_sequencer['end_frequency']}", sweep_end)
-    set_variable(f"{base}{tune_sequencer['gaindb']}", tune_gain)
-    set_variable(f"{base}{tune_sequencer['turns']}", tune_count)
-    set_variable(f"{base}{tune_sequencer['dwell']}", tune_dwell)
-    set_variable(f"{base}{tune_sequencer['bank_select']}", {"Bank 1"})
-    set_variable(f"{base}{tune_sequencer['tune_pll_following']}", {"Ignore"})
+    setup_data = setup_sequencer_stage_data(
+        duration=tune_count,
+        dwell=tune_dwell,
+        capture="Capture",
+        excitation="On",
+        excitation_level=tune_gain,
+        bank=1,
+        blanking="Blanking",
+        windowing="Windowed",
+        holdoff=0,
+        tune_pll="Ignore",
+    )
+    set_sequencer_state(
+        ax=mbf_axis,
+        state=1,
+        sweep_start=sweep_start,
+        sweep_end=sweep_end,
+        setup_data=setup_data,
+    )
     set_variable(f"{base}{tune_sequencer['enable']}", "On")
     set_variable(f"{base}{tune_sequencer['holdoff_state']}", 0)
-    set_variable(f"{base}{tune_sequencer['holdoff']}", 0)
-    set_variable(f"{base}{tune_sequencer['blanking_state']}", {"Blanking"})
-    set_variable(f"{base}{tune_sequencer['windowing_state']}", {"Windowed"})
-    set_variable(f"{base}{tune_sequencer['capture_state']}", {"Capture"})
-    tune_bank = pv_names["tails"]["Bunch_bank"]["bank1"]
-    # Setting bank 1 to use both the FIR and the sequencer but nothing else['']
+    # Setting bank 1 to use both the FIR and the sequencer but nothing else.
     set_variable(f"{base}{tune_bank['FIR']['enablewf']}", np.ones(1, harmonic_number))
     set_variable(f"{base}{tune_bank['NCO1']['enablewf']}", np.zeros(1, harmonic_number))
     set_variable(f"{base}{tune_bank['NCO2']['enablewf']}", np.zeros(1, harmonic_number))

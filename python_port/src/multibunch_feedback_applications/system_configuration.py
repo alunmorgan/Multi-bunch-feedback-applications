@@ -306,7 +306,7 @@ def system_config():
     pv_names["frontend"]["gain"]["y"] = ":LEV:Y.DESC"
     pv_names["frontend"]["gain"]["s"] = ":LEV:I.DESC"
     ## Backend PVs
-    # Base PVs of the hardware['']
+    # Base PVs of the hardware.
     pv_names["hardware_names"]["T"] = "SR23C-DI-TMBF-01"
     pv_names["hardware_names"]["L"] = "SR23C-DI-LMBF-01"
     pv_names["hardware_names"]["mem"]["x"] = pv_names["hardware_names"]["T"]
@@ -322,381 +322,145 @@ def system_config():
     pv_names["hardware_names"]["tx"] = [pv_names["hardware_names"]["lab"], ":X"]
     pv_names["hardware_names"]["ty"] = [pv_names["hardware_names"]["lab"], ":Y"]
     ## Trigger settings
-    pv_names["tails"]["triggers"]["mode"] = ":TRG:SEQ:MODE_S"
-    pv_names["tails"]["triggers"]["arm"] = ":TRG:SEQ:ARM_S.PROC"
+    triggers = {}
+    triggers["mode"] = ":TRG:SEQ:MODE_S"
+    triggers["arm"] = ":TRG:SEQ:ARM_S.PROC"
     pv_names["trigger_inputs"] = {"SOFT", "EXT", "PM", "ADC0", "ADC1", "SEQ0", "SEQ1"}
     for trigger_ind in range(1, len(pv_names["trigger_inputs"])):
         trigger = pv_names["trigger_inputs"][trigger_ind]
-        pv_names["tails"]["triggers"][trigger]["enable_status"] = [
-            ":TRG:SEQ:",
-            trigger,
-            ":EN_S",
-        ]
-        pv_names["tails"]["triggers"][trigger]["blanking_status"] = [
-            ":TRG:SEQ:",
-            trigger,
-            ":BL_S",
-        ]
+        triggers[trigger]["enable_status"] = f":TRG:SEQ:{trigger}:EN_S"
+        triggers[trigger]["blanking_status"] = f":TRG:SEQ:{trigger}:BL_S"
 
-    pv_names["tails"]["triggers"]["SEQ"]["arm"] = ":TRG:SEQ:ARM_S.PROC"
-    pv_names["tails"]["triggers"]["SEQ"]["disarm"] = ":TRG:SEQ:DISARM_S.PROC"
-    pv_names["tails"]["triggers"]["SEQ"]["mode"] = ":TRG:SEQ:MODE_S"
-    pv_names["tails"]["triggers"]["SEQ"]["delay"] = ":TRG:SEQ:DELAY_S"
-    # shared with other axis
-    pv_names["tails"]["triggers"]["MEM"]["arm"] = (
-        ":TRG:MEM:ARM_S.PROC"  # NEED TO TAKE OFF THE X|Y BEFORE USE['']
-    )
-    pv_names["tails"]["triggers"]["MEM"]["disarm"] = (
-        ":TRG:MEM:DISARM_S.PROC"  # NEED TO TAKE OFF THE X|Y BEFORE USE['']
-    )
-    pv_names["tails"]["triggers"]["MEM"]["mode"] = (
-        ":TRG:MEM:MODE_S"  # NEED TO TAKE OFF THE X|Y BEFORE USE['']
-    )
-    pv_names["tails"]["triggers"]["MEM"]["delay"] = (
-        ":TRG:MEM:DELAY_S"  # NEED TO TAKE OFF THE X|Y BEFORE USE['']
-    )
-    pv_names["tails"]["triggers"]["soft"] = (
-        ":TRG:SOFT_S.PROC"  # NEED TO TAKE OFF THE X|Y BEFORE USE['']
-    )
-    pv_names["tails"]["triggers"]["soft_settings"] = (
-        ":TRG:SOFT_S.SCAN"  # NEED TO TAKE OFF THE X|Y BEFORE USE['']
-    )
-    pv_names["tails"]["triggers"]["shared"] = (
-        ":TRG:MODE_S"  # NEED TO TAKE OFF THE X|Y BEFORE USE['']
-    )
-    pv_names["tails"]["triggers"]["blanking_length"] = (
-        ":TRG:BLANKING_S"  # NEED TO TAKE OFF THE X|Y BEFORE USE['']
-    )
     for trigger_ind in range(1, len(pv_names["trigger_inputs"])):
         trigger = pv_names["trigger_inputs"][trigger_ind]
-        pv_names["tails"]["triggers"]["MEM"][trigger]["enable_status"] = [
-            ":TRG:MEM:",
-            trigger,
-            ":EN_S",
-        ]
-        pv_names["tails"]["triggers"]["MEM"][trigger]["blanking_status"] = [
-            ":TRG:MEM:",
-            trigger,
-            ":BL_S",
-        ]
+        triggers["MEM"][trigger]["enable_status"] = f":TRG:MEM:{trigger}:EN_S"
+        triggers["MEM"][trigger]["blanking_status"] = f":TRG:MEM:{trigger}:BL_S"
 
+    triggers["SEQ"]["arm"] = ":TRG:SEQ:ARM_S.PROC"
+    triggers["SEQ"]["disarm"] = ":TRG:SEQ:DISARM_S.PROC"
+    triggers["SEQ"]["mode"] = ":TRG:SEQ:MODE_S"
+    triggers["SEQ"]["delay"] = ":TRG:SEQ:DELAY_S"
+    # shared with other axis
+    # NEED TO TAKE OFF THE X|Y BEFORE USE
+    triggers["MEM"]["arm"] = ":TRG:MEM:ARM_S.PROC"
+    triggers["MEM"]["disarm"] = ":TRG:MEM:DISARM_S.PROC"
+    triggers["MEM"]["mode"] = ":TRG:MEM:MODE_S"
+    triggers["MEM"]["delay"] = ":TRG:MEM:DELAY_S"
+    triggers["soft"] = ":TRG:SOFT_S.PROC"
+    triggers["soft_settings"] = ":TRG:SOFT_S.SCAN"
+    triggers["shared"] = ":TRG:MODE_S"
+    triggers["blanking_length"] = ":TRG:BLANKING_S"
+
+    pv_names["tails"]["triggers"] = triggers
     ## Super Sequencer settings
+    # FIXME should only have one set of calls here.
     pv_names["tails"]["Super_sequencer_count"] = ":SEQ:SUPER:COUNT_S"
     pv_names["tails"]["Super_sequencer_reset"] = ":SEQ:SUPER:RESET_S.PROC"
     pv_names["tails"]["Super_sequencer"]["count"] = ":SEQ:SUPER:COUNT_S"
     pv_names["tails"]["Super_sequencer"]["reset"] = ":SEQ:SUPER:RESET_S.PROC"
     ## Sequencer settings
     # applies to all
-    pv_names["tails"]["Sequencer"]["start_state"] = ":SEQ:PC_S"
-    pv_names["tails"]["Sequencer"]["steady_state_bank"] = ":SEQ:0:BANK_S"
-    pv_names["tails"]["Sequencer"]["reset"] = ":SEQ:RESET_S.PROC"
-    # pv_names['tails']['Sequencer']['count'] = ':COUNT_S'
-    for n_seq in range(1, 7):
-        n_seq_label = n_seq
-        l_seq = ["seq", n_seq_label]
-        pv_names["tails"]["Sequencer"][l_seq]["start_frequency"] = [
-            ":SEQ:",
-            n_seq_label,
-            ":START_FREQ_S",
-        ]
-        pv_names["tails"]["Sequencer"][l_seq]["end_frequency"] = [
-            ":SEQ:",
-            n_seq_label,
-            ":END_FREQ_S",
-        ]
-        pv_names["tails"]["Sequencer"][l_seq]["turns"] = [
-            ":SEQ:",
-            n_seq_label,
-            ":COUNT_S",
-        ]
-        pv_names["tails"]["Sequencer"][l_seq]["dwell"] = [
-            ":SEQ:",
-            n_seq_label,
-            ":DWELL_S",
-        ]
-        pv_names["tails"]["Sequencer"][l_seq]["gain"] = [
-            ":SEQ:",
-            n_seq_label,
-            ":GAIN_S",
-        ]
-        pv_names["tails"]["Sequencer"][l_seq]["gaindb"] = [
-            ":SEQ:",
-            n_seq_label,
-            ":GAIN_DB_S",
-        ]
-        pv_names["tails"]["Sequencer"][l_seq]["enable"] = [
-            ":SEQ:",
-            n_seq_label,
-            ":ENABLE_S",
-        ]
-        pv_names["tails"]["Sequencer"][l_seq]["step_frequency"] = [
-            ":SEQ:",
-            n_seq_label,
-            ":STEP_FREQ_S",
-        ]
-        pv_names["tails"]["Sequencer"][l_seq]["holdoff"] = [
-            ":SEQ:",
-            n_seq_label,
-            ":HOLDOFF_S",
-        ]
-        pv_names["tails"]["Sequencer"][l_seq]["bank_select"] = [
-            ":SEQ:",
-            n_seq_label,
-            ":BANK_S",
-        ]
-        pv_names["tails"]["Sequencer"][l_seq]["capture_state"] = [
-            ":SEQ:",
-            n_seq_label,
-            ":CAPTURE_S",
-        ]
-        pv_names["tails"]["Sequencer"][l_seq]["windowing_state"] = [
-            ":SEQ:",
-            n_seq_label,
-            ":ENWIN_S",
-        ]
-        pv_names["tails"]["Sequencer"][l_seq]["blanking_state"] = [
-            ":SEQ:",
-            n_seq_label,
-            ":BLANK_S",
-        ]
-        pv_names["tails"]["Sequencer"][l_seq]["holdoff_state"] = [
-            ":SEQ:",
-            n_seq_label,
-            ":STATE_HOLDOFF_S",
-        ]
-        pv_names["tails"]["Sequencer"][l_seq]["tune_pll_following"] = [
-            ":SEQ:",
-            n_seq_label,
-            ":TUNE_PLL_S",
-        ]
+    sequencer = {}
+    sequencer["start_state"] = ":SEQ:PC_S"
+    sequencer["steady_state_bank"] = ":SEQ:0:BANK_S"
+    sequencer["reset"] = ":SEQ:RESET_S.PROC"
+    for n_seq in range(1, 8):
+        l_seq = f"seq{n_seq}"
+        sequencer[l_seq]["start_frequency"] = f":SEQ:{n_seq}:START_FREQ_S"
+        sequencer[l_seq]["end_frequency"] = f":SEQ:{n_seq}:END_FREQ_S"
+        sequencer[l_seq]["turns"] = f":SEQ:{n_seq}:COUNT_S"
+        sequencer[l_seq]["dwell"] = f":SEQ:{n_seq}:DWELL_S"
+        sequencer[l_seq]["gain"] = f":SEQ:{n_seq}:GAIN_S"
+        sequencer[l_seq]["gaindb"] = f":SEQ:{n_seq}:GAIN_DB_S"
+        sequencer[l_seq]["enable"] = f":SEQ:{n_seq}:ENABLE_S"
+        sequencer[l_seq]["step_frequency"] = f":SEQ:{n_seq}:STEP_FREQ_S"
+        sequencer[l_seq]["holdoff"] = f":SEQ:{n_seq}:HOLDOFF_S"
+        sequencer[l_seq]["bank_select"] = f":SEQ:{n_seq}:BANK_S"
+        sequencer[l_seq]["capture_state"] = f":SEQ:{n_seq}:CAPTURE_S"
+        sequencer[l_seq]["windowing_state"] = f":SEQ:{n_seq}:ENWIN_S"
+        sequencer[l_seq]["blanking_state"] = f":SEQ:{n_seq}:BLANK_S"
+        sequencer[l_seq]["holdoff_state"] = f":SEQ:{n_seq}:STATE_HOLDOFF_S"
+        sequencer[l_seq]["tune_pll_following"] = f":SEQ:{n_seq}:TUNE_PLL_S"
+    pv_names["tails"]["Sequencer"] = sequencer
 
     ## Bank settings
-    for n_bank in range(0, 3):
-        n_bank_label = n_bank
-        l_bank = ["bank", n_bank_label]
-        pv_names["tails"]["Bunch_bank"][l_bank]["Output_types"] = [
-            ":BUN:",
-            n_bank_label,
-            ":OUTWF_S",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["bunch_select"] = [
-            ":BUN:",
-            n_bank_label,
-            ":BUNCH_SELECT_S",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["FIR"]["enablewf"] = [
-            ":BUN:",
-            n_bank_label,
-            ":FIR:ENABLE_S",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["FIR"]["set_enable"] = [
-            ":BUN:",
-            n_bank_label,
-            ":FIR:SET_ENABLE_S.PROC",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["FIR"]["set_disable"] = [
-            ":BUN:",
-            n_bank_label,
-            ":FIR:SET_DISABLE_S.PROC",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["FIR"]["gainwf"] = [
-            ":BUN:",
-            n_bank_label,
-            ":FIR:GAIN_S",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["FIR"]["gainswfdb"] = [
-            ":BUN:",
-            n_bank_label,
-            ":FIR:GAIN_DB",
-        ]
+    bbank = {}
+    for n_bank in range(4):
+        l_bank = f"bank{n_bank}"
+        bbank[l_bank]["Output_types"] = f":BUN:{n_bank}:OUTWF_S"
+        bbank[l_bank]["bunch_select"] = f":BUN:{n_bank}:BUNCH_SELECT_S"
+        bbank[l_bank]["FIR"]["enablewf"] = f":BUN:{n_bank}:FIR:ENABLE_S"
+        bbank[l_bank]["FIR"]["set_enable"] = f":BUN:{n_bank}:FIR:SET_ENABLE_S.PROC"
+        bbank[l_bank]["FIR"]["set_disable"] = f":BUN:{n_bank}:FIR:SET_DISABLE_S.PROC"
+        bbank[l_bank]["FIR"]["gainwf"] = f":BUN:{n_bank}:FIR:GAIN_S"
+        bbank[l_bank]["FIR"]["gainswfdb"] = f":BUN:{n_bank}:FIR:GAIN_DB"
         #     Select which filter to use on which bunch
-        pv_names["tails"]["Bunch_bank"][l_bank]["FIR"]["selectwf"] = [
-            ":BUN:",
-            n_bank_label,
-            ":FIRWF_S",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["FIR"]["set_select"] = [
-            ":BUN:",
-            n_bank_label,
-            ":FIRWF_SET_S.PROC",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["NCO1"]["enablewf"] = [
-            ":BUN:",
-            n_bank_label,
-            ":NCO1:ENABLE_S",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["NCO1"]["set_enable"] = [
-            ":BUN:",
-            n_bank_label,
-            ":NCO1:SET_ENABLE_S.PROC",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["NCO1"]["set_disable"] = [
-            ":BUN:",
-            n_bank_label,
-            ":NCO1:SET_DISABLE_S.PROC",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["NCO1"]["gainswf"] = [
-            ":BUN:",
-            n_bank_label,
-            ":NCO1:GAIN_S",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["NCO1"]["gainswfdb"] = [
-            ":BUN:",
-            n_bank_label,
-            ":NCO1:GAIN_DB",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["NCO2"]["enablewf"] = [
-            ":BUN:",
-            n_bank_label,
-            ":NCO2:ENABLE_S",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["NCO2"]["set_enable"] = [
-            ":BUN:",
-            n_bank_label,
-            ":NCO2:SET_ENABLE_S.PROC",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["NCO2"]["set_disable"] = [
-            ":BUN:",
-            n_bank_label,
-            ":NCO2:SET_DISABLE_S.PROC",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["NCO2"]["gainswf"] = [
-            ":BUN:",
-            n_bank_label,
-            ":NCO2:GAIN_S",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["NCO2"]["gainswfdb"] = [
-            ":BUN:",
-            n_bank_label,
-            ":NCO2:GAIN_DB",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["SEQ"]["enablewf"] = [
-            ":BUN:",
-            n_bank_label,
-            ":SEQ:ENABLE_S",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["SEQ"]["set_enable"] = [
-            ":BUN:",
-            n_bank_label,
-            ":SEQ:SET_ENABLE_S.PROC",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["SEQ"]["set_disable"] = [
-            ":BUN:",
-            n_bank_label,
-            ":SEQ:SET_DISABLE_S.PROC",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["SEQ"]["gainswf"] = [
-            ":BUN:",
-            n_bank_label,
-            ":SEQ:GAIN_S",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["SEQ"]["gainswfdb"] = [
-            ":BUN:",
-            n_bank_label,
-            ":SEQ:GAIN_DB",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["PLL"]["enablewf"] = [
-            ":BUN:",
-            n_bank_label,
-            ":PLL:ENABLE_S",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["PLL"]["set_enable"] = [
-            ":BUN:",
-            n_bank_label,
-            ":PLL:SET_ENABLE_S.PROC",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["PLL"]["set_disable"] = [
-            ":BUN:",
-            n_bank_label,
-            ":PLL:SET_DISABLE_S.PROC",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["PLL"]["gainswf"] = [
-            ":BUN:",
-            n_bank_label,
-            ":PLL:GAIN_S",
-        ]
-        pv_names["tails"]["Bunch_bank"][l_bank]["PLL"]["gainswfdb"] = [
-            ":BUN:",
-            n_bank_label,
-            ":PLL:GAIN_DB",
-        ]
+        bbank[l_bank]["FIR"]["selectwf"] = f":BUN:{n_bank}:FIRWF_S"
+        bbank[l_bank]["FIR"]["set_select"] = f":BUN:{n_bank}:FIRWF_SET_S.PROC"
+        bbank[l_bank]["NCO1"]["enablewf"] = f":BUN:{n_bank}:NCO1:ENABLE_S"
+        bbank[l_bank]["NCO1"]["set_enable"] = f":BUN:{n_bank}:NCO1:SET_ENABLE_S.PROC"
+        bbank[l_bank]["NCO1"]["set_disable"] = f":BUN:{n_bank}:NCO1:SET_DISABLE_S.PROC"
+        bbank[l_bank]["NCO1"]["gainswf"] = f":BUN:{n_bank}:NCO1:GAIN_S"
+        bbank[l_bank]["NCO1"]["gainswfdb"] = f":BUN:{n_bank}:NCO1:GAIN_DB"
+        bbank[l_bank]["NCO2"]["enablewf"] = f":BUN:{n_bank}:NCO2:ENABLE_S"
+        bbank[l_bank]["NCO2"]["set_enable"] = f":BUN:{n_bank}:NCO2:SET_ENABLE_S.PROC"
+        bbank[l_bank]["NCO2"]["set_disable"] = f":BUN:{n_bank}:NCO2:SET_DISABLE_S.PROC"
+        bbank[l_bank]["NCO2"]["gainswf"] = f":BUN:{n_bank}:NCO2:GAIN_S"
+        bbank[l_bank]["NCO2"]["gainswfdb"] = f":BUN:{n_bank}:NCO2:GAIN_DB"
+        bbank[l_bank]["SEQ"]["enablewf"] = f":BUN:{n_bank}:SEQ:ENABLE_S"
+        bbank[l_bank]["SEQ"]["set_enable"] = f":BUN:{n_bank}:SEQ:SET_ENABLE_S.PROC"
+        bbank[l_bank]["SEQ"]["set_disable"] = f":BUN:{n_bank}:SEQ:SET_DISABLE_S.PROC"
+        bbank[l_bank]["SEQ"]["gainswf"] = f":BUN:{n_bank}:SEQ:GAIN_S"
+        bbank[l_bank]["SEQ"]["gainswfdb"] = f":BUN:{n_bank}:SEQ:GAIN_DB"
+        bbank[l_bank]["PLL"]["enablewf"] = f":BUN:{n_bank}:PLL:ENABLE_S"
+        bbank[l_bank]["PLL"]["set_enable"] = f":BUN:{n_bank}:PLL:SET_ENABLE_S.PROC"
+        bbank[l_bank]["PLL"]["set_disable"] = f":BUN:{n_bank}:PLL:SET_DISABLE_S.PROC"
+        bbank[l_bank]["PLL"]["gainswf"] = f":BUN:{n_bank}:PLL:GAIN_S"
+        bbank[l_bank]["PLL"]["gainswfdb"] = f":BUN:{n_bank}:PLL:GAIN_DB"
+
+    pv_names["tails"]["Bunch_bank"] = bbank
 
     ## Detector settings
     # applies to all
-    pv_names["tails"]["Detector"]["source"] = ":DET:SELECT_S"
-    pv_names["tails"]["Detector"]["fill_waveforms"] = ":DET:FILL_WAVEFORMS_S"
-    pv_names["tails"]["Detector"]["fir_delay"] = ":DET:FIR_DELAY_S"
-    for n_det in range(0, 3):
-        n_det_label = n_det
-        l_det = ["det", n_det_label]
-        pv_names["tails"]["Detector"][l_det]["enable"] = [
-            ":DET:",
-            n_det_label,
-            ":ENABLE_S",
-        ]
-        pv_names["tails"]["Detector"][l_det]["bunch_selection"] = [
-            ":DET:",
-            n_det_label,
-            ":BUNCHES_S",
-        ]  # How do you set all?
-        pv_names["tails"]["Detector"][l_det]["scale"] = [
-            ":DET:",
-            n_det_label,
-            ":SCALING_S",
-        ]  # gain?
-        pv_names["tails"]["Detector"][l_det]["I"] = [":DET:", n_det_label, ":I"]
-        pv_names["tails"]["Detector"][l_det]["Q"] = [":DET:", n_det_label, ":Q"]
-        pv_names["tails"]["Detector"][l_det]["power"] = [":DET:", n_det_label, ":POWER"]
-        pv_names["tails"]["Detector"][l_det]["bunch_select"] = [
-            ":DET:",
-            n_det_label,
-            ":BUNCH_SELECT_S",
-        ]
-        pv_names["tails"]["Detector"][l_det]["reset_selection"] = [
-            ":DET:",
-            n_det_label,
-            ":RESET_SELECT_S.PROC",
-        ]
-        pv_names["tails"]["Detector"][l_det]["set_selection"] = [
-            ":DET:",
-            n_det_label,
-            ":SET_SELECT_S.PROC",
-        ]
+    detector = {}
+    detector["source"] = ":DET:SELECT_S"
+    detector["fill_waveforms"] = ":DET:FILL_WAVEFORMS_S"
+    detector["fir_delay"] = ":DET:FIR_DELAY_S"
+    for n_det in range(4):
+        l_det = ["det", n_det]
+        detector[l_det]["enable"] = f":DET:{n_det}:ENABLE_S"
+        detector[l_det]["bunch_selection"] = f":DET:{n_det}:BUNCHES_S"
+        detector[l_det]["scale"] = f":DET:{n_det}:SCALING_S"
+        detector[l_det]["I"] = f":DET:{n_det}:I"
+        detector[l_det]["Q"] = f":DET:{n_det}:Q"
+        detector[l_det]["power"] = f":DET:{n_det}:POWER"
+        detector[l_det]["bunch_select"] = f":DET:{n_det}:BUNCH_SELECT_S"
+        detector[l_det]["reset_selection"] = f":DET:{n_det}:RESET_SELECT_S.PROC"
+        detector[l_det]["set_selection"] = f":DET:{n_det}:SET_SELECT_S.PROC"
+
+    pv_names["tails"]["Detector"] = detector
 
     ## Memory settings
-    pv_names["tails"]["MEM"]["status"] = (
-        ":MEM:BUSY"  # NEED TO TAKE OFF THE X|Y BEFORE USE.
-    )
-    pv_names["tails"]["MEM"]["channel_select"] = (
-        ":MEM:SELECT_S"  # NEED TO TAKE OFF THE X|Y BEFORE USE.
-    )
-    pv_names["tails"]["MEM"]["offset"] = (
-        ":MEM:OFFSET_S"  # NEED TO TAKE OFF THE X|Y BEFORE USE.
-    )
-    pv_names["tails"]["MEM"]["runout"] = (
-        ":MEM:RUNOUT_S"  # NEED TO TAKE OFF THE X|Y BEFORE USE.
-    )
-    pv_names["tails"]["MEM"]["channel0_target"] = (
-        ":MEM:SEL0_S"  # NEED TO TAKE OFF THE X|Y BEFORE USE.
-    )
-    pv_names["tails"]["MEM"]["channel1_target"] = (
-        ":MEM:SEL1_S"  # NEED TO TAKE OFF THE X|Y BEFORE USE.
-    )
+    # NEED TO TAKE OFF THE X|Y BEFORE USE.
+    memory = {}
+    memory["status"] = ":MEM:BUSY"
+    memory["channel_select"] = ":MEM:SELECT_S"
+    memory["offset"] = ":MEM:OFFSET_S"
+    memory["runout"] = ":MEM:RUNOUT_S"
+    memory["channel0_target"] = ":MEM:SEL0_S"
+    memory["channel1_target"] = ":MEM:SEL1_S"
+    pv_names["tails"]["MEM"] = memory
+
     pv_names["tails"]["TRG"]["memory_status"] = ":TRG:MEM:STATUS"
     ## NCO settings
-    for n_nco in range(1, 2):
-        n_nco_label = n_nco
-        l_nco = ["NCO", n_nco_label]
-        pv_names["tails"][l_nco]["frequency"] = [":NCO", n_nco_label, ":FREQ_S"]
-        pv_names["tails"][l_nco]["gain"] = [":NCO", n_nco_label, ":GAIN_S"]
-        pv_names["tails"][l_nco]["gain_scalar"] = [
-            ":NCO",
-            n_nco_label,
-            ":GAIN_SCALAR_S",
-        ]
-        pv_names["tails"][l_nco]["gaindb"] = [":NCO", n_nco_label, ":GAIN_DB_S"]
-        pv_names["tails"][l_nco]["enable"] = [":NCO", n_nco_label, ":ENABLE_S"]
-        pv_names["tails"][l_nco]["PLL_follow"] = [":NCO", n_nco_label, ":TUNE_PLL_S"]
+    for n_nco in range(1, 3):
+        l_nco = ["NCO", n_nco]
+        pv_names["tails"][l_nco]["frequency"] = f":NCO{n_nco}:FREQ_S"
+        pv_names["tails"][l_nco]["gain"] = f":NCO{n_nco}:GAIN_S"
+        pv_names["tails"][l_nco]["gain_scalar"] = f":NCO{n_nco}:GAIN_SCALAR_S"
+        pv_names["tails"][l_nco]["gaindb"] = f":NCO{n_nco}:GAIN_DB_S"
+        pv_names["tails"][l_nco]["enable"] = f":NCO{n_nco}:ENABLE_S"
+        pv_names["tails"][l_nco]["PLL_follow"] = f":NCO{n_nco}:TUNE_PLL_S"
 
     ## FIR settings
     pv_names["tails"]["FIR"]["gain"] = ":FIR:GAIN_S"
@@ -714,43 +478,39 @@ def system_config():
     pv_names["tails"]["tune"]["left_height"] = ":TUNE:LEFT:HEIGHT"
     pv_names["tails"]["tune"]["right_height"] = ":TUNE:RIGHT:HEIGHT"
     ## PLL settings
-    pv_names["tails"]["pll"]["detector"]["dwell"] = ":PLL:DET:DWELL_S"
-    pv_names["tails"]["pll"]["detector"]["target_bunches"] = ":PLL:DET:BUNCHES_S"
-    pv_names["tails"]["pll"]["detector"]["mode"] = ":PLL:DET:SELECT_S"
-    pv_names["tails"]["pll"]["detector"]["scaling"] = ":PLL:DET:SCALING_S"
-    pv_names["tails"]["pll"]["detector"]["blanking"] = ":PLL:DET:BLANKING_S"
-    pv_names["tails"]["pll"]["detector"]["dwell"] = ":PLL:DET:DWELL_S"
-    pv_names["tails"]["pll"]["nco"]["enable"] = ":PLL:NCO:ENABLE_S"
-    pv_names["tails"]["pll"]["nco"]["gain"] = ":PLL:NCO:GAIN_DB_S"
-    pv_names["tails"]["pll"]["nco"]["set_frequency"] = ":PLL:NCO:FREQ_S"
-    pv_names["tails"]["pll"]["nco"]["frequency"] = ":PLL:NCO:FREQ"
-    pv_names["tails"]["pll"]["nco"]["offset_waveform"] = ":PLL:NCO:OFFSETWF"
-    pv_names["tails"]["pll"]["nco"]["mean_offset"] = ":PLL:NCO:MEAN_OFFSET"
-    pv_names["tails"]["pll"]["nco"]["std_offset"] = ":PLL:NCO:STD_OFFSET"
-    pv_names["tails"]["pll"]["nco"]["offset"] = ":PLL:NCO:OFFSET"
-    pv_names["tails"]["pll"]["nco"]["tune"] = ":PLL:NCO:TUNE"
-    pv_names["tails"]["pll"]["start"] = ":PLL:CTRL:START_S.PROC"
-    pv_names["tails"]["pll"]["stop"] = ":PLL:CTRL:STOP_S.PROC"
-    pv_names["tails"]["pll"]["p"] = ":PLL:CTRL:KP_S"
-    pv_names["tails"]["pll"]["i"] = ":PLL:CTRL:KI_S"
-    pv_names["tails"]["pll"]["target_phase"] = ":PLL:CTRL:TARGET_S"
-    pv_names["tails"]["pll"]["minumum_magnitude"] = ":PLL:CTRL:MIN_MAG_S"
-    pv_names["tails"]["pll"]["maximum_offset"] = ":PLL:CTRL:MAX_OFFSET_S"
-    pv_names["tails"]["pll"]["status"] = ":PLL:CTRL:STATUS"
-    pv_names["tails"]["pll"]["readback"]["magnitude"] = ":PLL:FILT:MAG"
-    pv_names["tails"]["pll"]["readback"]["phase"] = ":PLL:FILT:PHASE"
-    pv_names["tails"]["pll"]["readback"]["i"] = ":PLL:FILT:I"
-    pv_names["tails"]["pll"]["readback"]["q"] = ":PLL:FILT:Q"
-    pv_names["tails"]["pll"]["stop_reasons"]["stop"] = ":PLL:CTRL:STOP:STOP"
-    pv_names["tails"]["pll"]["stop_reasons"]["detector_overflow"] = (
-        ":PLL:CTRL:STOP:DET_OVF"
-    )
-    pv_names["tails"]["pll"]["stop_reasons"]["offset_overflow"] = (
-        ":PLL:CTRL:STOP:OFFSET_OVF"
-    )
-    pv_names["tails"]["pll"]["stop_reasons"]["magnitude_error"] = (
-        ":PLL:CTRL:STOP:MAG_ERROR"
-    )
+    pll = {}
+    pll["detector"]["dwell"] = ":PLL:DET:DWELL_S"
+    pll["detector"]["target_bunches"] = ":PLL:DET:BUNCHES_S"
+    pll["detector"]["mode"] = ":PLL:DET:SELECT_S"
+    pll["detector"]["scaling"] = ":PLL:DET:SCALING_S"
+    pll["detector"]["blanking"] = ":PLL:DET:BLANKING_S"
+    pll["detector"]["dwell"] = ":PLL:DET:DWELL_S"
+    pll["nco"]["enable"] = ":PLL:NCO:ENABLE_S"
+    pll["nco"]["gain"] = ":PLL:NCO:GAIN_DB_S"
+    pll["nco"]["set_frequency"] = ":PLL:NCO:FREQ_S"
+    pll["nco"]["frequency"] = ":PLL:NCO:FREQ"
+    pll["nco"]["offset_waveform"] = ":PLL:NCO:OFFSETWF"
+    pll["nco"]["mean_offset"] = ":PLL:NCO:MEAN_OFFSET"
+    pll["nco"]["std_offset"] = ":PLL:NCO:STD_OFFSET"
+    pll["nco"]["offset"] = ":PLL:NCO:OFFSET"
+    pll["nco"]["tune"] = ":PLL:NCO:TUNE"
+    pll["start"] = ":PLL:CTRL:START_S.PROC"
+    pll["stop"] = ":PLL:CTRL:STOP_S.PROC"
+    pll["p"] = ":PLL:CTRL:KP_S"
+    pll["i"] = ":PLL:CTRL:KI_S"
+    pll["target_phase"] = ":PLL:CTRL:TARGET_S"
+    pll["minumum_magnitude"] = ":PLL:CTRL:MIN_MAG_S"
+    pll["maximum_offset"] = ":PLL:CTRL:MAX_OFFSET_S"
+    pll["status"] = ":PLL:CTRL:STATUS"
+    pll["readback"]["magnitude"] = ":PLL:FILT:MAG"
+    pll["readback"]["phase"] = ":PLL:FILT:PHASE"
+    pll["readback"]["i"] = ":PLL:FILT:I"
+    pll["readback"]["q"] = ":PLL:FILT:Q"
+    pll["stop_reasons"]["stop"] = ":PLL:CTRL:STOP:STOP"
+    pll["stop_reasons"]["detector_overflow"] = ":PLL:CTRL:STOP:DET_OVF"
+    pll["stop_reasons"]["offset_overflow"] = ":PLL:CTRL:STOP:OFFSET_OVF"
+    pll["stop_reasons"]["magnitude_error"] = ":PLL:CTRL:STOP:MAG_ERROR"
+    pv_names["tails"]["pll"] = pll
     ## ADC buffers
     pv_names["tails"]["adc"]["delta"] = ":ADC:MMS:DELTA"
     pv_names["tails"]["adc"]["max"] = ":ADC:MMS:MAX"
